@@ -1,0 +1,322 @@
+| scribe.mac - Sym 9.4.2012
+| Updated 11.18.2012
+| Buys all available spells and tomes for specified level range (default is level 1 to current level) if a merchant window is open
+| It will not buy lower rank spells than you already have. If you have a rk. ii spell it will not buy a rk. i of the same name, but would buy a rk. iii if it was available.
+| when finished buying, or if no window open it scribes every available spell/tome found in inventory (regardless of level range given)
+|
+| It will now loop and keep buying/scribing if you run out of inventory space before you run out of spells to buy.
+|
+|
+| Usage: /mac scribe minlevel maxlevel
+|
+| /mac scribe 10 20
+| ^^ This will buy all spells/tomes from levels 10 to 20 from the current merchant
+|
+| /mac scribe
+| ^^ This will buy all spells/tomes from level 1 to your current level from the current merchant
+|
+| /mac scribe 30
+| ^^ This will buy all spells/tomes from level 30 to your current level from the current merchant
+|
+
+#event FullInventory "#*#Your inventory appears full!#*#"
+#event NotGold "#*#you do not have at least a gold membership#*#"
+#event WrongDiety "#*#You do not worship#*#"
+
+
+Sub Main
+    /declare HasVoA int outer 1
+    /declare InvScribeSlot int outer 1
+
+
+    /declare MyDeity string outer ${Me.Deity}
+    /declare MaxInvSlots int outer 10
+    /declare MinLevel int outer 1
+    /declare MaxLevel int outer ${Me.Level}
+    /declare DoLoop int outer 0
+    /declare mName string outer
+    /if (${Param0}) /varset MinLevel ${Param0}
+    /if (${Param1}) /varset MaxLevel ${Param1}
+    
+    :Start
+    /varset DoLoop 0
+    /if (${Merchant.Open}) {
+        /varset mName ${Merchant.Name}
+        /echo Buying all ${Me.Class} spells/tomes for levels ${MinLevel} to ${MaxLevel}
+        /if (!${Select[${Me.Class.ShortName},CLR,DRU,SHM,ENC,WIZ,MAG,NEC]}) /call BuyTomes
+        /if (!${Select[${Me.Class.ShortName},WAR,BER,MNK,ROG]}) /call BuySpells
+        /delay 2s
+    }
+    /if (${Merchant.Open}) {
+        /notify MerchantWnd MW_Done_Button leftmouseup
+        /delay 1s !${Merchant.Open}
+    }
+    /if (!${Select[${Me.Class.ShortName},CLR,DRU,SHM,ENC,WIZ,MAG,NEC]}) /call ScribeTomes
+    /if (!${Select[${Me.Class.ShortName},WAR,BER,MNK,ROG]}) /call ScribeSpells
+    /if (${DoLoop}) {
+        /target ${mName}
+        /delay 2s ${Target.ID}
+        /click right target
+        /delay 1s
+        /goto :Start
+    }
+/return
+
+
+
+
+Sub BuySpells
+    /if (!${Merchant.Open}) /return
+    /delay 2s
+    /if (!${Merchant.Items}) /return
+
+    /declare a int local
+    /declare b int local
+    /declare c int local
+    /declare SpellName string local
+    
+    /for a 1 to ${Merchant.Items}
+        /if (!${Me.FreeInventory}) /return
+        /if (!${Merchant.Open}) /return
+        /varset c 0
+        /varset SpellName ${Merchant.Item[${a}].Spell.Name}
+        /if (${SpellName.Find[ Rk. II ]}) /varset SpellName ${Merchant.Item[${a}].Spell.Name.Replace[ Rk. II ,]}
+        /if (${SpellName.Find[ Rk. III ]}) /varset SpellName ${Merchant.Item[${a}].Spell.Name.Replace[ Rk. III ,]}
+        
+        /if (${Merchant.Item[${a}].Type.Equal[Scroll]} && ${Merchant.Item[${a}].Spell.Level} >= ${MinLevel} && ${Merchant.Item[${a}].Spell.Level} <= ${MaxLevel} && ${Math.Calc[${Merchant.Item[${a}].BuyPrice}\1000]} < ${Me.Platinum} && !${Me.Book[${Merchant.Item[${a}].Spell.Name}]} && !${FindItemCount[${Merchant.Item[${a}]}]}) {
+            /if (${Me.CombatAbility[${SpellName}]}) {
+                /e :: I already know ${SpellName}
+                /next a
+            }
+
+             /if (${FindItemCount[${Merchant.Item[${a}]}]}) {
+                /e :: I already have ${Merchant.Item[${a}]} in inventory
+                /next a
+            }
+
+            /if (${Me.CombatAbility[${SpellName} Rk. II]} || ${FindItemCount[${Merchant.Item[${a}]} Rk. II]}) {
+                /e :: Skipping lower rank of ${SpellName}
+                /next a
+            }
+            
+            /if (${Me.CombatAbility[${SpellName} Rk. III]} || ${FindItemCount[${Merchant.Item[${a}]} Rk. III]}) {
+                /e :: Skipping lower rank of ${SpellName}
+                /next a
+            }            
+            
+            /if (${Merchant.Item[${a}].Deities} && ${MyDeity.NotEqual[${Merchant.Item[${a}].Deity[1]}]}) {
+                /e Unable to use ${SpellName} because of deity
+                /next a
+            }
+            /if (${Me.Book[${SpellName} Rk. II]} || ${FindItemCount[${SpellName} Rk. II]}) {
+                /e Skipping lower rank of ${SpellName}
+                /next a
+            }
+            /if (${Me.Book[${SpellName} Rk. III]} || ${FindItemCount[${SpellName} Rk. III]}) {
+                /e Skipping lower rank of ${SpellName}
+                /next a
+            }            
+                        
+            | this loop is needed because the merchant item number doesn't match up to the interface line number
+            /for b 1 to ${Window[MerchantWnd].Child[MW_ItemList].Items}
+               /if (${Window[MerchantWnd].Child[MW_ItemList].List[${b},2].Equal[${Merchant.Item[${a}]}]}) /varset c ${b}
+            /next b
+            
+            | merchant line number matches what we are looking to buy, buy 1 copy of it
+            /if (${c}) {
+                /echo Buying ${Window[MerchantWnd].Child[MW_ItemList].List[${c},2]}
+                /notify MerchantWnd MW_ItemList listselect ${c}
+                /nomodkey /ctrlkey /notify MerchantWnd MW_Buy_Button leftmouseup
+                /delay 1s
+                /doevents
+            }
+        }
+    /next a
+    
+/return
+
+
+Sub ScribeSpells
+    /declare Bag int local
+    /declare Slot int local   
+    /if (${Cursor.ID}) /autoinv
+
+    /for Bag 1 to ${MaxInvSlots}
+        /if (${InvSlot[pack${Bag}].Item.Container}) {
+            /if (!${Window[Pack${Bag}].Open}) /itemnotify pack${Bag} rightmouseup
+            /delay 1s ${Window[Pack${Bag}].Open}
+
+            /for Slot 1 to ${InvSlot[pack${Bag}].Item.Container}
+                /if (${InvSlot[pack${Bag}].Item.Item[${Slot}].Type.Equal[Scroll]} && ${InvSlot[pack${Bag}].Item.Item[${Slot}].Spell.Level} <= ${Me.Level} && !${Me.Book[${InvSlot[pack${Bag}].Item.Item[${Slot}].Spell.Name}]}) {
+                    /nomodkey /ctrlkey /itemnotify in pack${Bag} ${Slot} leftmouseup
+                    /delay 1s ${Cursor.ID}
+                    /if (${Cursor.ID}) /call doScribe
+                }
+            /next Slot
+
+            /if (${Window[Pack${Bag}].Open}) /itemnotify pack${Bag} rightmouseup
+        } else {
+            /if (${InvSlot[pack${Bag}].Item.Type.Equal[Scroll]} && ${InvSlot[pack${Bag}].Item.Spell.Level} <= ${Me.Level} && !${Me.Book[${InvSlot[pack${Bag}].Item.Spell.Name}]}) {
+                /nomodkey /ctrlkey /itemnotify ${InvSlot[pack${Bag}]} leftmouseup
+                /delay 1s ${Cursor.ID}
+                /if (${Cursor.ID}) /call doScribe
+            }
+        }
+    /next Bag
+
+    /if (${Window[SpellBookWnd].Open}) /squelch /windowstate SpellBookWnd close
+/return
+
+Sub doScribe
+    /declare a int local 1
+    /declare BookPage int local
+    /declare BookSlot int local
+    /declare tOut timer
+
+    
+    | find first available open spellbook slot, minus 1 in case last scribe was an overwrite
+    /varcalc a ${a} - 1
+    :NeedSlot
+        /varcalc a ${a} + 1
+    /if (${Me.Book[${a}].ID}) /goto :NeedSlot
+    
+    /varset BookPage ${Math.Calc[${a} / 8].Int}
+    
+    | no ceil() function, fake it
+    /if (${Math.Calc[${a} / 8]} > ${Math.Calc[${a} / 8].Int}) /varcalc BookPage ${BookPage} + 1
+    
+    /varset BookSlot ${Math.Calc[${a} % 8].Int}
+    
+    /if (${Math.Calc[${BookPage} % 2]} == 0) {
+        /if (${BookSlot} == 0) {
+            /varset BookSlot 16
+        } else {
+            /varcalc BookSlot ${BookSlot} + 8
+        }
+    } else {
+        /if (${BookSlot} == 0) /varset BookSlot 8
+    }
+    
+    /varset tOut 5s
+    /echo Scribing ${Cursor.Spell.Name} to page ${BookPage}
+    
+    /book ${BookPage}
+    /delay 2
+    /varcalc BookSlot ${BookSlot} - 1
+    /notify SpellBookWnd SBW_Spell${BookSlot} leftmouseup
+    
+    :WaitFinished
+        /if (${Window[ConfirmationDialogBox].Open} && ${Window[ConfirmationDialogBox].Child[CD_TextOutput].Text.Find[${Cursor.Spell.Name} will replace]}) /notify ConfirmationDialogBox Yes_Button leftmouseup
+        /if (!${tOut}) /autoinv
+        /delay 2
+        /doevents                        
+    /if (${Cursor.ID}) /goto :WaitFinished
+/return
+
+Sub BuyTomes
+    /if (!${Merchant.Open}) /return
+    /delay 2s
+    /if (!${Merchant.Items}) /return
+
+    /declare a int local
+    /declare b int local
+    /declare c int local
+    /declare SpellName string local
+    
+    /for a 1 to ${Merchant.Items}
+        /if (!${Me.FreeInventory}) /return
+        /varset c 0
+        /varset SpellName ${Merchant.Item[${a}].Spell.Name}
+        /if (${SpellName.Find[ Rk. II ]}) /varset SpellName ${Merchant.Item[${a}].Spell.Name.Replace[ Rk. II ,]}
+        /if (${SpellName.Find[ Rk. III ]}) /varset SpellName ${Merchant.Item[${a}].Spell.Name.Replace[ Rk. III ,]}
+        |/e Item ${a} is ${Merchant.Item[${a}].Spell.Name}
+        
+        /if (${Merchant.Item[${a}].Type.Equal[Scroll]} && ${Merchant.Item[${a}].Spell.Level} >= ${MinLevel} && ${Merchant.Item[${a}].Spell.Level} <= ${MaxLevel} && ${Math.Calc[${Merchant.Item[${a}].BuyPrice}\1000]} < ${Me.Platinum}) {
+            
+            /if (${Me.CombatAbility[${SpellName}]}) {
+                /e :: I already know ${SpellName}
+                /next a
+            }
+
+             /if (${FindItemCount[${Merchant.Item[${a}]}]}) {
+                /e :: I already have ${Merchant.Item[${a}]} in inventory
+                /next a
+            }
+
+            /if (${Me.CombatAbility[${SpellName} Rk. II]} || ${FindItemCount[${Merchant.Item[${a}]} Rk. II]}) {
+                /e :: Skipping lower rank of ${SpellName}
+                /next a
+            }
+            
+            /if (${Me.CombatAbility[${SpellName} Rk. III]} || ${FindItemCount[${Merchant.Item[${a}]} Rk. III]}) {
+                /e :: Skipping lower rank of ${SpellName}
+                /next a
+            }            
+            
+            | this loop is needed because the merchant item number doesn't match up to the interface line number
+            /for b 1 to ${Window[MerchantWnd].Child[MW_ItemList].Items}
+               /if (${Window[MerchantWnd].Child[MW_ItemList].List[${b},2].Equal[${Merchant.Item[${a}]}]}) /varset c ${b}
+            /next b
+            
+            | merchant line number matches what we are looking to buy, buy 1 copy of it
+            /if (${c}) {
+                /echo Buying ${Window[MerchantWnd].Child[MW_ItemList].List[${c},2]}
+                /notify MerchantWnd MW_ItemList listselect ${c}
+                /nomodkey /ctrlkey /notify MerchantWnd MW_Buy_Button leftmouseup
+                /delay 1s
+                /doevents
+            }
+        }
+    /next a
+/return
+
+Sub ScribeTomes
+    /declare Bag int local
+    /declare Slot int local
+
+    /if (${Cursor.ID}) /autoinv
+
+    /if (!${HasVoA} && ${InvSlot[pack${InvScribeSlot}].Item.Type.Equal[Scroll]} && ${InvSlot[pack${InvScribeSlot}].Item.Spell.Level} <= ${Me.Level} && !${Me.Book[${InvSlot[pack${InvScribeSlot}].Item.Spell.Name}]}) /nomodkey /ctrlkey /itemnotify ${InvSlot[pack${InvScribeSlot}]} rightmouseup
+
+    /for Bag 1 to ${MaxInvSlots}
+        /if (${InvSlot[pack${Bag}].Item.Container}) {
+            /if (!${Window[Pack${Bag}].Open}) /itemnotify pack${Bag} rightmouseup
+            /delay 1s ${Window[Pack${Bag}].Open}
+            /for Slot 1 to ${InvSlot[pack${Bag}].Item.Container}
+                /if (${InvSlot[pack${Bag}].Item.Item[${Slot}].Name.Find[Tome]} && ${InvSlot[pack${Bag}].Item.Item[${Slot}].Type.Equal[Scroll]} && ${InvSlot[pack${Bag}].Item.Item[${Slot}].Spell.Level} <= ${Me.Level} && !${Me.Book[${InvSlot[pack${Bag}].Item.Item[${Slot}].Spell.Name}]}) {
+                    /if (${HasVoA}) {
+                        /nomodkey /ctrlkey /itemnotify in pack${Bag} ${Slot} rightmouseup
+                        /delay 1s !${InvSlot[pack${Bag}].Item.Item[${Slot}].ID}
+                    } else {
+                        /nomodkey /ctrlkey /itemnotify in pack${Bag} ${Slot} leftmouseup
+                        /delay 1s ${Cursor.ID}
+                        /nomodkey /ctrlkey /itemnotify ${InvSlot[pack${InvScribeSlot}]} leftmouseup
+                        /delay 1s !${Cursor.ID}
+                        /nomodkey /ctrlkey /itemnotify ${InvSlot[pack${InvScribeSlot}]} rightmouseup
+                        /delay 1s !${InvSlot[pack${InvScribeSlot}].ID}
+                    }
+                }
+            /next Slot
+
+        }
+        /if (${Window[Pack${Bag}].Open}) /itemnotify pack${Bag} rightmouseup
+    /next Bag
+    /if (${Cursor.ID}) /autoinv
+/return
+
+sub Event_NotGold
+    /autoinv
+/return
+
+sub Event_WrongDiety
+    /autoinv
+/return
+
+sub Event_FullInventory
+    /if (${Merchant.Open}) {
+        /notify MerchantWnd MW_Done_Button leftmouseup
+        /delay 1s !${Merchant.Open}
+    }
+    /varset DoLoop 1
+    
+/return

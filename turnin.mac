@@ -1,0 +1,89 @@
+|------------------------------------------------------------------------] 
+| Bernat's Simple Turn-in Macro                                          ] 
+|                                                                        ] 
+| Author        : Bernat                                                 ] 
+| File name     : turn-in.mac                                            ] 
+| Version       : v1.0 2011-01-12 20:47 GMT+1                            ] 
+| Usage         : /macro turn-in itemname                                ] 
+|                   Example: /macro turn-in bone                         ] 
+|                   Example: /macro turn-in "bone chips"                 ] 
+| Description   : This macro will turn in, as fast as possible and one   ] 
+|                   by one, items whose partial name is given by         ] 
+|                   parameter itemname, until running out. Bags          ] 
+|                   containing the items must be open, and they must be  ] 
+|                   placed in the first available bags (if bags 1 and 2  ] 
+|                   contain items but bag 1 is closed, macro will stop). ] 
+|                 For names with multiple words, use of quotes is        ] 
+|                   required.                                            ] 
+|                 Be careful of client usage while the macro is running, ] 
+|                   as this may result in macro stopping or wrong item   ] 
+|                   being turned in.                                     ] 
+|------------------------------------------------------------------------] 
+
+Sub Main(itemname, itemcount) 
+/declare i int local
+
+    /echo Turning in ${itemcount} items by the name of ${itemname}... 
+	
+    /if (${Cursor.ID}) { 
+        /echo ERROR: Unexpected item at cursor. 
+        /endmacro 
+    } 
+    
+    :Loop 
+ 
+/for i 1 to ${itemcount}	 
+
+    /if (!${FindItem[${itemname}].ID}) { 
+        /echo INFO: Ran out of items to turn in. 
+        /endmacro 
+    } 
+ 
+    /if (${FindItem[${itemname}].InvSlot.Pack}) { 
+        /if (!${Window[${FindItem[${itemname}].InvSlot.Pack.Name}].Open}) { 
+            /itemnotify ${FindItem[${itemname}].InvSlot.Pack.Name} rightmouseup 
+            /delay 5s ${Window[${FindItem[${itemname}].InvSlot.Pack.Name}].Open} 
+        } 
+        /if (!${Window[${FindItem[${itemname}].InvSlot.Pack.Name}].Open}) { 
+            /echo ERROR: Timeout trying to open a pack. 
+            /endmacro 
+        } 
+    }
+	
+    /ctrl /itemnotify ${FindItem[${itemname}].InvSlot} leftmouseup 
+    /delay 1m ${Cursor.ID} 
+    /if (!${Cursor.ID}) { 
+        /echo ERROR: Timeout trying to place an item at cursor. 
+        /endmacro 
+    } 
+    
+    /click left target 
+    /delay 1m ${Window[GiveWnd].Open} 
+    /if (!${Window[GiveWnd].Open}) { 
+        /echo ERROR: Timeout trying to open GiveWnd. 
+        /endmacro 
+    } 
+       
+    /if (${Cursor.ID}) { 
+        /echo ERROR: Unexpected item at cursor. 
+        /endmacro 
+    } 
+	
+/next i    
+
+    /notify GiveWnd GVW_Give_Button leftmouseup 
+    /delay 1m !${Window[GiveWnd].Open} 
+    /if (${Window[GiveWnd].Open}) { 
+        /echo ERROR: Timeout trying to close GiveWnd. 
+        /endmacro 
+    } 
+	:freecursor
+	/delay 5
+	/if (${Cursor.ID}) /autoinv
+	/delay 5
+    /if (${Cursor.ID}) /goto :freecursor
+	
+	
+    /goto :Loop 
+    
+/return 

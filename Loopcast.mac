@@ -1,0 +1,18 @@
+#turbo
+Sub Main
+
+	/if (${Me.Sitting}) {
+	  /stand
+	}
+	
+	:Loop
+	/if (!${Me.SpellReady[1]}) {
+		/delay 20
+		/goto :Loop
+	} else {
+		/casting "Summon Drink" -maxtries|3
+
+		/goto :Loop
+	}
+
+/return

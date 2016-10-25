@@ -1,0 +1,190 @@
+--------- To Dos:
+
+. Create a default routes file, with routes from the guild lobby to common destinations
+
+. Set up some type of fix for 'you can use the ability X again in Y minute(s) Z seconds
+	This should be easy enough to set up as event that creates a timer.
+
+. Fix Auto-forage ( this is very very very...very minor )
+
+. Request- Add auto trade functions. Possibly auto accept trade with bots and a /bc notification when a non-bot is trading with a bot?
+ 
+. Heal Chain.  I hate heal chains.
+
+. Drag Corpses.  This was taken out due to issues with server stability.
+
+. Add a function to cast a buff on a given bot
+
+. Create an event to allow users to search for settings, and change those settings on the fly
+	Something that would function much like the help file, but instead give you a read-out of different settings to toggle
+
+. add enhancements to /only and /not so that you can set your own "groups".  also make another tag for group leader only
+
+. rework auto assist.  This one sucks
+
+. raid invite stuff
+
+. group check function to tell you if groups are all formed correctly
+
+. Multiple inis
+
+. heals + / -
+
+
+| finish auto destroy stuff
+| Create toggles for various functions to be listed in either e3_Settings, or e3_Data.  These should be added to the set / toggle function list
+	/declare reagentCheckInterval int outer 60
+	/if (${Ini[${genSettings_Ini},Background,Reagent Check Interval (Min)].Length}) /varset reagentCheckInterval ${Ini[${genSettings_Ini},Background,Reagent Check Interval (Min)]}
+
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r7 Change log:
+
+--------- Fixed:
+
+	- Fixed issues with pet heals
+	- Restricted Spells lists in character inis should work properly now
+	- Tweaked rogue evade / backstab disciplines, Auto-Evade should work smoothly now.
+	- Issues with AE Rez.  This should work properly now.
+	- Tweaked Warrior Bellow function to work while you have an active disc. You can now use Ancient: Chaos Cry while using Defensive
+	- Fixed issues with Mage Pet toys.  The pet weapons function should work properly again.
+	- Fixed issues with Suspending pets.
+	- Tweaked e3 Casting to allow for instant items discs and abilities to be used while moving.
+	- Auto Canni toggle in Shaman inis works properly now
+	- Fixed Rune functions on enchanters
+	- Fixed an issue with nukes switching targets on main character.
+	- Fixed Manual loot mode.
+	- Fixed an issue with e3 Alerts not displaying the correct class to kill Ikkinz mobs
+
+--------- Changed:
+
+	- e3 includes have been moved into the aptly named folder 'e3 Includes'.  This was done in an effort to clean up the Macros folder.
+	- Reworked Nukes to cast the entire array rather then the first available cast.
+	- Tweaked Combat Abilities so they will work whenever you're in combat.  Previously they were tied to /assiston, so your warrior wouldnt taunt or kick until after the mob was below 98%
+	- Enrage through attack will now be set to ON by default.
+	
+--------- Added:
+
+	- Pet Taunt (On/Off) in [Pets] Section of character inis.  Use this to toggle pet taunting.
+	- Add Spell Alias function.  Use /addalias Alias SpellName.  Ex, /addalias SoW Spirit of Wolf
+	- Auto-Melody for bards.  You can now set a melody to automatically start with the macro. 
+	- Auto-Pet Weapons for mages.  This will automatically summon pet weapons and items for new pets summoned by your netbots.  This will only happen when you have been out of combat and standing still for a at least 10 seconds.
+	- Group heal functionality.  You can now add Group Heals to your cleric / paladin inis.
+	
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r6 Change log:
+
+--------- Fixed:
+
+	- Fixed an issue with bards not memming spells for melodies
+	- Fixed an issue with saving groups.  /savegroup function should work properly now.
+
+--------- Added:
+
+	- You can now specify /MaxMana| and /MinHP| in your ini spell entries.
+	- Added a toggle to loot corpses after using the corpse summoner under General Settings.ini > [Corpse Summoning] > Loot After Summoning (On/Off).
+	- Added alerts for the stampede in tactics
+	- Added an event to report when a toon gets a character flag.
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r5 Change log:
+
+--------- Fixed:
+
+	- Fixed an issue that was causing bots to assist after being rezzed.
+	- Heal Chain using incorrect spell names.  There was a issue with some users having "Complete Heal" while others were using "Complete Healing".  The macro should now chose the appropriate spell.
+	- Rogue Auto-Hide
+	- Minor tweak to consent me function
+	- An issue that would cause all bots to stick behind on an assist call, regardless of the position listed in the ini.
+	- Fixed a minor issue with Auto-Evade that was causing hide to be engaged before a rogue's sneak attack discipline could be activated.  Sneak attack disciplines should activate as soon as both the disc, and hide, are available.
+	- Fixed an issue with BotBuffs, that was causing a mistarget.
+
+--------- Changed:
+	
+	- Users can now request buffs from and add aliases for items as well as spells.
+	- Added a retry timer to click yes and click no functions.
+	- Revamped the group up function to fix issues caused with the way groups were being saved.
+
+--------- Added:
+
+	- Added debug toggles for individual macro .incs to give users the option to debug smaller portions of the macro.
+	- Added /fixcorpses function.  New function that hides then shows all corpses, in an attempt to reset incorrect corpse locations.  (when you see a corpse one place but it's actually somewhere else.)
+	- Gather corpse function.  Use /gathercorpses to pull all consented corpses within range to you.
+	- AE Rez function.  Use /AERez to rez all nearby corpses.
+	- Auto-Tribute.
+		Auto-Tribute is a new function that attempts to conserve tribute points by giving users options to dynamically activate and deactivate tribute.
+		Users can use /tribute "on/off" to toggle tribute on or off for all bots.  Tribute will automcatically be deactivated when you zone, or have been standing idle for 10 minutes or more.
+		Alternatively users can add a timer setting to toggle tribute for a given amount of time.  Ex /tribute On|30m, or /tribute Off|15m.
+		Finally, users can also designate 'tribute zones' by using the command /tributezone "On/Off".  Tribute will automatically be toggled on, and stay on, whenever you enter a designated 'tribute zone'.
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r4 Change log:
+
+--------- Fixed:
+
+	- Fixed an issue that caused attack to turn back on after enrage.
+
+--------- Changed:
+
+	- Bots will no longer Auto-Assist on spells.  I had set up the Auto-Assist to detect the casting of detrimental spells, but I really don't think I like the changes.
+		Bots will now only Auto-Assist based on a melee engage.  Otherwise, they must be sent in manually using /assiston.
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r3 Change log:
+
+--------- Fixed:
+
+	- a non numeric encounter in BegForBuffs.inc that caused crashes when you were sent a tell containing an integer.
+	- an issue that was causing aliases not to update.
+	- cleric self buffs
+	- pet classes not summoning pets
+
+--------- Added:
+	
+	- Added a more complete spell alias file.  This may need to be combed through, and added to.
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r2 Change log:
+
+--------- Fixed:
+
+	- Fixed an issue with casting bot buffs that had a range of 0.  Fixed by adding AERange to the check.
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================
+
+v5.1 r1 Change log:
+
+--------- Fixed:
+
+	- Fixed a problem with spell timers when cast from items while debuffing
+	- Removed a few unused ini entries for warriors and rogues
+	- Fixed a typo in HoT that was causing it not to work
+	- Fixed an issue with warrior provoke disciplines being used as default discs
+	- Fixed issues with /CheckFor| in the [Buffs] section of the Bot.inis.  Spells like Elemental Siphon should work properly now
+
+--------- Changed:
+
+	- Revamped v5.0s clumsy, over-complicated settings files.
+		In an effort to try and make e3's settings files more user friendly, I've reorganized File Paths.ini, e3 Settings.ini, and Functions By Class.ini into
+		two new settings files; General Settings.ini, and Advanced Settings.ini.  The new files will give the user a more comprehensive view of all the various
+		macro settings, and how they tie together.  I've also begun adding additional settings that will allow users to customize e3 more than ever.
+
+--------- Added:
+	
+	- Added enchanter chain rune.  Use /runeOn /runeOff, or /runeOn NAME, /runeOff NAME to enable enchanter chain runes.  (You must have a Chain Rune spell defined in your enchanters ini)
+
+===============================================================================================================================================================================================
+===============================================================================================================================================================================================

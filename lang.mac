@@ -1,0 +1,11 @@
+#turbo
+Sub Main
+
+	
+	:Loop
+	/g bla
+	/delay 5
+	/goto :Loop
+
+	
+/return
