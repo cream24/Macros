@@ -1131,9 +1131,9 @@ SUB useBurns(ArrayName)
 	/for i 1 to ${${ArrayName}.Size[1]}
     /call check_Ready "${ArrayName}" ${i}
     /if (${Macro.Return}) {
-      /if (${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.NotEqual[No Effect]} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) {
+      /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) {
         /next i
-      } else /if (${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.NotEqual[No Effect]} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]} ) {
+      } else /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]} ) {
         /next i
       } else {
         /g useBurns ${Time} : ${ArrayName}-${${ArrayName}[${i},${iCastName}]}
