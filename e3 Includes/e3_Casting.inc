@@ -177,7 +177,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/varset pendingType ${DefaultGem}
 			}
 		}
-		
+
 		/varset ActionTaken TRUE
 		/casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 

@@ -61,7 +61,7 @@ SUB event_Assist(line, ChatSender, int MobID)
 						|/echo ${AssistTarget}
             /if (${Me.Pet.ID}) {
               /if (${Debug} || ${Debug_Assists}) /echo Pet Check: Sending pet in
-              /pet attack
+              /pet attack ${AssistTarget}
             }
             |/echo ${AssistType}
             /if (${AssistType.Equal[melee]}) {

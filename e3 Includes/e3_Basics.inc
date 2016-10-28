@@ -264,7 +264,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 		}
 		/declare barkTarget string outer ${Spawn[id ${msgTarget}].CleanName}
 		/declare barkReturned bool outer FALSE
-		/declare retryTimer timer local 45s
+		/declare retryTimer timer local 20s
 		/declare startingLoc string local
 		
 		/if (${Stick.Active}) /squelch /stick off
@@ -916,8 +916,8 @@ SUB EVENT_medOn(line, ChatSender)
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
+	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|		|-----------In Range-------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| Check that I'm a caster, and not a bard
 |		/if (${Me.Class.CanCast} && ${Me.Class.ShortName.NotEqual[BRD]}) {
 		/if (${Me.Class.ShortName.NotEqual[BRD]} && ${Me.Class.ShortName.NotEqual[WAR]}) {	
@@ -1300,25 +1300,22 @@ SUB EVENT_Force_RaidDisband
 #EVENT Invite "#1# invites you to join a group."
 SUB EVENT_Invite(line, ChatSender)
 /if (${Debug}) /echo |- EVENT_Invite ==>
-
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 	|    |-----------Valid User----------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]}) {
-	
 		| -Wait to finish casting
-		/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /delay 300 !${Me.Casting.ID}
-	
+		/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /stopcast
+		/delay 2 !${Me.Casting.ID}
 		| -If the groupleader was valid, disband a current group, and join the new one.
-		| /if (${Group} || ${Raid.Members}) /call EVENT_Disband
+		/if (${Group} || ${Raid.Members}) /call EVENT_Disband "PLACEHOLDER" "${Me.CleanName}"
 		
-		/declare retryTimer timer local 150
+		/declare retryTimer timer local 10s
 		
 		:retry_Invite
 		/if (${Debug}) /echo |- EVENT_Invite -| retry_Invite loop.
 		
-		/call Background_Events
 		/delay 1s
 		/invite
 		/delay 1s ${Group}
@@ -1331,8 +1328,7 @@ SUB EVENT_Invite(line, ChatSender)
 				/echo Failed to join the group.
 			}
 		}
-	}	
-
+	}
 /if (${Debug}) /echo <== EVENT_Invite -|
 /RETURN
 
@@ -1347,35 +1343,30 @@ SUB EVENT_Invite(line, ChatSender)
 #EVENT Disband "<#1#> Disband all"
 SUB EVENT_Disband(line, ChatSender)
 /if (${Debug}) /echo |- EVENT_Disband ==>
-
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 	|    |-----------Valid User----------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]}) {
-	
 		| -Wait to stop casting.
-		/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /delay 300 !${Me.Casting.ID}
-	
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /stopcast
+    /delay 2 !${Me.Casting.ID}
 		| -Disband from a raid.
 		/if (${Raid.Members}) {
 			/call TrueTarget ${Me.ID}
 			/delay 2
+			/if (${Raid.Leader.Name.Equal[${Me}]}) /delay 3
 			/raiddisband
-			/delay 10 !${Raid.Members}
+			/delay 1s !${Raid.Members}
 		}
-		
 		| -Disband from a group.
-		/if (${Group}) {
+		/if (${Group} && !${Group.Leader.Name.Equal[${Me}]}) {
 			/call TrueTarget ${Me.ID}
 			/delay 2
 			/disband
-			/delay 10 !${Group}
+			/delay 1s !${Group}
 		}
-		
-		/squelch /target clear
 	}
-
 /if (${Debug}) /echo <== EVENT_Disband -|
 /RETURN
 
@@ -1524,12 +1515,12 @@ SUB EVENT_groupUp(line, ChatSender, eventParams)
 		:nextGroupListing
 		/if (${Ini[${Group_Ini}].Arg[${i},|].Arg[2,_].Equal[${groupName}]} && ${Ini[${Group_Ini},${Ini[${Group_Ini}].Arg[${i},|]},GroupMember#0].NotEqual[DEPRECATED]}) {
 			| Disband from a current group
-			/if (${Group}) /call EVENT_Disband "PLACEHOLDER" "${Me.CleanName}"
+			/if (${Group} || ${Raid.Members}) /call EVENT_Disband "PLACEHOLDER" "${Me.CleanName}"
 				
 			| check to see if I am the group leader(GroupMember#0)
 			/if (${Ini[${Group_Ini},${Ini[${Group_Ini}].Arg[${i},|]},GroupMember#0].Equal[${Me.CleanName}]}) {
 				/echo Recalling [${groupName}]...
-				/delay 20
+				/delay 2s
 				| Invite group members while ignoring placeholders, and set 
 				/for e 1 to 5
 					/varset groupMembers[${e}] ${Ini[${Group_Ini},${Ini[${Group_Ini}].Arg[${i},|]},GroupMember#${e}]}
@@ -1540,12 +1531,18 @@ SUB EVENT_groupUp(line, ChatSender, eventParams)
 					}
 				/next e
 
-				/delay 100 ${Group} == ${groupSize}
+				/delay 3s ${Group} == ${groupSize}
 				/if (${Group} != ${groupSize}) {
 					/for e 1 to 5
-						/if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Bool[${Group.Member[${groupMembers[${e}]}]}]}) /docommand ${ChatToggle} [${groupMembers[${e}]}] Did not join the group...
+						/if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Bool[${Group.Member[${groupMembers[${e}]}]}]}) /invite ${groupMembers[${e}]}
 					/next e
 				}
+        /delay 3s ${Group} == ${groupSize}
+        /if (${Group} != ${groupSize}) {
+          /for e 1 to 5
+          /if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Bool[${Group.Member[${groupMembers[${e}]}]}]}) /docommand ${ChatToggle} [${groupMembers[${e}]}] Did not join the group...
+          /next e
+        }
 				/goto :skip
 			}
 		}

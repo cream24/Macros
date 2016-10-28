@@ -98,11 +98,12 @@ Sub ROG_Setup
 	/call IniToVar "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
 	/declare strikeDisc 		string outer ${strikeDiscStr.Arg[1,/]}
 	/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}	
-	/declare strikeDiscMinEnd	int outer 0	
-	/if (${strikeDiscStr.Find[/MinEnd|]}) {
-		/call argueString MinEnd "${MyAbilities[${i}]}"
+	/declare strikeDiscMinEnd	int outer 0
+
+	/if (${strikeDiscStr.Find[/MinEnd]}) {
+		/call argueString MinEnd "${strikeDiscStr}"
 		/varset strikeDiscMinEnd ${Macro.Return}
-	}	
+	}
 /if (${Debug}) /echo <== ROG_Setup -|
 /return
 

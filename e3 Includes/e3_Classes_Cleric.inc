@@ -17,7 +17,7 @@ SUB check_Yaulp
 		| Auto-yaulp spell
 		/if (!${Bool[${Me.Buff[${castName}]}]} && ${Me.PctMana} < 95 && ${Spell[${castName}].Stacks}) {
 			/if (${Target.ID}) /declare tempTarget int local ${Target.ID}
-			/casting "${yaulpSpell}"
+			/casting "${castName}"
 		}
 	}
 /if (${Debug}) /echo <== check_clrYaulp -|
