@@ -142,8 +142,8 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	|Use Disc
 	/if (${${ArrayName}[${ArrayIndex},${iCastType}].Equal[Disc]}) {
-		/if (${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.NotEqual[No Effect]} && ${${ArrayName}[${ArrayIndex},${iDuration}]}) {
-			/if (${Debug} || ${Debug_Casting}) /echo |- QuickBurn -| Waiting on disc [${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text}]
+		/if (${Me.ActiveDisc.ID} && ${${ArrayName}[${ArrayIndex},${iDuration}]}) {
+			/if (${Debug} || ${Debug_Casting}) /echo |- QuickBurn -| Waiting on disc [${Me.ActiveDisc}]
 			/varset castReturn ACTIVEDISC
 			/goto :skipCast
 		} else {
