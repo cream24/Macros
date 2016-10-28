@@ -218,8 +218,8 @@ SUB ListToArray(ArrayName, Data, varScope, delimiter)
 |--------------------------------------------------------|
 SUB BuildSpellArray(ArrayName, NewArrayName)
 	/if (!${Defined[SpellProp]}) {
-		/declare SpellProp[32] string outer 0
-		/varset SpellProp[1] SpellName
+		/declare SpellProp[34] string outer 0
+		/varset SpellProp[1] CastName
 		/varset SpellProp[2] CastType
 		/varset SpellProp[3] TargetType
 		/varset SpellProp[4] SpellGem
@@ -251,6 +251,8 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/varset SpellProp[30] SpellType
 		/varset SpellProp[31] CastTarget
     /varset SpellProp[32] GiftOfMana
+    /varset SpellProp[33] CheckForID
+    /varset SpellProp[34] SpellID
 	}
 
   /if (${Defined[${NewArrayName}]}) /deletevar ${NewArrayName}
@@ -289,6 +291,8 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 	/if (!${Defined[iSpellType]})		/declare iSpellType int outer 30
 	/if (!${Defined[iCastTarget]})		/declare iCastTarget int outer 31
   /if (!${Defined[iGiftOfMana]})		/declare iGiftOfMana int outer 32
+  /if (!${Defined[iCheckForID]})		/declare iCheckForID int outer 33
+  /if (!${Defined[iSpellID]})		/declare iSpellID int outer 34
 
 	/declare i int local
 	/declare printAll bool local FALSE
@@ -540,7 +544,17 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
       /varset	${NewArrayName}[${i},${iSpellName}] ${Spell[${${NewArrayName}[${i},${iCastName}]}]}
     }
 		/if (${printAll}) /echo SpellName ${${NewArrayName}[${i},${iSpellName}]}
-		
+    | get SpellID
+      /if (${${NewArrayName}[${i},${iCastType}].Equal[Item]}) {
+        /varset	${NewArrayName}[${i},${iSpellID}] ${FindItem[=${${NewArrayName}[${i},${iCastName}]}].Spell.ID}
+      } else /if (${${NewArrayName}[${i},${iCastType}].Equal[AA]}) {
+        /varset	${NewArrayName}[${i},${iSpellID}] ${Me.AltAbility[${${NewArrayName}[${i},${iCastName}]}].Spell.ID}
+      } else /if (${${NewArrayName}[${i},${iCastType}].Equal[Spell]}) {
+        /varset	${NewArrayName}[${i},${iSpellID}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].ID}
+      } else /if (${${NewArrayName}[${i},${iCastType}].Equal[Disc]}) {
+        /varset	${NewArrayName}[${i},${iSpellID}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].ID}
+      }
+      /if (${printAll}) /echo SpellID ${${NewArrayName}[${i},${iSpellID}]}
 		
 		| get NoBurn
 		/if (${${ArrayName}[${i}].Find[/NoBurn]}) {
@@ -584,7 +598,18 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     } else /if (${${NewArrayName}[${i},${iCastType}].Equal[Disc]}) {
       /varset	${NewArrayName}[${i},${iCastID}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].ID}
     }
-		/if (${printAll}) /echo iCastID ${${NewArrayName}[${i},${iSpellID}]}
+		/if (${printAll}) /echo iCastID ${${NewArrayName}[${i},${iCastID}]}
+
+    | get CheckForID
+    /if (${Bool[${AltAbility[${${NewArrayName}[${i},${iCheckFor}]}].Spell}]}) {
+      /varset ${NewArrayName}[${i},${iCheckForID}] ${AltAbility[${${NewArrayName}[${i},${iCheckFor}]}].Spell.ID}
+    } else /if (${Bool[${Spell[${${NewArrayName}[${i},${iCheckFor}]}].ID}]}) {
+      /varset ${NewArrayName}[${i},${iCheckForID}] ${Spell[${${NewArrayName}[${i},${iCheckFor}]}].ID}
+    } else {
+      /varset ${NewArrayName}[${i},${iCheckForID}] -1
+    }
+    /if (${printAll}) /echo ${${NewArrayName}[${i},${iCastName}]} ${${NewArrayName}[${i},${iCheckFor}]} iCheckForID ${${NewArrayName}[${i},${iCheckForID}]}
+
 
 		| get MinEnd
 		/if (${${ArrayName}[${i}].Find[/MinEnd|]}) {

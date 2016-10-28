@@ -49,13 +49,14 @@ SUB buffBots(ArrayName)
 		/varset buffTarget ${${ArrayName}[${s},${iCastTarget}]}
 	}
 	/varset buffSpellName		${${ArrayName}[${s},${iSpellName}]}
-	/varset buffSpellID			${Spell[${buffSpellName}].ID}
+	/varset buffSpellID			${${ArrayName}[${s},${iSpellID}]}]
 	/varset buffCheckForName	${${ArrayName}[${s},${iCheckFor}]}
-	/varset buffCheckForID		${Spell[${buffCheckForName}].ID}
-	/if (${buffCheckForID}==0) /varset buffCheckForID -1
+	/varset buffCheckForID		${${ArrayName}[${s},${iCheckForID}]}
 
+
+	|/echo ${buffSpellName} ${buffSpellID} ${buffCheckForName} ${buffCheckForID} ${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}
   |/echo ${buffSpellName} ${Select["${buffSpellName}","Thief's Eyes", "Fists of Wu", "Commanding Voice","Cry Havoc"]}
-  /if (${Select[${Spell[${buffSpellName}].ID},8001,8002,8000,8003]}) {
+  /if (${Select[${buffSpellID},8001,8002,8000,8003]}) {
     /call meleeCombatBuffs "${ArrayName}" ${s}
     /goto :skipBuff
   }
@@ -84,7 +85,7 @@ SUB buffBots(ArrayName)
 		|------- Netbots ------| 		
 			/call check_Distance ${buffTargetID} ${${ArrayName}[${s},${iMyRange}]}
 			/if (${Macro.Return}) {
-			  /if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}		&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffSpellID} ]}]}) {
+			  /if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffSpellID} ]}]}) {
 				/if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffCheckForID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffCheckForID} ]}]}) {
 				  /if (!${${ArrayName}[${s},${iTargetType}].Equal[Single in Group]} || ${Bool[${Group.Member[${buffTarget}]}]}) {
             /call check_Ready "${ArrayName}" ${s}

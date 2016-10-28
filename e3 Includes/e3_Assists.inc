@@ -66,7 +66,6 @@ SUB event_Assist(line, ChatSender, int MobID)
             |/echo ${AssistType}
             /if (${AssistType.Equal[melee]}) {
               /if (${Debug} || ${Debug_Assists}) /echo melee on
-              |/attack on
               /if (${Int[${AssistDistanceSetting}]}) {
                 /varset AssistStickDistance ${AssistDistanceSetting}
               } else {
@@ -75,6 +74,11 @@ SUB event_Assist(line, ChatSender, int MobID)
               | Check MaxRangeTo, make sure it is not out of bounds.
               /if (${AssistStickDistance} > 25) /varset AssistStickDistance 25
               /call StickToAssistTarget
+              /if (${Me.Class.ShortName.Equal[Rog]} && ${Defined[strikeDisc]}) {
+                /call check_rogStrike
+              } else {
+                /attack on
+              }
             } else /if (${AssistType.Equal[ranged]}) {
               /if (${Debug} || ${Debug_Assists}) /echo autofire on
               /squelch /face fast id ${AssistTarget}
@@ -275,7 +279,7 @@ SUB CombatAbilities
   |/echo in CombatAbilities
 | Prereq/priorities
   |/echo strikeDisc ${strikeDisc}
-  /if (${Defined[strikeDisc]}) /call check_rogStrike
+  |/if (${Defined[strikeDisc]}) /call check_rogStrike
   /if (${doTaunt}) {
     /if (${Select[${Me.TargetOfTarget},${Me.CleanName}]}==0) /doability Taunt
   }

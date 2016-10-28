@@ -7,7 +7,7 @@
 |--------------------------------------------------------------------------------|
 Sub check_rogStrike
 /if (${Debug}) /echo |- rogueStrike ==>	
-	/if (${Assisting} && ${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && ${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.Equal[No Effect]}) {
+	/if (${Assisting} && ${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID}) {
 		| Turn off combat.
 		/if (${Me.Combat}) /attack off
 		/if (${Stick.Active}) /squelch /stick pause			
@@ -33,8 +33,8 @@ Sub check_rogStrike
 		/delay 1
 		/if (!${Me.Sneaking} || !${Me.Invis}) /goto :skipStrike
 		/disc ${strikeDisc}
-		/delay 5 ${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.NotEqual[No Effect]}
-		/if (${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.Equal[No Effect]} && ${Me.CombatAbilityReady[${strikeDisc}]}) /goto :waitForDisc
+		/delay 5 ${Bool[${Me.ActiveDisc.ID}]}
+		/if (!${Me.ActiveDisc.ID} && ${Me.CombatAbilityReady[${strikeDisc}]}) /goto :waitForDisc
 		/delay 2
 		/doability Backstab
 
@@ -76,7 +76,7 @@ sub AutoEvade
 |only evade when strike is on cooldown with more than 8 sec left, otherwise it burns hide cd
   |/echo razorTimer ${razorTimer}
   |/echo h ${Me.AbilityReady[Hide]} d !${Bool[${Me.CombatAbilityReady[${strikeDisc}]}]}
-	/if (${Me.AbilityReady[Hide]} && (!${Bool[${strikeDisc}]} || ${strikeTimer}>80 || ${Me.Endurance} < ${strikeDiscEndCost} || ${Me.PctEndurance} < ${strikeDiscMinEnd} || !${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.Equal[No Effect]})) {
+	/if (${Me.AbilityReady[Hide]} && (!${Bool[${strikeDisc}]} || ${strikeTimer}>80 || ${Me.Endurance} < ${strikeDiscEndCost} || ${Me.PctEndurance} < ${strikeDiscMinEnd} || ${Me.ActiveDisc.ID})) {
 		| Turn off combat.
 		/attack off
 		/delay 1s !${Me.Combat}	

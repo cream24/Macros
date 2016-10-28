@@ -50,10 +50,10 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	/if (!${${ArrayName}[${ArrayIndex},${iCastInvis}]} && ${Me.Invis}) {
     /echo invisskip ${pendingCast} ${Spawn[id ${targetID}].Name}  ${targetID}
 	} else {
-    /echo cast ${pendingCast} ${Spawn[id ${targetID}].Name}  ${targetID}
+    /echo cast ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name}  ${targetID}
   }
 	|/call explodeforcallstack
-  |/varset Debug_Casting TRUE
+|  /varset Debug_Casting TRUE
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | Checks to abort casting due to previous failures
 
@@ -96,6 +96,15 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
     /delay 5s
     /varset castReturn CAST_ZONING
     /goto :skipCast
+  }
+  |pain in the ass rogue-specific logic
+  /if (${Me.Class.ShortName.Equal[Rog]}) {
+    /if (${Me.Invis}) {
+      |im near other people its ok to break hide
+      /if (${SpawnCount[pc radius 30]} > 1 && ${Me.AbilityReady[Hide]}) {
+        /doability hide
+      }
+    }
   }
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~		
 |  Basic Checks
@@ -177,7 +186,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/varset pendingType ${DefaultGem}
 			}
 		}
-
+    |/echo atcast "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 		/varset ActionTaken TRUE
 		/casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 
@@ -284,7 +293,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
 	}
-	/varset Debug_Casting FALSE
+	|/varset Debug_Casting FALSE
 /return
 
 |------------------------------------------------|

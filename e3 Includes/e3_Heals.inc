@@ -544,13 +544,13 @@ SUB groupHeals
 		/declare s int local
 		
 		/for s 1 to ${groupHeals2D.Size[1]}
-			/call check_Ready "groupHeals2D" ${s}
+			/call check_HealGroupCasting "groupHeals2D" ${s}
 			/if (${Macro.Return}) {
 				/call check_Mana "groupHeals2D" ${s}
 				/if (${Macro.Return}) {		
-					/call check_HealGroupCasting "groupHeals2D" ${s}
+					/call check_Ready "groupHeals2D" ${s}
 					/if (${Macro.Return}) {	
-						/echo check_HealGroupCasting
+						|/echo check_HealGroupCasting
 						/call e3_Cast ${Me.ID} "groupHeals2D" ${s}
 					}
 				}
