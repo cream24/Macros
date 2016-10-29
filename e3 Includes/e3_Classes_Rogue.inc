@@ -33,7 +33,11 @@ Sub check_rogStrike
 		/delay 1
 		/if (!${Me.Sneaking} || !${Me.Invis}) /goto :skipStrike
 		/disc ${strikeDisc}
+<<<<<<< HEAD
 		/delay 5 ${Bool[${Me.ActiveDisc.ID}]}
+=======
+		/delay 5 ${Me.ActiveDisc.ID}
+>>>>>>> d37700d35c4fcda08b6686cd61f650ca4c57fc2f
 		/if (!${Me.ActiveDisc.ID} && ${Me.CombatAbilityReady[${strikeDisc}]}) /goto :waitForDisc
 		/delay 2
 		/doability Backstab
