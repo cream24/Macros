@@ -253,6 +253,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/doevents Follow
 				/doevents Stop
 				/doevents MoveHere
+				/doevents BackOff
 				/doevents vetAA_Background_Events
 
         |/varset Debug_Casting FALSE
@@ -283,16 +284,16 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		} else /if (${Select[${castReturn},CAST_OUTDOORS,CAST_COMPONENTS,CAST_UNKNOWN]}) {
 			/docommand ** ${ChatToggle} Adding to failureList due to Return Events CAST_OUTDOORS,CAST_COMPONENT,CAST_UNKNOWN
 			/varset failureList ${failureList}${pendingCastID},		
-		} 
-	
+		}
+  }
+
 :skipCast
 	/if (${oldItem.Length}) /call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
-	/if (${returnTwist})	/call unpauseTwist	
+
 	/if (${Following} && !${Assisting}) /call AquireFollow
-	|-target revert handled in e3_assist
+  /if (${returnTwist})	/call unpauseTwist
 	
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
-	}
 	|/varset Debug_Casting FALSE
 /return
 

@@ -53,6 +53,8 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 				/if (${ChatText.Find[Port]}) {
 					/if (${Stick.Active}) /squelch /stick off
 					/if (${NetAdvPath.Status}==1) /squelch /netfollow off
+					/varset FollowTarget NULL
+					/varset Following FALSE
 					/delay 30 !${Stick.Active} && ${NetAdvPath.Status}==0
 				}
 
@@ -194,7 +196,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 										}
 
                     /if (${Me.Book[${whatToCast}]} && !${Bool[${Me.Gem[${whatToCast}]}]}) /call memorize_spell "${whatToCast}" ${DefaultGem}
-                    /delay 5s ${Me.SpellReady[${spellName}]}
+                    |/delay 5s ${Me.SpellReady[${spellName}]}
 										/casting "${whatToCast}" ${DefaultGem} "-targetid|${Spawn[pc =${newChatSender}].ID}" -maxtries|3
 									}
 								}		

@@ -260,6 +260,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 			} else {
 				/echo Could not find a SpawnID for [${msgTarget}].
 				/varset msgTarget NULL
+				/return
 			}
 		}
 		/declare barkTarget string outer ${Spawn[id ${msgTarget}].CleanName}

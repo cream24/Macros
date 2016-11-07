@@ -549,6 +549,7 @@ SUB sell_Setup
 Sub sell_Background_Events
 	/doevents syncInventory
 	/doevents sellItems
+  /doevents Combine
 /return
 
 
@@ -577,7 +578,7 @@ Sub sell_Aliases
 /if (${Debug} || ${Debug_Sell}) /echo |- _Aliases ==>
 
 	/squelch /alias /syncInventory /bc Sync Inventory
-	/squelch /alias /autosell /bc Auto Sell
+	/squelch /alias /autosell /echo Auto Sell
 
 /if (${Debug} || ${Debug_Sell}) /echo <== _Aliases -|
 /return

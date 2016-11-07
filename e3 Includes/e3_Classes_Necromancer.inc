@@ -2,27 +2,6 @@
 |- e3_Classes_Necromancer.inc v4.0 ( originally designed to work with e3.mac )	-|
 |- Written by Killians of PEQ													-|
 |--------------------------------------------------------------------------------|
-SUB check_lifeTap
-/if (${Debug}) /echo |- check_LifeTap ==>
-	/if (${Assisting}) {
-		/declare s int local
-		/for s 1 to ${lifeTaps2D.Size[1]}
-      /call check_Ready "lifeTaps2D" ${s}
-      /if (${Macro.Return}) {
-        /call check_Mana "lifeTaps2D" ${s}
-        /if (${Macro.Return}) {
-          /if (${Me.PctHPs} <= ${lifeTaps2D[${s},${iHealPct}]}) {
-            /call check_Distance ${AssistTarget} ${lifeTaps2D[${s},${iMyRange}]}
-            /if (${Macro.Return}) {
-              /call e3_Cast ${AssistTarget} "lifeTaps2D" ${s}
-            }
-          }
-        }
-      }
-    /if (!${ActionTaken}) /next s
-	}
-/if (${Debug}) /echo <== check_LifeTap -|
-/RETURN
 
 SUB check_Lich
 /if (${Debug}) /echo |- check_castLich ==>
@@ -68,7 +47,7 @@ Sub NEC_Setup
 /if (${Debug}) /echo |- NEC_Setup ==>
 	/if (${Ini[${Character_Ini},${Me.Class},Lich Spell].Length}) /call IniToVar "${Character_Ini},${Me.Class},Lich Spell" lichSpell string outer
 	/if (${Ini[${Character_Ini},${Me.Class},LifeTap#1].Length}) /call IniToArray "${Character_Ini},${Me.Class},LifeTap#" lifeTaps
-	/if (${lifeTaps}) /call BuildSpellArray "lifeTaps"	"lifeTaps2D"
+	/if (${lifeTaps.Size}) /call BuildSpellArray "lifeTaps"	"lifeTaps2D"
 	/if (${Ini[${Character_Ini},${Me.Class},Mana Dump (On/Off)].Length}) /call IniToVar "${Character_Ini},${Me.Class},Mana Dump (On/Off)" manaDump bool outer
   /if (${Ini[${Character_Ini},${Me.Class},Who to Mana Dump#1].Length}) /call IniToArray "${Character_Ini},${Me.Class},Who to Mana Dump#" whoto_manaDump
 	/if (${Ini[${Character_Ini},${Me.Class},Mana Dump#1].Length})        /call IniToArray "${Character_Ini},${Me.Class},Mana Dump#" manaDump_Spells

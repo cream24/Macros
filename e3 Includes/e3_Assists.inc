@@ -511,11 +511,11 @@ SUB check_Nukes
 |----------------------------------------------------|
 |- interrupts casting if target is invalid (dead)   -|
 |----------------------------------------------------|
-Sub check_detrimental_target
-/if (${Debug} || ${Debug_Assists}) /echo |- check_detrimental_target ==>
-  /delay 1
-/if (${Debug} || ${Debug_Assists}) /echo <== check_detrimental_target -|
-/RETURN ${Bool[${Spawn[id ${Target.ID}].Type.NotEqual[Corpse]}]}
+|Sub check_detrimental_target
+|/if (${Debug} || ${Debug_Assists}) /echo |- check_detrimental_target ==>
+|  /delay 1
+|/if (${Debug} || ${Debug_Assists}) /echo <== check_detrimental_target -|
+|/RETURN ${Bool[${Spawn[id ${Target.ID}].Type.NotEqual[Corpse]}]}
 
 |----------------------------------------------------|
 |- Enables Debuffing on a Target                    -|
@@ -1149,6 +1149,29 @@ SUB useBurns(ArrayName)
 /RETURN
 
 |--------------------------------------------------------------------------------|
+SUB check_lifeTap
+  /if (${Debug}) /echo |- check_LifeTap ==>
+  /if (${Assisting}) {
+    /declare s int local
+    /for s 1 to ${lifeTaps2D.Size[1]}
+    /call check_Ready "lifeTaps2D" ${s}
+    /if (${Macro.Return}) {
+      /call check_Mana "lifeTaps2D" ${s}
+      /if (${Macro.Return}) {
+        /if (${Me.PctHPs} <= ${lifeTaps2D[${s},${iHealPct}]}) {
+          /call check_Distance ${AssistTarget} ${lifeTaps2D[${s},${iMyRange}]}
+          /if (${Macro.Return}) {
+            /call e3_Cast ${AssistTarget} "lifeTaps2D" ${s}
+          }
+        }
+      }
+    }
+    /if (!${ActionTaken}) /next s
+  }
+  /if (${Debug}) /echo <== check_LifeTap -|
+/RETURN
+
+|--------------------------------------------------------------------------------|
 Sub assist_Setup
 /call INItoVar "${advSettings_Ini},Debug,Debug Assists (On/Off)" Debug_Assists bool outer
 /if (${Debug} || ${Debug_Assists}) /echo |- assist_Setup ==>
@@ -1274,37 +1297,37 @@ SUB assist_SpellArrays
   /if (${FullBurns.Size} > 0)	        /call BuildSpellArray "FullBurns" 	      "FullBurns2D"
   /if (${swarmPets.Size} > 0)	        /call BuildSpellArray "swarmPets" 	      "swarmPets2D"
 
-  /declare i int local
-  /if (${Nukes2D.Size} >0) {
-    /for i 1 to ${Nukes2D.Size[1]}
-    /varset Nukes2D[${i},${iSubToRun}] check_detrimental_target
-    /next i
-  }
-  /if (${Assist_Debuffs2D.Size} >0) {
-    /for i 1 to ${Assist_Debuffs2D.Size[1]}
-    /varset Assist_Debuffs2D[${i},${iSubToRun}] check_detrimental_target
-    /next i
-  }
-  /if (${Command_Debuffs2D.Size} >0) {
-    /for i 1 to ${Command_Debuffs2D.Size[1]}
-    /varset Command_Debuffs2D[${i},${iSubToRun}] check_detrimental_target
-    /next i
-  }
-  /if (${Assist_DoTs2D.Size} >0) {
-    /for i 1 to ${Assist_DoTs2D.Size[1]}
-    /varset Assist_DoTs2D[${i},${iSubToRun}] check_detrimental_target
-    /next i
-  }
-  /if (${Command_DoTs2D.Size} >0) {
-    /for i 1 to ${Command_DoTs2D.Size[1]}
-    /varset Command_DoTs2D[${i},${iSubToRun}] check_detrimental_target
-    /next i
-  }
-  /if (${swarmPets2D.Size} >0) {
-    /for i 1 to ${swarmPets2D.Size[1]}
-    /varset swarmPets2D[${i},${iSubToRun}] check_detrimental_target
-    /next i
-  }
+|  /declare i int local
+|  /if (${Nukes2D.Size} >0) {
+|    /for i 1 to ${Nukes2D.Size[1]}
+|    /varset Nukes2D[${i},${iSubToRun}] check_detrimental_target
+|    /next i
+|  }
+|  /if (${Assist_Debuffs2D.Size} >0) {
+|    /for i 1 to ${Assist_Debuffs2D.Size[1]}
+|    /varset Assist_Debuffs2D[${i},${iSubToRun}] check_detrimental_target
+|    /next i
+|  }
+|  /if (${Command_Debuffs2D.Size} >0) {
+|    /for i 1 to ${Command_Debuffs2D.Size[1]}
+|    /varset Command_Debuffs2D[${i},${iSubToRun}] check_detrimental_target
+|    /next i
+|  }
+|  /if (${Assist_DoTs2D.Size} >0) {
+|    /for i 1 to ${Assist_DoTs2D.Size[1]}
+|    /varset Assist_DoTs2D[${i},${iSubToRun}] check_detrimental_target
+|    /next i
+|  }
+|  /if (${Command_DoTs2D.Size} >0) {
+|    /for i 1 to ${Command_DoTs2D.Size[1]}
+|    /varset Command_DoTs2D[${i},${iSubToRun}] check_detrimental_target
+|    /next i
+|  }
+|  /if (${swarmPets2D.Size} >0) {
+|    /for i 1 to ${swarmPets2D.Size[1]}
+|    /varset swarmPets2D[${i},${iSubToRun}] check_detrimental_target
+|    /next i
+|  }
 /RETURN
 
 |--------------------------------------------------------------------------------|

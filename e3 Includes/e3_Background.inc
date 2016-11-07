@@ -15,10 +15,10 @@ SUB check_Zone
 	/varset currentZone ${Zone.ID}
 
 	| If im not wearing chest(dead) and not waiting for rez, wait for rez
-		/if (!${Bool[${InvSlot[chest].Item}]} && !${Waiting4Rez} && ${Me.Level}>=50) {
-			/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
-			/call Wait4Rez
-		}
+	|	/if (!${Bool[${InvSlot[chest].Item}]} && !${Waiting4Rez} && ${Me.Level}>=50) {
+	|		/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
+	|		/call Wait4Rez
+	|	}
 	| Update macro timers
 	/varset idleTimer ${idleInterval}m
 	| Turn off assist / attack
