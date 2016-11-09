@@ -353,94 +353,129 @@ SUB EVENT_barkReturn(line, returnBark)
 |- Moves to a given location, and clicks the nearest object.				        -|
 |- @param ChatSender: The command sender.									                  -|
 |----------------------------------------------------------------------------|
+#EVENT nclickIt "<#1#> NClick It#*#"
+#EVENT nclickIt "[#1#] NClick It#*#"
+SUB EVENT_nclickIt(line, ChatSender)
+/declare debug_clickit bool local FALSE
+/if (${debug_clickit}) /echo ${ChatSender} ${Zone.ShortName} ${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}
+
+	/if (${ChatSender.NotEqual[${Me.Name}]} && ${Spawn[pc =${ChatSender}].Distance3D} > 150) {
+		/echo \ay Aborting ClickIt: ${ChatSender} is > 150 away
+		/return
+	}
+	/if (${ChatSender.NotEqual[${Me.Name}]} && ${Spawn[pc =${ChatSender}].Distance3D} > 20) {
+		/declare moveToChatSenderTimer timer local 5s
+		/netfollow off
+		/stick off
+		/squelch /target id ${Spawn[pc =${ChatSender}].ID}
+		/squelch /face fast
+		/moveto id ${Spawn[pc =${ChatSender}].ID}
+		:continueMoveToChatSender
+		/delay 1
+		/if (${Spawn[pc =${ChatSender}].ID} > 20 && ${moveToChatSenderTimer}) /goto :continueMoveToChatSender
+
+		/if (${Spawn[pc =${ChatSender}].ID} > 20) {
+			/echo \ay Aborting ClickIt: Could not move to < 20 of ${ChatSender}
+			/moveto off
+			/return
+		}
+	}
+
+  /if (${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}) /call InitoArray "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
+  | doorid, x, y, z, name
+	/if (${debug_clickit}) /echo Doors in zone ${doorList.Size}
+  /declare i int local
+  /declare closestDoorID int local 0
+  /declare closestDoorDist float local 0
+  |find the closest door to me
+  /for i 1 to ${doorList.Size}
+		/if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
+		/squelch /doortarget id ${doorList[${i}].Arg[1,,]}
+    |/delay 1
+		/if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.Distance3D} < 100) {
+			/varset closestDoorDist ${DoorTarget.Distance}
+			/varset closestDoorID ${doorList[${i}].Arg[1,,]}
+		}
+  /next i
+
+	/if (${debug_clickit}) /echo closest ${closestDoorID} ${closestDoorDist}
+	| if i have a door within 100 distance then move to it and try to click
+	/if (!${Bool[${closestDoorID}]}) {
+		/echo \ay Aborting ClickIt: I could not find an acceptable door < 100 3D units
+		/return
+	}
+
+	/squelch /doortarget id ${closestDoorID}
+
+	/if (${DoorTarget.Distance} > 20) {
+		/declare moveTimer timer local 5s
+		/netfollow off
+		/stick off
+		/squelch /face door fast
+		/moveto loc ${DoorTarget.Y} ${DoorTarget.X}
+		:continueMoveTo
+		/delay 1
+		/if (${DoorTarget.Distance} > 20 && ${Bool[${moveTimer}]}) /goto :continueMoveTo
+	}
+	/if (${DoorTarget.Distance} > 20) {
+		/echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 10s
+		/moveto off
+		/return
+	} else {
+		/declare MyZone int local ${Zone.ID}
+		/declare clickTimer timer local 5s
+		|add starting loc vs final loc for intrazone click
+		/declare clickDelay int local ${Math.Calc[${Math.Rand[${Me.ID}]}%${clickitRandomDelay}|1]}
+		/declare doorStartingDist ${DoorTarget.Distance3D}
+		:retryClickDoor
+		/delay ${clickDelay}
+		/squelch /click left door
+		/if (${clickTimer} && (${MyZone}==${Zone.ID} || ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20)) /goto :retryClickDoor
+		/if (${MyZone}==${Zone.ID} && ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20) {
+			/echo \ay I have failed to click Door ${Switch.ID} ${DoorTarget.Name}
+			/moveto off
+			/return
+		}
+	}
+
+/RETURN
+
+
+|----------------------------------------------------------------------------|
+|- Moves to a given location, and clicks the nearest object.				        -|
+|- @param ChatSender: The command sender.									                  -|
+|----------------------------------------------------------------------------|
 #EVENT clickIt "<#1#> Click It#*#"
 SUB EVENT_clickIt(line, ChatSender)
+/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_clickIt ==>
 	| -Verify the event
   /call verifyEvent "${ChatSender}" "${line}"
   /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 |    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-		/declare debug_clickit bool local FALSE
-		/if (${debug_clickit}) /echo ${ChatSender} ${Zone.ShortName} ${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}
-		/if (${debug_clickit} && ${ChatSender.Equal[${Me.Name}]}) /delay 5s
-		|**
-		| Move to the person who calls ClickIT
-		/if (${ChatSender.NotEqual[${Me.Name}]} && ${Spawn[pc =${ChatSender}].Distance3D} > 150) {
-			/echo \ay Aborting ClickIt: ${ChatSender} is > 150 away
-			/return
-		}
-		/if (${ChatSender.NotEqual[${Me.Name}]} && ${Spawn[pc =${ChatSender}].Distance3D} > 20) {
-			/declare moveToChatSenderTimer timer local 5s
-			/netfollow off
-			/stick off
-			/squelch /target id ${Spawn[pc =${ChatSender}].ID}
-			/squelch /face fast
-			/moveto id ${Spawn[pc =${ChatSender}].ID}
-			:continueMoveToChatSender
-			/delay 1
-			/if (${Spawn[pc =${ChatSender}].ID} > 20 && ${moveToChatSenderTimer}) /goto :continueMoveToChatSender
-
-			/if (${Spawn[pc =${ChatSender}].ID} > 20) {
-				/echo \ay Aborting ClickIt: Could not move to < 20 of ${ChatSender}
-				/moveto off
-				/return
-			}
-		}
-		**|
-		|load array of doors from doors.ini:  doorid, x, y, z, name
-		/if (${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}) /call InitoArray "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
-		/if (${debug_clickit}) /echo Doors in zone ${doorList.Size}
-		/declare i int local
-		/declare closestDoorID int local 0
-		/declare closestDoorDist float local 0
-		|find the closest door to me
-		/for i 1 to ${doorList.Size}
-			/if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
-			/squelch /doortarget id ${doorList[${i}].Arg[1,,]}
-			|/delay 1
-			/if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.Distance3D} < 100) {
-				/varset closestDoorDist ${DoorTarget.Distance}
-				/varset closestDoorID ${doorList[${i}].Arg[1,,]}
-			}
-		/next i
-		| if i have a door within 100 distance then move to it and try to click
-		/if (${debug_clickit}) /echo closest ${closestDoorID} ${closestDoorDist}
-		/if (!${Bool[${closestDoorID}]}) {
-			/echo \ay Aborting ClickIt: I could not find an acceptable door < 100 3D units
-			/return
-		}
-		/squelch /doortarget id ${closestDoorID}
-		/if (${DoorTarget.Distance} > 20) {
-			/declare moveTimer timer local 5s
-			/netfollow off
-			/stick off
-			/squelch /face door fast
-			/moveto loc ${DoorTarget.Y} ${DoorTarget.X}
-			:continueMoveTo
-			/delay 1
-			/if (${DoorTarget.Distance} > 20 && ${Bool[${moveTimer}]}) /goto :continueMoveTo
-		}
-		/if (${DoorTarget.Distance} > 20) {
-			/echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 10s
-			/moveto off
-			/return
-		} else {
-			/declare MyZone int local ${Zone.ID}
-			/declare clickTimer timer local 5s
-			|add starting loc vs final loc for intrazone click
-			/declare clickDelay int local ${Math.Calc[${Math.Rand[${Me.ID}]}%${clickitRandomDelay}|1]}
-			/declare doorStartingDist ${DoorTarget.Distance3D}
-			:retryClickDoor
-			/delay ${clickDelay}
-			/squelch /click left door
-			/if (${clickTimer} && (${MyZone}==${Zone.ID} || ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20)) /goto :retryClickDoor
-			/if (${MyZone}==${Zone.ID} && ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20) {
-				/echo \ay I have failed to click Door ${Switch.ID} ${DoorTarget.Name}
-				/moveto off
-				/return
-			}
-		}
-	}
+	/echo in clickit
+    /netfollow off
+    /stick off
+    /declare MyDelay int local ${Math.Calc[${Math.Rand[${Me.ID}]}%${clickitRandomDelay}|1]}
+    /declare MyZone int local ${Zone.ID}
+    /if (${Target.ID}) /squelch target clear
+    /doortarget
+    /declare clickitTimer timer local 10s
+    |/if (${DoorTarget.Distance}<=70 && (${DoorTarget.Name.Find[cave]} || ${DoorTarget.Name.Find[_crystal]} || ${DoorTarget.Name.Find[trans_]} || ${DoorTarget.Name.Find[_book_]} || ${DoorTarget.Name.Find[crate]} || ${DoorTarget.Name.Find[pontree]} || ${DoorTarget.Name.Find[zonebox]} || ${DoorTarget.Name.Find[potran]} || ${DoorTarget.Name.Find[port]} || ${DoorTarget.Name.Find[rock]} || ${DoorTarget.Name.Find[tele]} || ${DoorTarget.Name.Find[prtl]} || ${DoorTarget.Name.Find[potrhut]} || ${DoorTarget.Name.Find[door]} || ${DoorTarget.Name.Find[grave]} || ${DoorTarget.Name.Find[switch]})) {
+      /squelch /face door fast
+      /squelch /moveto loc ${DoorTarget.Y} ${DoorTarget.X}
+      /delay 1s
+      /echo ${DoorTarget}
+      :retry
+        /delay ${MyDelay}
+        /click left door
+        /delay 20
+      /if (${MyZone}==${Zone.ID} && ${Bool[${clickitTimer}]}) /goto :retry
+    |} else {
+      /echo \ar cannot find an acceptable doortarget
+   | }
+  }
+/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_clickIt -|
 /RETURN
 
 |----------------------------------------------------------------------------|
@@ -1365,15 +1400,16 @@ SUB EVENT_Invite(line, ChatSender)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]}) {
 		| -Wait to finish casting
 		/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /stopcast
-		/delay 10 !${Me.Casting.ID}
-		/squelch /target clear
-
-		/declare retryTimer timer local 5s
+		/delay 2 !${Me.Casting.ID}
+		| -If the groupleader was valid, disband a current group, and join the new one.
+		/if (${Group} || ${Raid.Members}) /call EVENT_Disband "PLACEHOLDER" "${Me.CleanName}"
+		
+		/declare retryTimer timer local 10s
 		
 		:retry_Invite
-|		/if (${Debug}) /echo |- EVENT_Invite -| retry_Invite loop.
+		/if (${Debug}) /echo |- EVENT_Invite -| retry_Invite loop.
 		
-		/delay 5
+		/delay 1s
 		/invite
 		/delay 1s ${Group}
 		
@@ -1680,6 +1716,7 @@ Sub basics_Background_Events
 |	/if (${event_counter}==3) {
   /doevents clickIt
   /doevents oldclickIt
+  /doevents nclickIt
   /doevents bark
   /doevents reportMana
   /doevents groupUp

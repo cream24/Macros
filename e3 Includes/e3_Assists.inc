@@ -47,7 +47,7 @@ SUB event_Assist(line, ChatSender, int MobID)
 					/varset Assisting TRUE
 					/varset AssistTarget ${MobID}
 					/varset AllowControl FALSE
-          /varset enrageHold FALSE
+          /varset isEnraged FALSE
 					| If I am the assist caller, or I am feigning, don't allow macro control.
 					/if (${ChatSender.NotEqual[${Me.CleanName}]} && !${Me.Feigning}) {
 					|/echo inif
@@ -135,7 +135,7 @@ SUB AssistOff
 	/varset Assisting FALSE
 	/varset AssistTarget 0
 	/varset AllowControl FALSE
-  /varset enrageHold FALSE
+  /varset isEnraged FALSE
 
   /if (${Stick.Status.Equal[ON]}) /squelch /stick off
   /if (${Debuff_Targets.Size})    /deletevar Debuff_Targets
@@ -164,38 +164,33 @@ SUB StickToAssistTarget
 /if (${Debug} || ${Debug_Assists}) /echo |- StickToAssistTarget ==> assistPoint ${AssistStickPoint} dist ${AssistStickDistance}
 		/if (${AssistStickPoint.Equal[behind]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick behind [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 10 uw
-			/delay 10 !${Me.Moving} || ${Target.Distance} < 15
-			/squelch /stick hold moveback behind ${AssistStickDistance} uw	
-			/delay 10 ${Me.Moving}
+			/squelch /stick moveback snaproll 15 uw
+			/delay 20 ${Stick.Behind} && ${Stick.Stopped}
+			/squelch /stick hold moveback behind ${AssistStickDistance} uw
 		} else /if (${AssistStickPoint.Equal[behindonce]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick behindonce [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 10 uw
-			/delay 10 !${Me.Moving} || ${Target.Distance} < 15
+			/squelch /stick moveback snaproll 15 uw
+      /delay 20 ${Stick.Behind} && ${Stick.Stopped}
 			/squelch /stick hold moveback behindonce ${AssistStickDistance} uw
-			/delay 10 ${Me.Moving}
 		} else /if (${AssistStickPoint.Equal[pin]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick pin [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 10 uw
-			/delay 10 !${Me.Moving} || ${Target.Distance} < 15
+			/squelch /stick moveback snaproll 15 uw
+			/delay 20 ${Stick.Stopped}
 			/squelch /stick hold moveback pin ${AssistStickDistance} uw
-			/delay 10 ${Me.Moving}
 		} else /if (${AssistStickPoint.Equal[front]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick front [${AssistStickDistance}].
 			/squelch /stick hold front ${AssistStickDistance} uw
-			/delay 10 ${Me.Moving}
+      /delay 20 ${Stick.Stopped}
 		} else /if (${AssistStickPoint.Equal[!front]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick !front [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 10 uw
-			/delay 10 !${Me.Moving} || ${Target.Distance} < 15
+			/squelch /stick moveback snaproll 15 uw
+      /delay 20 ${Stick.Behind} && ${Stick.Stopped}
 			/squelch stick hold moveback !front ${AssistStickDistance} uw
-			/delay 10 ${Me.Moving}
 		} else {
 			/if (${Debug} || ${Debug_Assists}) /echo [${AssistStickPoint}] is not a valid stick point.  Defaulting to stick behind.
-			/squelch /stick moveback snaproll 10 uw
-			/delay 10 !${Me.Moving} || ${Target.Distance} < 15
-			/squelch /stick hold moveback behind ${AssistStickDistance} uw	
-			/delay 10 ${Me.Moving}
+			/squelch /stick moveback snaproll 15 uw
+      /delay 20 ${Stick.Behind} && ${Stick.Stopped}
+			/squelch /stick hold moveback behind ${AssistStickDistance} uw
 		}
 /if (${Debug} || ${Debug_Assists}) /echo <== StickToAssistTarget -|	
 /RETURN
@@ -228,14 +223,12 @@ SUB check_AssistStatus
     |----- Melee functions-------------------------------------------------------------------------------------------------------------|
       /if (${AssistType.Equal[Melee]}) {
         |- mob is or was enraged
-        /if (${enrageHold}) {
+        /if (${isEnraged}) {
           /call check_IsLookingAt
           /if (${Macro.Return}) {
             /if (${Debug} || ${Debug_Assists}) /echo I am not behind the target. Stopping attack.
             /attack off
             /return
-          } else {
-            /varset enrageHold FALSE
           }
         }
         | If I am target of target and not sticking to front(tank) attack/stick off
@@ -247,18 +240,23 @@ SUB check_AssistStatus
           /stick off
         } else {
           | If the mob is not targeting me
-          | or is moving .. why?
-            /if (!${Me.Combat}) /attack on
-            /if (!${Stick.Active} || (${Target.Distance} > ${AssistStickDistance})) {
-              /doevents getCloser
-              /call StickToAssistTarget
-            }
+          /if (!${Me.Combat}) /attack on
+          /if (!${Stick.Active} || (${Target.Distance} > ${AssistStickDistance})) {
+            /doevents getCloser
+            /call StickToAssistTarget
           }
+        }
     |----- Ranged functions-------------------------------------------------------------------------------------------------------------||
     } else /if (${AssistType.Equal[Ranged]}) {
       /squelch /face fast id ${AssistTarget}
-      /if (${Target.Distance} < 35 || ${Target.Distance} > ${RangedStickDistance}) /squelch /stick hold moveback ${RangedStickDistance}
-      /if (!${Me.AutoFire}) /autofire on
+      |dont play chase
+      /if (${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]}) {
+        /stick off
+        /squelch /autofire off
+      } else /if (${Target.Distance} < 35 || ${Target.Distance} > ${RangedStickDistance}) {
+        /squelch /stick hold moveback ${RangedStickDistance}
+        /if (!${Me.AutoFire}) /autofire on
+      }
     }
   }
   |/echo MyAbilities ${MyAbilities.Size}
@@ -278,8 +276,6 @@ SUB CombatAbilities
   /declare i int local
   |/echo in CombatAbilities
 | Prereq/priorities
-  |/echo strikeDisc ${strikeDisc}
-  |/if (${Defined[strikeDisc]}) /call check_rogStrike
   /if (${doTaunt}) {
     /if (${Select[${Me.TargetOfTarget},${Me.CleanName}]}==0) /doability Taunt
   }
@@ -289,9 +285,11 @@ SUB CombatAbilities
  | /echo MyAbilities  ${i} ${abilityName}
 |- Class abilities
   /if (${Me.Ability[${abilityName}]}) {
+    /if (${abilityName.Equal[Bash]}) {
+      /if (!${Select[${Me.Inventory[Offhand].Type},Shield]} && !${Me.AltAbility[2 Hand Bash]}) /next i
+    }
     /if (${Me.AbilityReady[${abilityName}]}) {
       /doability "${abilityName}"
-     | /echo doabil ${abilityName}
     }
     |- AA, only those with 0 cast time can go here
   } else /if (${Me.AltAbility[${abilityName}]}) {
@@ -364,6 +362,7 @@ SUB check_IsLookingAt
 #event EnrageOn "#1# has become ENRAGED."
 SUB Event_EnrageOn(line, RageOn)
   /if (${Debug} || ${Debug_Assists}) /echo |- Event_EnrageOn ==> Enrage ON, turning attack OFF
+  /varset isEnraged bool outer TRUE
   /if (${Me.Combat} && ${Target.ID} == ${Spawn[${RageOn}].ID} && ${Target.PctHPs} < 20) {
     /call check_IsLookingAt
     /if (${AssistStickPoint.Equal[behind]} && (${Stick.Behind} || ${Stick.MoveBehind}) && !${Me.TargetOfTarget.Name.Equal[${Me.Name}]} && !${Macro.Return}) /return
@@ -372,7 +371,6 @@ SUB Event_EnrageOn(line, RageOn)
       /pet hold
       /pet back off
     }
-    /varset enrageHold bool outer TRUE
   }
 /RETURN
 |------------------------------------------------|
@@ -381,10 +379,10 @@ SUB Event_EnrageOn(line, RageOn)
 #event EnrageOff "#1# is no longer enraged."
 SUB Event_EnrageOff(line, RageOn)
   /if (${Debug} || ${Debug_Assists}) /echo |- EnrageOff ==> Enrage OFF, turning attack ON
-  /if (${enrageHold} && ${Target.ID} == ${Spawn[${RageOn}].ID}) {
+  /if (${isEnraged} && ${Target.ID} == ${Spawn[${RageOn}].ID}) {
     /attack on
     /if (${Me.Pet.ID}) /pet attack
-    /varset enrageHold FALSE
+    /varset isEnraged FALSE
   }
 /RETURN
 
@@ -830,9 +828,13 @@ SUB DoTs_OnCommand
 /if (${Debug} || ${Debug_Assists}) /echo <== DoT_OnCommand -|
 /RETURN
 
+|----------------------------------|
+|- Swap to Ranged for Target AE	  -|
+|----------------------------------|
+
 
 |----------------------------|
-|- Turns AE functions on.	-|
+|- Turns AE functions on.	  -|
 |----------------------------|
 #event AEOn "<#1#> AllAE on"
 #event AEOn "#1# tells you#*#AllAE on'"
@@ -959,6 +961,16 @@ SUB Event_TargetAEOff(line, ChatSender)
       /varset use_TargetAE FALSE
       /if (${Defined[aeTarget]}) /deletevar aeTarget
       /if (!${aemsg}) /docommand ${ChatToggle} Ending Target AE.
+
+      | if swapped to range for ae, revert
+      /if (${revertRngToMelee}) {
+          /varset AssistType Melee
+          /varset revertRngToMelee FALSE
+          /swap melee
+          /delay 2
+          /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "NONE"
+          /delay 2
+      }
     }
   }
   /if (${Debug} || ${Debug_Assists}) /echo <== Event_TargetAEOff -|
@@ -978,7 +990,7 @@ SUB check_AE
       /varset AssistType Melee
       /varset revertRngToMelee FALSE
       /swap melee
-      /delay 5
+      /delay 2
     }
   }
   /declare i int local
@@ -1031,6 +1043,7 @@ SUB check_AE
 SUB event_SwarmPets(line, ChatSender, int swarmTarget)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_SwarmPets ==>
 	| -Verify the event
+/if (${swarmPets2D.Size[1]} > 0) {
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 	|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
@@ -1041,10 +1054,11 @@ SUB event_SwarmPets(line, ChatSender, int swarmTarget)
 			/declare i int local
 			/for i 1 to ${swarmPets2D.Size[1]}
 				/call e3_Cast ${swarmTarget} "swarmPets2D" "${i}"
-				/delay 5s !${Me.Casting}
+				/delay 5s !${Me.Casting.ID}
 			/next i
 		}
 	}
+}
 /if (${Debug} || ${Debug_Assists}) /echo <== event_SwarmPets -|
 /RETURN
 
@@ -1053,6 +1067,7 @@ SUB event_SwarmPets(line, ChatSender, int swarmTarget)
 SUB check_Burns
 |/if (${Debug} || ${Debug_Assists}) /echo |- check_Burns ==>
 	/if (${use_FullBurns})  /call useBurns "FullBurns2D"
+  /if (${use_LongBurns})  /call useBurns "LongBurns2D"
 	/if (${use_QuickBurns}) /call useBurns "QuickBurns2D"
 |/if (${Debug} || ${Debug_Assists}) /echo <== check_Burns -|
 /RETURN
@@ -1102,6 +1117,31 @@ SUB event_QuickBurn(line, ChatSender)
 /RETURN
 
 |----------------------------------------------------|
+|- Engages LongBurns listed in the Character_Ini.	-|
+|----------------------------------------------------|
+#event LongBurn "<#1#> Long Burn"
+SUB event_LongBurn(line, ChatSender)
+  /if (${Debug} || ${Debug_Assists}) /echo |- event_LongBurn ==>
+| Check Assisting
+  /if (!${Assisting}) {
+    /echo You must be attacking something to burn.
+  } else {
+    | Check for longburns to cast
+    /if (${Defined[LongBurns2D]}) {
+      | -Verify the event
+      /call verifyEvent "${ChatSender}" "${line}"
+      /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+      |    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+      /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+        /docommand ${ChatToggle} Using Long Burns...
+        /if (!${Defined[use_LongBurns]}) /declare use_LongBurns bool outer TRUE
+      }
+    }
+  }
+  /if (${Debug} || ${Debug_Assists}) /echo <== event_LongBurn -|
+/RETURN
+
+|----------------------------------------------------|
 |- Engages FullBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
 #event FullBurn "<#1#> Full Burn"
@@ -1141,7 +1181,9 @@ SUB useBurns(ArrayName)
         /next i
       } else {
         /g useBurns ${Time} : ${ArrayName}-${${ArrayName}[${i},${iCastName}]}
+        /delay 1
         /call e3_Cast ${AssistTarget} "${ArrayName}" "${i}"
+        /delay 1
       }
     }
 	/if (!${ActionTaken}) /next i
@@ -1186,7 +1228,7 @@ Sub assist_Setup
 	/declare use_TargetAE bool outer FALSE
 	/declare use_PBAE bool outer FALSE
   /declare resistCount string outer
-	/declare enrageHold bool outer FALSE
+	/declare isEnraged bool outer FALSE
 	/declare revertRngToMelee bool outer FALSE
 	/declare aemsg bool outer FALSE
   /declare aeTarget string outer
@@ -1269,9 +1311,9 @@ SUB assist_SpellArrays
 |- AE Spells
   /if (${Ini[${Character_Ini},TargetAE,TargetAE#1].Length}) /call INItoArray "${Character_Ini},TargetAE,TargetAE#" TargetAE_Spells
   /if (${Ini[${Character_Ini},PBAE,PBAE#1].Length})     /call INItoArray "${Character_Ini},PBAE,PBAE#" PBAE_Spells
-| [QuickBurns].
+| [Burns].
   /if (${Ini[${Character_Ini},Burn,Quick Burn#1].Length}) /call IniToArray "${Character_Ini},Burn,Quick Burn#" QuickBurns
-| [FullBurns].
+  /if (${Ini[${Character_Ini},Burn,Long Burn#1].Length}) /call IniToArray "${Character_Ini},Burn,Long Burn#" LongBurns
   /if (${Ini[${Character_Ini},Burn,Full Burn#1].Length}) /call IniToArray "${Character_Ini},Burn,Full Burn#" FullBurns
 
   /if (${Me.Class.ShortName.Equal[MAG]}) {
@@ -1284,7 +1326,9 @@ SUB assist_SpellArrays
     /if (${Bool[${Me.AltAbility[Spirit Call]}]})    /call BuildArray "swarmPets" "Spirit Call"
   } else /if (${Me.Class.ShortName.Equal[WIZ]}) {
     /if (${Bool[${Me.AltAbility[Call of Xuzl]}]})   /call BuildArray "swarmPets" "Call of Xuzl"
-  }
+  } else /if (${Me.Class.ShortName.Equal[BRD]}) {
+  /if (${Bool[${Me.AltAbility[Song of Stone]}]})   /call BuildArray "swarmPets" "Song of Stone"
+}
 
   /if (${MyNukes.Size} > 0)		        /call BuildSpellArray "MyNukes"	          "Nukes2D"
   /if (${PBAE_Spells.Size} > 0)		    /call BuildSpellArray "PBAE_Spells"	      "PBAE_Spells2D"
@@ -1294,6 +1338,7 @@ SUB assist_SpellArrays
   /if (${Assist_DoTs.Size} > 0)	      /call BuildSpellArray "Assist_DoTs" 	    "Assist_DoTs2D"
   /if (${Command_DoTs.Size} > 0)	    /call BuildSpellArray "Command_DoTs" 	    "Command_DoTs2D"
   /if (${QuickBurns.Size} > 0)	      /call BuildSpellArray "QuickBurns" 	      "QuickBurns2D"
+  /if (${LongBurns.Size} > 0)	        /call BuildSpellArray "LongBurns" 	      "LongBurns2D"
   /if (${FullBurns.Size} > 0)	        /call BuildSpellArray "FullBurns" 	      "FullBurns2D"
   /if (${swarmPets.Size} > 0)	        /call BuildSpellArray "swarmPets" 	      "swarmPets2D"
 
@@ -1388,6 +1433,7 @@ SUB assist_CharacterSettings
 	| Burn entries.
 	/if (!${Ini[${Character_Ini},Burn].Length}) {
 		/call WriteToIni "${Character_Ini},Burn,Quick Burn#1"
+    /call WriteToIni "${Character_Ini},Burn,Long Burn#1"
 		/call WriteToIni "${Character_Ini},Burn,Full Burn#1"
 	}
 /if (${Debug} || ${Debug_Assists}) /echo <== assist_CharacterSettings -|
@@ -1414,6 +1460,7 @@ Sub assist_Aliases
   /noparse /squelch /alias /SwarmPets /bc Swarm pets on ${Target.ID}
 	/squelch /alias /EpicBurns /bc Epic burn
 	/squelch /alias /QuickBurns /bc Quick burn
+  /squelch /alias /LongBurns /bc Long burn
 	/squelch /alias /FullBurns /bc Full burn
 	/squelch /alias /taunton /varset doTaunt 1
   /squelch /alias /tauntoff /varset doTaunt 0
@@ -1435,6 +1482,7 @@ Sub assist_Background_Events
     /varset combatTimer ${combatDelay}
   }
   /doevents QuickBurn
+  /doevents LongBurn
   /doevents FullBurn
   /doevents EpicBurn
   /doevents EnrageOn
@@ -1449,5 +1497,6 @@ Sub assist_Background_Events
   /doevents PBAEOn
   /doevents TargetAEOff
   /doevents TargetAEOn
+  /doevents SwarmPets
   /if (${auto_AssistOn}) /call check_AutoAssist
 /return
