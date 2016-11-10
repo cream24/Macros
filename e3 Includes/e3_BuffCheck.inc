@@ -60,7 +60,6 @@ SUB buffBots(ArrayName)
     /call meleeCombatBuffs "${ArrayName}" ${s}
     /goto :skipBuff
   }
-
 	/call check_Mana "${ArrayName}" ${s}
 	/if (${Macro.Return}) {
 		|------- Self ------|

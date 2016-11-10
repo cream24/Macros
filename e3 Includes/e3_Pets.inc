@@ -123,7 +123,7 @@ SUB buffPet
         }
       }
 		}
-	/if (!${ActionTaken}) /next s
+  /if (!${ActionTaken}) /next s
 /if (${Debug} || ${Debug_Pets}) /echo <== buffPet -|
 /RETURN
 

@@ -110,7 +110,7 @@ Sub check_rune
 sub event_charmOn(line, ChatSender, targetID)
   /if (${Me.Class.ShortName.Equal[ENC]}) {
     /if (${Debug} || ${Debug_Ench}) /echo |- remove_RuneTarget ==>
-      /if (${Spawn[id ${targetID}].Distance} < 240 && !${Spawn[id ${targetID}].Named} && ${Spawn[id ${targetID}].Level} <= ${Me.Level}) {
+      /if ((${Spawn[id ${targetID}].Distance} < 240 && !${Spawn[id ${targetID}].Named} && ${Spawn[id ${targetID}].Level} <= ${Me.Level} && ${SpawnCount[npc id ${targetID}]}>0) || ${targetID}==${Me.Pet.ID}) {
         /varset charmTarget ${targetID}
         /varset doCharm TRUE
         /docommand ${ChatToggle} << Charm enabled ${Spawn[id ${charmTarget}].CleanName} >>
@@ -157,13 +157,21 @@ sub event_toggleMez(line, ChatSender, mezToggle)
 Sub check_charm
 /if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
   /declare s int local
+  /declare charmDuration int local
   /if (${doCharm} && ${Bool[${charmTarget}]}) {
+  /if (${SpawnCount[npc id ${charmTarget}]}==0 && ${charmTarget}!=${Me.Pet.ID}) {
+    /docommand ${ChatToggle} Disabling Charm: ${charmTarget} is no longer a valid npc
+    /varset doCharm FALSE
+    /varset charmTarget 0
+    /return
+  }
     /if (${Me.Pet.Race.Name.Equal[Invisible Man]}) {
       /pet get lost
       /delay 1s !${Me.Pet.ID}
     }
     |/if (!${Bool[${Me.Pet.ID}]} || ${charmTimer} < 3) {
     /if (!${Bool[${Me.Pet.ID}]}) {
+      /bc [+r+] << ${Spawn[id ${charmTarget}].CleanName} is not Charmed! >> [+r+]
       /for s 1 to ${charmArray2D.Size[1]}
       /call check_Ready "charmArray2D" ${s}
       /if (${Macro.Return}) {
@@ -171,12 +179,12 @@ Sub check_charm
         /if (${Macro.Return}) {
           /call check_Distance ${charmTarget} ${charmArray2D[${s},${iMyRange}]}
           /if (${Macro.Return}) {
-            /docommand ${ChatToggle} << Charming ${charmTarget} with ${charmArray2D[${s},${iCastName}]} >>
+            /docommand ${ChatToggle} << Charming ${charmTarget} ${Spawn[id ${charmTarget}].CleanName} with ${charmArray2D[${s},${iCastName}]} >>
             /call e3_Cast ${charmTarget} "charmArray2D" "${s}"
             /if (${Bool[${Me.Pet.ID}]}) {
-              |/varset charmTimer ${Target.Charmed.Duration.TotalSeconds}s
+              /bc [+g+] >> Charmed ${Spawn[id ${charmTarget}].CleanName} <<
               /timed 5 /pet back off
-              /timed 15 /pet follow
+              /timed 10 /pet follow
             } else {
               /if (${castReturn.Equal[CAST_IMMUNE]}) {
                 /varset doCharm FALSE
@@ -187,6 +195,31 @@ Sub check_charm
           }
         }
       }
+      /if (!${Bool[${Me.Pet.ID}]}) /next s
+    } else {
+    |accounce time left on charm
+      /for s 1 to ${charmArray2D.Size[1]}
+        /if (${Bool[${Me.PetBuff[${charmArray2D[${s},${iSpellName}]}]}]}) {
+          /varset charmDuration ${Pet.BuffDuration[${charmArray2D[${s},${iSpellName}]}].TotalSeconds}
+          |/echo charmduration ${charmDuration} timer ${charmBuffTimer}
+          /if (${charmDuration} > 60) {
+            /if (!${Bool[${charmBuffTimer}]}) {
+              /bc [+g+] My charm fades in ${charmDuration} sec
+              /varset charmBuffTimer 18s
+            }
+          } else /if (${charmDuration} <= 60 && ${charmDuration} > 9) {
+            /if (!${Bool[${charmBuffTimer}]}) {
+              /bc [+y+] My charm fades in ${charmDuration} sec
+              /varset charmBuffTimer 6s
+            }
+          } else /if (${charmDuration} <= 9) {
+            /if (!${Bool[${charmBuffTimer}]}) {
+              /bc [+r+] My charm fades in ${charmDuration} sec
+              /varset charmBuffTimer 1s
+              }
+          }
+        }
+      /next s
     }
   }
 /if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
@@ -260,6 +293,8 @@ Sub ENC_Setup
   } else {
     /declare doCharm bool outer FALSE
   }
+
+  /declare charmBuffTimer timer outer
 /return
 
 Sub ENC_Background_Events

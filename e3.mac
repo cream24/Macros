@@ -4,7 +4,7 @@
 |--------------------------------|
 
 |default turbo, class specific turbo is loaded in e3_setup call
-#turbo 40
+#turbo 100
 #chat group
 #chat tell
 #include e3 Includes\e3_Setup.inc
