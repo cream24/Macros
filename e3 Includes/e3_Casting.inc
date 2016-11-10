@@ -97,8 +97,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	}
   |- Dont cast while waiting for char to load post-zoning
   /if (${currentZone} != ${Zone.ID}) {
-  |  /echo in zonemismatch
-    /delay 5s
+    /delay 1s
     /varset castReturn CAST_ZONING
     /goto :skipCast
   }
@@ -265,6 +264,8 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/doevents Stop
 				/doevents MoveHere
 				/doevents BackOff
+				/doevents clickit
+				/doevents bark
 				/doevents vetAA_Background_Events
 
         |/varset Debug_Casting FALSE

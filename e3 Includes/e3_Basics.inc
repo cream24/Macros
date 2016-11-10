@@ -363,6 +363,7 @@ SUB EVENT_clickIt(line, ChatSender)
 		/declare debug_clickit bool local FALSE
 		/if (${debug_clickit}) /echo ${ChatSender} ${Zone.ShortName} ${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}
 		/if (${debug_clickit} && ${ChatSender.Equal[${Me.Name}]}) /delay 5s
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 		|**
 		| Move to the person who calls ClickIT
 		/if (${ChatSender.NotEqual[${Me.Name}]} && ${Spawn[pc =${ChatSender}].Distance3D} > 150) {

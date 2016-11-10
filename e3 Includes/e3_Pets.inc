@@ -21,8 +21,8 @@ SUB check_Pets
 SUB summonPet
 /if (${Debug} || ${Debug_Pets}) /echo |- summonPet ==>
   |handle zone delay to prevent summoning pet if one exists
-  /if (!${Bool[${Zone.ID}]} || ${currentZone} != ${Zone.ID}) {
-    /delay 8s
+  /if (!${Bool[${Zone.ID}]} || ${currentZone} != ${Zone.ID} || ${SpawnCount[pc = ${Me}]}==0) {
+    /delay 3s
     /call check_Zone
     /return
   }

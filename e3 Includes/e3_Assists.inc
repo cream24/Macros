@@ -141,6 +141,7 @@ SUB AssistOff
   /if (${Debuff_Targets.Size})    /deletevar Debuff_Targets
   /if (${DoT_Targets.Size})       /deletevar DoT_Targets
 	/if (${Defined[use_QuickBurns]}) /deletevar use_QuickBurns
+  /if (${Defined[use_LongBurns]}) /deletevar use_LongBurns
 	/if (${Defined[use_FullBurns]}) /deletevar use_FullBurns
 
   /if (${Defined[${resistCount}]}) /deletevar ${resistCount}
@@ -469,7 +470,7 @@ SUB check_Nukes
       /goto :skipCast
     }
     |if im burning and /noburn is set, skip the spell
-    /if ((${use_QuickBurns} || ${use_FullBurns}) && ${${ArrayName}[${castIndex},${iNoBurn}]}) {
+    /if ((${use_QuickBurns} || ${use_LongBurns} || ${use_FullBurns}) && ${${ArrayName}[${castIndex},${iNoBurn}]}) {
       /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
       /goto :skipCast
     }
@@ -828,11 +829,6 @@ SUB DoTs_OnCommand
 /if (${Debug} || ${Debug_Assists}) /echo <== DoT_OnCommand -|
 /RETURN
 
-|----------------------------------|
-|- Swap to Ranged for Target AE	  -|
-|----------------------------------|
-
-
 |----------------------------|
 |- Turns AE functions on.	  -|
 |----------------------------|
@@ -892,16 +888,30 @@ SUB Event_TargetAEOn(line, ChatSender)
     /if (!${aemsg}) /docommand ${ChatToggle} Casting Target AE spells...
   }
   | if ranger swap to ranged + bow
-  /if (${Me.Class.ShortName.Equal[RNG]} && ${swapTgtAeRanged}) {
-    /if (${AssistType.NotEqual[Ranged]}) {
-      /varset AssistType Ranged
-      /varset revertRngToMelee TRUE
-      /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${Me.Inventory[Ranged].Name}/Ranged" 1
-      /swap ranged
-      /delay 5
-    }
-  }
+  /if (${Me.Class.ShortName.Equal[RNG]} && ${swapTgtAeRanged}) /call swapToRangedSet TRUE
+
   /if (${Debug} || ${Debug_Assists}) /echo <== Event_TargetAEOn -|
+/RETURN
+
+|----------------------------------|
+|- Swap to Ranged for Target AE	  -|
+|----------------------------------|
+SUB swapToRangedSet(toggleRanged bool)
+  /if (${toggleRanged} && ${AssistType.Equal[ranged]}) {
+    /varset AssistType Ranged
+    /varset revertRngToMelee TRUE
+    /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${Me.Inventory[Ranged].Name}/Ranged" 1
+    /delay 2
+    /swap ranged
+    /delay 2
+  } else {
+    /varset AssistType Melee
+    /varset revertRngToMelee FALSE
+    /swap melee
+    /delay 2
+    /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "NONE"
+    /delay 2
+  }
 /RETURN
 
 |--------------------------------|
@@ -961,16 +971,7 @@ SUB Event_TargetAEOff(line, ChatSender)
       /varset use_TargetAE FALSE
       /if (${Defined[aeTarget]}) /deletevar aeTarget
       /if (!${aemsg}) /docommand ${ChatToggle} Ending Target AE.
-
-      | if swapped to range for ae, revert
-      /if (${revertRngToMelee}) {
-          /varset AssistType Melee
-          /varset revertRngToMelee FALSE
-          /swap melee
-          /delay 2
-          /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "NONE"
-          /delay 2
-      }
+      /if (${revertRngToMelee}) /call swapToRangedSet FALSE
     }
   }
   /if (${Debug} || ${Debug_Assists}) /echo <== Event_TargetAEOff -|
