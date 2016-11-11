@@ -112,10 +112,7 @@ SUB buffPet
 	/for s 1 to ${petBuffs2D.Size[1]}
 	|/echo ${petBuffs2D[${s},${iCastName}]} stack ${petBuffs2D[${s},${iSpellName}]} ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} has !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}
 	|removing ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} for now as balikor's mark reports non-stacking
-	|hack fix for beast stacking issue
-  /if (${Bool[${Me.Song[Empathic Fury]}]} && ${buffSpellName.Equal[Growl of the Panther]}) /goto :skipBuff
-  
-  /if (!${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}) {
+  /if (!${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iCheckFor}]}]}]}) {
     /call check_Ready "petBuffs2D" ${s}
     /if (${Macro.Return}) {
       /if (${Me.Pet.Distance} < ${petBuffs2D[${s},${iMyRange}]}) {
