@@ -441,6 +441,7 @@ Sub background_Aliases
 	/noparse /squelch /alias /AddAutoDestroy /echo Add Auto-Destro item ${Cursor.Name}
 	/noparse /squelch /alias /RemoveAutoDestroy /echo Remove Auto-Destro item ${Cursor.Name}
 	/squelch /alias /tributezone /bc Set Tribute Zone
+	/noparse /squelch /alias /reporttrib /noparse /bcaa //gu ${Me.CurrentFavor}
 /return
 
 |----------------------------------------------------------------------------------------------------|

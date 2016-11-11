@@ -896,8 +896,9 @@ SUB Event_TargetAEOn(line, ChatSender)
 |----------------------------------|
 |- Swap to Ranged for Target AE	  -|
 |----------------------------------|
-SUB swapToRangedSet(toggleRanged bool)
-  /if (${toggleRanged} && ${AssistType.Equal[ranged]}) {
+SUB swapToRangedSet(bool toggleRanged)
+/echo ${toggleRanged} toggleRanged
+  /if (${toggleRanged} && ${AssistType.Equal[melee]}) {
     /varset AssistType Ranged
     /varset revertRngToMelee TRUE
     /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${Me.Inventory[Ranged].Name}/Ranged" 1
