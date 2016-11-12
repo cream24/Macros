@@ -226,7 +226,7 @@ Sub BuildCorpseList
   /declare p int local 1
   /declare cID int local
   /declare CorpseList[100] int local 0
-  /if (${Defined[${CorpseListPriority}]}) /deletevar CorpseListPriority
+  /if (${Defined[CorpseListPriority]}) /deletevar CorpseListPriority
   /declare CorpseListPriority[100] int outer 0
   /varset CorpseListSize 0
   /if (!${SpawnCount[pccorpse radius 100]}) /return
