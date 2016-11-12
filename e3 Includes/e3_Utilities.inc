@@ -851,6 +851,8 @@ SUB ClearCursor
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sub SwapItem(itemName,slotName)
+  /if (!${Bool[${itemName}]} || !${Bool[${slotName}]}) /return
+
   /if (${Cursor.ID}) /call ClearCursor
 	|if the item is in a bag rather than top level inventory slot, open the bag prior to exchange
 	/if (${Me.Inventory[${FindItem[=${itemName}].ItemSlot}].Container}) {

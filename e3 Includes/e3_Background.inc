@@ -202,6 +202,9 @@ SUB completePendingExchange
 	| Check for the item needing to be swapped back.
 	/declare itemToSwapBack string local ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[1,/]}
   /declare swapItemSlot ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[2,/]}
+  |/echo ${itemToSwapBack} ${itemToSwapBack.Length}  ${swapItemSlot} ${swapItemSlot.Length}
+  /if (!${Bool[${itemToSwapBack}]} || !${Bool[${swapItemSlot}]}) /return
+
   /if (${Me.Inventory[${swapItemSlot}].Name.Equal[${itemToSwapBack}]})  {
     /if (${itemToSwapBack.NotEqual[NONE]}) /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" NONE 1
   } else /if (!${FindItemCount[${itemToSwapBack}]}) {
