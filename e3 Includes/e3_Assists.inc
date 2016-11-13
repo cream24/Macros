@@ -542,7 +542,6 @@ SUB check_DoTs
 |----------------------------------------------------|
 SUB cast_longTermSpells(int spellTarget, string ArrayName)
   /if (${Debug} || ${Debug_Assists}) /echo |- cast_longTermSpells - [${ArrayName}] ==>
-
   /declare spellTimer string local
   /declare spellRecast int local 0
   /declare i int local
@@ -609,7 +608,9 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
       | If the cast was successful.
       } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${i},${iSpellName}]}]} && ${castReturn.Equal[CAST_SUCCESS]}) {
         /if (${Defined[${resistCount}]}) /deletevar ${resistCount}
+        |if i dont have spell awarenes use default buff duration
         /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000
+        /if (${spellRecast}==0) /varcalc spellRecast ${${ArrayName}[${i},${iDuration}]}*6
         |/echo ${Target.Name}  ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]} ${spellRecast}
         |/echo ******** spellRecast ${spellRecast} ***********
         |duration over 90 seconds is considered long term
