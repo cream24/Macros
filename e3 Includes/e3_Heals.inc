@@ -323,7 +323,7 @@ SUB hot_Allbots
 			/if (${Bool[${NetBots[${currClient}].InZone}]} && ${NetBots[${currClient}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
 				/call check_HotAllStack "${currClient}"
 				/if (${Macro.Return}) {						
-					/call check_Ready"hotSpells2D" ${s}
+					/call check_Ready "hotSpells2D" ${s}
 					|/echo check_Ready ${Macro.Return}
 					/if (${Macro.Return}) {
 						/call check_Distance ${NetBots[${currClient}].ID} ${hotSpells2D[${s},${iMyRange}]}
