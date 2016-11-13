@@ -542,6 +542,7 @@ SUB check_DoTs
 |----------------------------------------------------|
 SUB cast_longTermSpells(int spellTarget, string ArrayName)
   /if (${Debug} || ${Debug_Assists}) /echo |- cast_longTermSpells - [${ArrayName}] ==>
+|/varset Debug_Assists TRUE
   /declare spellTimer string local
   /declare spellRecast int local 0
   /declare i int local
@@ -552,22 +553,23 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
 		/varset resistCount resist__${spellTarget}_${ArrayName}-${i}
     |/echo st ${spellTimer} ${${spellTimer}} ${Bool[${${spellTimer}}]}
 
-    |check if the target is already debuffed, and if the duration is longer than the recast time
-    /if (${spellTarget} != ${Target.ID}) {
-      /call TrueTarget ${spellTarget}
-      /delay 1
-    }
-    |/echo ${Target.Name} ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} dru ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}
-    /if (!${Bool[${${spellTimer}}]} && ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} && ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
-      /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 - ${longTermRecastTime}
-      /call createTimer "${spellTimer}" "${spellRecast}s"
-      /echo \ag ${Target.CleanName} already debuffed ${${ArrayName}[${i},${iSpellName}]} ${spellRecast}
-    }
-
 		/if (${${spellTimer}}) {
-		   | /echo has spelltimer
         /if (${Debug} || ${Debug_Assists}) /echo |- cast_longTermSpells - [${ArrayName}] -|	Waiting to recast ${${ArrayName}[${i},${iCastName}]}.
     } else {
+
+      |check if the target is already debuffed, and if the duration is longer than the recast time
+      /if (${spellTarget} != ${Target.ID}) {
+        /call TrueTarget ${spellTarget}
+        /delay 1
+      }
+      |/echo ${Target.Name} ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} dru ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}
+      /if (!${Bool[${${spellTimer}}]} && ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} && ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
+        /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 - ${longTermRecastTime}
+        /call createTimer "${spellTimer}" "${spellRecast}s"
+        /echo \ag ${Target.CleanName} already debuffed ${${ArrayName}[${i},${iSpellName}]} ${spellRecast}
+        /goto :skipCast
+      }
+
       :attemptCast
       | cast the spell
       /call check_Ready "${ArrayName}" ${i}
@@ -626,6 +628,7 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
     }
   /if (!${ActionTaken}) /next i
  :skipCast
+|/varset Debug_Assists FALSE
 /if (${Debug} || ${Debug_Assists}) /echo <== cast_longTermSpells - [${arrayName}] -|
 /RETURN
 
