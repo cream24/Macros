@@ -32,7 +32,56 @@ SUB alerts_Background_Events
   /doevents MobSet
   /doevents InktutaDeathtouch
   /doevents GotExp
+  /doevents swapNoBlunt
+	/doevents swapNoSlash
+	/doevents swapNoPierce
+	/doevents swapNoH2H
 /RETURN
+
+#event swapNoPierce "#*#You are affected by imprecision#*#"
+|no fire
+SUB event_swapNoPierce
+  /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
+    /echo swap NotPierce
+  } else /if (${Select[${Me.Class.ShortName},WIZ,MAG]}) {
+    /if (${Me.Casting.ID}) /call interrupt
+    /assistoff /only|me
+  } else /if (${Select[${Me.Class.ShortName},ENC]}) {
+    /assistoff /only|me
+}
+/return
+
+#event swapNoBlunt "#*#Your movements become rigid#*#"
+|no cold
+SUB event_swapNoBlunt
+  /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
+    /echo swap NotBlunt
+  } else /if (${Select[${Me.Class.ShortName},WIZ,MAG,ENC]}) {
+    /assiston /only|me
+  }
+/return
+
+#event swapNoSlash "#*#You feel very unlucky#*#"
+|no magic
+SUB event_swapNoSlash
+  /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
+    /echo swap NotSlash
+  } else /if (${Select[${Me.Class.ShortName},ENC,WIZ]}) {
+    /if (${Me.Casting.ID}) /call interrupt
+    /assistoff /only|me
+  }
+/return
+
+#event swapNoH2H "#*#You lose your coordination#*#"
+|no poison/disease
+SUB event_swapNoH2H
+  /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
+    /echo swap NotH2H
+  } else /if (${Select[${Me.Class.ShortName},WIZ,MAG,ENC]}) {
+    /assiston /only|me
+  }
+/return
+
 
 #event tactics_stampede "#*#You hear the pounding of hooves#*#"
 Sub event_tactics_stampede
@@ -42,14 +91,10 @@ Sub event_tactics_stampede
 	}
 /return
 
-
-
 #event charFlag "You receive a character flag#*#"
 Sub event_charFlag
 	/bc I have recieved a character flag!
 /return
-
-
 
 #event Define_UquaKey "#*#The #1# must unlock the door to the next room.#*#"
 SUB event_Define_UquaKey(string line, string KeyToUse)
