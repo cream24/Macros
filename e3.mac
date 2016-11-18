@@ -1,6 +1,7 @@
 |--------------------------------|
-|- e3.mac	v5.1				-|
+|- e3.mac	v6.0				-|
 |- Written by Killians of PEQ.	-|
+|- Rework  by Creamo of PEQ.	-|
 |--------------------------------|
 
 |default turbo, class specific turbo is loaded in e3_setup call

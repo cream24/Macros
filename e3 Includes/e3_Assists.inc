@@ -295,7 +295,9 @@ SUB CombatAbilities
     |- AA, only those with 0 cast time can go here
   } else /if (${Me.AltAbility[${abilityName}]}) {
     /if (${Me.AltAbilityReady[${abilityName}]}) {
+      /delay 1
       /casting "${abilityName}" alt
+      /delay 1
       |/echo casting ${abilityName}
     }
     |- Discipline, no disc with a duration can go here
