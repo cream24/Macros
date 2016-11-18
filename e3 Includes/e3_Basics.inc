@@ -265,35 +265,31 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 		}
 		/declare barkTarget string outer ${Spawn[id ${msgTarget}].CleanName}
 		/declare barkReturned bool outer FALSE
-		/declare retryTimer timer local 20s
+		/declare retryTimer timer local 30s
 		/declare startingLoc string local
 		
 		/if (${Stick.Active}) /squelch /stick off
 		/if (${NetAdvPath.Status}==1) /squelch /netfollow off
 		/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 
+    /call TrueTarget ${msgTarget}
+    /doevents flush barkReturn
+
 		:retry_Bark
+		|/echo barking ${barkMsg} at ${barkTarget}
     /if (${Me.Invis}) /makemevisible
 
-		/if (${Debug} && !${spamTimer_retryBark}) {
-			/echo |- EVENT_bark -| :retry_Bark loop
-			/call createTimer spamTimer_retryBark 20
-		}
-		
-		| -Target the msgTarget
-		/call TrueTarget ${msgTarget}
 		/if (${Target.Distance} > 10) {
 			/call MoveTo -Loc|${Target.Y},${Target.X}
+			/delay 3
 			/if (${retryTimer}) {
 				/goto :retry_Bark
 			} else {
 				/echo |- EVENT_Bark -| Failed to move to the intended target.
 			}
 		} else {
-		
 			| -Wait a moment, then bark the message.
-			/delay ${Math.Rand[15]}
-			
+			/delay ${Math.Rand[10]}
 			/varset startingLoc ${Me.Loc.Replace[ ,]}
 			
 			| -Reset barkMsg
@@ -304,8 +300,8 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 			
 			/say ${barkMsg}
 			
-			| -Wait up to 3 seconds for something to happen.
-			/delay 3s ${Zone.ID} != ${currentZone} || ${Me.Loc.Replace[ ,].NotEqual[${startingLoc}]} || ${Window[ConfirmationDialogBox].Open} || ${Window[LargeDialogWindow].Open}
+			| -Wait up to 2 seconds for something to happen.
+			/delay 2s ${Zone.ID} != ${currentZone} || ${Me.Loc.Replace[ ,].NotEqual[${startingLoc}]} || ${Window[ConfirmationDialogBox].Open} || ${Window[LargeDialogWindow].Open}
 
 			| -Click Yes to a confirmation box.
 			/if (${Window[ConfirmationDialogBox].Open}) {
@@ -320,6 +316,8 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 			/call Triangulate_Distance ${Me.Loc.Replace[ ,]} ${startingLoc}
 			
 			/doevents barkReturn
+
+			|/echo dist ${Macro.Return} barkret ${barkReturned} timer ${retryTimer}
 
 			/if (${Zone.ID} == ${currentZone} && ${Macro.Return} < 50 && !${barkReturned}) {
 				/if (${retryTimer}) {
@@ -342,10 +340,11 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 |- @param line: '|BarkTarget| says, 'Something''			      -|
 |- @param returnBark: What the NPC replied.					        -|
 |------------------------------------------------------------|
-#EVENT barkReturn "|${barkTarget}| #*#"
+#EVENT barkReturn "${barkTarget} #1#"
 SUB EVENT_barkReturn(line, returnBark)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_barkReturn ==>
 	/varset barkReturned TRUE
+	/echo returnBark ${returnBark}
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_barkReturn -|
 /RETURN
 
@@ -354,6 +353,8 @@ SUB EVENT_barkReturn(line, returnBark)
 |- @param ChatSender: The command sender.									                  -|
 |----------------------------------------------------------------------------|
 #EVENT clickIt "<#1#> Click It#*#"
+#EVENT clickIt "#1# tells the group, 'Click It'"
+#EVENT clickIt "#1# you tell your party, 'Click It'"
 SUB EVENT_clickIt(line, ChatSender)
 	| -Verify the event
   /call verifyEvent "${ChatSender}" "${line}"
