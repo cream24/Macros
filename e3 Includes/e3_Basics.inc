@@ -275,6 +275,15 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
     /call TrueTarget ${msgTarget}
     /doevents flush barkReturn
 
+    /if (${Me.Class.ShortName.Equal[ROG]}) {
+      /target clear
+      /delay 2
+      /attack on
+      /delay 1
+      /attack off
+      /delay 1
+    }
+    /call TrueTarget ${msgTarget}
 		:retry_Bark
 		|/echo barking ${barkMsg} at ${barkTarget}
     /if (${Me.Invis}) /makemevisible
