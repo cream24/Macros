@@ -157,7 +157,7 @@ Sub cure_spellArrays
     /call BuildSpellArray "rCure" "rCure2D"
   } else {
     /if (${Debug}) /echo I do not have Radiant Cure
-    /varset autoRCure FALSE
+    /if (${Defined[autoRCure]}) /varset autoRCure FALSE
   }
 /RETURN
 

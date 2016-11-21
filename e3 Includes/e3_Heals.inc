@@ -518,7 +518,7 @@ SUB check_HealGroupCasting(ArrayName, int ArrayIndex)
 		/if (${Macro.Return}) {
 			/varcalc targetCount ${targetCount} + 1
 			/varcalc avgGrpHealth ${avgGrpHealth} + ${NetBots[${Group.Member[${g}]}].PctHPs}
-			/if (${NetBots[${Group.Member[${g}]}].ID} && ${NetBots[${Group.Member[${g}]}].PctHPs}  <= ${${ArrayName}[${ArrayIndex},${iHealPct}]}) /varcalc numLowHp ${numLowHp} + 1
+			/if (${Bool[${NetBots[${Group.Member[${g}]}].ID}]} && ${NetBots[${Group.Member[${g}]}].PctHPs}  <= ${${ArrayName}[${ArrayIndex},${iHealPct}]}) /varcalc numLowHp ${numLowHp} + 1
 		}
 	|/echo ${NetBots[${Group.Member[${g}]}].PctHPs} ${${ArrayName}[${ArrayIndex},${iHealPct}]}
 	/next g

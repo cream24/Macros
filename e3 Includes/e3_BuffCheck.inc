@@ -90,6 +90,10 @@ SUB buffBots(ArrayName)
             /call check_Ready "${ArrayName}" ${s}
             /if (${Macro.Return}) {
 					    /call e3_Cast ${buffTargetID} "${ArrayName}" ${s}
+					    /delay 3 ${Target.BuffsPopulated}
+              /if (${castReturn.Equal[CAST_SUCCESS]} && !${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffSpellID} ]}]}) {
+                /call CreateTimer "nht${Target.ID}-${buffSpellID}" "${noHoldDelay}"
+              }
             }
 				  } else /if (${Debug} || ${Debug_BuffCheck}) /echo ~Bot is not in group for groupbuff~		
 				} else /if (${Debug} || ${Debug_BuffCheck}) /echo ~Bot has checkFoR buff~

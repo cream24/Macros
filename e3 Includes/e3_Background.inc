@@ -13,7 +13,6 @@ SUB check_Zone
 /if (${Debug} || ${Debug_Background}) /echo |- check_Zone ==>
 	| Set current zone ID
 	/varset currentZone ${Zone.ID}
-
 	| If im not wearing chest(dead) and not waiting for rez, wait for rez
 	|	/if (!${Bool[${InvSlot[chest].Item}]} && !${Waiting4Rez} && ${Me.Level}>=50) {
 	|		/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
@@ -22,7 +21,7 @@ SUB check_Zone
 	| Update macro timers
 	/varset idleTimer ${idleInterval}m
 	| Turn off assist / attack
-	/if (${Assisting} || ${Me.Combat} || ${NetBots[${Me}].CombatState}==0) /call AssistOff
+	/call AssistOff
 	| Load Spellset
 	/if (${Me.Class.CanCast} && ${Defined[Default_SpellSet]}) /call check_Gems
 	| Reset ignored spell list

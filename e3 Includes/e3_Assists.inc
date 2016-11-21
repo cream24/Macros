@@ -1083,9 +1083,16 @@ SUB check_Burns
 |----------------------------------------------------|
 |- Engages EpicBurns 								                -|
 |----------------------------------------------------|
-#event EpicBurn "<#1#> Epic Burn"
+#EVENT EpicBurn "<#1#> Epic Burn"
+#EVENT EpicBurn "#1# tells you, 'Epic Burn'"
+#EVENT EpicBurn "#1# tells the group, 'Epic Burn'"
+#EVENT EpicBurn "#1# you tell your party, 'Epic Burn'"
 SUB event_EpicBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_EpicBurn ==>
+  /call verifyEvent "${ChatSender}" "${line}"
+  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+      |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		/if (${Defined[EpicName]}) {
 			| -Verify the event
 			/call verifyEvent "${ChatSender}" "${line}"
@@ -1096,81 +1103,106 @@ SUB event_EpicBurn(line, ChatSender)
         /casting ${EpicName} item -maxtries|3
 			}
 		}
+  }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_EpicBurn -|
 /RETURN
 
 |----------------------------------------------------|
 |- Engages QuickBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
-#event QuickBurn "<#1#> Quick Burn"
+#EVENT QuickBurn "<#1#> Quick Burn"
+#EVENT QuickBurn "#1# tells you, 'Quick Burn'"
+#EVENT QuickBurn "#1# tells the group, 'Quick Burn'"
+#EVENT QuickBurn "#1# you tell your party, 'Quick Burn'"
 SUB event_QuickBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_QuickBurn ==>
-	| Check Assisting
-	/if (!${Assisting}) {
-		/echo You must be attacking something to burn.
-	} else {
-		| Check for quickburns to cast
-		/if (${Defined[QuickBurns2D]}) {
-      | -Verify the event
-			/call verifyEvent "${ChatSender}" "${line}"
-			/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-			|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
-			/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-				/docommand ${ChatToggle} Using Quick Burns...
-				/if (!${Defined[use_QuickBurns]}) /declare use_QuickBurns bool outer TRUE
-			}
-		}
-	}
+  /call verifyEvent "${ChatSender}" "${line}"
+  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+      |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+    | Check Assisting
+    /if (!${Assisting}) {
+      /echo You must be attacking something to burn.
+    } else {
+      | Check for quickburns to cast
+      /if (${Defined[QuickBurns2D]}) {
+        | -Verify the event
+        /call verifyEvent "${ChatSender}" "${line}"
+        /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+        |    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+        /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+          /docommand ${ChatToggle} Using Quick Burns...
+          /if (!${Defined[use_QuickBurns]}) /declare use_QuickBurns bool outer TRUE
+        }
+      }
+    }
+  }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_QuickBurn -|
 /RETURN
 
 |----------------------------------------------------|
 |- Engages LongBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
-#event LongBurn "<#1#> Long Burn"
+#EVENT LongBurn "<#1#> Long Burn"
+#EVENT LongBurn "#1# tells you, 'Long Burn'"
+#EVENT LongBurn "#1# tells the group, 'Long Burn'"
+#EVENT LongBurn "#1# you tell your party, 'Long Burn'"
 SUB event_LongBurn(line, ChatSender)
-  /if (${Debug} || ${Debug_Assists}) /echo |- event_LongBurn ==>
-| Check Assisting
-  /if (!${Assisting}) {
-    /echo You must be attacking something to burn.
-  } else {
-    | Check for longburns to cast
-    /if (${Defined[LongBurns2D]}) {
-      | -Verify the event
-      /call verifyEvent "${ChatSender}" "${line}"
-      /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-      |    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
-      /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-        /docommand ${ChatToggle} Using Long Burns...
-        /if (!${Defined[use_LongBurns]}) /declare use_LongBurns bool outer TRUE
+/if (${Debug} || ${Debug_Assists}) /echo |- event_LongBurn ==>
+  /call verifyEvent "${ChatSender}" "${line}"
+  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+        |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+  | Check Assisting
+    /if (!${Assisting}) {
+      /echo You must be attacking something to burn.
+    } else {
+      | Check for longburns to cast
+      /if (${Defined[LongBurns2D]}) {
+        | -Verify the event
+        /call verifyEvent "${ChatSender}" "${line}"
+        /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+        |    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+        /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+          /docommand ${ChatToggle} Using Long Burns...
+          /if (!${Defined[use_LongBurns]}) /declare use_LongBurns bool outer TRUE
+        }
       }
     }
   }
-  /if (${Debug} || ${Debug_Assists}) /echo <== event_LongBurn -|
+/if (${Debug} || ${Debug_Assists}) /echo <== event_LongBurn -|
 /RETURN
 
 |----------------------------------------------------|
 |- Engages FullBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
-#event FullBurn "<#1#> Full Burn"
+#EVENT FullBurn "<#1#> Full Burn"
+#EVENT FullBurn "#1# tells you, 'Full Burn'"
+#EVENT FullBurn "#1# tells the group, 'Full Burn'"
+#EVENT FullBurn "#1# you tell your party, 'Full Burn'"
 SUB event_FullBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_FullBurn ==>
+  /call verifyEvent "${ChatSender}" "${line}"
+  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+       |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 	| Check Assisting
-	/if (!${Assisting}) {
-		/echo You must be attacking something to burn.
-	} else {
-		| Check for FullBurns to cast
-		/if (${Defined[FullBurns2D]}) {
-			| -Verify the event
-			/call verifyEvent "${ChatSender}" "${line}"
-			/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-			|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
-			/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-				/docommand ${ChatToggle} Using Full Burns...
-				/if (!${Defined[use_FullBurns]}) /declare use_FullBurns bool outer TRUE
-			}
-		}
-	}
+    /if (!${Assisting}) {
+      /echo You must be attacking something to burn.
+    } else {
+      | Check for FullBurns to cast
+      /if (${Defined[FullBurns2D]}) {
+        | -Verify the event
+        /call verifyEvent "${ChatSender}" "${line}"
+        /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+        |    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+        /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+          /docommand ${ChatToggle} Using Full Burns...
+          /if (!${Defined[use_FullBurns]}) /declare use_FullBurns bool outer TRUE
+        }
+      }
+    }
+  }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_FullBurn -|
 /RETURN
 
@@ -1269,8 +1301,8 @@ Sub assist_Setup
 | Epic Definitions for EpicBurn - warr, shd, pal,
 /if (${FindItemCount["Prismatic Dragon Blade"]})                /declare EpicName string outer "Prismatic Dragon Blade"
 /if (${FindItemCount["Blade of Vesagran"]})                     /declare EpicName string outer "Blade of Vesagran"
-/if (${FindItemCount["Savage Lord's Totem"]})                   /declare EpicName string outer "Savage Lord's Totem"
-/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
+|/if (${FindItemCount["Savage Lord's Totem"]})                   /declare EpicName string outer "Savage Lord's Totem"
+|/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
 /if (${FindItemCount["Raging Taelosian Alloy Axe"]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
 /if (${FindItemCount["Vengeful Taelosian Blood Axe"]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
 /if (${FindItemCount["Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"

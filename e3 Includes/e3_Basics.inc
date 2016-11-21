@@ -1075,8 +1075,7 @@ SUB check_MedBreak
 /if (${Debug} || ${Debug_Basics}) /echo <== check_MedBreak -|
 /RETURN
 
-
-
+|--------------------------------------------------------------------------------|
 #EVENT set_AAXP "<#1#> Set AA XP #2#"
 #EVENT set_AAXP "[#1#] Set AA XP #2#"
 SUB EVENT_set_AAXP(line, ChatSender, eventParams)
@@ -1098,8 +1097,7 @@ SUB EVENT_set_AAXP(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo <== set_AAXP -|
 /RETURN
 
-
-
+|--------------------------------------------------------------------------------|
 #EVENT fixCorpses "<#*#> Fix Corpses"
 SUB EVENT_fixCorpses
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_fixCorpses ==>
@@ -1114,8 +1112,6 @@ SUB EVENT_fixCorpses
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_fixCorpses -|
 /RETURN
 
-
-
 |----------------------------------------|
 |- Consents a PC to drag your corpse.	-|
 |----------------------------------------|
@@ -1123,7 +1119,6 @@ SUB EVENT_fixCorpses
 #event Consent "<#1#> Consent #2#"
 SUB Event_Consent(line, ChatSender, ConsentTarget)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Consent ==>
-
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
@@ -1135,11 +1130,8 @@ SUB Event_Consent(line, ChatSender, ConsentTarget)
 			/consent ${ConsentTarget}
 		}
 	}
-
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Consent -|
 /RETURN
-
-
 
 |--------------------------------------------------------------------------------------------|
 |- Adds a PC name to your list of consentTargets.  This is used is corpse drag functions.	-|
@@ -1155,8 +1147,6 @@ SUB event_addConsent(line, consentTarget)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_addConsent -|
 /RETURN
 
-
-
 |--------------------------------------------------------------------------------|
 |- Clears your list of PCs who have consented to have you move their corpse.	-|
 |--------------------------------------------------------------------------------|
@@ -1167,27 +1157,24 @@ SUB event_flushConsent
 	/if (${Defined[consentTargets]}) /varset consentTargets ${Me.CleanName}
 /RETURN
 
-
-
+|--------------------------------------------------------------------------------|
 #event gatherCorpses "[MQ2] Gather corpses"
 #event gatherCorpses "[MQ2] Gather corpse"
 SUB event_gatherCorpses
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_gatherCorpses ==>
-  /hidecor npc
+  /bc Consent ${Me.CleanName}
 	/declare i int local
 	/for i 1 to ${SpawnCount['s radius 100]}
-		/if (${Select[${Spawn[${NearestSpawn[${i},'s radius 100]}].CleanName.Arg[1,']},${consentTargets}]}) {
-			/call TrueTarget ${Spawn[${NearestSpawn[${i},'s radius 100]}].ID}
-			/delay 3
+		/if (${Select[${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].CleanName.Arg[1,']},${consentTargets}]}) {
+			/call TrueTarget ${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].ID}
+			/delay 2
 			/corpse
 			/delay 10 ${Target.Distance} < 20
 		}
 	/next i
 	/squelch /target clear
-	/hidecor looted
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_gatherCorpses -|
 /RETURN
-
 
 |-------------------------------
 |- All bots click yes or no to confirmation boxes.

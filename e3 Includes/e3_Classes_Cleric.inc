@@ -134,6 +134,9 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
 
         /call defineRezSpell
         /call TrueTarget ${corpseID}
+        /delay 1
+        /tell ${playerName} Wait4Rez
+        /delay 2
         /call check_CorpseRezzable
         |/echo ${playerName} cid${corpseID} canrez${canRez} dist${Target.Distance}
 
@@ -141,12 +144,12 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
           /echo ${Target.Name} is not eligible for rez
           /next i
         } else {
-          /tell ${playerName} Wait4Rez
-          /if (${Target.Distance} > 35 && ${Target.Distance} < 100) {
+          |/tell ${playerName} Wait4Rez
+          /if (${Target.Distance} > 15 && ${Target.Distance} < 100) {
             /corpse
-            /delay 4
+            /delay 2
             /corpse
-            /delay 4
+            /delay 2
             /if (${Target.Distance} > 35) {
               /tell ${playerName} skipping rez, corpse drag failed: ${Target.Distance} distance
               /goto :skipRez
@@ -154,7 +157,7 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
           }
           |check if anyone else has rezd the corpse this iteration
           /doevents check_otherRezzing
-          /delay 1s
+          /delay 2
           |/echo or${otherRezzing} cid${corpseID}-
           /if (${Select[${otherRezzing},${corpseID}-]}) {
             /echo Someone is already rezzing ${playerName} ${corpseID}
@@ -192,6 +195,10 @@ Sub Event_CorpseExpired(line, corpseExpired)
 /return !${corpseExpired.Equal[cannot]}
 
 |----------------------------------------------------------------------------|
+#event NotOnline "#*# is not online at this time."
+Sub Event_NotOnline(line)
+/RETURN FALSE
+|----------------------------------------------------------------------------|
 #event check_otherRezzing "<#1#> Resurrecting-#2#"
 SUB event_check_otherRezzing(line, ChatSender,corpseID)
   /if (${Me.Name.NotEqual[${ChatSender}]}) /varset otherRezzing ${otherRezzing}${corpseID}-
@@ -203,6 +210,8 @@ Sub check_CorpseRezzable
   /declare conTimer timer local 5s
   /declare returnResult bool local FALSE
   /declare corpseOwner string local
+  /doevents NotOnline
+  /if (!${Macro.Return}) /return FALSE
   /consider
   :waitForExpired
   /doevents CorpseExpired
