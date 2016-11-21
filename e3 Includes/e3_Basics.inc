@@ -20,12 +20,12 @@
 #EVENT Follow "<#1#> Follow"
 #EVENT Follow "#1# tells you, 'Follow'"
 #EVENT Follow "#1# tells the group, 'Follow'"
-#EVENT Follow "#1# you tell your party, 'Follow'"
+#EVENT Follow "#1# tell your party, 'Follow'"
 #EVENT Follow "[#1#] Follow #2#"
 #EVENT Follow "<#1#> Follow #2#"
 #EVENT Follow "#1# tells you, 'Follow #2#'"
 #EVENT Follow "#1# tells the group, 'Follow #2#'"
-#EVENT Follow "#1# you tell your party, 'Follow #2#'"
+#EVENT Follow "#1# tell your party, 'Follow #2#'"
 SUB EVENT_Follow(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Follow ==>
 
@@ -241,7 +241,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
 |--------------------------------------------------------------------------------------------------------|
 #EVENT bark "<#1#> Bark at #2# #3#"
 #EVENT bark "#1# tells the group, 'Bark at #2# #3#'"
-#EVENT bark "#1# you tell your party, 'Bark at #2# #3#'"
+#EVENT bark "#1# tell your party, 'Bark at #2# #3#'"
 SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Bark ==>
 	| -Verify the event
@@ -363,7 +363,7 @@ SUB EVENT_barkReturn(line, returnBark)
 |----------------------------------------------------------------------------|
 #EVENT clickIt "<#1#> Click It#*#"
 #EVENT clickIt "#1# tells the group, 'Click It'"
-#EVENT clickIt "#1# you tell your party, 'Click It'"
+#EVENT clickIt "#1# tell your party, 'Click It'"
 SUB EVENT_clickIt(line, ChatSender)
 	| -Verify the event
   /call verifyEvent "${ChatSender}" "${line}"
@@ -462,7 +462,7 @@ SUB EVENT_clickIt(line, ChatSender)
 |----------------------------------------------------------------------------|
 #EVENT oldclickIt "<#1#> OldClickIt #2#"
 #EVENT oldclickIt "#1# tells the group, 'OldClickIt #2#'"
-#EVENT oldclickIt "#1# you tell your party, 'OldClickIt #2#'"
+#EVENT oldclickIt "#1# tell your party, 'OldClickIt #2#'"
 SUB EVENT_oldclickIt(line, ChatSender, locToStart)
   /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_clickIt ==>
 | -Verify the event
@@ -548,7 +548,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
 |----------------------------------------------------------------------------|
 #EVENT runThruZone "<#1#> Run through zone at #2#"
 #EVENT runThruZone "#1# tells the group, 'Run through zone at #2#'"
-#EVENT runThruZone "#1# you tell your party, 'Run through zone at #2#'"
+#EVENT runThruZone "#1# tell your party, 'Run through zone at #2#'"
 SUB EVENT_runThruZone(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_runThruZone ==>
 
@@ -1213,7 +1213,7 @@ SUB EVENT_ClickYes(line, ChatSender, eventParams)
 |--------------------------------------------------------|
 #EVENT gate	"<#1#> Gate"
 #EVENT gate "#1# tells you, 'Gate'"
-#EVENT gate "#1# you tell your party, 'Gate'"
+#EVENT gate "#1# tell your party, 'Gate'"
 #EVENT gate "#1# tells the group, 'Gate'"
 SUB EVENT_gate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Gate ==>
@@ -1254,21 +1254,21 @@ SUB EVENT_gate(line, ChatSender)
 #EVENT Evacuate "[#1#] Evac"
 #EVENT Evacuate	"<#1#> Evac"
 #EVENT Evacuate "#1# tells you, 'Evac'"
-#EVENT Evacuate "#1# you tell your party, 'Evac'"
+#EVENT Evacuate "#1# tell your party, 'Evac'"
 #EVENT Evacuate "#1# tells the group, 'Evac'"
 #EVENT Evacuate "[#1#] Evacuate"
 #EVENT Evacuate	"<#1#> Evacuate"
 #EVENT Evacuate "#1# tells you, 'Evacuate'"
-#EVENT Evacuate "#1# you tell your party, 'Evacuate'"
+#EVENT Evacuate "#1# tell your party, 'Evacuate'"
 #EVENT Evacuate "#1# tells the group, 'Evacuate'"
 
 #EVENT Evacuate	"<#1#> Evac |/|#*#"
 #EVENT Evacuate "#1# tells you, 'Evac |/|#*#'"
-#EVENT Evacuate "#1# you tell your party, 'Evac |/|#*#'"
+#EVENT Evacuate "#1# tell your party, 'Evac |/|#*#'"
 #EVENT Evacuate "#1# tells the group, 'Evac |/|#*#'"
 #EVENT Evacuate	"<#1#> Evacuate |/|#*#"
 #EVENT Evacuate "#1# tells you, 'Evacuate |/|#*#'"
-#EVENT Evacuate "#1# you tell your party, 'Evacuate |/|#*#'"
+#EVENT Evacuate "#1# tell your party, 'Evacuate |/|#*#'"
 #EVENT Evacuate "#1# tells the group, 'Evacuate |/|#*#'"
 SUB EVENT_Evacuate(line, ChatSender)
 /if (${Select[${Me.Class.ShortName},DRU,WIZ]}) {

@@ -5,7 +5,7 @@
 #EVENT Lessons "<#1#> Lesson of the Devoted"
 #EVENT Lessons "#1# tells you, 'Lesson of the Devoted'"
 #EVENT Lessons "#1# tells the group, 'Lesson of the Devoted'"
-#EVENT Lessons "#1# you tell your party, 'Lesson of the Devoted'"
+#EVENT Lessons "#1# tell your party, 'Lesson of the Devoted'"
 SUB EVENT_Lessons(line, ChatSender)
 /if (${Debug}) /echo |- EVENT_Lessons ==>
 	| -Verify the event
@@ -43,7 +43,7 @@ SUB EVENT_Lessons(line, ChatSender)
 #EVENT Infusion "<#1#> Infusion of the Faithful"
 #EVENT Infusion "#1# tells you, 'Infusion of the Faithful'"
 #EVENT Infusion "#1# tells the group, 'Infusion of the Faithful'"
-#EVENT Infusion "#1# you tell your party, 'Infusion of the Faithful'"
+#EVENT Infusion "#1# tell your party, 'Infusion of the Faithful'"
 SUB EVENT_Infusion(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_Infusion ==>
 	| -Verify the event
@@ -83,7 +83,7 @@ SUB EVENT_Infusion(line, ChatSender, eventParams)
 #EVENT Staunch "<#1#> Staunch Recovery"
 #EVENT Staunch "#1# tells you, 'Staunch Recovery'"
 #EVENT Staunch "#1# tells the group, 'Staunch Recovery'"
-#EVENT Staunch "#1# you tell your party, 'Staunch Recovery'"
+#EVENT Staunch "#1# tell your party, 'Staunch Recovery'"
 SUB EVENT_Staunch(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_Staunch ==>
 	| -Verify the event
@@ -123,7 +123,7 @@ SUB EVENT_Staunch(line, ChatSender, eventParams)
 #EVENT Servant "<#1#> Steadfast Servant"
 #EVENT Servant "#1# tells you, 'Steadfast Servant'"
 #EVENT Servant "#1# tells the group, 'Steadfast Servant'"
-#EVENT Servant "#1# you tell your party, 'Steadfast Servant'"
+#EVENT Servant "#1# tell your party, 'Steadfast Servant'"
 SUB EVENT_Servant(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_Servant ==>
 	| -Verify the event
@@ -162,7 +162,7 @@ SUB EVENT_Servant(line, ChatSender, eventParams)
 #EVENT Intensity "<#1#> Intensity of the Resolute"
 #EVENT Intensity "#1# tells you, 'Intensity of the Resolute'"
 #EVENT Intensity "#1# tells the group, 'Intensity of the Resolute'"
-#EVENT Intensity "#1# you tell your party, 'Intensity of the Resolute'"
+#EVENT Intensity "#1# tell your party, 'Intensity of the Resolute'"
 SUB EVENT_Intensity(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_Intensity ==>
 	| -Verify the event
@@ -201,7 +201,7 @@ SUB EVENT_Intensity(line, ChatSender, eventParams)
 #EVENT Armor "<#1#> Armor of Experience"
 #EVENT Armor "#1# tells you, 'Armor of Experience'"
 #EVENT Armor "#1# tells the group, 'Armor of Experience'"
-#EVENT Armor "#1# you tell your party, 'Armor of Experience'"
+#EVENT Armor "#1# tell your party, 'Armor of Experience'"
 SUB EVENT_Armor(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_Armor ==>
 	| -Verify the event
@@ -241,7 +241,7 @@ SUB EVENT_Armor(line, ChatSender, eventParams)
 #EVENT RecoverCorpses "<#1#> Expedient Recovery"
 #EVENT RecoverCorpses "#1# tells you, 'Expedient Recovery'"
 #EVENT RecoverCorpses "#1# tells the group, 'Expedient Recovery'"
-#EVENT RecoverCorpses "#1# you tell your party, 'Expedient Recovery'"
+#EVENT RecoverCorpses "#1# tell your party, 'Expedient Recovery'"
 SUB EVENT_RecoverCorpses(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_RecoverCorpses ==>
 	| -Verify the event
@@ -281,7 +281,7 @@ SUB EVENT_RecoverCorpses(line, ChatSender, eventParams)
 #EVENT MGB "<#1#> Mass Group Buff"
 #EVENT MGB "#1# tells you, 'Mass Group Buff'"
 #EVENT MGB "#1# tells the group, 'Mass Group Buff'"
-#EVENT MGB "#1# you tell your party, 'Mass Group Buff'"
+#EVENT MGB "#1# tell your party, 'Mass Group Buff'"
 SUB EVENT_MGB(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_MGB ==>
 	| -Verify the event
@@ -322,7 +322,7 @@ SUB EVENT_MGB(line, ChatSender, eventParams)
 #EVENT GateToLobby "<#1#> Throne of Heroes"
 #EVENT GateToLobby "#1# tells you, 'Throne of Heroes'"
 #EVENT GateToLobby "#1# tells the group, 'Throne of Heroes'"
-#EVENT GateToLobby "#1# you tell your party, 'Throne of Heroes'"
+#EVENT GateToLobby "#1# tell your party, 'Throne of Heroes'"
 SUB EVENT_GateToLobby(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_GateToLobby ==>
 	| -Verify the event

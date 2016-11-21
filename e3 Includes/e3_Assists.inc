@@ -1086,7 +1086,7 @@ SUB check_Burns
 #EVENT EpicBurn "<#1#> Epic Burn"
 #EVENT EpicBurn "#1# tells you, 'Epic Burn'"
 #EVENT EpicBurn "#1# tells the group, 'Epic Burn'"
-#EVENT EpicBurn "#1# you tell your party, 'Epic Burn'"
+#EVENT EpicBurn "#1# tell your party, 'Epic Burn'"
 SUB event_EpicBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_EpicBurn ==>
   /call verifyEvent "${ChatSender}" "${line}"
@@ -1113,7 +1113,7 @@ SUB event_EpicBurn(line, ChatSender)
 #EVENT QuickBurn "<#1#> Quick Burn"
 #EVENT QuickBurn "#1# tells you, 'Quick Burn'"
 #EVENT QuickBurn "#1# tells the group, 'Quick Burn'"
-#EVENT QuickBurn "#1# you tell your party, 'Quick Burn'"
+#EVENT QuickBurn "#1# tell your party, 'Quick Burn'"
 SUB event_QuickBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_QuickBurn ==>
   /call verifyEvent "${ChatSender}" "${line}"
@@ -1146,7 +1146,7 @@ SUB event_QuickBurn(line, ChatSender)
 #EVENT LongBurn "<#1#> Long Burn"
 #EVENT LongBurn "#1# tells you, 'Long Burn'"
 #EVENT LongBurn "#1# tells the group, 'Long Burn'"
-#EVENT LongBurn "#1# you tell your party, 'Long Burn'"
+#EVENT LongBurn "#1# tell your party, 'Long Burn'"
 SUB event_LongBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_LongBurn ==>
   /call verifyEvent "${ChatSender}" "${line}"
@@ -1179,7 +1179,7 @@ SUB event_LongBurn(line, ChatSender)
 #EVENT FullBurn "<#1#> Full Burn"
 #EVENT FullBurn "#1# tells you, 'Full Burn'"
 #EVENT FullBurn "#1# tells the group, 'Full Burn'"
-#EVENT FullBurn "#1# you tell your party, 'Full Burn'"
+#EVENT FullBurn "#1# tell your party, 'Full Burn'"
 SUB event_FullBurn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_FullBurn ==>
   /call verifyEvent "${ChatSender}" "${line}"
