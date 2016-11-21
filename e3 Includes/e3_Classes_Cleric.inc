@@ -123,6 +123,7 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
     /declare n int local
 		/declare playerName string local
 		/declare corpseID int local
+		/declare corpseList string local ,
 
     /for n 1 to ${numIterations}
       /varset otherRezzing
@@ -134,17 +135,21 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
 
         /call defineRezSpell
         /call TrueTarget ${corpseID}
-        /delay 1
-        /tell ${playerName} Wait4Rez
-        /delay 2
+
+        |/echo ${corpseList} ${corpseID} ${corpseList.Find[,${corpseID},]}
+        /if (${corpseList.Find[,${corpseID},]}) {
+          /echo I have already rezzed ${playerName} - ${corpseID}
+          /goto :skipRez
+        }
         /call check_CorpseRezzable
+
         |/echo ${playerName} cid${corpseID} canrez${canRez} dist${Target.Distance}
 
         /if (${canRez}!=1) {
           /echo ${Target.Name} is not eligible for rez
           /next i
         } else {
-          |/tell ${playerName} Wait4Rez
+          /tell ${playerName} Wait4Rez
           /if (${Target.Distance} > 15 && ${Target.Distance} < 100) {
             /corpse
             /delay 2
@@ -170,6 +175,7 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
             /bc Resurrecting-${corpseID}
             /delay 2
             /call e3_cast ${corpseID} "rezArray2D" 1
+            /if (${castReturn.Equal[CAST_SUCCESS]}) /varset corpseList ${corpseList}${corpseID},
           } else {
             /echo ${rezArray2D[1,${iCastName}]} is not ready to cast
           }
@@ -195,10 +201,6 @@ Sub Event_CorpseExpired(line, corpseExpired)
 /return !${corpseExpired.Equal[cannot]}
 
 |----------------------------------------------------------------------------|
-#event NotOnline "#*# is not online at this time."
-Sub Event_NotOnline(line)
-/RETURN FALSE
-|----------------------------------------------------------------------------|
 #event check_otherRezzing "<#1#> Resurrecting-#2#"
 SUB event_check_otherRezzing(line, ChatSender,corpseID)
   /if (${Me.Name.NotEqual[${ChatSender}]}) /varset otherRezzing ${otherRezzing}${corpseID}-
@@ -210,8 +212,6 @@ Sub check_CorpseRezzable
   /declare conTimer timer local 5s
   /declare returnResult bool local FALSE
   /declare corpseOwner string local
-  /doevents NotOnline
-  /if (!${Macro.Return}) /return FALSE
   /consider
   :waitForExpired
   /doevents CorpseExpired
