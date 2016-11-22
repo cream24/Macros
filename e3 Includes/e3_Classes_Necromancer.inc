@@ -7,7 +7,7 @@ SUB check_Lich
 /if (${Debug}) /echo |- check_castLich ==>
 	/if (${Defined[lichSpell]} && !${Me.Buff[${lichSpell}].ID} && ${Me.PctMana} < 90 && ${Spell[${lichSpell}].Stacks} && ${Me.PctHPs} > 80) /casting "${lichSpell}"
 	/delay 5s !${Me.Casting.ID}
-  /if (${Me.Buff[${lichSpell}].ID} && ${Me.PctHPs} < 20 && ${NetBots[${Me}].CombatState} > 0)  /removebuff ${lichSpell}
+  /if (${Me.Buff[${lichSpell}].ID} && ${Me.PctHPs} < 20 && ${Me.CombatState.NotEqual[COMBAT]})  /removebuff ${lichSpell}
 /if (${Debug}) /echo <== check_castLich -|
 /RETURN
 

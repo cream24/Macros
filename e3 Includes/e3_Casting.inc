@@ -335,7 +335,7 @@ Sub check_Ready(ArrayName, int ArrayIndex)
 Sub memorize_spell(spellName,gemNum)
   /memorize "${spellName}" ${gemNum}
   /delay 5s ${Bool[${Me.Gem[${spellName}]}]}
-  /if (${NetBots[${Me}].CombatState} > 0) {
+  /if (${Me.CombatState.NotEqual[COMBAT]}) {
     /delay 10s ${Me.SpellReady[${spellName}]}
   } else {
     /delay 2s ${Me.SpellReady[${spellName}]}

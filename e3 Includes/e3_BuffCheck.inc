@@ -14,7 +14,7 @@ SUB check_Buffs
 	/if (${BuffCheck} ) {
 		/if (!${ActionTaken} && !${activeTimer} && ${BuffCombatCheck} && !${idle} && (!${medBreak} || ${Me.Combat}))	/call buffBots "CombatBuffs2D"
 		/if (!${ActionTaken} && ${InstantBuffs2D.Size[1]})		/call buffBots "InstantBuffs2D"
-		/if (!${ActionTaken} && !${combatTimer} && !${activeTimer} && !${Me.Combat} && !${Assisting} && !${Me.Moving} && ${NetBots[${Me}].CombatState} > 0 && ${BuffCheck}) {
+		/if (!${ActionTaken} && !${combatTimer} && !${activeTimer} && ${Me.CombatState.NotEqual[COMBAT]} && !${Assisting} && !${Me.Moving} && ${BuffCheck}) {
 			/if (!${ActionTaken} && ${SelfBuffs2D.Size[1]})	/call buffBots "SelfBuffs2D"
 			/if (!${ActionTaken} && ${BotBuffs2D.Size[1]})	/call buffBots "BotBuffs2D"
 		}
@@ -110,7 +110,7 @@ SUB buffBots(ArrayName)
 SUB meleeCombatBuffs(ArrayName, int s)
 |/echo mcb ${s} ${NetBots[${${ArrayName}[${s},${iCastTarget}]}].Name} ${${ArrayName}[${s},${iCastName}]}
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- meleeCombatBuffs ${ArrayName} ${s} ==>
-  /if (${NetBots[${Me}].CombatState} == 0 || ${Me.Combat}) {
+  /if (${Me.CombatState.Equal[COMBAT]}) {
     /declare buffTargetID	int local ${NetBots[${${ArrayName}[${s},${iCastTarget}]}].ID}
     /if (!${Bool[${NetBots[${${ArrayName}[${s},${iCastTarget}]}].ShortBuff.Find[${${ArrayName}[${s},${iCastID}]} ]}]}) {
       | if the target is me, ensure my group leader does not have the buff (cleaving anger + cry havoc)

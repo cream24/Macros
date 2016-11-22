@@ -372,7 +372,7 @@ SUB EVENT_end_ChainHeal(line, ChatSender)
 
 | There is a place for the chain to break down in this script
 SUB check_healChain
-/if (${Debug} || ${Debug_HealChain}) /echo |- ChainHeal ==>
+|/if (${Debug} || ${Debug_HealChain}) /echo |- ChainHeal ==>
 	/call chainHeal_Events
 	/if (${Chain_Status.Equal[HEALING]}) {
 		/varset ActionTaken TRUE
@@ -424,7 +424,7 @@ SUB check_healChain
 		}
 	}
 
-/if (${Debug} || ${Debug_HealChain}) /echo <== ChainHeal -|
+|/if (${Debug} || ${Debug_HealChain}) /echo <== ChainHeal -|
 /RETURN
 
 
@@ -527,13 +527,14 @@ SUB EVENT_set_LastHealer(line, ChatSender, time_Hour, time_Min, time_Sec)
 		
 		/varcalc next_Delay ${time_Sec} + ${Chain_Timing}
 
-		/if (${Debug} || ${Debug_HealChain}) /echo |- Chain_NextHealTimer -| set to: [${Math.Calc[${next_Delay} - ${Time.Time24.Arg[3,:]}].Int}s]
 		/varset Chain_NextHealTimer ${Math.Calc[${next_Delay} - ${Time.Time24.Arg[3,:]}].Int}s
+    /if (${Chain_NextHealTimer}>=60) /varcalc ${Chain_NextHealTimer}-60
 
+    /if (${Debug} || ${Debug_HealChain}) /echo |- Chain_NextHealTimer -| set to ${Chain_NextHealTimer}: ${next_Delay} - ${Time.Time24.Arg[3,:]}
 		/varset Chain_LastHealer ${ChatSender}
 		/varset Chain_NextTimingSet TRUE
 		
-		/if (${Debug} || ${Debug_HealChain}) /echo |- EVENT_set_LastHealer -| Chain_Timer= ${Chain_Timer} :: Chain_LastHealer= ${Chain_LastHealer}
+		/if (${Debug} || ${Debug_HealChain}) /echo |- EVENT_set_LastHealer -| Chain_Timer= ${Chain_Timing} :: Chain_LastHealer= ${Chain_LastHealer}
 	}
 
 /if (${Debug} || ${Debug_HealChain}) /echo <== EVENT_set_LastHealer -|

@@ -97,5 +97,5 @@ Sub ROG_Aliases
 /return
 
 Sub ROG_Background_Events
-	/if (${AutoHide} && !${Me.Invis} && !${Me.Moving} && ${NetBots[${Me}].CombatState} > 0 && !${Me.Combat}) /call AutoHide
+	/if (${AutoHide} && !${Me.Invis} && !${Me.Moving} && ${Me.CombatState.NotEqual[COMBAT]}) /call AutoHide
 /return

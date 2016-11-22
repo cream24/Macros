@@ -989,7 +989,7 @@ SUB Event_TargetAEOff(line, ChatSender)
 |------------------------------------------------------------------------------------------------------------|
 SUB check_AE
 /if (${Debug} || ${Debug_Assists}) /echo |- check_AE ==>
-  /if ((${use_PBAE} || ${use_TargetAE}) && !${Bool[${SpawnCount[npc radius ${AE_Radius}]}]} && ${NetBots[${Me}].CombatState} > 0) {
+  /if ((${use_PBAE} || ${use_TargetAE}) && !${Bool[${SpawnCount[npc radius ${AE_Radius}]}]} && ${Me.CombatState.NotEqual[COMBAT]}) {
     /varset use_TargetAE FALSE
     /varset use_PBAE FALSE
     /if (${Defined[aeTarget]}) /deletevar aeTarget

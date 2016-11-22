@@ -84,9 +84,9 @@ sub Event_Rez(string line, string ChatSender)
     /call defineRezSpell
     /delay 15s ${Bool[${Cast.Status.Find[I]}]}
     /call TrueTarget ${Spawn[${ChatSender}'s].ID}
-    /echo ${Target.ID}
+    |/echo ${Target.ID}
     /call check_CorpseRezzable
-    /echo checkcanrez ${Macro.Return}
+    |/echo checkcanrez ${Macro.Return}
     /if (${canRez}==1) {
       /call check_Ready "rezArray2D" 1
       /if (${Macro.Return}) {

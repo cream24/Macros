@@ -5,7 +5,7 @@
 SUB check_Harvest
 	/if (${autoHarvest}) {
     |only harvest if im not in ooc regen
-    /if (${NetBots[${Me}].CombatState} < 3) {
+    /if (${Me.CombatState.NotEqual[ACTIVE]}) {
       /declare s int local
       /for s 1 to ${harvestSpells2D.Size[1]}
         /call check_Ready "harvestSpells2D" ${s}

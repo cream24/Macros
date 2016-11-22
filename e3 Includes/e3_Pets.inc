@@ -9,8 +9,8 @@ SUB check_Pets
   |/echo ${Pets} && !${suspend_Pets} && !${combatTimer} && !${activeTimer}
 	/if (!${ActionTaken} && !${suspend_Pets} && !${activeTimer}) {
 	  /if (${Me.Pet.ID} && ${petHeal2D.Size[1]}) /call check_petHeal
-		/if (!${Me.Pet.ID} && !${ActionTaken} && ${petSpell2D.Size[1]} && ${SpawnCount[pc ${Me}]} && (${petSummonCombat} || ${NetBots[${Me}].CombatState} > 0)) /call summonPet
-		/if (${Me.Pet.ID} && !${ActionTaken} && ${petBuffs2D.Size[1]} && (${petBuffCombat} || ${NetBots[${Me}].CombatState} > 0)) /call buffPet
+		/if (!${Me.Pet.ID} && !${ActionTaken} && ${petSpell2D.Size[1]} && ${SpawnCount[pc ${Me}]} && (${petSummonCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call summonPet
+		/if (${Me.Pet.ID} && !${ActionTaken} && ${petBuffs2D.Size[1]} && (${petBuffCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call buffPet
 		/if (${Me.Pet.ID} && !${ActionTaken} && ${petAutoShrink} && !${combatTimer}) /call check_AutoShrink
 	}
 /if (${Debug} || ${Debug_Pets}) /echo <== check_Pets -|

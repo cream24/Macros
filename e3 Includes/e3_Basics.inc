@@ -1055,7 +1055,7 @@ SUB check_MedBreak
 		/if (${NetAdvPath.Status}==1) /squelch /netfollow off
 	}
 	| If End MedBreak in Combat (On/Off)=On, and a netbot is in combat, call medOff
-	/if (${medOn_combatBreak} && ${NetBots[${Me}].CombatState} == 0) /call EVENT_medOff "NULL" "${Me.CleanName}"
+	/if (${medOn_combatBreak} && ${Me.CombatState.Equal[COMBAT]}) /call EVENT_medOff "NULL" "${Me.CleanName}"
 	/if (!${Me.Feigning}) {
 		| do ***Meditating*** popup
 		/if (!${medbreak_Popup_Timer}) {

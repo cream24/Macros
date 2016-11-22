@@ -6,11 +6,11 @@ SUB check_Canni
 /if (${Debug}) /echo |- autoCanni ==>
 	/if (${AutoCanni}) {
 	  |only canni if im not in ooc regen
-		/if (${NetBots[${Me}].CombatState} < 3) {
+		/if (${Me.CombatState.NotEqual[ACTIVE]}) {
 			/declare s int local
 	    |add special check for spiritual channeling
 			/for s 1 to ${canniSpells2D.Size[1]}
-			  /if (${canniSpells2D[${s},${iCastName}].NotEqual[Spiritual Channeling]} || (${canniSpells2D[${s},${iCastName}].Equal[Spiritual Channeling]} && ${NetBots[${Me}].CombatState} ==0)) {
+			  /if (${canniSpells2D[${s},${iCastName}].NotEqual[Spiritual Channeling]} || (${canniSpells2D[${s},${iCastName}].Equal[Spiritual Channeling]} && ${Me.CombatState.Equal[COMBAT]})) {
           /call check_Ready "canniSpells2D" ${s}
           /if (${Macro.Return}) {
             /call check_Mana "canniSpells2D" ${s}
