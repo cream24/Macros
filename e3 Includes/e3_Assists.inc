@@ -442,7 +442,7 @@ SUB check_AutoAssist
 SUB check_Nukes
 |/varset Debug true
 /if (${Debug} || ${Debug_Assists}) /echo |- check_Nukes ==>
-	/if (${Nukes2D.Size[1]} && ${Assisting} && ${use_Nukes}) {
+	/if (${${nukesToUse}.Size[1]} && ${Assisting} && ${use_Nukes}) {
 	  /declare castIndex int local
 	  /declare s int local
     /declare m int local
@@ -453,60 +453,60 @@ SUB check_Nukes
       /return
     }
 
-   /for s 1 to ${Nukes2D.Size[1]}
+   /for s 1 to ${${nukesToUse}.Size[1]}
     /varset castIndex ${s}
     | if /rotate is defined, and the current array index was the last successful cast, skip to next index
-    /if (${Nukes2D[${s},${iCastName}].Equal[${lastSuccessfulCast}]} && ${Nukes2D[${s},${iRotate}]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]} /rotate is defined
+    /if (${${nukesToUse}[${s},${iCastName}].Equal[${lastSuccessfulCast}]} && ${${nukesToUse}[${s},${iRotate}]}) {
+      /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${${nukesToUse}[${castIndex},${iCastName}]} /rotate is defined
       /goto :skipCast
     }
     | if i have Gift Of Mana find a spell with /GoM
     /if (${Bool[${Me.Song[Gift of Mana].ID}]}) {
-      /for m 1 to ${Nukes2D.Size[1]}
-        /if (${Nukes2D[${m},${iGiftOfMana}]}) /varset castIndex ${m}
+      /for m 1 to ${${nukesToUse}.Size[1]}
+        /if (${${nukesToUse}[${m},${iGiftOfMana}]}) /varset castIndex ${m}
       /next m
     }
     |if i have aggro and /noaggro is set, skip the spell
-    /if (${Nukes2D[${castIndex},${iNoAggro}]} && ${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have aggro and /noaggro is set
+    /if (${${nukesToUse}[${castIndex},${iNoAggro}]} && ${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]}) {
+      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${${nukesToUse}[${castIndex},${iCastName}]}, i have aggro and /noaggro is set
       /goto :skipCast
     }
     |if im burning and /noburn is set, skip the spell
-    /if ((${use_QuickBurns} || ${use_LongBurns} || ${use_FullBurns}) && ${${ArrayName}[${castIndex},${iNoBurn}]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
+    /if ((${use_QuickBurns} || ${use_LongBurns} || ${use_FullBurns}) && ${${nukesToUse}[${castIndex},${iNoBurn}]}) {
+      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${${nukesToUse}[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
       /goto :skipCast
     }
     | if i have spell damage reduction recourse and the mob has more than 25% health or i have < 10% mana, skip cast.  cast anyway if i have GoM to avoid losing it
     /if ((${Me.Buff[Weave of Weakness].ID} || ${Me.Buff[Flames of Weakness].ID}) && (${Target.PctHPs} > 25 || ${Me.PctMana} < 10) && !${Bool[${Me.Song[Gift of Mana].ID}]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have spell damage reduction
+      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${${nukesToUse}[${castIndex},${iCastName}]}, i have spell damage reduction
       /goto :skipCast
     }
 
-    /call check_Ready "Nukes2D" ${castIndex}
+    /call check_Ready "${nukesToUse}" ${castIndex}
     /if (${Macro.Return}) {
-      /call check_Mana "Nukes2D" ${castIndex}
+      /call check_Mana "${nukesToUse}" ${castIndex}
       /if (${Macro.Return}) {
-        /call check_Distance ${AssistTarget} ${Nukes2D[${s},${iMyRange}]}
+        /call check_Distance ${AssistTarget} ${${nukesToUse}[${s},${iMyRange}]}
         /if (${Macro.Return}) {
           |/squelch /face fast id ${AssistTarget}
-          /call e3_Cast ${AssistTarget} "Nukes2D" "${castIndex}"
+          /call e3_Cast ${AssistTarget} "${nukesToUse}" "${castIndex}"
         }
       }
     }
     |if the nuke was succesful, see if there is a delay defined and create a timer which locks out all nukes for the duration
-    /if (${Nukes2D[${castIndex},${iDelay}]} && ${Select[${castReturn},CAST_SUCCESS]}) {
+    /if (${${nukesToUse}[${castIndex},${iDelay}]} && ${Select[${castReturn},CAST_SUCCESS]}) {
       /if (${Debug} || ${Debug_Assists}) /echo delaying for ${${ArrayName}[${castIndex},${iDelay}]}
       /if (${Defined[castDelay${lastSuccessfulCast}]}) {
-        /varset castDelay${lastSuccessfulCast} ${Nukes2D[${castIndex},${iDelay}]}
+        /varset castDelay${lastSuccessfulCast} ${${nukesToUse}[${castIndex},${iDelay}]}
       } else {
-        /call CreateTimer "castDelay${lastSuccessfulCast}" "${Nukes2D[${castIndex},${iDelay}]}"
+        /call CreateTimer "castDelay${lastSuccessfulCast}" "${${nukesToUse}[${castIndex},${iDelay}]}"
       }
     }
 	:skipCast
     /if (!${ActionTaken}) /next s
   }
 /if (${Debug} || ${Debug_Assists}) /echo <== check_Nukes -|
-|  /varset Debug false
+|/varset Debug false
 /RETURN
 
 |----------------------------------------------------|
@@ -1254,6 +1254,108 @@ SUB check_lifeTap
 /RETURN
 
 |--------------------------------------------------------------------------------|
+#EVENT NukeSet "<#1#> NukeSet #2#"
+#EVENT NukeSet "#1# tells you, 'NukeSet #2#'"
+#EVENT NukeSet "#1# tells the group, 'NukeSet #2#'"
+#EVENT NukeSet "#1# tell your party, 'NukeSet #2#'"
+SUB event_NukeSet(line, ChatSender, NukeArray)
+  /call verifyEvent "${ChatSender}" "${line}"
+  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+|-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+
+    /if (${Select[${NukeArray},Default,Main,Nukes,Nuke]} > 0) {
+      /if (${Nukes2D.Size[1]}) {
+        /varset nukesToUse Nukes2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},BigFire,BF]} > 0) {
+      /if (${BigFire2D.Size[1]}) {
+        /varset nukesToUse BigFire2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},BigCold,BC]} > 0) {
+      /if (${BigCold2D.Size[1]}) {
+        /varset nukesToUse BigCold2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},BigMagic,BM]} > 0) {
+      /if (${BigMagic2D.Size[1]}) {
+        /varset nukesToUse BigMagic2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},FastFire,FF]} > 0) {
+      /if (${FastFire2D.Size[1]}) {
+        /varset nukesToUse FastFire2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},FastCold2D,FC]} > 0) {
+      /if (${FastCold2D.Size[1]}) {
+        /varset nukesToUse FastCold2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},FastMagic,FM]} > 0) {
+      /if (${FastMagic2D.Size[1]}) {
+        /varset nukesToUse FastMagic2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},LureFire,LF]} > 0) {
+      /if (${LureFire2D.Size[1]}) {
+        /varset nukesToUse LureFire2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},LureCold,LC]} > 0) {
+      /if (${LureCold2D.Size[1]}) {
+        /varset nukesToUse LureCold2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},LureMagic,LM]} > 0) {
+      /if (${LureMagic2D.Size[1]}) {
+        /varset nukesToUse LureMagic2D
+        /varset use_Nukes TRUE
+        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      } else {
+        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+      }
+    } else /if (${Select[${NukeArray},OFF,FALSE]} > 0) {
+      /varset use_Nukes FALSE
+      /echo \ag Nuking Disabled
+
+    } else {
+      /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+    }
+  }
+/RETURN
+
+
+|--------------------------------------------------------------------------------|
 Sub assist_Setup
 /call INItoVar "${advSettings_Ini},Debug,Debug Assists (On/Off)" Debug_Assists bool outer
 /if (${Debug} || ${Debug_Assists}) /echo |- assist_Setup ==>
@@ -1272,6 +1374,7 @@ Sub assist_Setup
 	/declare revertRngToMelee bool outer FALSE
 	/declare aemsg bool outer FALSE
   /declare aeTarget string outer
+  /if (!${Defined[nukesToUse]})   /declare nukesToUse string global Nukes2D
 
 | ------------------------------------- Import Macro_Ini Settings.
 	/call IniToVar "${genSettings_Ini},Assists,Max Engage Distance"     MaxAssistDistance int outer
@@ -1342,6 +1445,16 @@ Sub assist_Setup
 SUB assist_SpellArrays
 | [Nukes].
   /if (${Ini[${Character_Ini},Nukes,Nuke#1].Length}) /call INItoArray "${Character_Ini},Nukes,Nuke#" MyNukes
+  /if (${Ini[${Character_Ini},Nukes,BigFire#1].Length}) /call INItoArray "${Character_Ini},Nukes,BigFire#" MyBigFire
+  /if (${Ini[${Character_Ini},Nukes,BigCold#1].Length}) /call INItoArray "${Character_Ini},Nukes,BigCold#" MyBigCold
+  /if (${Ini[${Character_Ini},Nukes,BigMagic#1].Length}) /call INItoArray "${Character_Ini},Nukes,BigMagic#" MyBigMagic
+  /if (${Ini[${Character_Ini},Nukes,FastFire#1].Length}) /call INItoArray "${Character_Ini},Nukes,FastFire#" MyFastFire
+  /if (${Ini[${Character_Ini},Nukes,FastCold#1].Length}) /call INItoArray "${Character_Ini},Nukes,FastCold#" MyFastCold
+  /if (${Ini[${Character_Ini},Nukes,FastMagic#1].Length}) /call INItoArray "${Character_Ini},Nukes,FastMagic#" MyFastMagic
+  /if (${Ini[${Character_Ini},Nukes,LureFire#1].Length}) /call INItoArray "${Character_Ini},Nukes,LureFire#" MyLureFire
+  /if (${Ini[${Character_Ini},Nukes,LureCold#1].Length}) /call INItoArray "${Character_Ini},Nukes,LureCold#" MyLureCold
+  /if (${Ini[${Character_Ini},Nukes,LureMagic#1].Length}) /call INItoArray "${Character_Ini},Nukes,LureMagic#" MyLureMagic
+
 | [DoTs]
   /if (${Ini[${Character_Ini},DoTs,DoT on Assist#1].Length})  /call INItoArray "${Character_Ini},DoTs,DoT on Assist#" Assist_DoTs
   /if (${Ini[${Character_Ini},DoTs,DoT on Command#1].Length}) /call INItoArray "${Character_Ini},DoTs,DoT on Command#" Command_DoTs
@@ -1370,7 +1483,17 @@ SUB assist_SpellArrays
   /if (${Bool[${Me.AltAbility[Song of Stone]}]})   /call BuildArray "swarmPets" "Song of Stone"
 }
 
-  /if (${MyNukes.Size} > 0)		        /call BuildSpellArray "MyNukes"	          "Nukes2D"
+  /if (${MyNukes.Size} > 0)		        /call BuildSpellArray "MyNukes"	        "Nukes2D"
+  /if (${MyBigFire.Size} > 0)		      /call BuildSpellArray "MyBigFire"	      "BigFire2D"
+  /if (${MyBigCold.Size} > 0)		      /call BuildSpellArray "MyBigCold"	      "BigCold2D"
+  /if (${MyBigMagic.Size} > 0)		    /call BuildSpellArray "MyBigMagic"	    "BigMagic2D"
+  /if (${MyFastFire.Size} > 0)		    /call BuildSpellArray "MyFastFire"	    "FastFire2D"
+  /if (${MyFastCold.Size} > 0)		    /call BuildSpellArray "MyFastCold"	    "FastCold2D"
+  /if (${MyFastMagic.Size} > 0)		    /call BuildSpellArray "MyFastMagic"	    "FastMagic2D"
+  /if (${MyLureFire.Size} > 0)		    /call BuildSpellArray "MyLureFire"	    "LureFire2D"
+  /if (${MyLureCold.Size} > 0)		    /call BuildSpellArray "MyLureCold"	    "LureCold2D"
+  /if (${MyLureMagic.Size} > 0)		    /call BuildSpellArray "MyLureMagic"	    "LureMagic2D"
+
   /if (${PBAE_Spells.Size} > 0)		    /call BuildSpellArray "PBAE_Spells"	      "PBAE_Spells2D"
   /if (${TargetAE_Spells.Size} > 0)		/call BuildSpellArray "TargetAE_Spells" 	"TargetAE_Spells2D"
   /if (${Assist_Debuffs.Size} > 0)		/call BuildSpellArray "Assist_Debuffs" 		"Assist_Debuffs2D"
@@ -1451,6 +1574,37 @@ SUB assist_CharacterSettings
 	/if (${Select[${Me.Class.ShortName},BST,DRU,ENC,MAG,PAL,NEC,RNG,SHD,SHM,WIZ]}) {
 		/if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
 	}
+  /if (${Select[${Me.Class.ShortName},WIZ]}) {
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigCold#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigMagic#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastCold#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastMagic#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureCold#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureMagic#1"
+  }
+  /if (${Select[${Me.Class.ShortName},MAG]}) {
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigMagic#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastMagic#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureMagic#1"
+  }
+  /if (${Select[${Me.Class.ShortName},RNG,DRU]}) {
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigCold#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastCold#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
+    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureCold#1"
+  }
+
 	| If I'm a casting class, add DoT entries.
 	/if (${Select[${Me.Class.ShortName},BST,DRU,ENC,NEC,RNG,SHD,SHM]}) {
 		/if (!${Ini[${Character_Ini},DoTs].Length}) {
@@ -1506,7 +1660,8 @@ Sub assist_Aliases
   /squelch /alias /tauntoff /varset doTaunt 0
 |	/squelch /alias /pvpOn /bc Toggle PvP ON
 |	/squelch /alias /pvpOff /bc Toggle PvP OFF
-	/squelch /alias /AssistType /bcaa //varset Assist Type
+	/squelch /alias /AssistType /bc //varset Assist Type
+	/squelch /alias /ns /bc NukeSet
 
 /if (${Debug} || ${Debug_Assists}) /echo <== assist_Aliases -|
 /return
@@ -1538,5 +1693,6 @@ Sub assist_Background_Events
   /doevents TargetAEOff
   /doevents TargetAEOn
   /doevents SwarmPets
+  /doevents NukeSet
   /if (${auto_AssistOn}) /call check_AutoAssist
 /return
