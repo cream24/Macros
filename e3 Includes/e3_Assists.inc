@@ -976,7 +976,8 @@ SUB Event_TargetAEOff(line, ChatSender)
     /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
       /if (${Me.Casting.ID}) /call interrupt
       /varset use_TargetAE FALSE
-      /if (${Defined[aeTarget]}) /deletevar aeTarget
+      /varset aeTarget 0
+      |/if (${Defined[aeTarget]}) /deletevar aeTarget
       /if (!${aemsg}) /docommand ${ChatToggle} Ending Target AE.
       /if (${revertRngToMelee}) /call swapToRangedSet FALSE
     }
@@ -992,14 +993,10 @@ SUB check_AE
   /if ((${use_PBAE} || ${use_TargetAE}) && !${Bool[${SpawnCount[npc radius ${AE_Radius}]}]} && ${Me.CombatState.NotEqual[COMBAT]}) {
     /varset use_TargetAE FALSE
     /varset use_PBAE FALSE
-    /if (${Defined[aeTarget]}) /deletevar aeTarget
+    /varset aeTarget 0
+    |/if (${Defined[aeTarget]}) /deletevar aeTarget
     /docommand ${ChatToggle} Ending AE: No mobs in radius ${AE_Radius}
-    /if (${revertRngToMelee}) {
-      /varset AssistType Melee
-      /varset revertRngToMelee FALSE
-      /swap melee
-      /delay 2
-    }
+    /if (${revertRngToMelee}) /call swapToRangedSet FALSE
   }
   /declare i int local
 	/if (${use_PBAE}) {

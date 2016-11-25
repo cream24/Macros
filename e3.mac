@@ -37,7 +37,7 @@ SUB Main(modeSelect)
 
 		| If I'm not active, call mainFunctions
 		/if (!${activeTimer}) {
-      /if (!${Assisting} && (!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[Brd]})) /call completePendingExchange
+      /if (!${Assisting} && (!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[Brd]}) && !${use_TargetAE}) /call completePendingExchange
 
       |These are functions in the e3_setup/Advanced.ini class sections... CLR Function#1=check_DivineArb
 			/for i 1 to ${mainLoop_Array.Size}

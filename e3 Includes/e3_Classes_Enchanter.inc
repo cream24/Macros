@@ -266,7 +266,7 @@ Sub ENC_Setup
   /declare autoMez bool outer FALSE
 	/if (${Ini[${Character_Ini},Enchanter,AutoRune].Length}) /call IniToVar "${Character_Ini},Enchanter,AutoRune (On/Off)" autoRune bool outer
 	/if (${Ini[${Character_Ini},Enchanter,AutoMez (On/Off)].Length}) /call IniToVar "${Character_Ini},Enchanter,AutoMez (On/Off)" autoMez bool outer
-	/if (${Ini[${Character_Ini},Enchanter,GatherMana].Length}) /call IniToVar "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int outer
+	/if (${Ini[${Character_Ini},Enchanter,GatherMana Pct].Length}) /call IniToVar "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int outer
 
   /if (${Ini[${Character_Ini},Enchanter,RuneTarget#1].Length})	/call IniToArray "${Character_Ini},Enchanter,RuneTarget#"	runeTargets
   /if (${Ini[${Character_Ini},Enchanter,RuneSpell#1].Length})	/call IniToArray "${Character_Ini},Enchanter,RuneSpell#"	runeArray
