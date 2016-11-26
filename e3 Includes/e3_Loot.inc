@@ -190,7 +190,7 @@ SUB loot_It
     |if no more corpses, Click 'Done' and return to group.
     |/echo no more corpses, loot done ${looted_Corpses}
     /if (${Corpse.Open}) /notify LootWnd DoneButton leftmouseup
-    /if (${returnTwist}) /call unpauseTwist
+    |/if (${returnTwist}) /call unpauseTwist
     /if (${Following}) {
       /call AquireFollow
     } else {

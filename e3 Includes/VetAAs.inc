@@ -17,20 +17,9 @@ SUB EVENT_Lessons(line, ChatSender)
 		/if (!${Me.AltAbilityReady[Lesson of the Devoted]}) {
 			/docommand ${ChatToggle} Lesson of the Devoted is not ready.
 		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
+			/if (${Twist.Twisting}) /call pauseTwist
 			/casting "Lesson of the Devoted" -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
+			/delay 3s !${Me.Casting.ID}
 		}
 	}
 /if (${Debug}) /echo <== EVENT_Lessons -|
@@ -55,21 +44,9 @@ SUB EVENT_Infusion(line, ChatSender, eventParams)
 		/if (!${Me.AltAbilityReady[Infusion of the Faithful]}) {
 			/docommand ${ChatToggle} Infusion of the Faithful is not ready.
 		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
-			
+      /if (${Twist.Twisting}) /call pauseTwist
 			/casting "Infusion of the Faithful"  -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
+      /delay 5 !${Me.Casting.ID}
 		}
 	}
 
@@ -94,23 +71,10 @@ SUB EVENT_Staunch(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Staunch Recovery]}) {
 			/docommand ${ChatToggle} Staunch Recovery is not ready.
-		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-				
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
-			
-			/casting "Staunch Recovery" -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
+    } else {
+      /if (${Twist.Twisting}) /call pauseTwist
+      /casting "Staunch Recovery"  -maxtries|3
+      /delay 3s !${Me.Casting.ID}
 		}
 	}
 /if (${Debug}) /echo <== EVENT_Staunch -|
@@ -135,21 +99,9 @@ SUB EVENT_Servant(line, ChatSender, eventParams)
 		/if (!${Me.AltAbilityReady[Steadfast Servant]}) {
 			/docommand ${ChatToggle} Steadfast Servant is not ready.
 		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
-			
+      /if (${Twist.Twisting}) /call pauseTwist
 			/casting "Steadfast Servant" -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
+      /delay 3s !${Me.Casting.ID}
 		}
 	}
 /if (${Debug}) /echo <== EVENT_Servant -|
@@ -173,23 +125,10 @@ SUB EVENT_Intensity(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Intensity of the Resolute]}) {
 			/docommand ${ChatToggle} Intensity of the Resolute is not ready.
-		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
-			
-			/casting "Intensity of the Resolute" -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
-		}
+    } else {
+      /if (${Twist.Twisting}) /call pauseTwist
+      /casting "Intensity of the Resolute" -maxtries|3
+    }
 	}
 /if (${Debug}) /echo <== EVENT_Intensity -|
 /RETURN
@@ -212,24 +151,10 @@ SUB EVENT_Armor(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Armor of Experience]}) {
 			/docommand ${ChatToggle} Armor of Experience is not ready.
-		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-				
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
-			
-			/casting "Armor of Experience" -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
-		}
+    } else {
+      /if (${Twist.Twisting}) /call pauseTwist
+      /casting "Armor of Experience" -maxtries|3
+    }
 	}
 /if (${Debug}) /echo <== EVENT_Armor -|
 /RETURN
@@ -252,23 +177,12 @@ SUB EVENT_RecoverCorpses(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Expedient Recovery]}) {
 			/docommand ${ChatToggle} Expedient Recovery is not ready.
-		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare returnTwist bool local TRUE
-				/squelch /twist stop
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-				/doability Hide
-			}
-			
-			/casting "Expedient Recovery" -maxtries|3
-
-			/if (${returnTwist}) {
-				/timed 70 /squelch /twist start
-				/varset returnTwist 0
-			}
-		}
+    } else {
+      /if (${Twist.Twisting}) /call pauseTwist
+      /if (${Me.Casting.ID}) /call interrupt
+      /casting "Expedient Recovery" -maxtries|3
+      /delay 3s !${Me.Casting.ID}
+    }
 	}
 /if (${Debug}) /echo <== EVENT_RecoverCorpses -|
 /RETURN
@@ -293,23 +207,10 @@ SUB EVENT_MGB(line, ChatSender, eventParams)
 		/if (${Me.AltAbility[Mass Group Buff]}) {
 			/if (!${Me.AltAbilityReady[Mass Group Buff]}) {
 				/docommand ${ChatToggle} Mass Group Buff is not ready.
-			} else {
-				|----------------------------------------------------------If I'm a Bard, pause twist
-				/if (${Twist.Twisting}) {
-					/declare returnTwist bool local TRUE
-					/squelch /twist stop
-				|----------------------------------------------------------If I'm a rogue, stop hiding.
-				} else /if (${Me.Class.ShortName.Equal[ROG]} && ${Me.Invis} && !${Me.AbilityReady[Hide]}) {
-					/doability Hide
-				}
-				
-				/casting "Mass Group Buff" -maxtries|3
-
-				/if (${returnTwist}) {
-					/squelch /twist start
-					/varset returnTwist 0
-				}
-			}
+      } else {
+        /if (${Twist.Twisting}) /call pauseTwist
+        /casting "Mass Group Buff" -maxtries|3
+      }
 		}
 	}
 /if (${Debug}) /echo <== EVENT_GateToLobby -|
@@ -333,22 +234,11 @@ SUB EVENT_GateToLobby(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Throne of Heroes]}) {
 			/docommand ${ChatToggle} Throne of Heroes is not ready.
-		} else {
-			|----------------------------------------------------------If I'm a Bard, pause twist
-			/if (${Twist.Twisting}) {
-				/declare restartTwist bool local TRUE
-				/squelch /twist stop
-			|----------------------------------------------------------If I'm a rogue, stop hiding.
-			}
-			/if (${Me.Invis}) /makemevisible
-			/if (${Me.Casting.ID}) /call interrupt
-
-			/casting "Throne of Heroes" -maxtries|3
-
-			/if (${restartTwist}) {
-				/timed 180 /squelch /twist start
-				/varset restartTwist 0
-			}
+    } else {
+      /if (${Twist.Twisting}) /call pauseTwist
+      /if (${Me.Casting.ID}) /call interrupt
+      /casting "Throne of Heroes" -maxtries|3
+      /delay 16s !${Me.Casting.ID}
 		}
 	}
 /if (${Debug}) /echo <== EVENT_GateToLobby -|

@@ -1256,99 +1256,33 @@ SUB check_lifeTap
 #EVENT NukeSet "#1# tells the group, 'NukeSet #2#'"
 #EVENT NukeSet "#1# tell your party, 'NukeSet #2#'"
 SUB event_NukeSet(line, ChatSender, NukeArray)
+/if (${Debug} || ${Debug_Assists})  /echo |- event_NukeSet ==>
   /call verifyEvent "${ChatSender}" "${line}"
   /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+    /if (${Select[${Me.Class.ShortName},BST,CLR,DRU,ENC,MAG,PAL,NEC,RNG,SHD,SHM,WIZ]}) {
+      |multiple default options
+      /if (${Select[${NukeArray},Default,Main,Nukes,Nuke]} > 0) {
+        /varset NukeArray Nuke
+      } else /if (${Select[${NukeArray},OFF,FALSE]} > 0) {
+        /varset use_Nukes FALSE
+        /echo \ag Nuking Disabled
+      }
 
-    /if (${Select[${NukeArray},Default,Main,Nukes,Nuke]} > 0) {
-      /if (${Nukes2D.Size[1]}) {
-        /varset nukesToUse Nukes2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
+      /if (!${Ini[${Character_Ini},Nukes,${NukeArray}#1].Length}) {
+        /if (${Debug} || ${Debug_Assists}) /echo \ay [${NukeArray}] is not configured in your bot ini, keeping existing nuke set: [${nukesToUse}]
+        /return
       } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},BigFire,BF]} > 0) {
-      /if (${BigFire2D.Size[1]}) {
-        /varset nukesToUse BigFire2D
+        /call INItoArray "${Character_Ini},Nukes,${NukeArray}#" MyNukes
+        /if (${MyNukes.Size} > 0) /call BuildSpellArray "MyNukes" "Nukes2D"
+        /varset nukesToUse ${NukeArray}
         /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
+        /echo \ag Switched to [${nukesToUse}] - ${Nukes2D.Size[1]} spells
       }
-    } else /if (${Select[${NukeArray},BigCold,BC]} > 0) {
-      /if (${BigCold2D.Size[1]}) {
-        /varset nukesToUse BigCold2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},BigMagic,BM]} > 0) {
-      /if (${BigMagic2D.Size[1]}) {
-        /varset nukesToUse BigMagic2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},FastFire,FF]} > 0) {
-      /if (${FastFire2D.Size[1]}) {
-        /varset nukesToUse FastFire2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},FastCold2D,FC]} > 0) {
-      /if (${FastCold2D.Size[1]}) {
-        /varset nukesToUse FastCold2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},FastMagic,FM]} > 0) {
-      /if (${FastMagic2D.Size[1]}) {
-        /varset nukesToUse FastMagic2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},LureFire,LF]} > 0) {
-      /if (${LureFire2D.Size[1]}) {
-        /varset nukesToUse LureFire2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},LureCold,LC]} > 0) {
-      /if (${LureCold2D.Size[1]}) {
-        /varset nukesToUse LureCold2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},LureMagic,LM]} > 0) {
-      /if (${LureMagic2D.Size[1]}) {
-        /varset nukesToUse LureMagic2D
-        /varset use_Nukes TRUE
-        /echo \ag Switched to ${NukeArray} ${nukesToUse}
-      } else {
-        /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
-      }
-    } else /if (${Select[${NukeArray},OFF,FALSE]} > 0) {
-      /varset use_Nukes FALSE
-      /echo \ag Nuking Disabled
-
-    } else {
-      /echo \ay ${NukeArray} is empty or invalid - keeping existing nuke set ${nukesToUse}
     }
   }
+/if (${Debug} || ${Debug_Assists})  /echo <== event_NukeSet -|
 /RETURN
 
 
@@ -1371,7 +1305,7 @@ Sub assist_Setup
 	/declare revertRngToMelee bool outer FALSE
 	/declare aemsg bool outer FALSE
   /declare aeTarget string outer
-  /if (!${Defined[nukesToUse]})   /declare nukesToUse string global Nukes2D
+  /if (!${Defined[nukesToUse]})   /declare nukesToUse string global Nuke
 
 | ------------------------------------- Import Macro_Ini Settings.
 	/call IniToVar "${genSettings_Ini},Assists,Max Engage Distance"     MaxAssistDistance int outer
@@ -1441,16 +1375,7 @@ Sub assist_Setup
 |------------------------------------------------------------------------------------------------
 SUB assist_SpellArrays
 | [Nukes].
-  /if (${Ini[${Character_Ini},Nukes,Nuke#1].Length}) /call INItoArray "${Character_Ini},Nukes,Nuke#" MyNukes
-  /if (${Ini[${Character_Ini},Nukes,BigFire#1].Length}) /call INItoArray "${Character_Ini},Nukes,BigFire#" MyBigFire
-  /if (${Ini[${Character_Ini},Nukes,BigCold#1].Length}) /call INItoArray "${Character_Ini},Nukes,BigCold#" MyBigCold
-  /if (${Ini[${Character_Ini},Nukes,BigMagic#1].Length}) /call INItoArray "${Character_Ini},Nukes,BigMagic#" MyBigMagic
-  /if (${Ini[${Character_Ini},Nukes,FastFire#1].Length}) /call INItoArray "${Character_Ini},Nukes,FastFire#" MyFastFire
-  /if (${Ini[${Character_Ini},Nukes,FastCold#1].Length}) /call INItoArray "${Character_Ini},Nukes,FastCold#" MyFastCold
-  /if (${Ini[${Character_Ini},Nukes,FastMagic#1].Length}) /call INItoArray "${Character_Ini},Nukes,FastMagic#" MyFastMagic
-  /if (${Ini[${Character_Ini},Nukes,LureFire#1].Length}) /call INItoArray "${Character_Ini},Nukes,LureFire#" MyLureFire
-  /if (${Ini[${Character_Ini},Nukes,LureCold#1].Length}) /call INItoArray "${Character_Ini},Nukes,LureCold#" MyLureCold
-  /if (${Ini[${Character_Ini},Nukes,LureMagic#1].Length}) /call INItoArray "${Character_Ini},Nukes,LureMagic#" MyLureMagic
+  /if (${Ini[${Character_Ini},Nukes,Nuke#1].Length}) /call INItoArray "${Character_Ini},Nukes,${nukesToUse}#" MyNukes
 
 | [DoTs]
   /if (${Ini[${Character_Ini},DoTs,DoT on Assist#1].Length})  /call INItoArray "${Character_Ini},DoTs,DoT on Assist#" Assist_DoTs
@@ -1481,15 +1406,6 @@ SUB assist_SpellArrays
 }
 
   /if (${MyNukes.Size} > 0)		        /call BuildSpellArray "MyNukes"	        "Nukes2D"
-  /if (${MyBigFire.Size} > 0)		      /call BuildSpellArray "MyBigFire"	      "BigFire2D"
-  /if (${MyBigCold.Size} > 0)		      /call BuildSpellArray "MyBigCold"	      "BigCold2D"
-  /if (${MyBigMagic.Size} > 0)		    /call BuildSpellArray "MyBigMagic"	    "BigMagic2D"
-  /if (${MyFastFire.Size} > 0)		    /call BuildSpellArray "MyFastFire"	    "FastFire2D"
-  /if (${MyFastCold.Size} > 0)		    /call BuildSpellArray "MyFastCold"	    "FastCold2D"
-  /if (${MyFastMagic.Size} > 0)		    /call BuildSpellArray "MyFastMagic"	    "FastMagic2D"
-  /if (${MyLureFire.Size} > 0)		    /call BuildSpellArray "MyLureFire"	    "LureFire2D"
-  /if (${MyLureCold.Size} > 0)		    /call BuildSpellArray "MyLureCold"	    "LureCold2D"
-  /if (${MyLureMagic.Size} > 0)		    /call BuildSpellArray "MyLureMagic"	    "LureMagic2D"
 
   /if (${PBAE_Spells.Size} > 0)		    /call BuildSpellArray "PBAE_Spells"	      "PBAE_Spells2D"
   /if (${TargetAE_Spells.Size} > 0)		/call BuildSpellArray "TargetAE_Spells" 	"TargetAE_Spells2D"
@@ -1568,38 +1484,13 @@ SUB assist_CharacterSettings
 		/if (!${Ini[${Character_Ini},Melee Abilities].Length}) /call WriteToIni "${Character_Ini},Melee Abilities,Ability#1"
 	}
 	| If I'm a casting class, add Nuke entries.
-	/if (${Select[${Me.Class.ShortName},BST,DRU,ENC,MAG,PAL,NEC,RNG,SHD,SHM,WIZ]}) {
+	/if (${Select[${Me.Class.ShortName},BST,CLR,DRU,ENC,MAG,PAL,NEC,RNG,SHD,SHM,WIZ]}) {
 		/if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
 	}
-  /if (${Select[${Me.Class.ShortName},WIZ]}) {
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
+  /if (${Select[${Me.Class.ShortName},DRU,RNG,MAG,WIZ]}) {
     /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigCold#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigMagic#1"
     /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastCold#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastMagic#1"
     /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureCold#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureMagic#1"
-  }
-  /if (${Select[${Me.Class.ShortName},MAG]}) {
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigMagic#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastMagic#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureMagic#1"
-  }
-  /if (${Select[${Me.Class.ShortName},RNG,DRU]}) {
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigCold#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastCold#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureCold#1"
   }
 
 	| If I'm a casting class, add DoT entries.

@@ -303,7 +303,8 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	/if (${oldItem.Length}) /call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
 
 	/if (${Following} && !${Assisting}) /call AquireFollow
-  /if (${returnTwist})	/call unpauseTwist
+  /if (${Me.Class.ShortName.Equal[BRD]}) /varset resumeTwistDelay 1s
+  |/if (${returnTwist})	/call unpauseTwist
 	
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
 	|/varset Debug_Casting FALSE

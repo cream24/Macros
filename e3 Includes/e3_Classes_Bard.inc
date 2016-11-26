@@ -2,8 +2,8 @@
 |- e3_Classes_Bard.inc v3.0 ( originally designed to work with e3.mac )	-|
 |- Written by Killians of PEQ											                      -|
 |------------------------------------------------------------------------|
-#event saveMelody "<#1#> SaveMelody #2# #3#"
-#event saveMelody "[MQ2] SaveMelody #2# #3#"
+#event saveMelody "<#1#> Save Melody #2# #3#"
+#event saveMelody "[MQ2] Save Melody #2# #3#"
 SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 /if (${Debug}) /echo |- EVENT_saveMelody ==>
 	| If no ChatSender is defined, make one.
@@ -25,7 +25,7 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 		| If the gem number is not recognized
 		/if (!${Int[${songsToSave.Arg[${i}, ]}]} || ${Int[${songsToSave.Arg[${i}, ]}]} < 1 || ${Int[${songsToSave.Arg[${i}, ]}]} > 9) {
 			/if (${songsToSave.Arg[${i}, ].NotEqual[-Overwrite]}) {
-				/echo [${songsToSave.Arg[${i}, ]}] is not a valid gem number.  Please use the following syntax when saving melodies, "Save Melody [NAME] [# # # # #] (-Overwrite)".  Ex.  /echo Save Melody Raid 1 2 3 4 5 -Overwrite
+				/echo [${songsToSave.Arg[${i}, ]}] is not a valid gem number.  Please use the following syntax when saving melodies, "Save Melody [NAME] [# # # # #] (-Overwrite)".  Ex.  /echo Save Melody Raid 1 2 3 4 5 6 7 -Overwrite
 			}
 		} else {
 			/echo Song#${i}=${Me.Gem[${songsToSave.Arg[${i}, ]}]}/gem|${songsToSave.Arg[${i}, ]}
@@ -95,6 +95,7 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
 				/if (${Bool[${songList}]}) {
 					| Twist the newly built songList.
 					/varset playingMelody TRUE
+					/varset returnTwist FALSE
 					/varset songSet ${songList}
 					/docommand ${ChatToggle} Playing [${melodyName}] melody...
 					/twist ${songSet}
@@ -112,7 +113,7 @@ SUB pauseTwist
 /if (${Debug} || ${Debug_Casting}) /echo |- pauseTwist ==>
 	/varset	returnTwist TRUE
 	/squelch /twist stop
-	/delay 20 !${Me.Casting.ID}	
+	/delay 20 !${Me.Casting.ID}
 /if (${Debug} || ${Debug_Casting}) /echo <== pauseTwist -|
 /return
 
@@ -136,8 +137,9 @@ Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
 	/call InitoVar "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
   /declare returnTwist		bool outer FALSE
-  /declare playingMelody		bool outer FALSE
+  /declare playingMelody	bool outer FALSE
   /declare songSet string outer
+  /declare resumeTwistDelay timer outer
 /if (${Debug}) /echo <== BRD_Setup -|
 /return
 
@@ -145,6 +147,7 @@ Sub BRD_Setup
 Sub BRD_Background_Events	
 	/doevents saveMelody
 	/doevents startMelody
+	/if (${returnTwist} && !${Bool[${Me.Casting}]} && !${Twist.Twisting} && !${resumeTwistDelay}) /call unpauseTwist
 	| Check melody
 	|/if (!${ActionTaken} && ${playingMelody} && !${Twist.Twisting} && !${Bool[${Me.Casting}]} && ${Bool[${songSet}]}) /doevents startMelody
 /return
