@@ -1,0 +1,216 @@
+| # orig @author - FZLives
+| # Creamo rework
+| # Auto COH's
+| The following #define specifies which channel announcements made by this macro go to. It should always
+| be /gu, except when working on this macro, in which case it can be changed to /echo or /tell <charactername>
+| in order to cut back on /gu spam.
+#define    /announce    /gu
+| Set the following define to the number of DeciSeconds (tenths of a second) of no activity
+| to wait before automatically dropping from a group.
+#define    IdleTimerDS        100
+| If a group member is within CoHOutsideOfRadius units of the Mage running this macro, it's assumed
+| that they've already been CoH'd, and will not be CoH'd again.
+#define CoHOutsideOfRadius    50
+| If you want this macro to CoH only characters who are a member of the casting Mage's guild, set the
+| following #define to TRUE.
+#define CoHGuildiesOnly    FALSE
+
+#define cohSpellGem 8
+
+Sub Main
+    | This /delay 1 should be the first line of any macro that may be launched by another macro. MQ2 bug work-around.
+    /delay 1
+    /if ( ${Me.Class.Name.NotEqual[Magician]} ) {
+        /echo I am not a Magician, so I cannot run a Call of the Hero macro.
+        /popup I am not a Magician, so I cannot run a Call of the Hero macro.
+        /endmacro
+    } else /if ( ${FindItemCount[=Pearl]} == 0 ) {
+        /announce I am completely out of Pearls! I need to be re-stocked before I can cast Call of the Hero.
+        /popup Out of Pearls!
+        /endmacro
+    } else /if ( ${FindItemCount[=Pearl]} < 5 ) {
+        /announce I have only ${FindItemCount[=Pearl]} Pearl${If[${FindItemCount[=Pearl]}>1,s,]} left! I will not automatically CoH until I am restocked.
+        /announce Contact my owner to have him/her manually CoH someone who has a supply of pearls available to re-stock me.
+        /endmacro
+    } else /if (!${Plugin[MQ2Cast].Name.Length}) {
+		/popup MQ2Cast which is not loaded, ending macro
+		/announce I require MQ2Cast which is not loaded, ending macro
+		/endmacro
+	}
+	/if (!${Bool[${Me.Gem[Call of the Hero]}]}) {
+		/announce Memorizing Call of the Hero
+		/memorize 1771 cohSpellGem
+	}
+    | Now announces the Mage's supply of Pearls in guild chat, so that guildies know if they need to bring Pearls
+    | to restock the CoH Bot.
+    /announce COH activated in ${Zone.Name}. ${FindItemCount[=Pearl]} Pearls
+
+    :SubMainLoop
+        /if (${Me.Grouped}) {
+            /if ( !${Defined[timerIdleAutoDisband]} ) {
+                /declare timerIdleAutoDisband timer outer IdleTimerDS
+            } else /if ( ${timerIdleAutoDisband} == 0 ) {
+                /call Disband
+            }			
+        }
+		/if (${Me.CombatState.Equal[COMBAT]}) {
+			/popup CoH Bot is in combat, this is no bueno
+			/announce CoH Bot is in combat, this is no bueno
+			/delay 3s
+		}
+        /doevents GroupInviteFrom
+        /delay 1
+		/if (${Me.Grouped}) /call CoHGroup		
+    /goto :SubMainLoop
+/return
+
+
+Sub CoHGroup
+	/declare iGroupMemberCOH  int local
+	/declare iCoHsPerformed   int local
+	/declare grouplist string local
+	/for iGroupMemberCOH 1 to ${Group.Members}
+		/varset grouplist ${grouplist}${Group.Member[${iGroupMemberCOH}].CleanName},
+	/next iGroupMemberCOH
+	/announce CoHing ${grouplist} 
+	
+	:COHGroupLoop
+		/varset iCoHsPerformed 0
+		/for iGroupMemberCOH 1 to ${Group.Members}
+			|/echo CoH ${Group.Member[${iGroupMemberCOH}].CleanName} ${iGroupMemberCOH} ${sGroupMembersAlreadyCoHd} ${Bool[${sGroupMembersAlreadyCoHd.Find[${Group.Member[${iGroupMemberCOH}].CleanName},]}]}
+			/if (${Select[${Group.Member[${iGroupMemberCOH}].Type},PC]} == 1 && !${Bool[${sGroupMembersAlreadyCoHd.Find[${Group.Member[${iGroupMemberCOH}].CleanName},]}]} ) {
+				:waitforCoHReady
+				/if (!${Me.SpellReady[Call of the Hero]} && !${Me.AltAbilityReady[Call of the Hero]}) {
+					/delay 2
+					/goto :waitforCoHReady
+				}
+				/if (${Me.CurrentMana} < (${Spell[Call of the Hero].Mana} + 50)) {
+					/if (!${Me.Sitting}) /sit
+					/delay 60s ${Me.CurrentMana} > (${Spell[Call of the Hero].Mana} + 50)
+				}
+				/delay 5			
+				/call PerformCoHOnTarget "${Group.Member[${iGroupMemberCOH}].CleanName}"
+				/if ( ${Select[${Macro.Return},TRUE]} ) {
+					/varcalc iCoHsPerformed  ${iCoHsPerformed} + 1
+				}
+			}
+		/next iGroupMemberCOH
+	/if ( ${iCoHsPerformed} >= 1 ) {
+		/goto :COHGroupLoop
+	}
+	/call Disband
+/return
+
+Sub Disband
+ /if (${Me.Grouped}) {
+	/if (${Defined[sGroupMembersAlreadyCoHd]}) {
+		/announce Done CoHing ${sGroupMembersAlreadyCoHd}
+		/g Done CoHing ${sGroupMembersAlreadyCoHd}
+		/deletevar sGroupMembersAlreadyCoHd		
+	} else {
+		/g I had no one to CoH, disbanding
+	}
+	/squelch /target myself
+	/delay 15 ${Target.ID} == ${Me.ID}
+	/disband
+	/delay 1s
+ }
+/if (${Defined[timerIdleAutoDisband]}) /deletevar timerIdleAutoDisband 
+/return
+
+Sub PerformCoHOnTarget(string sTargetName)
+    /declare iGroupMember    int        local
+    /declare iCoHTargetID    int        local    0
+    | I am always Group.Member[0], so start with index 1.
+    /for iGroupMember 1 to ${Group.Members}
+    /if ( ${Group.Member[${iGroupMember}].CleanName.Equal[${sTargetName}]} ) {
+        /varset iCoHTargetID  ${Group.Member[${iGroupMember}].ID}
+    } else {
+        /next iGroupMember
+    }
+    | If we get to this point and iCoHTargetID is still zero, it means that sTargetName is not in my group.
+    /if ( ${iCoHTargetID} == 0 ) {
+        /echo ${sTargetName} is not in my group. How the heck did they manage to fire this event? Possibly said "/g me" then immediately disbanded?
+        | Return false to indicate that sTargetName was not CoH'd.
+        /return FALSE
+    }
+    | Now, make sure that sTargetName is a valid CoH target...
+    /if ( ${Select[${Spawn[id ${iCoHTargetID}].Type},PC]} != 1 ) {
+        /echo Cannot find PC ${sTargetName} ${iCoHTargetID} CoH target just died and became a corpse.
+        /return FALSE
+    } else /if ( ${Spawn[id ${iCoHTargetID}].Distance} < CoHOutsideOfRadius ) {
+        | Seems that the target has already been CoH'd. No need to waste the time (and a Pearl) doing it again.
+        /return FALSE
+    } else /if ( CoHGuildiesOnly && ${Me.Guild.Length} && ${Spawn[id ${iCoHTargetID}].Guild.NotEqual[${Me.Guild}]} ) {
+        /g I'm sorry, ${Spawn[id ${iCoHTargetID}].CleanName}. I'm only authorized to CoH players who wear the <${Me.Guild}> guild tag.
+        /return FALSE
+    } else /if ( ${FindItemCount[=Pearl]} < 5 ) {
+        /g I'm sorry, I'm dangerously low on Pearls, and cannot CoH you.
+        /g If any of you have Pearls that can re-stock me, please contact the owner of this Mage and have them CoH you manually.        
+        /if ( ${FindItemCount[=Pearl]} > 0 ) {
+            /announce I only have ${FindItemCount[=Pearl]} Pearl(s) in my inventory. Automatic CoHs are suspended until I get more Pearls.
+            /announce If you have Pearls with you that you can re-stock me with, let my owner know so that he/she can CoH you manually.
+        } else {
+            /announce I have no Pearls, so I am unable to perform any CoHs.
+        }
+        /popup Critically low on Pearls! Restock ASAP. Ending Macro.
+        /echo Critically low on Pearls! Restock ASAP. Ending Macro.
+        /endmacro
+    } else {
+        | Ok, all of the pre-conditions are met. Let's actually attempt to perform a CoH. But first, make sure we're ready and able to cast
+        | the CoH spell successfully...
+            | Alright! If we got to this point, it appears that we have a valid target, and are ready to cast CoH on him/her.
+            | First, get the right person on target...
+            /squelch /target pc id ${iCoHTargetID}
+            /delay 2s ${Target.ID} == ${iCoHTargetID}
+            /if ( ${Target.ID} != ${iCoHTargetID} ) {
+                /g Sorry, ${Spawn[id ${iCoHTargetID}].CleanName}. I can't target you for CoH for some reason. Lag, perhaps?
+                /return FALSE
+            }    
+			
+			/if (${Me.AltAbilityReady[Call of the Hero]}) {
+				/casting 7050 -maxtries|2				
+				/delay 16s ${Cast.Status.Equal[I]}
+			} else /if (${Me.SpellReady[Call of the Hero]}) {
+				/casting 1771 gem8 -maxtries|2
+				/delay 16s ${Cast.Status.Equal[I]}				
+			}
+            | Should put in a check for the "There are no heroes here" message, or whatever it is.
+			/if (${Target.Distance} < 30) {
+				/g Successfully CoH'd ${Spawn[id ${iCoHTargetID}].CleanName}.
+				/if ( !${Defined[sGroupMembersAlreadyCoHd]} ) {
+					/declare sGroupMembersAlreadyCoHd string outer ${Spawn[id ${iCoHTargetID}].CleanName},
+				} else {
+					/varset sGroupMembersAlreadyCoHd ${sGroupMembersAlreadyCoHd}${Spawn[id ${iCoHTargetID}].CleanName},
+				}
+				/delay 1
+				/return TRUE
+				/if (${Defined[timerIdleAutoDisband]}) /varset timerIdleAutoDisband    IdleTimerDS				
+			} else {
+				/return FALSE
+			}			
+    }
+/return FALSE
+
+#event GroupInviteFrom    "#1# invites you to join a group."
+Sub Event_GroupInviteFrom(string sEventText, string sInvitedByName)
+	/delay 5
+    /if ( CoHGuildiesOnly && ${Me.Guild.Length} && ${Spawn[pc ${sInvitedByName}].Guild.NotEqual[${Me.Guild}]} ) {
+        /if ( !${Me.Grouped} ) {
+			/echo huh
+            /announce ${sInvitedByName} invited me to a group, but ${If[${Spawn[pc ${sInvitedByName}].Gender.Equal[Female]},she,he]} is not a member of <${Me.Guild}>, so I am declining the invitation without saying anything to ${If[${Spawn[pc ${sInvitedByName}].Gender.Equal[Female]},her,him]}.
+            /target myself
+            /disband
+        }
+        /return
+    }
+    /if (${Me.Grouped}) {
+        /tell ${sInvitedByName} Sorry, I'm working on CoHing the group with the following people in it: ${Me.GroupList}. Please invite me again in a minute or two when I'm done.
+        /return
+    }	
+    /squelch /target clear
+    /delay 5
+	/invite
+	/delay 2s ${Me.Grouped}
+	/delay 5
+/return

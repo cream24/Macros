@@ -54,7 +54,6 @@ Cams.mac
 DoorTests.mac
 combine.mac
 combine_ikk4.mac
-Coh.mac
 click.mac
 Arrows.mac
 camp.mac
@@ -170,3 +169,5 @@ e3 Bot Inis/zmtz_pre/Pontoon_PEQTGC.ini
 e3 Macro Inis/doorquery.txt
 ground.mac
 e3 Bot Inis/Moinkay_CreamTest.ini
+Coho2.mac
+e3 Bot Inis/Cerltwo_CreamTest.ini
