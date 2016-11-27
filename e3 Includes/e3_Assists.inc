@@ -454,7 +454,6 @@ SUB check_Nukes
     }
 
    /for s 1 to ${Nukes2D.Size[1]}
-    /echo mainloop
     /varset castIndex ${s}
     | if /rotate is defined, and the current array index was the last successful cast, skip to next index
     /if (${Nukes2D[${s},${iCastName}].Equal[${lastSuccessfulCast}]} && ${Nukes2D[${s},${iRotate}]}) {
