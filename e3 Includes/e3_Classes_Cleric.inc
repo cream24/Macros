@@ -153,27 +153,23 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
           /if (${Target.Distance} > 15 && ${Target.Distance} < 100) {
             /corpse
             /delay 2
-            /corpse
-            /delay 2
             /if (${Target.Distance} > 35) {
               /tell ${playerName} skipping rez, corpse drag failed: ${Target.Distance} distance
               /goto :skipRez
             }
           }
           |check if anyone else has rezd the corpse this iteration
-          /doevents check_otherRezzing
-          /delay 2
-          |/echo or${otherRezzing} cid${corpseID}-
-          /if (${Select[${otherRezzing},${corpseID}-]}) {
-            /echo Someone is already rezzing ${playerName} ${corpseID}
-            /goto :skipRez
-          }
           |corpse can be rezd and is in range
           /call check_Ready "rezArray2D" 1
           /if (${Macro.Return}) {
-            /delay 2
+            /doevents check_otherRezzing
+            |/echo or${otherRezzing} cid${corpseID}-
+            /if (${Select[${otherRezzing},${corpseID}-]}) {
+              /echo Someone is already rezzing ${playerName} ${corpseID}
+              /goto :skipRez
+            }
             /bc Resurrecting-${corpseID}
-            /delay 2
+            /delay 1
             /call e3_cast ${corpseID} "rezArray2D" 1
             /if (${castReturn.Equal[CAST_SUCCESS]}) /varset corpseList ${corpseList}${corpseID},
           } else {
@@ -382,6 +378,7 @@ sub Event_AE_CR(string line)
       /bc MGB Celestial Regeneration inc...
       /rs MGB Celestial Regeneration inc...
      /casting "Mass Group Buff|alt" "-maxtries|3"
+     /delay 5
      /casting "Celestial Regeneration|alt" "-maxtries|3"
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...

@@ -22,6 +22,7 @@ SUB check_Zone
 	/varset idleTimer ${idleInterval}m
 	| Turn off assist / attack
 	/call AssistOff
+  /if (${use_TargetAE} || ${use_PBAE}) /call event_AEOff "NULL" "${Me.CleanName}"
 	| Load Spellset
 	/if (${Me.Class.CanCast} && ${Defined[Default_SpellSet]}) /call check_Gems
 	| Reset ignored spell list
