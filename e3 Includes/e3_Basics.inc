@@ -992,18 +992,18 @@ SUB EVENT_medOn(line, ChatSender)
 		| Check that I'm a caster, and not a bard
 |		/if (${Me.Class.CanCast} && ${Me.Class.ShortName.NotEqual[BRD]}) {
 		/if (${Me.Class.ShortName.NotEqual[BRD]} && ${Me.Class.ShortName.NotEqual[WAR]}) {	
-			| Set medbreak variables
-			/varset medBreak TRUE
-			/if (${line.Find[ Hold]}) {
-				/varset medBreak_Hold TRUE
-			} else {
-				/varset medBreak_Hold FALSE
-			}
 			| Check range
 			/if (${Spawn[pc ${ChatSender}].Distance} < ${MaxResponseDist}) {
 				/docommand ${ChatToggle} Meditating...
+        | Set medbreak variables
+        /varset medBreak TRUE
+        /if (${line.Find[ Hold]}) {
+          /varset medBreak_Hold TRUE
+        } else {
+          /varset medBreak_Hold FALSE
+        }
 			} else {
-				/docommand ${ChatToggle} I am too far away from you to meditate, right now.  I'll start meditating when you're in range.
+				/docommand ${ChatToggle} I am too far away from you to meditate
 			}
 		}
 	}
@@ -1045,9 +1045,9 @@ SUB check_MedBreak
 /if (${Debug} || ${Debug_Basics}) /echo |- check_MedBreak ==>
 
 	| If I'm following, check distance to follow target
-	/if (${Following} && ${SpawnCount[pc ${FollowTarget}]} && ${Spawn[pc ${FollowTarget}].Distance} > ${LeashLength}  && !${Me.Moving}) {
+	/if (${Following} && ${SpawnCount[pc =${FollowTarget}]} && ${Spawn[pc =${FollowTarget}].Distance} < ${LeashLength}  && !${Me.Moving}) {
 		/call check_Follow
-		/delay 30 ${Me.Moving}
+		/delay 10 ${Me.Moving}
 	}
 	| If I'm not moving disengage any active follow plugins
 	/if (!${Me.Moving} && (${Stick.Active} || ${NetAdvPath.Status}==1)) {
@@ -1055,7 +1055,13 @@ SUB check_MedBreak
 		/if (${NetAdvPath.Status}==1) /squelch /netfollow off
 	}
 	| If End MedBreak in Combat (On/Off)=On, and a netbot is in combat, call medOff
-	/if (${medOn_combatBreak} && ${Me.CombatState.Equal[COMBAT]}) /call EVENT_medOff "NULL" "${Me.CleanName}"
+	/if (${medOn_combatBreak} && ${Me.CombatState.Equal[COMBAT]}) {
+    /docommand ${ChatToggle} Ending Medbreak.
+    /varset medBreak FALSE
+    /varset medBreak_Hold FALSE
+    /if (${Me.Sitting}) /stand
+	}
+
 	/if (!${Me.Feigning}) {
 		| do ***Meditating*** popup
 		/if (!${medbreak_Popup_Timer}) {
@@ -1658,7 +1664,8 @@ Sub basics_Setup
 
 	/declare LeashLength int outer 100
 	/if (${Ini[${genSettings_Ini},General,Leash Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Leash Length]}]}) /call IniToVar "${genSettings_Ini},General,Leash Length" LeashLength int outer
-	/if (!${Ini[${genSettings_Ini},General,End MedBreak in Combat(On/Off)].Length}) /call IniToVar "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" medOn_combatBreak bool outer
+	/if (${Ini[${genSettings_Ini},General,End MedBreak in Combat(On/Off)].Length}) /call IniToVar "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" medOn_combatBreak bool outer
+  /if (${Ini[${genSettings_Ini},General,AutoMedBreak PctMana].Length}) /call IniToVar "${genSettings_Ini},General,AutoMedBreak PctMana" autoMedPctMana int outer
 	| -Add Groups_Ini file path
 	/if (!${Ini[${MacroData_Ini},File Paths,Saved Groups].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Saved Groups" "e3 Macro Inis\Saved Groups.ini" 1
 	| -Import Groups_Ini.
@@ -1726,6 +1733,7 @@ SUB basics_MacroSettings
 	/call WriteToIni "${genSettings_Ini},General,Max Response Distance" 500
 	/call WriteToIni "${genSettings_Ini},General,Leash Length" 250
 	/call WriteToIni "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" On
+  /call WriteToIni "${genSettings_Ini},General,AutoMedBreak PctMana" 0
 
 /if (${Debug} || ${Debug_Basics}) /echo <== basics_MacroSettings -|
 /RETURN
