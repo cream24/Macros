@@ -232,7 +232,7 @@ SUB hot_tanks
 	/for t 1 to ${tanks.Size}
 		/for s 1 to ${hotSpells2D.Size[1]}
 			/if (${Bool[${NetBots[${tanks[${t}]}].InZone}]} && ${NetBots[${tanks[${t}]}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
-				/call check_HotTankStack "${tanks[${t}]}"
+				/call check_HotTankStack "${tanks[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
 				/if (${Macro.Return}) {			
 					/call check_Ready "hotSpells2D" ${s}
 					|/echo check_Ready ${Macro.Return}
@@ -273,19 +273,22 @@ SUB hot_importantBots
   /for t 1 to ${importantBots.Size}
     /for s 1 to ${hotSpells2D.Size[1]}
     /if (${Bool[${NetBots[${importantBots[${t}]}].InZone}]} && ${NetBots[${importantBots[${t}]}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
-      /call check_Ready "hotSpells2D" ${s}
-      |/echo check_Ready ${Macro.Return}
+      /call check_HotTankStack "${importantBots[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
       /if (${Macro.Return}) {
-        /call check_Distance ${NetBots[${importantBots[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]}
-        |/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
+        /call check_Ready "hotSpells2D" ${s}
+        |/echo check_Ready ${Macro.Return}
         /if (${Macro.Return}) {
-          /call check_Mana "hotSpells2D" ${s}
-          |/echo check_Mana ${Macro.Return} ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs}  ${NetBots[${currentBot}].PctHPs}
+          /call check_Distance ${NetBots[${importantBots[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]}
+          |/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
           /if (${Macro.Return}) {
-            |/echo currbot ${Bool[${currentBotID}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${NetBots[${currentBot}].PctHPs}
-            /if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
-              /varset currentBot ${importantBots[${t}]}
-              /varset currentSpellIndx ${s}
+            /call check_Mana "hotSpells2D" ${s}
+            |/echo check_Mana ${Macro.Return} ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs}  ${NetBots[${currentBot}].PctHPs}
+            /if (${Macro.Return}) {
+              |/echo currbot ${Bool[${currentBotID}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${NetBots[${currentBot}].PctHPs}
+              /if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
+                /varset currentBot ${importantBots[${t}]}
+                /varset currentSpellIndx ${s}
+              }
             }
           }
         }
@@ -397,23 +400,27 @@ SUB hot_pets
 |------------------------------------------------|
 |- Check Tank hot stacking					    -|
 |------------------------------------------------|
-SUB check_HotTankStack(targetName)
+SUB check_HotTankStack(targetName, spellID)
 	/declare passCheck bool local TRUE
 	/declare i int local
 	/if (!${Defined[targetName]}) {
 		/declare targShortBuff string local ${NetBots[${Target.CleanName}].ShortBuff.Replace[ ,,]}
 	} else {
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
-	}	
-	/for i 1 to ${hotTankNoStack.Size}
-		/if (${Select[${hotTankNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
-	/next i	
+	}
+	/if (${targShortBuff.Find[${spellID},]}) {
+	  /varset passCheck FALSE
+  } else {
+    /for i 1 to ${hotTankNoStack.Size}
+      /if (${Select[${hotTankNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+    /next i
+	}
 /RETURN ${passCheck}
 
 |------------------------------------------------|
 |- Check Important Bot hot stacking				-|
 |------------------------------------------------|
-SUB check_HotImportantBotStack(targetName)
+SUB check_HotImportantBotStack(targetName, spellID)
 	/declare passCheck bool local TRUE
 	/declare i int local
 	/if (!${Defined[targetName]}) {
@@ -421,15 +428,19 @@ SUB check_HotImportantBotStack(targetName)
 	} else {
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
-	/for i 1 to ${hotImportantNoStack.Size}
-		/if (${Select[${hotImportantNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
-	/next i
+  /if (${targShortBuff.Find[${spellID},]}) {
+    /varset passCheck FALSE
+  } else {
+    /for i 1 to ${hotImportantNoStack.Size}
+      /if (${Select[${hotImportantNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+    /next i
+  }
 /RETURN ${passCheck}
 
 |------------------------------------------------|
 |- Check Netbot Bot hot stacking				-|
 |------------------------------------------------|
-SUB check_HotAllStack(targetName)
+SUB check_HotAllStack(targetName, spellID)
 	/declare passCheck bool local TRUE
 	/declare i int local
 	/if (!${Defined[targetName]}) {
@@ -437,15 +448,19 @@ SUB check_HotAllStack(targetName)
 	} else {
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
-	/for i 1 to ${hotAllNoStack.Size}
-		/if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
-	/next i
+  /if (${targShortBuff.Find[${spellID},]}) {
+    /varset passCheck FALSE
+  } else {
+    /for i 1 to ${hotAllNoStack.Size}
+      /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+    /next i
+  }
 /RETURN ${passCheck}
 
 |------------------------------------------------|
 |- Check Pet hot stacking				-|
 |------------------------------------------------|
-SUB check_HotPetStack(targetName)
+SUB check_HotPetStack(targetName, spellID)
   /declare passCheck bool local TRUE
   /declare i int local
   /if (!${Defined[targetName]}) {
@@ -453,9 +468,13 @@ SUB check_HotPetStack(targetName)
   } else {
     /declare targShortBuff string local ${NetBots[${targetName}].PetBuff.Replace[ ,,]}
   }
-  /for i 1 to ${hotAllNoStack.Size}
-    /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
-  /next i
+  /if (${targShortBuff.Find[${spellID},]}) {
+    /varset passCheck FALSE
+  } else {
+    /for i 1 to ${hotAllNoStack.Size}
+      /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+    /next i
+  }
 /RETURN ${passCheck}
 
 

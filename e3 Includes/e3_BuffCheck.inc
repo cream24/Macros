@@ -199,6 +199,7 @@ SUB event_BuffAll
 |----------------------------------------------------|
 |- Tell a character to turn on/off all buffing		-|
 |----------------------------------------------------|
+#EVENT toggleBuffs "<#1#> Toggle Buffs #2#"
 #EVENT toggleBuffs "#1# tells you, 'Toggle Buffs #2#'"
 SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
@@ -215,6 +216,7 @@ SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 |----------------------------------------------------|
 |- Tell a character to turn on/off combat buffing	-|
 |----------------------------------------------------|
+#EVENT toggleCombatBuffs "<#1#> Toggle Combat Buffs #2#"
 #EVENT toggleCombatBuffs "#1# tells you, 'Toggle Combat Buffs #2#'"
 SUB EVENT_toggleCombatBuffs(line, ChatSender, buffSetting)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
