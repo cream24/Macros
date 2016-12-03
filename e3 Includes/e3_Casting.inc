@@ -105,8 +105,9 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   /if (${Me.Class.ShortName.Equal[Rog]}) {
     /if (${Me.Invis}) {
       |im near other people its ok to break hide
-      /if (${SpawnCount[pc radius 30]} > 1 && ${Me.AbilityReady[Hide]}) {
+      /if (${SpawnCount[pc radius 30]} > 1 && ${Me.AbilityReady[Hide]} && !${SpawnCount[npc radius 100]}) {
         /doability hide
+        |/echo skipping buff, hidden
       }
     }
   }
@@ -170,8 +171,8 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	|-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	|- Spells, AA, Items
 	} else {
-			|- Stop following for spell/item/aa with a cast time > 0 MyCastTime
-		/if (${${ArrayName}[${ArrayIndex},${MyCastTime}]} >0) {
+			|- Stop following for spell/item/aa with a cast time > 0 MyCastTime, unless im a bard
+		/if (${${ArrayName}[${ArrayIndex},${MyCastTime}]} >0 && ${Me.Class.ShortName.NotEqual[BRD]}) {
 			/if (${Stick.Status.Equal[on]}) /squelch /stick pause
 			/if (${NetAdvPath.Following} && !${NetAdvPath.Paused} && ${Following}) /squelch /netfollow pause	
 			/delay 3 !${Me.Moving}
@@ -200,7 +201,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		/casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 
 		|- Memorizing spell
-		/if (${Cast.Status.Find[M]}) /delay 5s !${Cast.Status.Find[M]}
+		/if (${Cast.Status.Find[M]}) /delay 4s !${Cast.Status.Find[M]}
 		|- Set expected cast end time in 1/10ths of a second
 		/varcalc castEndTime ${Me.Casting.MyCastTime}/100
     |/echo incastchecks ${Time}
@@ -208,6 +209,11 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 |- check for reasons to cancel casting
 
 		/if (${Cast.Status.Find[C]}) {
+		  |dont allow item swap/must equip interrupts to avoid crashes
+		  /if (${oldItem.Length}) {
+		    /delay 2
+		    /goto :cast_still_pending
+		  }
 			/if (!${interruptFlag}) {
 			   |- Run SubToRun
 			   |/varset Debug_Casting TRUE
@@ -301,7 +307,6 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 
 :skipCast
 	/if (${oldItem.Length}) /call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
-
 	/if (${Following} && !${Assisting}) /call AquireFollow
   /if (${Me.Class.ShortName.Equal[BRD]}) /varset resumeTwistDelay 1s
   |/if (${returnTwist})	/call unpauseTwist

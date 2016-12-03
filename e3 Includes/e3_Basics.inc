@@ -130,10 +130,14 @@ SUB AquireFollow
 
 |----------------------------------------------------------------------------|
 |- Disengages follow on bots who are in the same zone as the ChatSender.	  -|
-|- Use, /stop, in  /goup, or /bc.							                              -|
+|- Use, /stop, in  /group, or /bc.							                              -|
 |----------------------------------------------------------------------------|
 #EVENT Stop	"<#1#> Stop"
 #EVENT Stop "#1# tells the group, 'Stop'"
+#EVENT Stop "#1# you tell your party, 'Stop'"
+#EVENT Stop	"<#1#> Stop #2#"
+#EVENT Stop "#1# tells the group, 'Stop #2#'"
+#EVENT Stop "#1# you tell your party, 'Stop #2#'"
 SUB EVENT_Stop(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Stop ==>
 	| -Check if I'm following.
@@ -417,8 +421,14 @@ SUB EVENT_clickIt(line, ChatSender)
 		| if i have a door within 100 distance then move to it and try to click
 		/if (${debug_clickit}) /echo closest ${closestDoorID} ${closestDoorDist}
 		/if (!${Bool[${closestDoorID}]}) {
-			/echo \ay Aborting ClickIt: I could not find an acceptable door < 100 3D units
-			/return
+		  /squelch /doortarget
+		  /if (${DoorTarget.Distance} < 50) {
+        /varset closestDoorID ${Switch.ID}
+		  } else {
+        /echo \ay Aborting ClickIt: I could not find an acceptable door < 100 3D units
+        /return
+		  }
+
 		}
 		/squelch /doortarget id ${closestDoorID}
 		/if (${DoorTarget.Distance} > 20) {
@@ -1616,10 +1626,63 @@ SUB EVENT_groupUp(line, ChatSender, eventParams)
 /if (${Debug}) /echo <== EVENT_groupUp -|
 /RETURN
 
-
-
 |---------------------------|
-|- Written by Stryd of PEQ -|
+#EVENT exp_group "[#1#] ExpGroup #2#"
+#EVENT exp_group "<#1#> ExpGroup #2#"
+#EVENT exp_group "#1# tells the group, 'ExpGroup #2#'"
+#EVENT exp_group "#1# tell your party, 'ExpGroup #2#'"
+SUB EVENT_exp_group(line,ChatSender, expToggle)
+	|/if (!${Ini[${Character_Ini},Swap Items].Length}) /call WriteToIni "${Character_Ini},Swap Items,;Melee" "Ruby of Determined Assault|Ranged"
+  /call verifyEvent "${ChatSender}" "${line}"
+  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+  |-    |-----------Valid User----------|    |-----------In Zone-------------|	|--------Included Bot-----------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
+
+    |enable KoS mode
+    /if (${Select[${expToggle},On,Yes,True,1]} > 0) {
+      /if (${Ini[${Character_Ini},Melee Abilities,Ability#1].Length}) /call INItoArray "${Character_Ini},Melee Abilities,Ability#" MyAbilities
+      /if (${Me.Class.ShortName.Equal[Rog]}) {
+      	/call buff_SpellArrays
+				/varset strikeDisc ${strikeDiscStr.Arg[1,/]}
+			}
+      /if (${Defined[NukeArray]} && ${Ini[${Character_Ini},Nukes,${KSNukeSet}#1].Length}) /varset NukeArray ${KSNukeSet}
+      /if (${Defined[KSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${KSWeaponSet}].Length}) /swap ${KSWeaponSet}
+      /echo \ag KS Mode Activated - get exp
+
+		|remove anything that could kos when out of group
+    } else /if (${Select[${expToggle},Off,No,False,0]} > 0) {
+      /if (${Select[${Me.Class.ShortName},${Ini[${genSettings_Ini},ExpGroup,NoCombatAbil]}]}) /deletevar MyAbilities
+      /if (${Defined[NukeArray]} && ${Ini[${Character_Ini},Nukes,${NoKSNukeSet}#1].Length}) /varset NukeArray ${NoKSNukeSet}
+			/if (${Defined[NoKSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${NoKSWeaponSet}].Length}) /swap ${NoKSWeaponSet}
+      /if (${Me.Class.ShortName.Equal[Rog]}) {
+				/varset strikeDisc 0
+        /declare i int local
+        :remove_poisons
+          /for i 1 to ${CombatBuffs2D.Size[1]}
+            /if (${CombatBuffs2D[${i},${iCastName}].Find[${expNoPoison}]}) {
+              /call RemoveSpellArrayElement "CombatBuffs2D" ${i}
+              /goto :remove_poisons
+            }
+          /next i
+          /for i 1 to ${SelfBuffs2D.Size[1]}
+          /if (${SelfBuffs2D[${i},${iCastName}].Find[${expNoPoison}]}) {
+            /call RemoveSpellArrayElement "SelfBuffs2D" ${i}
+            /goto :remove_poisons
+          }
+          /next i
+          /for i 1 to ${BotBuffs2D.Size[1]}
+          /if (${BotBuffs2D[${i},${iCastName}].Find[${expNoPoison}]}) {
+            /call RemoveSpellArrayElement "BotBuffs2D" ${i}
+            /goto :remove_poisons
+          }
+          /next i
+        /squelch ${Me.Buff[${expNoPoison}].Remove}
+      }
+      /echo \ag NoKS Mode Activated - do not get exp
+    }
+}
+/return
+
 |---------------------------|
 #EVENT reportMana "<#1#> Report mana#*#"
 SUB EVENT_reportMana(line,ChatSender)
@@ -1658,7 +1721,13 @@ Sub basics_Setup
 	/declare medBreak_Hold bool outer FALSE
 	/declare medbreak_Popup_Timer timer outer
 	/declare clickitRandomDelay int outer 5
-	
+
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" noKSWeaponSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_NukeSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_NukeSet" noKSNukeSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,KS_NukeSet].Length}) 				/call IniToVar "${genSettings_Ini},ExpGroup,KS_NukeSet" KSNukeSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoPoison].Length}) 					/call IniToVar "${genSettings_Ini},ExpGroup,NoPoison" expNoPoison string outer
+
 	/declare MaxResponseDist int outer 250
 	/if (${Ini[${genSettings_Ini},General,Max Response Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Response Distance]}]}) /call IniToVar "${genSettings_Ini},General,Max Response Distance" MaxResponseDist int outer
 
@@ -1721,6 +1790,7 @@ Sub basics_Background_Events
   /doevents dropBuff
   /doevents runThruZone
   /doevents macroHelp
+  /doevents exp_group
 |		/varset event_counter 1
 |	} else {
 |		/varcalc event_counter ${event_counter}+1
@@ -1734,6 +1804,12 @@ SUB basics_MacroSettings
 	/call WriteToIni "${genSettings_Ini},General,Leash Length" 250
 	/call WriteToIni "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" On
   /call WriteToIni "${genSettings_Ini},General,AutoMedBreak PctMana" 0
+
+	/call WriteToIni "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoExp
+	/call WriteToIni "${genSettings_Ini},ExpGroup,NoKS_NukeSet" NoExp
+	/call WriteToIni "${genSettings_Ini},ExpGroup,KS_WeaponSet" Main
+	/call WriteToIni "${genSettings_Ini},ExpGroup,KS_NukeSet" Exp
+	/call WriteToIni "${genSettings_Ini},ExpGroup,NoPoison" "Bite of the Shissar"
 
 /if (${Debug} || ${Debug_Basics}) /echo <== basics_MacroSettings -|
 /RETURN
