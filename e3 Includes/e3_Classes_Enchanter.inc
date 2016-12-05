@@ -108,7 +108,7 @@ Sub check_rune
 #event charmOn "<#1#> Charm on #2#"
 #event charmOn "#1# tells you, 'Charm on #2#'"
 sub event_charmOn(line, ChatSender, targetID)
-  /if (${Me.Class.ShortName.Equal[ENC]}) {
+  /if (${Me.Class.ShortName.Equal[ENC]} || ${Me.Class.ShortName.Equal[BRD]}) {
     /if (${Debug} || ${Debug_Ench}) /echo |- remove_RuneTarget ==>
       /if ((${Spawn[id ${targetID}].Distance} < 240 && !${Spawn[id ${targetID}].Named} && ${Spawn[id ${targetID}].Level} <= ${Me.Level} && ${SpawnCount[npc id ${targetID}]}>0) || ${targetID}==${Me.Pet.ID}) {
         /varset charmTarget ${targetID}
@@ -125,7 +125,7 @@ sub event_charmOn(line, ChatSender, targetID)
 #event charmOff "<#1#> Charm Off"
 #event charmOff "#1# tells you, 'Charm Off'"
 sub event_charmOff(line, ChatSender)
-  /if (${Me.Class.ShortName.Equal[ENC]}) {
+  /if (${Me.Class.ShortName.Equal[ENC]} || ${Me.Class.ShortName.Equal[BRD]}) {
     /if (${Debug} || ${Debug_Ench}) /echo |- remove_RuneTarget ==>
       /if (${doCharm}) {
         /docommand ${ChatToggle} << Charm Disabled ${Spawn[id ${charmTarget}].CleanName} >>
@@ -140,7 +140,7 @@ sub event_charmOff(line, ChatSender)
 #event toggleMez "<#1#> Mez #2#"
 #event toggleMez "#1# tells you, 'Mez #2#'"
 sub event_toggleMez(line, ChatSender, mezToggle)
-  /if (${Me.Class.ShortName.Equal[ENC]}) {
+  /if (${Me.Class.ShortName.Equal[ENC]} || ${Me.Class.ShortName.Equal[BRD]}) {
     /if (${Debug} || ${Debug_Ench}) /echo |- remove_RuneTarget ==>
       /if (${mezToggle.Equal[on]}) {
         /varset autoMez TRUE

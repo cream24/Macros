@@ -286,6 +286,8 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
       /delay 1
       /attack off
       /delay 1
+      /if (${Me.Invis}) /doability hide
+			/if (${Me.Sneaking}) /doability sneak
     }
     /call TrueTarget ${msgTarget}
 		:retry_Bark
@@ -1299,10 +1301,10 @@ SUB EVENT_Evacuate(line, ChatSender)
 		| -Attempt to evac.
 		/if (${Me.AltAbilityReady[Exodus]}) {
 			/docommand ${ChatToggle} Evacuating!
-			/call e3_Cast ${Me.ID} "Exodus" alt
+			/casting "Exodus" alt
 		} else /if (${Me.Book[${Evac_Spell.Arg[1,/]}]}) {
 			/docommand ${ChatToggle} Evacuating!
-			/call e3_Cast ${Me.ID} "${Evac_Spell.Arg[1,/]}/GiveUpTimer|30s"
+			/casting "${Evac_Spell.Arg[1,/]}"
 		} else {
 			/docommand ${ChatToggle} I am not able to Evac at this time.
 		}
