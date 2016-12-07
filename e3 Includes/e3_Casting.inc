@@ -60,7 +60,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   |if im invis and iCastInvis=0 (default except for heals)
   |if im a rog, not in combat, done no action for 10+ seconds, and near 2+ other players then drop invis to buff (allows autohide)
   /if (${Me.Invis}) {
-    /if (${Me.Class.ShortName.Equal[Rog]} && !${Me.Combat} && ${SpawnCount[pc radius 40]} > 2 && ${idleTimer}< 2900) {
+    /if (${Me.Class.ShortName.Equal[Rog]} && !${Me.Combat} && ${SpawnCount[pc radius 40]} > 2 && (${idleTimer}<${Math.Calc[${idleInterval}*600 - 100]} ) && !${SpawnCount[npc radius 100]}) {
       /makemevisible
     } else /if (!${${ArrayName}[${ArrayIndex},${iCastInvis}]}) {
       /varset castReturn CAST_INVISIBLE
@@ -101,16 +101,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
     /varset castReturn CAST_ZONING
     /goto :skipCast
   }
-  |pain in the ass rogue-specific logic
-  /if (${Me.Class.ShortName.Equal[Rog]}) {
-    /if (${Me.Invis}) {
-      |im near other people its ok to break hide
-      /if (${SpawnCount[pc radius 30]} > 1 && ${Me.AbilityReady[Hide]} && !${SpawnCount[npc radius 100]}) {
-        /doability hide
-        |/echo skipping buff, hidden
-      }
-    }
-  }
+
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~		
 |  Basic Checks
 :wait_for_misc
