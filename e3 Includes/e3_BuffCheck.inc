@@ -53,7 +53,7 @@ SUB buffBots(ArrayName)
 	/varset buffCheckForName	${${ArrayName}[${s},${iCheckFor}]}
 	/varset buffCheckForID		${${ArrayName}[${s},${iCheckForID}]}
 
-  /if (!${Bool[${NetBots[${buffTarget}].ID}]}) /return
+  /if (!${Bool[${NetBots[${buffTarget}].ID}]}) /goto :skipBuff
 	|/echo ${buffSpellName} ${buffSpellID} ${buffCheckForName} ${buffCheckForID} ${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}
   |/echo ${buffSpellName} ${Select["${buffSpellName}","Thief's Eyes", "Fists of Wu", "Commanding Voice","Cry Havoc"]}
   /if (${Select[${buffSpellID},8001,8002,8000,8003]}) {
