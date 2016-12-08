@@ -30,7 +30,7 @@ sub check_DivineArb
 		/declare i int local
 		/for i 0 to ${Group}
 			/if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
-				/if (${SpawnCount[ID ${Spawn[${Group.Member[${g}]}].ID} radius 70]} > 0 &&  ${NetBots[${Group.Member[${g}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
+				/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 &&  ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
 					/if (${NetBots[${Group.Member[${i}]}].PctHPs}<${DivineArb_Pct}) {
 						/if (${FindItemCount[Harmony of the Soul]} && ${FindItem[Harmony of the Soul].Timer}==0) {
               /casting "Harmony of the Soul|item"
