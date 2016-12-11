@@ -127,6 +127,114 @@ SUB unpauseTwist
 	/delay 20 ${Me.Casting.ID}
 /return
 
+
+|--------------------------------------------------------------|
+Sub check_bard_charm
+  /if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
+  /declare s int local
+  /declare charmDuration int local
+  /if (${doCharm} && ${Bool[${charmTarget}]}) {
+    /if (${SpawnCount[npc id ${charmTarget}]}==0 && ${charmTarget}!=${Me.Pet.ID}) {
+      /docommand ${ChatToggle} Disabling Charm: ${charmTarget} is no longer a valid npc
+      /varset doCharm FALSE
+      /varset charmTarget 0
+      /return
+    }
+    /if (${Me.Pet.Race.Name.Equal[Invisible Man]}) {
+      /pet get lost
+      /delay 1s !${Me.Pet.ID}
+    }
+    |/if (!${Bool[${Me.Pet.ID}]} || ${charmTimer} < 3) {
+    /if (!${Bool[${Me.Pet.ID}]}) {
+      /bc [+r+] << ${Spawn[id ${charmTarget}].CleanName} is not Charmed! >> [+r+]
+      /for s 1 to ${charmArray2D.Size[1]}
+      /call check_Ready "charmArray2D" ${s}
+      /if (${Macro.Return}) {
+        /call check_Mana "charmArray2D" ${s}
+        /if (${Macro.Return}) {
+          /call check_Distance ${charmTarget} ${charmArray2D[${s},${iMyRange}]}
+          /if (${Macro.Return}) {
+            /docommand ${ChatToggle} << Charming ${charmTarget} ${Spawn[id ${charmTarget}].CleanName} with ${charmArray2D[${s},${iCastName}]} >>
+            /call e3_Cast ${charmTarget} "charmArray2D" "${s}"
+            /if (${Bool[${Me.Pet.ID}]}) {
+              /bc [+g+] >> Charmed ${Spawn[id ${charmTarget}].CleanName} <<
+              /timed 5 /pet back off
+              /timed 10 /pet follow
+            } else {
+              /if (${castReturn.Equal[CAST_IMMUNE]}) {
+                /varset doCharm FALSE
+                /varset charmTarget 0
+                /docommand ${ChatToggle} << ${Spawn[id ${charmTarget}].CleanName} is immune, turning off charm >>
+              }
+            }
+          }
+        }
+      }
+      /if (!${Bool[${Me.Pet.ID}]}) /next s
+    } else {
+      |accounce time left on charm
+      /for s 1 to ${charmArray2D.Size[1]}
+      /if (${Bool[${Me.PetBuff[${charmArray2D[${s},${iSpellName}]}]}]}) {
+        /varset charmDuration ${Pet.BuffDuration[${charmArray2D[${s},${iSpellName}]}].TotalSeconds}
+        |/echo charmduration ${charmDuration} timer ${charmBuffTimer}
+        /if (${charmDuration} > 60) {
+          /if (!${Bool[${charmBuffTimer}]}) {
+            /bc [+g+] My charm fades in ${charmDuration} sec
+            /varset charmBuffTimer 18s
+          }
+        } else /if (${charmDuration} <= 60 && ${charmDuration} > 9) {
+          /if (!${Bool[${charmBuffTimer}]}) {
+            /bc [+y+] My charm fades in ${charmDuration} sec
+            /varset charmBuffTimer 6s
+          }
+        } else /if (${charmDuration} <= 9) {
+          /if (!${Bool[${charmBuffTimer}]}) {
+            /bc [+r+] My charm fades in ${charmDuration} sec
+            /varset charmBuffTimer 1s
+          }
+        }
+      }
+      /next s
+    }
+  }
+  /if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
+/return
+
+
+|--------------------------------------------------------------|
+| Mez mobs in ae radius that are not assist target
+sub check_bard_mez
+  /if (${Debug} || ${Debug_Ench}) /echo |- check_Mez ==>
+  /if (${autoMez}) {
+    /declare i int local
+    /declare s int local
+    /declare mezTarg int local
+    /if (!${SpawnCount[playerstate 4 npc targetable radius ${AE_Radius}]}) /return
+    /for i 1 to ${SpawnCount[playerstate 4 npc targetable radius ${AE_Radius}]}
+      /varset mezTarg ${NearestSpawn[${i},playerstate 4 npc targetable radius ${AE_Radius}].ID}
+      /if (${Spawn[id ${mezTarget}].CleanName.Find[' pet]}) /next i
+      /call TrueTarget ${mezTarg}
+      /delay 1s ${Target.BuffsPopulated}
+      /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 5)) {
+        /for s 1 to ${mezArray2D.Size[1]}
+            /call check_Distance ${mezTarg} ${mezArray2D[${s},${iMyRange}]}
+            /if (${Macro.Return}) {
+              /if (${mezArray2D[${s},${iCastType}].Equal[Spell]} && !${Bool[${Me.Gem[${mezArray2D[${s},${iCastName}]}]}]}) /call memorize_spell "${mezArray2D[${s},${iCastName}]}" ${mezArray2D[${s},${iSpellGem}]}
+              /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
+                /if (${Twist.Twisting}) /call pauseTwist
+                |:retryMez
+                /twist once ${mezArray2D[${s},${iSpellGem}]}
+                /delay 3s !${Me.Casting.ID}
+                /delay 1s ${Target.BuffsPopulated}
+
+                /if (${returnTwist}) /call unpauseTwist
+            }
+        /if (!${ActionTaken}) /next s
+      }
+    /if (!${ActionTaken}) /next i
+  }
+  /if (${Debug}) /echo <== check_Mez -|
+/return
 |------------------------------------------------|
 |- Loads melody from ini and configures for use	-|
 |------------------------------------------------|
@@ -136,10 +244,31 @@ SUB unpauseTwist
 Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
 	/call InitoVar "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
+  /if (${Ini[${Character_Ini},Bard,AutoMez (On/Off)].Length}) /call IniToVar "${Character_Ini},Bard,AutoMez (On/Off)" autoMez bool outer
+  /if (${Ini[${Character_Ini},Bard,Mez#1].Length})	/call IniToArray "${Character_Ini},Bard,Mez#"	mezArray
+  /if (${Ini[${Character_Ini},Bard,Charm#1].Length})	/call IniToArray "${Character_Ini},Bard,Charm#"	charmArray
   /declare returnTwist		bool outer FALSE
   /declare playingMelody	bool outer FALSE
   /declare songSet string outer
   /declare resumeTwistDelay timer outer
+
+  /if (${Bool[${mezArray.Size}]}) {
+    /call BuildSpellArray "mezArray"	"mezArray2D"
+  } else {
+    /if (${Defined[autoMez]}) /varset autoMez FALSE
+  }
+
+  /declare charmTarget int outer
+  /if (${Bool[${charmArray.Size}]}) {
+    /call BuildSpellArray "charmArray"	"charmArray2D"
+    /declare doCharm bool outer TRUE
+    /declare charmTimer timer outer
+  } else {
+    /declare doCharm bool outer FALSE
+  }
+
+  /declare charmBuffTimer timer outer
+
 /if (${Debug}) /echo <== BRD_Setup -|
 /return
 
@@ -148,6 +277,11 @@ Sub BRD_Background_Events
 	/doevents saveMelody
 	/doevents startMelody
 	/if (${returnTwist} && !${Bool[${Me.Casting}]} && !${Twist.Twisting} && !${resumeTwistDelay}) /call unpauseTwist
+
+  /doevents charmTarget
+  /doevents toggleMez
+  /doevents charmOn
+  /doevents charmOff
 	| Check melody
 	|/if (!${ActionTaken} && ${playingMelody} && !${Twist.Twisting} && !${Bool[${Me.Casting}]} && ${Bool[${songSet}]}) /doevents startMelody
 /return
@@ -160,6 +294,9 @@ SUB BRD_MacroSettings
 
 SUB BRD_CharacterSettings
 	/call WriteToIni "${Character_Ini},Bard,Auto-Melody"
+  /call WriteToIni "${Character_Ini},Bard,AutoMez (On/Off)" Off
+  /call WriteToIni "${Character_Ini},Bard,Mez#1"
+  /call WriteToIni "${Character_Ini},Bard,Charm#1"
 /RETURN
 
 Sub BRD_Aliases

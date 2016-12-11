@@ -45,7 +45,7 @@ SUB Main(modeSelect)
 			/if (!${ActionTaken}) /next i
 
 			| MedBreak
-			/if ((${Me.PctMana} < ${autoMedPctMana} || (${Me.PctMana}==0 && ${Me.PctEndurance} < ${autoMedPctMana})) && ${Me.CombatState.NotEqual[COMBAT]} && !${Me.Moving} && !${Following} && !${Me.Casting.ID}) /varset medBreak TRUE
+			/if (((${Me.PctMana} < ${autoMedPctMana} && ${Me.MaxMana} > 1) || ((${Me.PctEndurance} < ${autoMedPctMana}))) && ${Me.CombatState.NotEqual[COMBAT]} && !${Me.Moving} && !${Following} && !${Me.Casting.ID}) /varset medBreak TRUE
 			/if (${medBreak}) /call check_MedBreak
 			| Maintain macro timers
 			/if (${timerArray.Size}) /call check_macroTimers

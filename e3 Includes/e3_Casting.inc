@@ -189,8 +189,11 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		}
     |/echo atcast "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 		/varset ActionTaken TRUE
-		/casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
-
+    /if (${targetID} != ${Me.ID}) {
+		  /casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
+    } else {
+      /casting "${pendingCastID}|${pendingType}"
+    }
 		|- Memorizing spell
 		/if (${Cast.Status.Find[M]}) /delay 4s !${Cast.Status.Find[M]}
 		|- Set expected cast end time in 1/10ths of a second
