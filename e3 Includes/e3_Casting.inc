@@ -243,7 +243,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
           /goto :interrupted
 				}
 				|-Target is out of range
-				/if (${Target.Distance} > ${${ArrayName}[${ArrayIndex},${iMyRange}]}) {
+				/if (${targetID} != ${Me.ID} && ${Target.Distance} > ${${ArrayName}[${ArrayIndex},${iMyRange}]}) {
           /if (${Debug} || ${Debug_Casting}) /echo target range called interrupt
 					/call interrupt
           /goto :interrupted
@@ -306,7 +306,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   |/if (${returnTwist})	/call unpauseTwist
 	
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
-	|/varset Debug_Casting FALSE
+|	/varset Debug_Casting FALSE
 /return
 
 |------------------------------------------------|
