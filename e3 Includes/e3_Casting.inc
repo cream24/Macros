@@ -53,7 +53,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
     /echo cast ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name}  ${targetID}
   }
 	|/call explodeforcallstack
-|  /varset Debug_Casting TRUE
+  |/varset Debug_Casting TRUE
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | Checks to abort casting due to previous failures
 
@@ -189,7 +189,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		}
     |/echo atcast "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 		/varset ActionTaken TRUE
-    /if (${targetID} != ${Me.ID}) {
+    /if (${${ArrayName}[${ArrayIndex},${iTargetType}].NotEqual[Self]}) {
 		  /casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
     } else {
       /casting "${pendingCastID}|${pendingType}"
@@ -237,7 +237,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				}
 				|-Dead target and I'm not using a detrimental AE
 				|/echo ${${ArrayName}[${ArrayIndex},${iCastName}]} ${${ArrayName}[${ArrayIndex},${iTargetType}]}
-				/if (!${Bool[${Target.ID}]} && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Targeted AE,Corpse]}) {
+				/if (${targetID} != ${Me.ID} && !${Bool[${Target.ID}]} && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Targeted AE,Corpse]}) {
           /if (${Debug} || ${Debug_Casting}) /echo target corpse called interrupt
 					/call interrupt
           /goto :interrupted
@@ -306,7 +306,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   |/if (${returnTwist})	/call unpauseTwist
 	
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
-|	/varset Debug_Casting FALSE
+	|/varset Debug_Casting FALSE
 /return
 
 |------------------------------------------------|
