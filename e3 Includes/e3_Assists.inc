@@ -109,6 +109,7 @@ SUB Event_BackOff(line, ChatSender)
 	|    |-----------Valid User----------|    |--------Included Bot-----------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
 		/if (${Assisting} && ${AllowControl} && ${Verbosity}) /docommand ${ChatToggle} Backing off.
+		/varset PauseTarget ${Target.ID}
 		/call AssistOff
 	}
 /if (${Debug} || ${Debug_Assists}) /echo <== Event_BackOff -|
@@ -1296,6 +1297,7 @@ Sub assist_Setup
 	/declare AllowControl bool outer FALSE
   /declare AssistTarget int outer 0
 	/declare AssistStickDistance int outer
+	/declare PauseTarget string outer
 |	/declare AutoAggro bool outer TRUE
 	/declare use_Nukes bool outer TRUE
 	/declare use_TargetAE bool outer FALSE
