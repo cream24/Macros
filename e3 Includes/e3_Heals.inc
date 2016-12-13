@@ -233,6 +233,7 @@ SUB hot_tanks
 		/for s 1 to ${hotSpells2D.Size[1]}
 			/if (${Bool[${NetBots[${tanks[${t}]}].InZone}]} && ${NetBots[${tanks[${t}]}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
 				/call check_HotTankStack "${tanks[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
+				|/echo hotstack ${Macro.Return} ${hotSpells2D[${s},${iSpellID}]} ${hotSpells2D[${s},${iCastID}]} ${hotSpells2D[${s},${iCastName}]}
 				/if (${Macro.Return}) {			
 					/call check_Ready "hotSpells2D" ${s}
 					|/echo check_Ready ${Macro.Return}
@@ -273,26 +274,26 @@ SUB hot_importantBots
   /for t 1 to ${importantBots.Size}
     /for s 1 to ${hotSpells2D.Size[1]}
     /if (${Bool[${NetBots[${importantBots[${t}]}].InZone}]} && ${NetBots[${importantBots[${t}]}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
-      /call check_HotTankStack "${importantBots[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
-      /if (${Macro.Return}) {
-        /call check_Ready "hotSpells2D" ${s}
-        |/echo check_Ready ${Macro.Return}
-        /if (${Macro.Return}) {
-          /call check_Distance ${NetBots[${importantBots[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]}
-          |/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
-          /if (${Macro.Return}) {
-            /call check_Mana "hotSpells2D" ${s}
-            |/echo check_Mana ${Macro.Return} ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs}  ${NetBots[${currentBot}].PctHPs}
-            /if (${Macro.Return}) {
-              |/echo currbot ${Bool[${currentBotID}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${NetBots[${currentBot}].PctHPs}
-              /if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
-                /varset currentBot ${importantBots[${t}]}
-                /varset currentSpellIndx ${s}
-              }
-            }
-          }
-        }
-      }
+		/call check_HotImportantBotStack "${importantBots[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
+		/if (${Macro.Return}) {	
+		  /call check_Ready "hotSpells2D" ${s}
+		  |/echo check_Ready ${Macro.Return}
+		  /if (${Macro.Return}) {
+			/call check_Distance ${NetBots[${importantBots[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]}
+			|/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
+			/if (${Macro.Return}) {
+			  /call check_Mana "hotSpells2D" ${s}
+			  |/echo check_Mana ${Macro.Return} ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs}  ${NetBots[${currentBot}].PctHPs}
+			  /if (${Macro.Return}) {
+				|/echo currbot ${Bool[${currentBotID}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${NetBots[${currentBot}].PctHPs}
+				/if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
+				  /varset currentBot ${importantBots[${t}]}
+				  /varset currentSpellIndx ${s}
+				}
+			  }
+			}
+		}
+		}
     }
     /next s
   /next t
@@ -324,7 +325,7 @@ SUB hot_Allbots
 	/varset currClient ${NetBots.Client[${t}]}
 		/for s 1 to ${hotSpells2D.Size[1]}
 			/if (${Bool[${NetBots[${currClient}].InZone}]} && ${NetBots[${currClient}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
-				/call check_HotAllStack "${currClient}"
+				/call check_HotAllStack "${currClient}" ${hotSpells2D[${s},${iSpellID}]}
 				/if (${Macro.Return}) {						
 					/call check_Ready "hotSpells2D" ${s}
 					|/echo check_Ready ${Macro.Return}
@@ -369,7 +370,7 @@ SUB hot_pets
     /if (!${Bool[${NetBots[${petOwners[${t}]}].PetID}]}) /next t
       /for s 1 to ${hotSpells2D.Size[1]}
       /if (${NetBots[${petOwners[${t}]}].PetHP} <= ${hotSpells2D[${s},${iHealPct}]}) {
-        /call check_HotPetStack "${petOwners[${t}]}"
+        /call check_HotPetStack "${petOwners[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
         /if (${Macro.Return}) {
           /call check_Ready "hotSpells2D" ${s}
           |/echo check_Ready ${Macro.Return}
@@ -428,7 +429,7 @@ SUB check_HotImportantBotStack(targetName, spellID)
 	} else {
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
-  /if (${targShortBuff.Find[${spellID},]}) {
+  /if (${Bool[${spellID}]} && ${targShortBuff.Find[${spellID},]}) {
     /varset passCheck FALSE
   } else {
     /for i 1 to ${hotImportantNoStack.Size}
@@ -448,7 +449,7 @@ SUB check_HotAllStack(targetName, spellID)
 	} else {
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
-  /if (${targShortBuff.Find[${spellID},]}) {
+  /if (${Bool[${spellID}]} && ${targShortBuff.Find[${spellID},]}) {
     /varset passCheck FALSE
   } else {
     /for i 1 to ${hotAllNoStack.Size}
@@ -468,7 +469,7 @@ SUB check_HotPetStack(targetName, spellID)
   } else {
     /declare targShortBuff string local ${NetBots[${targetName}].PetBuff.Replace[ ,,]}
   }
-  /if (${targShortBuff.Find[${spellID},]}) {
+  /if (${Bool[${spellID}]} && ${targShortBuff.Find[${spellID},]}) {
     /varset passCheck FALSE
   } else {
     /for i 1 to ${hotAllNoStack.Size}
