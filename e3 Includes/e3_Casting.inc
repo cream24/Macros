@@ -189,7 +189,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		}
     |/echo atcast "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
 		/varset ActionTaken TRUE
-    /if (${${ArrayName}[${ArrayIndex},${iTargetType}].NotEqual[Self]}) {
+    /if (${${ArrayName}[${ArrayIndex},${iTargetType}].NotEqual[Self]} || !${Bool[${Target.ID}]}) {
 		  /casting "${pendingCastID}|${pendingType}" "-targetid|${targetID}"
     } else {
       /casting "${pendingCastID}|${pendingType}"
@@ -237,7 +237,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				}
 				|-Dead target and I'm not using a detrimental AE
 				|/echo ${${ArrayName}[${ArrayIndex},${iCastName}]} ${${ArrayName}[${ArrayIndex},${iTargetType}]}
-				/if (${targetID} != ${Me.ID} && !${Bool[${Target.ID}]} && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Targeted AE,Corpse]}) {
+				/if (!${Bool[${Target.ID}]} && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Targeted AE,Corpse]}) {
           /if (${Debug} || ${Debug_Casting}) /echo target corpse called interrupt
 					/call interrupt
           /goto :interrupted
