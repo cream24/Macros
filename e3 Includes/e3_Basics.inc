@@ -1724,9 +1724,9 @@ Sub basics_Setup
 	/declare medbreak_Popup_Timer timer outer
 	/declare clickitRandomDelay int outer 5
 
-	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" noKSWeaponSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoKSWeaponSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string outer
-	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_NukeSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_NukeSet" noKSNukeSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_NukeSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_NukeSet" NoKSNukeSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_NukeSet].Length}) 				/call IniToVar "${genSettings_Ini},ExpGroup,KS_NukeSet" KSNukeSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,NoPoison].Length}) 					/call IniToVar "${genSettings_Ini},ExpGroup,NoPoison" expNoPoison string outer
 

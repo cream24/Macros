@@ -6,12 +6,11 @@ Sub Main
 	}
 	
 	:Loop
-	/if (!${Me.SpellReady[1]}) {
+	/if (!${Me.SpellReady[5]}) {
 		/delay 20
 		/goto :Loop
 	} else {
-		/casting "Summon Drink" -maxtries|3
-
+		/cast 5
 		/goto :Loop
 	}
 
