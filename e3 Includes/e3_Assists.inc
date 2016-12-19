@@ -1404,8 +1404,10 @@ SUB assist_SpellArrays
   } else /if (${Me.Class.ShortName.Equal[WIZ]}) {
     /if (${Bool[${Me.AltAbility[Call of Xuzl]}]})   /call BuildArray "swarmPets" "Call of Xuzl"
   } else /if (${Me.Class.ShortName.Equal[BRD]}) {
-  /if (${Bool[${Me.AltAbility[Song of Stone]}]})   /call BuildArray "swarmPets" "Song of Stone"
-}
+    /if (${Bool[${Me.AltAbility[Song of Stone]}]})   /call BuildArray "swarmPets" "Song of Stone"
+  } else /if (${Me.Class.ShortName.Equal[CLR]}) {
+    /if (${Bool[${Me.AltAbility[Celestial Hammer]}]})   /call BuildArray "swarmPets" "Celestial Hammer"
+  }
 
   /if (${MyNukes.Size} > 0)		        /call BuildSpellArray "MyNukes"	        "Nukes2D"
 
