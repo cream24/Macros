@@ -14,7 +14,7 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 		| Check if the melody already exists, and should not be overwritten.
 		/if (${Ini[${Character_Ini},${melodyName} Melody].Length}) {	
 			/if (${Debug}) /echo |- EVENT_saveMelody -| Overwriting [${melodyName}] melody...
-			/for i 1 to 7
+			/for i 1 to 8
 				/if (${Ini[${Character_Ini},${melodyName} Melody,Song#${i}].Length}) /call WriteToIni "${Character_Ini},${melodyName} Melody,Song#${i}" *PLACEHOLDER 1
 			/next i
 		}
@@ -52,7 +52,9 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
 		/if (${melodyName.Find[ /]}) /varset melodyName ${melodyName.Arg[1, /]}
 		/if (${Me.Class.ShortName.Equal[BRD]}) {			
 			| If I don't have the melodyName listed in my ini.
-			/if (!${Ini[${Character_Ini},${melodyName} Melody,Song#1].Length}) {				
+      /call #IniToArray "${Character_Ini},${melodyName} Melody,Song#" melodyArray
+      /echo ${melodyArray.Size}
+			/if (!${Bool[${melodyArray.Size}]}) {
 				| If Stop, end, or pause were used, stop the melody.
 				/if (${Select[${melodyName},Stop,End,Pause]}) {
 					/varset playingMelody FALSE
@@ -67,16 +69,17 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
 				/declare spellName string local
 				/declare i int local
 				| For 1 to 7 (maximum melody size to include selos, 6 songs played actively with some droppage)
-				/for i 1 to 7
-				/if (${Ini[${Character_Ini},${melodyName} Melody,Song#${i}].Length} && ${Ini[${Character_Ini},${melodyName} Melody,Song#${i}].NotEqual[PLACEHOLDER]}) {
-					/varset spellName ${Ini[${Character_Ini},${melodyName} Melody,Song#${i}].Arg[1,/]}
+				/for i 1 to ${melodyArray.Size}
+				|/echo ${i} ${melodyArray[${i}]}
+				/if (${melodyArray[${i}].Length} && ${melodyArray[${i}].NotEqual[PLACEHOLDER]}) {
+					/varset spellName ${melodyArray[${i}].Arg[1,/]}
 					| Check that the song is in my book
 					/if (!${Me.Book[${spellName}]}) {	
 						/echo I don't have [${spellName}] in my spellbook, playing the melody without it.
 					} else {
 						| If the song is not memmed, use mq2Cast to mem
 						/if (!${Me.Gem[${spellName}]}) {
-							/call argueString gem| "${Ini[${Character_Ini},${melodyName} Melody,Song#${i}]}"
+							/call argueString gem| "${melodyArray[${i}]}"
               /if (${Bool[${Macro.Return}]}) {
                 /varset memGem ${Macro.Return}
               } else {
