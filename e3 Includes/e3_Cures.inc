@@ -7,6 +7,7 @@
 Sub check_Cures
 	/declare t int local
 	/declare n int local
+  /declare g int local
 | 1- checks Radiant Curing: AutoRadiant + RadiantCure#
   /if (${autoRCure}) /call do_RadiantCure
 
@@ -34,7 +35,30 @@ Sub check_Cures
     /if (!${ActionTaken})  /next t
   }
 
-| 3- checks all netbot curing: CureAll#
+| 3a - cure group first in cureall
+  /if (!${ActionTaken} && ${doCureAll}) {
+    /for t 1 to ${cureAllTargets2D.Size[1]}
+      /for g 1 to ${Group}
+        /if (${SpawnCount[pc =${NetBots[${Group.Member[${g}]}].Name}]} && ${NetBots[${Group.Member[${g}]}].Buff.Find[${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID} ]}) {
+          /call check_Ready "cureAllTargets2D" ${t}
+          |/echo check_Ready ${Macro.Return}
+          /if (${Macro.Return}) {
+            /call check_Distance ${NetBots[${NetBots.Client[${n}]}].ID} ${cureAllTargets2D[${t},${iMyRange}]}
+            |/echo check_Distance ${NetBots[${NetBots.Client[${n}]}].ID}  ${cureTargets2D[${t},${iMyRange}]} ${Macro.Return}
+            /if (${Macro.Return}) {
+              /call check_Mana "cureAllTargets2D" ${t}
+              |/echo check_Mana ${Macro.Return}
+              /if (${Macro.Return}) {
+                /call e3_Cast ${NetBots[${Group.Member[${g}]}].ID} "cureAllTargets2D" ${t}
+              } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} failed mana check
+            } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} is too far away
+          } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} is not ready for ${NetBots.Client[${n}]}
+        }
+      /if (!${ActionTaken}) /next g
+    /if (!${ActionTaken})  /next t
+  }
+
+| 3b- checks all netbot curing: CureAll#
   /if (!${ActionTaken} && ${doCureAll}) {
     /for t 1 to ${cureAllTargets2D.Size[1]}
     /if (${Math.Rand[2]}==0) {
@@ -133,9 +157,10 @@ Sub cures_Setup
 |--------------------------------------------|
 Sub cure_spellArrays
   /declare i int local
-  /if (${Ini[${Character_Ini},Cures,RadiantCure#1].Length})	/call IniToArray "${Character_Ini},Cures,RadiantCure#"	rCureArray
+  /call #IniToArray "${Character_Ini},Cures,RadiantCure#"	rCureArray
+  /call #IniToArray "${Character_Ini},Cures,Cure#"        cureTargets
+  /call #IniToArray "${Character_Ini},Cures,CureAll#"     cureAllTargets
 
-  /if (${Ini[${Character_Ini},Cures,Cure#1].Length})	 /call IniToArray "${Character_Ini},Cures,Cure#" cureTargets
   /if (${Bool[${cureTargets.Size}]}) {
     /varset doCures TRUE
     /call BuildSpellArray "cureTargets"	"cureTargets2D"
@@ -143,8 +168,6 @@ Sub cure_spellArrays
       /varset cureTargets2D[${i},${iSubToRun}] check_cureCasting
     /next i
   }
-
-  /if (${Ini[${Character_Ini},Cures,CureAll#1].Length})	 /call IniToArray "${Character_Ini},Cures,CureAll#" cureAllTargets
   /if (${cureAllTargets.Size}) {
     /varset doCureAll TRUE
     /call BuildSpellArray "cureAllTargets" "cureAllTargets2D"

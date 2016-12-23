@@ -243,20 +243,20 @@ Sub buffCheck_Setup
 /return
 
 SUB buff_SpellArrays
-  /if (${Ini[${Character_Ini},Buffs,Instant Buff#1].Length})	/call IniToArray "${Character_Ini},Buffs,Instant Buff#" InstantBuffs
-  /if (${Ini[${Character_Ini},Buffs,Self Buff#1].Length})		/call IniToArray "${Character_Ini},Buffs,Self Buff#"	SelfBuffs
-  /if (${Ini[${Character_Ini},Buffs,Group Buff#1].Length})	/call IniToArray "${Character_Ini},Buffs,Group Buff#"	GroupBuffs
-  /if (${Ini[${Character_Ini},Buffs,Bot Buff#1].Length})		/call IniToArray "${Character_Ini},Buffs,Bot Buff#"	BotBuffs
-  /if (${Ini[${Character_Ini},Buffs,Combat Buff#1].Length})	/call IniToArray "${Character_Ini},Buffs,Combat Buff#"	CombatBuffs
+  /call #IniToArray "${Character_Ini},Buffs,Instant Buff#" 	InstantBuffs
+  /call #IniToArray "${Character_Ini},Buffs,Self Buff#"			SelfBuffs
+  /call #IniToArray "${Character_Ini},Buffs,Group Buff#"		GroupBuffs
+  /call #IniToArray "${Character_Ini},Buffs,Bot Buff#"			BotBuffs
+  /call #IniToArray "${Character_Ini},Buffs,Combat Buff#"		CombatBuffs
 
   /if (${CombatBuffs.Size})	/varset BuffCombatCheck TRUE
   /if (${InstantBuffs.Size} || ${SelfBuffs.Size} || ${BotBuffs.Size} || ${CombatBuffs.Size}) /varset BuffCheck TRUE
 
   /if (${InstantBuffs.Size})	/call BuildSpellArray "InstantBuffs"	"InstantBuffs2D"
-  /if (${SelfBuffs.Size})		/call BuildSpellArray "SelfBuffs"		"SelfBuffs2D"
-  /if (${BotBuffs.Size})		/call BuildSpellArray "BotBuffs"		"BotBuffs2D"
-  /if (${CombatBuffs.Size})	/call BuildSpellArray "CombatBuffs"		"CombatBuffs2D"
-  /if (${GroupBuffs.Size})	/call BuildSpellArray "GroupBuffs"		"GroupBuffs2D"
+  /if (${SelfBuffs.Size})		  /call BuildSpellArray "SelfBuffs"			"SelfBuffs2D"
+  /if (${BotBuffs.Size})		  /call BuildSpellArray "BotBuffs"			"BotBuffs2D"
+  /if (${CombatBuffs.Size}) 	/call BuildSpellArray "CombatBuffs"		"CombatBuffs2D"
+  /if (${GroupBuffs.Size})	  /call BuildSpellArray "GroupBuffs"		"GroupBuffs2D"
 
   /declare s int local
   /if (${InstantBuffs2D.Size[1]}) {

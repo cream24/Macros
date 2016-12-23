@@ -43,6 +43,8 @@
 #include e3 Includes\e3_Classes_Wizard.inc
 
 #include e3 Includes\VetAAs.inc
+#include e3 Includes\vyslib.inc
+#include e3 Includes\vyslib_items.inc
 
 
 
@@ -121,8 +123,8 @@ SUB e3_Setup(modeSelect)
 	/declare ChatToggle string outer /bc
 	/if (${Ini[${Macro_Ini},General,Macro Output Channel].Length}) /call IniToVar "${Macro_Ini},General,Macro Output Channel" ChatToggle string outer
 
-	/call IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
-	/call IniToArray "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
+	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call #IniToArray "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
 	
 | Setup Includes ========================================================================================================== 
 
@@ -209,7 +211,7 @@ SUB EVENT_make_MacroSettingsIni
 	/delay 15
 
 	| Import the array of Included Setups
-	/call IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	| Call each setup
 	/declare i int local
@@ -251,7 +253,7 @@ SUB EVENT_make_CharacterSettingsIni
 
 	/echo Creating ${Me.CleanName}'${If[${Me.CleanName.Right[1].Equal[s]},,s]} settings file...
 	
-	/call IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	/declare i int local
 	
@@ -287,7 +289,7 @@ SUB EVENT_updateAliases
 	/squelch /alias /debugon /varset Debug 1
 	/squelch /alias /debugoff /varset Debug 0
 
-	/call IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	/declare i int local
 	

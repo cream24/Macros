@@ -245,8 +245,8 @@ Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
 	/call InitoVar "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
   /if (${Ini[${Character_Ini},Bard,AutoMez (On/Off)].Length}) /call IniToVar "${Character_Ini},Bard,AutoMez (On/Off)" autoMez bool outer
-  /if (${Ini[${Character_Ini},Bard,Mez#1].Length})	/call IniToArray "${Character_Ini},Bard,Mez#"	mezArray
-  /if (${Ini[${Character_Ini},Bard,Charm#1].Length})	/call IniToArray "${Character_Ini},Bard,Charm#"	charmArray
+  /call #IniToArray "${Character_Ini},Bard,Mez#"	  mezArray
+  /call #IniToArray "${Character_Ini},Bard,Charm#"	charmArray
   /declare returnTwist		bool outer FALSE
   /declare playingMelody	bool outer FALSE
   /declare songSet string outer

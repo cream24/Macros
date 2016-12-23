@@ -24,7 +24,7 @@ Sub WIZ_Setup
 /if (${Debug}) /echo |- WIZ_Setup ==>
 	/call INItoVar "${Character_Ini},Wizard,Evac Spell" Evac_Spell string outer
 	/call INItoVar "${Character_Ini},Wizard,Auto-Harvest (On/Off)" autoHarvest bool outer
-	/call IniToArray "${Character_Ini},Wizard,Harvest#" harvestSpells
+	/call #IniToArray "${Character_Ini},Wizard,Harvest#" harvestSpells
   /if (${harvestSpells.Size}) /call BuildSpellArray "harvestSpells"	"harvestSpells2D"
 
 /if (${Debug}) /echo <== WIZ_Setup -|

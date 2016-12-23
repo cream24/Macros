@@ -13,11 +13,6 @@ SUB check_Zone
 /if (${Debug} || ${Debug_Background}) /echo |- check_Zone ==>
 	| Set current zone ID
 	/varset currentZone ${Zone.ID}
-	| If im not wearing chest(dead) and not waiting for rez, wait for rez
-	|	/if (!${Bool[${InvSlot[chest].Item}]} && !${Waiting4Rez} && ${Me.Level}>=50) {
-	|		/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
-	|		/call Wait4Rez
-	|	}
 	| Update macro timers
 	/varset idleTimer ${idleInterval}m
 	| Turn off assist / attack
@@ -420,7 +415,7 @@ Sub background_Setup
 	| Auto-Tribute
 	/call IniToVar "${genSettings_Ini},Auto-Tribute,Auto-Tribute (On/Off)" autoTribute bool outer
 	| Import NetBots HUD array
-	/call IniToArray "${advSettings_Ini},NetBots HUD,NetBot#" netBotsHUDArray
+	/call #IniToArray "${advSettings_Ini},NetBots HUD,NetBot#" netBotsHUDArray
 /if (${Debug} || ${Debug_Background}) /echo <== background_Setup -|
 /return
 

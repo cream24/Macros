@@ -405,27 +405,30 @@ SUB EVENT_clickIt(line, ChatSender)
 		}
 		**|
 		|load array of doors from doors.ini:  doorid, x, y, z, name
-		/if (${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}) /call InitoArray "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
+		/call #InitoArray "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
 		/if (${debug_clickit}) /echo Doors in zone ${doorList.Size}
 		/declare i int local
 		/declare closestDoorID int local 0
 		/declare closestDoorDist float local 0
 		|find the closest door to me
-		/for i 1 to ${doorList.Size}
-			/if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
-			/squelch /doortarget id ${doorList[${i}].Arg[1,,]}
-			|/delay 1
-			/if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.Distance3D} < 100) {
-				/varset closestDoorDist ${DoorTarget.Distance}
-				/varset closestDoorID ${doorList[${i}].Arg[1,,]}
-			}
-		/next i
+		/if (${doorList.Size} > 0) {
+      /for i 1 to ${doorList.Size}
+        /if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
+        /squelch /doortarget id ${doorList[${i}].Arg[1,,]}
+        |/delay 1
+        /if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.Distance3D} < 100) {
+          /varset closestDoorDist ${DoorTarget.Distance}
+          /varset closestDoorID ${doorList[${i}].Arg[1,,]}
+        }
+      /next i
+    }
 		| if i have a door within 100 distance then move to it and try to click
 		/if (${debug_clickit}) /echo closest ${closestDoorID} ${closestDoorDist}
 		/if (!${Bool[${closestDoorID}]}) {
 		  /squelch /doortarget
-		  /if (${DoorTarget.Distance} < 50) {
+		  /if (${DoorTarget.Distance} < 150) {
         /varset closestDoorID ${Switch.ID}
+				/if (${debug_clickit}) /echo no door in file, picked closest door ${Switch.ID}
 		  } else {
         /echo \ay Aborting ClickIt: I could not find an acceptable door < 100 3D units
         /return
@@ -455,6 +458,7 @@ SUB EVENT_clickIt(line, ChatSender)
 			/declare doorStartingDist ${DoorTarget.Distance3D}
 			:retryClickDoor
 			/delay ${clickDelay}
+      /squelch /doortarget id ${closestDoorID}
 			/squelch /click left door
 			/if (${clickTimer} && (${MyZone}==${Zone.ID} || ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20)) /goto :retryClickDoor
 			/if (${MyZone}==${Zone.ID} && ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20) {
@@ -1642,7 +1646,7 @@ SUB EVENT_exp_group(line,ChatSender, expToggle)
 
     |enable KoS mode
     /if (${Select[${expToggle},On,Yes,True,1]} > 0) {
-      /if (${Ini[${Character_Ini},Melee Abilities,Ability#1].Length}) /call INItoArray "${Character_Ini},Melee Abilities,Ability#" MyAbilities
+      /call #INItoArray "${Character_Ini},Melee Abilities,Ability#" MyAbilities
       /if (${Me.Class.ShortName.Equal[Rog]}) {
       	/call buff_SpellArrays
 				/varset strikeDisc ${strikeDiscStr.Arg[1,/]}
@@ -1722,7 +1726,7 @@ Sub basics_Setup
 	/declare medBreak bool outer FALSE
 	/declare medBreak_Hold bool outer FALSE
 	/declare medbreak_Popup_Timer timer outer
-	/declare clickitRandomDelay int outer 5
+	/declare clickitRandomDelay int outer 10
 
 	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoKSWeaponSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string outer

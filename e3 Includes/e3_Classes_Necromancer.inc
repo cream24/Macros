@@ -46,11 +46,11 @@ SUB check_manaDump
 Sub NEC_Setup
 /if (${Debug}) /echo |- NEC_Setup ==>
 	/if (${Ini[${Character_Ini},${Me.Class},Lich Spell].Length}) /call IniToVar "${Character_Ini},${Me.Class},Lich Spell" lichSpell string outer
-	/if (${Ini[${Character_Ini},${Me.Class},LifeTap#1].Length}) /call IniToArray "${Character_Ini},${Me.Class},LifeTap#" lifeTaps
+	/call #IniToArray "${Character_Ini},${Me.Class},LifeTap#" lifeTaps
 	/if (${lifeTaps.Size}) /call BuildSpellArray "lifeTaps"	"lifeTaps2D"
 	/if (${Ini[${Character_Ini},${Me.Class},Mana Dump (On/Off)].Length}) /call IniToVar "${Character_Ini},${Me.Class},Mana Dump (On/Off)" manaDump bool outer
-  /if (${Ini[${Character_Ini},${Me.Class},Who to Mana Dump#1].Length}) /call IniToArray "${Character_Ini},${Me.Class},Who to Mana Dump#" whoto_manaDump
-	/if (${Ini[${Character_Ini},${Me.Class},Mana Dump#1].Length})        /call IniToArray "${Character_Ini},${Me.Class},Mana Dump#" manaDump_Spells
+  /call #IniToArray "${Character_Ini},${Me.Class},Who to Mana Dump#" whoto_manaDump
+	/call #IniToArray "${Character_Ini},${Me.Class},Mana Dump#" manaDump_Spells
   /if (${manaDump_Spells.Size}) /call BuildSpellArray "manaDump_Spells"	"manaDump_Spells2D"
 /if (${Debug}) /echo <== NEC_Setup -|
 /return

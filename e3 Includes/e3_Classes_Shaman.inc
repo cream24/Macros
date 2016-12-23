@@ -29,7 +29,7 @@ SUB check_Canni
 Sub SHM_Setup
 /if (${Debug}) /echo |- SHM_Setup ==>
 	/call IniToVar "${Character_Ini},Shaman,Auto-Canni (On/Off)" AutoCanni bool outer
-	/call IniToArray "${Character_Ini},Shaman,Canni#" canniSpells
+	/call #IniToArray "${Character_Ini},Shaman,Canni#" canniSpells
   /if (${canniSpells.Size}) /call BuildSpellArray "canniSpells"	"canniSpells2D"
 /if (${Debug}) /echo <== SHM_Setup -|
 /return

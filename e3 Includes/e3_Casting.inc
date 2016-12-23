@@ -53,7 +53,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
     /echo cast ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name}  ${targetID}
   }
 	|/call explodeforcallstack
-  |/varset Debug_Casting TRUE
+  /varset Debug_Casting FALSE
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | Checks to abort casting due to previous failures
 
@@ -306,7 +306,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   |/if (${returnTwist})	/call unpauseTwist
 	
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
-	|/varset Debug_Casting FALSE
+/varset Debug_Casting FALSE
 /return
 
 |------------------------------------------------|

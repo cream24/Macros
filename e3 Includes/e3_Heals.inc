@@ -607,9 +607,6 @@ SUB heal_Setup
 	/declare interruptImportantCastSec	int outer 18
 	/declare interruptAllCastSec		float outer 25
 
-
-|	/declare recentHeal_Timer timer outer
-
   /declare do_GroupHeals bool outer FALSE
   /declare healTanks bool outer FALSE
   /declare healImportant bool outer FALSE
@@ -625,12 +622,13 @@ SUB heal_Setup
   /call ListToArray "hotAllNoStack"		    "${hotAllNoStackStr}" 		  "outer" ","
 
   /if (${Bool[${Ini[${Character_Ini},Heals]}]}) {
-    /if (${Ini[${Character_Ini},Heals,Who to Heal].Length})				      /call IniToVar "${Character_Ini},Heals,Who to Heal"				      WhoToHeal string outer
-    /if (${Ini[${Character_Ini},Heals,Who to HoT].Length})				      /call IniToVar "${Character_Ini},Heals,Who to HoT"				      WhoToHoT string outer
-    /if (${Ini[${Character_Ini},Heals,Tank#1].Length})					        /call IniToArray "${Character_Ini},Heals,Tank#"					        tanks
-    /if (${Ini[${Character_Ini},Heals,Important Bot#1].Length})			    /call IniToArray "${Character_Ini},Heals,Important Bot#"		    importantBots
-    /if (${Ini[${Character_Ini},Heals,Pet Owner#1].Length})				      /call IniToArray "${Character_Ini},Heals,Pet Owner#"			      petOwners
+    /if (${Ini[${Character_Ini},Heals,Who to Heal].Length})		/call IniToVar "${Character_Ini},Heals,Who to Heal"		 WhoToHeal string outer
+    /if (${Ini[${Character_Ini},Heals,Who to HoT].Length})		/call IniToVar "${Character_Ini},Heals,Who to HoT"		 WhoToHoT string outer
+    /call #IniToArray "${Character_Ini},Heals,Tank#"           tanks
+    /call #IniToArray "${Character_Ini},Heals,Important Bot#"  importantBots
+    /call #IniToArray "${Character_Ini},Heals,Pet Owner#"      petOwners
   }
+
   /call heal_SpellArrays
 
   /if (${Debug} || ${Debug_Heals}) /echo <== heal_Setup -|
@@ -639,14 +637,14 @@ SUB heal_Setup
 |--------------------------------------------------------------------------------------------------------------------------------
 SUB heal_SpellArrays
 | Import settings from Character_Ini
-  /if (${Ini[${Character_Ini},Life Support,Life Support#1].Length}) /call IniToArray "${Character_Ini},Life Support,Life Support#" lifeSupport
+  /call #IniToArray "${Character_Ini},Life Support,Life Support#" lifeSupport
   /if (${Bool[${Ini[${Character_Ini},Heals]}]}) {
-    /if (${Ini[${Character_Ini},Heals,Tank Heal#1].Length})				      /call IniToArray "${Character_Ini},Heals,Tank Heal#"			      tankHeals
-    /if (${Ini[${Character_Ini},Heals,Important Heal#1].Length})		    /call IniToArray "${Character_Ini},Heals,Important Heal#"		    importantHeals
-    /if (${Ini[${Character_Ini},Heals,All Heal#1].Length})				      /call IniToArray "${Character_Ini},Heals,All Heal#"				      allHeals
-    /if (${Ini[${Character_Ini},Heals,Pet Heal#1].Length})				      /call IniToArray "${Character_Ini},Heals,Pet Heal#"				      petHeals
-    /if (${Ini[${Character_Ini},Heals,Heal Over Time Spell#1].Length})	/call InitoArray "${Character_Ini},Heals,Heal Over Time Spell#"	hotSpells
-    /if (${Ini[${Character_Ini},Heals,Group Heal#1].Length})			      /call InitoArray "${Character_Ini},Heals,Group Heal#"			      groupHeals
+    /call #IniToArray "${Character_Ini},Heals,Tank Heal#"             tankHeals
+    /call #IniToArray "${Character_Ini},Heals,Important Heal#"        importantHeals
+    /call #IniToArray "${Character_Ini},Heals,All Heal#"              allHeals
+    /call #IniToArray "${Character_Ini},Heals,Pet Heal#"              petHeals
+    /call #IniToArray "${Character_Ini},Heals,Heal Over Time Spell#"  hotSpells
+    /call #IniToArray "${Character_Ini},Heals,Group Heal#"            groupHeals
   }
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 | lets healers break invis to cast heal
@@ -655,6 +653,7 @@ SUB heal_SpellArrays
   /declare castImportantHealWhileInvis	int local 1
   /declare castAllHealWhileInvis			int local 1
 
+	|/echo t ${tanks.Size} th ${tankHeals.Size} wth ${WhoToHeal.Find[Tanks]}
   /if (${WhoToHeal.Find[Tanks]} && ${tanks.Size} > 0 && ${tankHeals.Size} > 0)		                  /varset healTanks			TRUE
   /if (${WhoToHeal.Find[ImportantBots]} && ${importantBots.Size} > 0 && ${importantHeals.Size} > 0)	/varset healImportant	TRUE
   /if (${WhoToHeal.Find[All]} && ${allHeals.Size} > 0)										                          /varset healAll			 TRUE

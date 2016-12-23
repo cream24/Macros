@@ -303,6 +303,7 @@ SUB CombatAbilities
     }
     |- Discipline, no disc with a duration can go here
   } else /if (${Me.CombatAbility[${abilityName}]}) {
+    /echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName}
     /if (${Me.CombatAbilityReady[${abilityName}]}) {
       | Check for MinEnd
       /if (${MyAbilities[${i}].Find[/MinEnd|]}) {
@@ -411,6 +412,7 @@ SUB check_AutoAssist
 /if (${Debug} || ${Debug_Assists}) /echo |- check_AutoAssist ==>
 	/if (!${Assisting}) {
 		| First check if I am attacking something
+		|/echo ${auto_AssistOn} engagepct ${EngagePct}
 		/if (${Target.ID} && ${Me.Combat} || ${Target.ID} && ${Spell[${Me.Casting.ID}].SpellType.Equal[Detrimental]}) {
 			/if (${Target.PctHPs} < ${EngagePct} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]} && ${Target.ID} != ${PauseTarget}) {
 				/if (${Debug} || ${Debug_Assists}) /echo I am attacking, engaging Assist functions
@@ -426,8 +428,14 @@ SUB check_AutoAssist
 						/if (${Debug} || ${Debug_Assists}) /echo I do not have line of sight on [${Spawn[id ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID}].CleanName}].  Holding auto assist
 					} else {
 						/if (${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetHP} < ${EngagePct} && ${Select[${Spawn[id ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID}].Type},${AcceptableTargetTypes}]} && ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID} != ${PauseTarget} && ${Spawn[id ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID}].Distance} < ${MaxAssistDistance}) {
-							/if (${Debug} || ${Debug_Assists}) /echo ${NetBots[${NetBots.Client.Arg[${i}, ]}]} is attacking, assisting...
-							/call EVENT_Assist PLACEHOLDER ${NetBots.Client.Arg[${i}, ]} ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID}
+              /call TrueTarget ${msgTarget}
+              |/echo ${NetBots[${NetBots.Client.Arg[${i}, ]}].Name} targ ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID} thp ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetHP} attack ${NetBots[${NetBots.Client.Arg[${i}, ]}].Attacking} cast ${Spell[${NetBots[${NetBots.Client.Arg[${i}, ]}].Casting}].SpellType.Equal[Detrimental]}
+							/squelch /target id ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID}
+							/delay 3 ${Target.BuffsPopulated}
+							/if (${Target.PctHPs} < ${EngagePct}) {
+							  /if (${Debug} || ${Debug_Assists}) /echo ${NetBots[${NetBots.Client.Arg[${i}, ]}]} is attacking, assisting...
+							  /call EVENT_Assist PLACEHOLDER ${NetBots.Client.Arg[${i}, ]} ${NetBots[${NetBots.Client.Arg[${i}, ]}].TargetID}
+              }
 						}
 					}
 				}
@@ -1271,11 +1279,11 @@ SUB event_NukeSet(line, ChatSender, NukeArray)
         /echo \ag Nuking Disabled
       }
 
-      /if (!${Ini[${Character_Ini},Nukes,${NukeArray}#1].Length}) {
+      /if (!${Ini[${Character_Ini},Nukes,${NukeArray}].Length}) {
         /if (${Debug} || ${Debug_Assists}) /echo \ay [${NukeArray}] is not configured in your bot ini, keeping existing nuke set: [${nukesToUse}]
         /return
       } else {
-        /call INItoArray "${Character_Ini},Nukes,${NukeArray}#" MyNukes
+        /call #INItoArray "${Character_Ini},Nukes,${NukeArray}#" MyNukes
         /if (${MyNukes.Size} > 0) /call BuildSpellArray "MyNukes" "Nukes2D"
         /varset nukesToUse ${NukeArray}
         /varset use_Nukes TRUE
@@ -1319,11 +1327,11 @@ Sub assist_Setup
 
 | ------------------------------------- Import Character_Ini Settings.
 	/if (${Ini[${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)].Length})  /call IniToVar "${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)" AssistType string outer
-  /if (${Ini[${Character_Ini},Assist Settings,Taunt(On/Off)].Length})          /call IniToVar "${Character_Ini},Assist Settings,Taunt(On/Off)" doTaunt bool outer
-	/if (${Ini[${Character_Ini},Assist Settings,Melee Stick Point].Length})           /call IniToVar "${Character_Ini},Assist Settings,Melee Stick Point" AssistStickPoint string outer
-	/if (${Ini[${Character_Ini},Assist Settings,Melee Distance].Length})              /call IniToVar "${Character_Ini},Assist Settings,Melee Distance" AssistDistanceSetting string outer
-	/if (${Ini[${Character_Ini},Assist Settings,Ranged Distance].Length})             /call IniToVar "${Character_Ini},Assist Settings,Ranged Distance" RangedStickDistance string outer
-	/if (${Ini[${Character_Ini},Assist Settings,Auto-Assist Engage Percent].Length})  /call IniToVar "${Character_Ini},Assist Settings,Auto-Assist Engage Percent" EngagePct int outer
+  /if (${Ini[${Character_Ini},Assist Settings,Taunt(On/Off)].Length})                   /call IniToVar "${Character_Ini},Assist Settings,Taunt(On/Off)" doTaunt bool outer
+	/if (${Ini[${Character_Ini},Assist Settings,Melee Stick Point].Length})               /call IniToVar "${Character_Ini},Assist Settings,Melee Stick Point" AssistStickPoint string outer
+	/if (${Ini[${Character_Ini},Assist Settings,Melee Distance].Length})                  /call IniToVar "${Character_Ini},Assist Settings,Melee Distance" AssistDistanceSetting string outer
+	/if (${Ini[${Character_Ini},Assist Settings,Ranged Distance].Length})                 /call IniToVar "${Character_Ini},Assist Settings,Ranged Distance" RangedStickDistance string outer
+	/if (${Ini[${Character_Ini},Assist Settings,Auto-Assist Engage Percent].Length})      /call IniToVar "${Character_Ini},Assist Settings,Auto-Assist Engage Percent" EngagePct int outer
 	/if (!${Defined[EngagePct]}) {
 		/if (${Debug} || ${Debug_Assists}) /echo ERROR: @[EngagePct] - EngagePct is invalid, defaulting to 98%
 		/declare EngagePct int outer 98
@@ -1332,7 +1340,7 @@ Sub assist_Setup
 		/varset EngagePct 98
 	}
 	| [Melee Abilities].
-	/if (${Ini[${Character_Ini},Melee Abilities,Ability#1].Length}) /call INItoArray "${Character_Ini},Melee Abilities,Ability#" MyAbilities
+  /call #INItoArray "${Character_Ini},Melee Abilities,Ability#" MyAbilities
 
 | Epic Definitions for EpicBurn - warr, shd, pal,
 /if (${FindItemCount["Prismatic Dragon Blade"]})                /declare EpicName string outer "Prismatic Dragon Blade"
@@ -1377,21 +1385,16 @@ Sub assist_Setup
 |------------------------------------------------------------------------------------------------
 SUB assist_SpellArrays
 | [Nukes].
-  /if (${Ini[${Character_Ini},Nukes,Nuke#1].Length}) /call INItoArray "${Character_Ini},Nukes,${nukesToUse}#" MyNukes
-
-| [DoTs]
-  /if (${Ini[${Character_Ini},DoTs,DoT on Assist#1].Length})  /call INItoArray "${Character_Ini},DoTs,DoT on Assist#" Assist_DoTs
-  /if (${Ini[${Character_Ini},DoTs,DoT on Command#1].Length}) /call INItoArray "${Character_Ini},DoTs,DoT on Command#" Command_DoTs
-| [Debuffs]
-  /if (${Ini[${Character_Ini},Debuffs,Debuff on Assist#1].Length})  /call INItoArray "${Character_Ini},Debuffs,Debuff on Assist#" Assist_Debuffs
-  /if (${Ini[${Character_Ini},Debuffs,Debuff on Command#1].Length}) /call INItoArray "${Character_Ini},Debuffs,Debuff on Command#" Command_Debuffs
-|- AE Spells
-  /if (${Ini[${Character_Ini},TargetAE,TargetAE#1].Length}) /call INItoArray "${Character_Ini},TargetAE,TargetAE#" TargetAE_Spells
-  /if (${Ini[${Character_Ini},PBAE,PBAE#1].Length})     /call INItoArray "${Character_Ini},PBAE,PBAE#" PBAE_Spells
-| [Burns].
-  /if (${Ini[${Character_Ini},Burn,Quick Burn#1].Length}) /call IniToArray "${Character_Ini},Burn,Quick Burn#" QuickBurns
-  /if (${Ini[${Character_Ini},Burn,Long Burn#1].Length}) /call IniToArray "${Character_Ini},Burn,Long Burn#" LongBurns
-  /if (${Ini[${Character_Ini},Burn,Full Burn#1].Length}) /call IniToArray "${Character_Ini},Burn,Full Burn#" FullBurns
+  /call #INItoArray "${Character_Ini},Nukes,${nukesToUse}#"       MyNukes
+  /call #INItoArray "${Character_Ini},DoTs,DoT on Assist#"        Assist_DoTs
+  /call #INItoArray "${Character_Ini},DoTs,DoT on Command#"       Command_DoTs
+  /call #INItoArray "${Character_Ini},Debuffs,Debuff on Assist#"  Assist_Debuffs
+  /call #INItoArray "${Character_Ini},Debuffs,Debuff on Command#" Command_Debuffs
+  /call #INItoArray "${Character_Ini},TargetAE,TargetAE#" TargetAE_Spells
+  /call #INItoArray "${Character_Ini},PBAE,PBAE#" PBAE_Spells
+  /call #IniToArray "${Character_Ini},Burn,Quick Burn#" QuickBurns
+  /call #IniToArray "${Character_Ini},Burn,Long Burn#" LongBurns
+  /call #IniToArray "${Character_Ini},Burn,Full Burn#" FullBurns
 
   /if (${Me.Class.ShortName.Equal[MAG]}) {
     /if (${Bool[${Me.AltAbility[Servant of Ro]}]})        /call BuildArray "swarmPets" "Servant of Ro"

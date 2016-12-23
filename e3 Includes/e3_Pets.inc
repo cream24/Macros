@@ -197,16 +197,13 @@ Sub pet_Setup
 |------------------------------------------------------------------------|
 |- spell setup
 SUB pet_spellArrays
-  /if (${Ini[${Character_Ini},Pets,Pet Spell#1].Length}) /call INItoArray "${Character_Ini},Pets,Pet Spell#" petSpell
-  /if (${Bool[${petSpell.Size}]}) {
-    /call BuildSpellArray "petSpell"	"petSpell2D"
-  }
-  /if (${Ini[${Character_Ini},Pets,Pet Buff#1].Length}) {
-    /call INItoArray "${Character_Ini},Pets,Pet Buff#" petBuffs
-    /if (${petBuffs.Size}) /call BuildSpellArray "petBuffs"	"petBuffs2D"
-  }
-  /if (${Ini[${Character_Ini},Pets,Pet Heal#1].Length}) /call INItoArray "${Character_Ini},Pets,Pet Heal#" petHeal
-  /if (${petHeal.Size}) /call BuildSpellArray "petHeal"	"petHeal2D"
+  /call #INItoArray "${Character_Ini},Pets,Pet Spell#" petSpell
+  /call #INItoArray "${Character_Ini},Pets,Pet Buff#" petBuffs
+  /call #INItoArray "${Character_Ini},Pets,Pet Heal#" petHeal
+
+  /if (${petSpell.Size}>0) /call BuildSpellArray "petSpell"	"petSpell2D"
+  /if (${petBuffs.Size}>0) /call BuildSpellArray "petBuffs"	"petBuffs2D"
+  /if (${petHeal.Size}>0) /call BuildSpellArray "petHeal"	"petHeal2D"
 /RETURN
 
 |------------------------------------------------------------------------|

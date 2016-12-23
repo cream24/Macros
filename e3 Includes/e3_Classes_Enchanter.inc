@@ -268,11 +268,11 @@ Sub ENC_Setup
 	/if (${Ini[${Character_Ini},Enchanter,AutoMez (On/Off)].Length}) /call IniToVar "${Character_Ini},Enchanter,AutoMez (On/Off)" autoMez bool outer
 	/if (${Ini[${Character_Ini},Enchanter,GatherMana Pct].Length}) /call IniToVar "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int outer
 
-  /if (${Ini[${Character_Ini},Enchanter,RuneTarget#1].Length})	/call IniToArray "${Character_Ini},Enchanter,RuneTarget#"	runeTargets
-  /if (${Ini[${Character_Ini},Enchanter,RuneSpell#1].Length})	/call IniToArray "${Character_Ini},Enchanter,RuneSpell#"	runeArray
-  /if (${Ini[${Character_Ini},Enchanter,Mez#1].Length})	/call IniToArray "${Character_Ini},Enchanter,Mez#"	mezArray
-  /if (${Ini[${Character_Ini},Enchanter,Charm#1].Length})	/call IniToArray "${Character_Ini},Enchanter,Charm#"	charmArray
-  /if (${Ini[${Character_Ini},Cures,Cure#1].Length})	 /call IniToArray "${Character_Ini},Cures,Cure#" cureTargets
+  /call #IniToArray "${Character_Ini},Enchanter,RuneTarget#"  runeTargets
+  /call #IniToArray "${Character_Ini},Enchanter,RuneSpell#"   runeArray
+  /call #IniToArray "${Character_Ini},Enchanter,Mez#"         mezArray
+  /call #IniToArray "${Character_Ini},Enchanter,Charm#"       charmArray
+
   /if (${Bool[${mezArray.Size}]}) {
     /call BuildSpellArray "mezArray"	"mezArray2D"
   } else {

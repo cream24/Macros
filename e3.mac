@@ -12,6 +12,14 @@
 
 SUB Main(modeSelect)
   /declare macroVersion string outer 6.0
+  /declare IniMode string outer
+  /call #RequirePlugin MQ2IniExt
+  /if (${Macro.Return}) {
+    /varset IniMode IniExt
+    /iniext clear
+  } else {
+    /varset IniMode Ini
+  }
   /call e3_Setup "${modeSelect}"
 
   /declare i int local

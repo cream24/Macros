@@ -302,7 +302,7 @@ SUB MAG_Setup
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_Setup ==>
   /declare coh_dist int outer 150
 	/call IniToVar "${Character_Ini},Magician,Auto-Pet Weapons (On/Off)" autoWeapons bool outer
-	/call IniToArray "${Character_Ini},Magician,Summoned Pet Item#" petItems
+	/call #IniToArray "${Character_Ini},Magician,Summoned Pet Item#" petItems
 	/declare mageRangedSwap bool outer FALSE
 	/if (${petItems.Size}) /call BuildSpellArray "petItems"	"petItems2D"
 	|/echo ${petItems.Size} ${petItems2D.Size[1]}
