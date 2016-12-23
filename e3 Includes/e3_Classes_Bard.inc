@@ -53,7 +53,6 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
 		/if (${Me.Class.ShortName.Equal[BRD]}) {			
 			| If I don't have the melodyName listed in my ini.
       /call #IniToArray "${Character_Ini},${melodyName} Melody,Song#" melodyArray
-      /echo ${melodyArray.Size}
 			/if (!${Bool[${melodyArray.Size}]}) {
 				| If Stop, end, or pause were used, stop the melody.
 				/if (${Select[${melodyName},Stop,End,Pause]}) {
