@@ -1657,7 +1657,7 @@ SUB EVENT_exp_group(line,ChatSender, expToggle)
 
 		|remove anything that could kos when out of group
     } else /if (${Select[${expToggle},Off,No,False,0]} > 0) {
-      /if (${Select[${Me.Class.ShortName},${Ini[${genSettings_Ini},ExpGroup,NoCombatAbil]}]}) /deletevar MyAbilities
+      /if (${Select[${Me.Class.ShortName},${Ini[${genSettings_Ini},ExpGroup,NoCombatAbil]}]} && ${Defined[MyAbilities]}) /deletevar MyAbilities
       /if (${Ini[${Character_Ini},Nukes,${NoKSNukeSet}].Length}) /call event_NukeSet "PLACEHOLDER" "${Me}" ${NoKSNukeSet}
 			/if (${Defined[NoKSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${NoKSWeaponSet}].Length}) /swap ${NoKSWeaponSet}
       /if (${Me.Class.ShortName.Equal[Rog]}) {

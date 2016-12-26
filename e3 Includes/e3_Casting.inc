@@ -60,7 +60,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   |if im invis and iCastInvis=0 (default except for heals)
   |if im a rog, not in combat, done no action for 10+ seconds, and near 2+ other players then drop invis to buff (allows autohide)
   /if (${Me.Invis}) {
-    /if (${Me.Class.ShortName.Equal[Rog]} && !${Me.Combat} && ${SpawnCount[pc radius 40]} > 2 && (${idleTimer}<${Math.Calc[${idleInterval}*600 - 100]} ) && !${SpawnCount[npc radius 100]}) {
+    /if (${Me.Class.ShortName.Equal[Rog]} && !${Me.Combat} && ${SpawnCount[pc radius 40]} > 2 && (${idleTimer}<${Math.Calc[${idleInterval}*600 - 100]} ) && !${SpawnCount[npc radius 100 zradius 100]}) {
       /makemevisible
     } else /if (!${${ArrayName}[${ArrayIndex},${iCastInvis}]}) {
       /varset castReturn CAST_INVISIBLE

@@ -74,7 +74,7 @@ SUB event_Assist(line, ChatSender, int MobID)
               | Check MaxRangeTo, make sure it is not out of bounds.
               /if (${AssistStickDistance} > 25) /varset AssistStickDistance 25
               /call StickToAssistTarget
-              /if (${Me.Class.ShortName.Equal[Rog]} && ${Defined[strikeDisc]}) {
+              /if (${Me.Class.ShortName.Equal[Rog]} && ${Defined[strikeDisc]} && ${Bool[${strikeDisc}]}) {
                 /call check_rogStrike
               } else {
                 /attack on
@@ -303,7 +303,7 @@ SUB CombatAbilities
     }
     |- Discipline, no disc with a duration can go here
   } else /if (${Me.CombatAbility[${abilityName}]}) {
-    /echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName}
+    /echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName} ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbilityReady[Backstab]}
     /if (${Me.CombatAbilityReady[${abilityName}]}) {
       | Check for MinEnd
       /if (${MyAbilities[${i}].Find[/MinEnd|]}) {
