@@ -1651,14 +1651,14 @@ SUB EVENT_exp_group(line,ChatSender, expToggle)
       	/call buff_SpellArrays
 				/varset strikeDisc ${strikeDiscStr.Arg[1,/]}
 			}
-      /if (${Defined[NukeArray]} && ${Ini[${Character_Ini},Nukes,${KSNukeSet}#1].Length}) /varset NukeArray ${KSNukeSet}
-      /if (${Defined[KSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${KSWeaponSet}].Length}) /swap ${KSWeaponSet}
+      /if (${Ini[${Character_Ini},Nukes,${KSNukeSet}].Length}) /call event_NukeSet "PLACEHOLDER" "${Me}" ${KSNukeSet}
+      /if (${Ini[${Character_Ini},Swap Items,${KSWeaponSet}].Length}) /swap ${KSWeaponSet}
       /echo \ag KS Mode Activated - get exp
 
 		|remove anything that could kos when out of group
     } else /if (${Select[${expToggle},Off,No,False,0]} > 0) {
       /if (${Select[${Me.Class.ShortName},${Ini[${genSettings_Ini},ExpGroup,NoCombatAbil]}]}) /deletevar MyAbilities
-      /if (${Defined[NukeArray]} && ${Ini[${Character_Ini},Nukes,${NoKSNukeSet}#1].Length}) /varset NukeArray ${NoKSNukeSet}
+      /if (${Ini[${Character_Ini},Nukes,${NoKSNukeSet}].Length}) /call event_NukeSet "PLACEHOLDER" "${Me}" ${NoKSNukeSet}
 			/if (${Defined[NoKSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${NoKSWeaponSet}].Length}) /swap ${NoKSWeaponSet}
       /if (${Me.Class.ShortName.Equal[Rog]}) {
 				/varset strikeDisc 0
