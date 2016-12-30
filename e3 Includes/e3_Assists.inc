@@ -237,7 +237,6 @@ SUB check_AssistStatus
         | If I am < 50% life turn off attack (unless tank/stick front)
         | why does not moving matter.. && !${Bool[${Int[${Target.Speed}]}]}
         /if (${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]} && ${AssistStickPoint.NotEqual[front]}) {
-          /if (${Debug} || ${Debug_Assists}) /echo Setting hasTanked to TRUE, sticking without position.
           /if (${Me.PctHPs} < 50 ) /attack off
           /stick off
         } else {
@@ -283,28 +282,28 @@ SUB CombatAbilities
   }
 | For 1 to the size of MyAbilities array, use each ability.
   /for i 1 to ${MyAbilities.Size}
-  /varset abilityName ${MyAbilities[${i}].Arg[1,/]}
- | /echo MyAbilities  ${i} ${abilityName}
-|- Class abilities
-  /if (${Me.Ability[${abilityName}]}) {
-    /if (${abilityName.Equal[Bash]}) {
-      /if (!${Select[${Me.Inventory[Offhand].Type},Shield]} && !${Me.AltAbility[2 Hand Bash]}) /next i
-    }
-    /if (${Me.AbilityReady[${abilityName}]}) {
-      /doability "${abilityName}"
-    }
-    |- AA, only those with 0 cast time can go here
-  } else /if (${Me.AltAbility[${abilityName}]}) {
-    /if (${Me.AltAbilityReady[${abilityName}]}) {
-      /delay 1
-      /casting "${abilityName}" alt
-      /delay 1
-      |/echo casting ${abilityName}
-    }
-    |- Discipline, no disc with a duration can go here
-  } else /if (${Me.CombatAbility[${abilityName}]}) {
-    /echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName} ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbilityReady[Backstab]}
-    /if (${Me.CombatAbilityReady[${abilityName}]}) {
+    /varset abilityName ${MyAbilities[${i}].Arg[1,/]}
+    | /echo MyAbilities  ${i} ${abilityName}
+    |- Class abilities
+    /if (${Me.Ability[${abilityName}]}) {
+      /if (${abilityName.Equal[Bash]}) {
+        /if (!${Select[${Me.Inventory[Offhand].Type},Shield]} && !${Me.AltAbility[2 Hand Bash]}) /next i
+      }
+      /if (${Me.AbilityReady[${abilityName}]}) {
+        /doability "${abilityName}"
+        /delay 2 !${Me.AbilityReady[${abilityName}]}
+      }
+      |- AA, only those with 0 cast time can go here
+    } else /if (${Me.AltAbility[${abilityName}]}) {
+      /if (${Me.AltAbilityReady[${abilityName}]}) {
+        /casting "${abilityName}" alt
+        /delay 3 !${Me.AltAbilityReady[${abilityName}]}
+        |/echo casting ${abilityName}
+      }
+      |- Discipline, no disc with a duration can go here
+    } else /if (${Me.CombatAbility[${abilityName}]}) {
+    |/echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName} ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbilityReady[Backstab]}
+      /if (${Me.CombatAbilityReady[${abilityName}]}) {
       | Check for MinEnd
       /if (${MyAbilities[${i}].Find[/MinEnd|]}) {
         /call argueString MinEnd "${MyAbilities[${i}]}"
@@ -314,12 +313,13 @@ SUB CombatAbilities
       }
       |/echo myend ${Me.PctEndurance} minend ${minEnd} endcost ${Spell[${abilityName}].EnduranceCost} ${Me.Endurance}
       /if (${Me.PctEndurance} >= ${minEnd} && ${Spell[${abilityName}].EnduranceCost} <= ${Me.Endurance}) {
-        |/echo discing ${abilityName}
+        |/echo ready ${abilityName} ${Me.CombatAbilityReady[${abilityName}]}
         /disc ${abilityName}
+        /delay 3 !${Me.CombatAbilityReady[${abilityName}]}
         |/echo post disc
       }
     }
-  }
+}
   /next i
 
   /if (${AutoEvade}) /call AutoEvade
@@ -503,7 +503,7 @@ SUB check_Nukes
       }
     }
     |if the nuke was succesful, see if there is a delay defined and create a timer which locks out all nukes for the duration
-    /if (${Nukes2D[${castIndex},${iDelay}]} && ${Select[${castReturn},CAST_SUCCESS]}) {
+    /if (${Bool[${Nukes2D[${castIndex},${iDelay}]}]} && ${Select[${castReturn},CAST_SUCCESS]}) {
       /if (${Debug} || ${Debug_Assists}) /echo delaying for ${${ArrayName}[${castIndex},${iDelay}]}
       /if (${Defined[castDelay${lastSuccessfulCast}]}) {
         /varset castDelay${lastSuccessfulCast} ${Nukes2D[${castIndex},${iDelay}]}
@@ -1107,6 +1107,7 @@ SUB event_EpicBurn(line, ChatSender)
 			/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 				/docommand ${ChatToggle} Using Epic Burns...
         /casting ${EpicName} item -maxtries|3
+        /delay 10 !${Me.Casting.ID}
 			}
 		}
   }
@@ -1217,22 +1218,21 @@ SUB event_FullBurn(line, ChatSender)
 |--------------------------------------------------------------------------------|
 SUB useBurns(ArrayName)
 /if (${Debug} || ${Debug_Assists}) /echo |- useBurns Target=${burnTarget}- Array=${ArrayName} ==>
+  /echo useburnstart ${Time}
 	/declare i int local
 	/for i 1 to ${${ArrayName}.Size[1]}
     /call check_Ready "${ArrayName}" ${i}
     /if (${Macro.Return}) {
-      /if (${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.NotEqual[No Effect]} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) {
-        /next i
-      } else /if (${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text.NotEqual[No Effect]} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]} ) {
-        /next i
-      } else {
-        /g useBurns ${Time} : ${ArrayName}-${${ArrayName}[${i},${iCastName}]}
-        /delay 1
-        /call e3_Cast ${AssistTarget} "${ArrayName}" "${i}"
-        /delay 1
-      }
+      /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) /goto :skipCurrent
+      /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]}) /goto :skipCurrent
+
+      /g useBurns ${Time} : ${ArrayName}-${${ArrayName}[${i},${iCastName}]}
+      /call e3_Cast ${AssistTarget} "${ArrayName}" "${i}"
+    } else {
+      /echo NotReady: ${i} ${${ArrayName}[${i},${iCastName}]}
     }
-	/if (!${ActionTaken}) /next i
+  /if (!${ActionTaken}) /next i
+  :skipCurrent
 /if (${Debug} || ${Debug_Assists}) /echo <== useBurns -|
 /RETURN
 
@@ -1563,6 +1563,7 @@ Sub assist_Aliases
 
 |--------------------------------------------------------------------------------|
 Sub assist_Background_Events
+  |/echo assistbg ${Time}
   /doevents Assist
   /doevents BackOff
   /if (${Assisting}) {
@@ -1590,4 +1591,5 @@ Sub assist_Background_Events
   /doevents SwarmPets
   /doevents NukeSet
   /if (${auto_AssistOn}) /call check_AutoAssist
+  |/echo assistbg ${Time}
 /return

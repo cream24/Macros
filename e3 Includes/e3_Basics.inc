@@ -269,7 +269,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 		}
 		/declare barkTarget string outer ${Spawn[id ${msgTarget}].CleanName}
 		/declare barkReturned bool outer FALSE
-		/declare retryTimer timer local 30s
+		/declare retryTimer timer local 35s
 		/declare startingLoc string local
 		
 		/if (${Stick.Active}) /squelch /stick off
@@ -460,7 +460,7 @@ SUB EVENT_clickIt(line, ChatSender)
 			/delay ${clickDelay}
       /squelch /doortarget id ${closestDoorID}
 			/squelch /click left door
-			/if (${clickTimer} && (${MyZone}==${Zone.ID} || ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20)) /goto :retryClickDoor
+			/if (${clickTimer} && (${MyZone}==${Zone.ID} && ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20)) /goto :retryClickDoor
 			/if (${MyZone}==${Zone.ID} && ${Math.Abs[${doorStartingDist}-${DoorTarget.Distance3D}]} < 20) {
 				/echo \ay I have failed to click Door ${Switch.ID} ${DoorTarget.Name}
 				/moveto off

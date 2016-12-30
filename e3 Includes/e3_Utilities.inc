@@ -935,7 +935,7 @@ SUB MoveTo(destinationInfo, int distCheck)
 			
 		| Engage MQ2MoveUtils.
 			:retry_MoveToLoc
-			/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /interrupt
+			/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 			/squelch /moveto loc ${Y_Loc} ${X_Loc} dist ${If[${Defined[distCheck]},${distCheck},10]}
 			/delay 10 ${Me.Moving} || ${MoveTo.Moving}
 			
