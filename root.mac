@@ -1,0 +1,18 @@
+#turbo
+Sub Main
+	/declare rootSpell string local
+	/if (${Me.Class.ShortName.Equal[Wiz]}) /varset rootSpell Greater Fetter
+	/if (${Me.Class.ShortName.Equal[Rng]}) /varset rootSpell Earthen Roots
+	/echo ${rootSpell} on ${Target.ID}
+	:Loop
+	/if (!${Me.Gem[${rootSpell}]}) /memorize "${rootSpell}" 8
+	/if (!${Me.SpellReady[${rootSpell}]}) {
+		/delay 5
+		/goto :Loop
+	} else {
+		/casting "${rootSpell}"
+		/delay 5s !${Me.Casting.ID}
+		/if (${Bool[${Target.Rooted}]}) /delay 15s
+		/goto :Loop
+	}
+/return

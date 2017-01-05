@@ -1261,6 +1261,7 @@ SUB check_lifeTap
 
 |--------------------------------------------------------------------------------|
 #EVENT NukeSet "<#1#> NukeSet #2#"
+#EVENT NukeSet "[#1#] NukeSet #2#"
 #EVENT NukeSet "#1# tells you, 'NukeSet #2#'"
 #EVENT NukeSet "#1# tells the group, 'NukeSet #2#'"
 #EVENT NukeSet "#1# tell your party, 'NukeSet #2#'"

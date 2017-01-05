@@ -267,7 +267,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/doevents clickit
 				/doevents bark
 				/doevents vetAA_Background_Events
-
+				/call alerts_Background_Events
         |/varset Debug_Casting FALSE
 			}
 			/goto :cast_still_pending
@@ -333,10 +333,15 @@ Sub check_Ready(ArrayName, int ArrayIndex)
 /RETURN ${passCheck}
 
 Sub memorize_spell(spellName,gemNum)
+  /declare secWaited int local 0
   /memorize "${spellName}" ${gemNum}
   /delay 5s ${Bool[${Me.Gem[${spellName}]}]}
   /if (${Me.CombatState.NotEqual[COMBAT]}) {
-    /delay 10s ${Me.SpellReady[${spellName}]}
+    :checkMem
+      /delay 2s ${Me.SpellReady[${spellName}]}
+      /varcalc secWaited ${secWaited}+1
+      /call Background_Events
+      /if (${secWaited} < 5) /goto :checkMem
   } else {
     /delay 2s ${Me.SpellReady[${spellName}]}
   }

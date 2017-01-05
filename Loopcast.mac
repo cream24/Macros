@@ -1,16 +1,17 @@
 #turbo
-Sub Main
+Sub Main(gemNumber)
 
 	/if (${Me.Sitting}) {
 	  /stand
 	}
 	
 	:Loop
-	/if (!${Me.SpellReady[5]}) {
-		/delay 20
+	/if (!${Me.SpellReady[${gemNumber}]}) {
+		/delay 1s
 		/goto :Loop
 	} else {
-		/cast 5
+		/cast ${gemNumber}
+		/delay 10s !${Me.Casting.ID}
 		/goto :Loop
 	}
 

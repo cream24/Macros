@@ -747,15 +747,23 @@ SUB EVENT_CheckBuffs(line, ChatSender, eventParams)
 SUB EVENT_FindItems(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_FindItems ==>
 	| -Verify the event
-	/call verifyEvent "${ChatSender}" "${line}"
-	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+  /call #CreateVars string outer TempPart InclusionPart
+  /call #SplitInclusionArgs "${eventParams}" TempPart InclusionPart
+
+  /call #verifyEvent "${ChatSender}" "${line}"
+  /if (!${Macro.Return}) /return
+
+	|/call verifyEvent "${ChatSender}" "${line}"
+	|/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 	|    |-----------Valid User----------|    |--------Included Bot-----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
+	|/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
 		| -Declare counting variables.
 		/declare i int local
 		/declare e int local
 		/declare itemName string local
-		/declare ItemToFind string local ${eventParams.Arg[1,-]}
+    /declare ItemToFind string local ${TempPart}
+		|/declare ItemToFind string local ${eventParams.Arg[1,-]}
+		|/declare ItemToFind string local ${itemName}
 		/if (${FindItemCount[${ItemToFind}]} || ${FindItemBankCount[${ItemToFind}]} || ${Cursor.Name.Equal[${ItemToFind}]}) {
 			/docommand ${ChatToggle} >> Found (${Math.Calc[${FindItemCount[${ItemToFind}]} + ${FindItemBankCount[${ItemToFind}]}].Int}) examples of [${ItemToFind}] ..  <<
 			| wait for all chars to report item count before showing details
@@ -795,7 +803,7 @@ SUB EVENT_FindItems(line, ChatSender, eventParams)
 				/next i
 			}
 		}
-	}
+	|}
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
 /RETURN
 
@@ -809,11 +817,13 @@ SUB EVENT_FindItems(line, ChatSender, eventParams)
 SUB EVENT_FindMissingItem(line, ChatSender, eventParams)
 	/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_FindItems ==>
   | -Verify the event
-	/call verifyEvent "${ChatSender}" "${line}"
-	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-  |    |-----------Valid User----------|    |--------Included Bot-----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
-		/declare ItemToFind string local ${eventParams.Arg[1,-]}
+  /call #CreateVars string outer TempPart InclusionPart
+  /call #SplitInclusionArgs "${eventParams}" TempPart InclusionPart
+
+  /call #verifyEvent "${ChatSender}" "${line}"
+  /if (!${Macro.Return}) /return
+  /declare ItemToFind string local ${TempPart}
+		|/declare ItemToFind string local ${eventParams.Arg[1,-]}
 
 		/if (${FindItemCount[=${ItemToFind}]} || ${FindItemBankCount[=${ItemToFind}]} || ${Cursor.Name.Equal[=${ItemToFind}]}) {
       /if (${Debug} || ${Debug_Basics}) /echo found ${ItemToFind}
@@ -821,7 +831,7 @@ SUB EVENT_FindMissingItem(line, ChatSender, eventParams)
     } else {
 			/docommand ${ChatToggle} >> I did not find ${ItemToFind} ... <<
     }
-	}
+	|}
 	/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
 /RETURN
 
@@ -1619,7 +1629,7 @@ SUB EVENT_groupUp(line, ChatSender, eventParams)
         /delay 3s ${Group} == ${groupSize}
         /if (${Group} != ${groupSize}) {
           /for e 1 to 5
-          /if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Bool[${Group.Member[${groupMembers[${e}]}]}]}) /docommand ${ChatToggle} [${groupMembers[${e}]}] Did not join the group...
+            /if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Bool[${Group.Member[${groupMembers[${e}]}]}]}) /docommand ${ChatToggle} [${groupMembers[${e}]}] Did not join the group...
           /next e
         }
 				/goto :skip
@@ -1632,6 +1642,73 @@ SUB EVENT_groupUp(line, ChatSender, eventParams)
 /if (${Debug}) /echo <== EVENT_groupUp -|
 /RETURN
 
+|** #EVENT groupUp "<#1#> Group #2#"
+SUB EVENT_groupUp(line, ChatSender, eventParams)
+  /debug main |- EVENT_groupUp ==>
+
+| -Verify the event
+  /call verifyEvent "${ChatSender}" "${line}"
+  /varset ChatSender ${Macro.Return.Arg[1,_]}
+|    |-----------Valid User----------|    |--------Included Bot-----------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
+
+    /if (${ChatSender.Equal[${Me.Name}]}) {
+      /if (${Raid.Leader}) {
+        /bca //raiddisband
+        /delay 2s
+        /raiddisband
+      } else {
+        /delay 3s
+      }
+      /bca //disband
+      /delay 2s
+    }
+
+    /declare groupName string local ${eventParams.Arg[1,/]}
+    /if (${groupName.Right[1].Equal[ ]}) /varset groupName ${groupName.Left[${Math.Calc[${groupName.Length}-1]}]}
+    /declare groupFound string local
+    /declare groupMembers[5] string local
+    /declare groupSize int local
+
+    /declare i int local 1
+    /declare e int local
+
+    | -Check for groupName in Group_Ini.
+    :nextGroupListing
+    /if (${${IniMode}[${Group_Ini}].Arg[${i},|].Arg[2,_].Equal[${groupName}]} && ${${IniMode}[${Group_Ini},${${IniMode}[${Group_Ini}].Arg[${i},|]},GroupMember#0].NotEqual[DEPRECATED]}) {
+      | Disband from a current group
+      /if (${Group}) /call EVENT_Disband "PLACEHOLDER" "${Me.CleanName}"
+
+      | check to see if I am the group leader(GroupMember#0)
+      /if (${${IniMode}[${Group_Ini},${${IniMode}[${Group_Ini}].Arg[${i},|]},GroupMember#0].Equal[${Me.CleanName}]}) {
+        /echo Recalling [${groupName}]...
+        /delay 20
+        | Invite group members while ignoring placeholders, and set
+        /for e 1 to 5
+        /varset groupMembers[${e}] ${${IniMode}[${Group_Ini},${${IniMode}[${Group_Ini}].Arg[${i},|]},GroupMember#${e}]}
+        /if (${${IniMode}[${Group_Ini},${${IniMode}[${Group_Ini}].Arg[${i},|]},GroupMember#${e}].NotEqual[PLACEHOLDER]}) {
+          /varcalc groupSize ${groupSize}+1
+          | -Alert PC of incoming group invite.
+          /invite ${groupMembers[${e}]}
+        }
+        /next e
+
+        /delay 4s ${Group} == ${groupSize}
+        /if (${Group} != ${groupSize}) {
+          /for e 1 to 5
+            /if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Group.Member[${groupMembers[${e}]}]}) /docommand ${ChatToggle} [${groupMembers[${e}]}] Did not join the group...
+          /next e
+        }
+        /goto :skip
+      }
+    }
+    /varcalc i ${i}+1
+    /if (${${IniMode}[${Group_Ini}].Arg[${i},|].Length}) /goto :nextGroupListing
+  }
+  :skip
+  /debug main <== EVENT_groupUp -|
+/RETURN
+**|
 |---------------------------|
 #EVENT exp_group "[#1#] ExpGroup #2#"
 #EVENT exp_group "<#1#> ExpGroup #2#"

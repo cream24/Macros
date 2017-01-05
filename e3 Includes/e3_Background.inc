@@ -195,6 +195,7 @@ SUB check_Active
 SUB completePendingExchange
 /if (${Debug} || ${Debug_Background}) /echo |- completePendingExchanges ==>
 	| Check for the item needing to be swapped back.
+	/if (${Zone.ID}==306) /return
 	/declare itemToSwapBack string local ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[1,/]}
   /declare swapItemSlot ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[2,/]}
   |/echo ${itemToSwapBack} ${itemToSwapBack.Length}  ${swapItemSlot} ${swapItemSlot.Length}

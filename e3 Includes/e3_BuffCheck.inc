@@ -38,6 +38,7 @@ SUB buffBots(ArrayName)
 	/declare currentBuffs		string local
 	/declare currentSongs		string local
 
+/varset Debug_BuffCheck FALSE
  /for s 1 to ${${ArrayName}.Size[1]}
 	/if (${Debug} || ${Debug_BuffCheck}) /echo buffing ${${ArrayName}[${s},${iCastName}]} on ${${ArrayName}[${s},${iCastTarget}]} checkFor ${${ArrayName}[${s},${iCheckFor}]}
 
@@ -67,7 +68,7 @@ SUB buffBots(ArrayName)
 			/if (!${Bool[${Me.Buff[${buffSpellName}]}]} || (${Bool[${Me.Buff[${buffSpellName}]}]} && ${Me.Buff[${buffSpellName}].Duration.TotalSeconds} <= ${buffRecastTime})) {
 			  |/echo ${ArrayName} ${s} b ${buffSpellName} cn ${buffCheckForName}  ${Bool[${Me.Song[${buffSpellName}]}]} ${Bool[${Me.Song[${buffCheckForName}]}]}
 				/if (!${Bool[${Me.Song[${buffSpellName}]}]} && !${Bool[${Me.Song[${buffCheckForName}]}]}) {
-					/if (${Spell[${buffSpellName}].Stacks} && !${Bool[${Me.Buff[${buffCheckForName}]}]}) {
+					/if ((${Spell[${buffSpellName}].Stacks} || ${buffSpellName.Equal[Shield of Dreams]}) && !${Bool[${Me.Buff[${buffCheckForName}]}]}) {
             /call check_Ready "${ArrayName}" ${s}
             /if (${Macro.Return}) {
               /if (${buffSpellName.Equal[Pyromancy]}) {
@@ -104,6 +105,8 @@ SUB buffBots(ArrayName)
   :skipBuff
  /if (!${ActionTaken}) /next s
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== buffBots -|
+
+  /varset Debug_BuffCheck FALSE
 /RETURN
 
 |--------------------------------------------------------|

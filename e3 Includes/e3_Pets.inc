@@ -41,10 +41,13 @@ SUB check_AutoShrink
 /if (${Debug} || ${Debug_Pets}) /echo |- check_AutoShrink ==>
 	/if (${Me.Pet.ID} && ${Me.Pet.Height}>1) {
 		/if (${FindItemCount[=Gemstone of Dark Flame]}) {
+		  /echo casting gemstone shrink
 			/casting "Gemstone of Dark Flame" "-targetid|${Me.Pet.ID}"
 		} else /if 	(${FindItemCount[=Symbol of Ancient Summoning]}) {
+		  /echo casting symbol shrink
 			/casting "Symbol of Ancient Summoning" "-targetid|${Me.Pet.ID}"
 		} else /if (${Me.Book[Tiny Companion]}) {
+		  /echo casting tiny comp
 			/casting "Tiny Companion" "-targetid|${Me.Pet.ID}"
 		}
 		/delay 5s !${Me.Casting.ID}

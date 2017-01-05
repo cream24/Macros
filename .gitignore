@@ -48,6 +48,7 @@ Temporary Items
 *.name
 .idea/compiler.xml
 *.xml
+*_CreamTest.ini
 ArrayTest.mac
 beg.mac
 Cams.mac
@@ -61,8 +62,6 @@ ch.mac
 campkill.mac
 Coho.mac
 Coh_new2.mac
-e3 Bot Inis/zmtz/Balron_PEQTGC.ini
-e3 Bot Inis/zmtz/Barrymanilow_PEQTGC.ini
 e3 Includes.rar
 E3.iml
 EventTest.mac
@@ -73,117 +72,25 @@ robe_camp.mac
 ShowBonuses.mac
 forage.mac
 Inventory.mac
-e3 Bot Inis/zmtz/Zorak_PEQTGC.ini
-e3 Bot Inis/zmtz/Tuica_PEQTGC.ini
-e3 Bot Inis/zmtz/Bonham_PEQTGC.ini
-e3 Bot Inis/zmtz/Bosom_PEQTGC.ini
-e3 Bot Inis/zmtz/Boxsters_PEQTGC.ini
-e3 Bot Inis/zmtz/Butfloss_PEQTGC.ini
-e3 Bot Inis/zmtz/Clancybrown_PEQTGC.ini
-e3 Bot Inis/zmtz/Caryelwes_PEQTGC.ini
-e3 Bot Inis/zmtz/Clasper_PEQTGC.ini
-e3 Bot Inis/zmtz/Craic_PEQTGC.ini
-e3 Bot Inis/zmtz/Cleavage_PEQTGC.ini
-e3 Bot Inis/zmtz/Coprolite_PEQTGC.ini
-e3 Bot Inis/zmtz/Taxes_PEQTGC.ini
-e3 Bot Inis/zmtz/Spaceghost_PEQTGC.ini
-e3 Bot Inis/zmtz/Skinf_PEQTGC.ini
-e3 Bot Inis/zmtz/Stefani_PEQTGC.ini
-e3 Bot Inis/zmtz/Tepes_PEQTGC.ini
-e3 Bot Inis/zmtz/Lube_PEQTGC.ini
-e3 Bot Inis/zmtz/Magners_PEQTGC.ini
-e3 Bot Inis/zmtz/Fondle_PEQTGC.ini
-e3 Bot Inis/zmtz/Flatulence_PEQTGC.ini
-e3 Bot Inis/zmtz/Ditherdown_PEQTGC.ini
-e3 Bot Inis/zmtz/Detras_PEQTGC.ini
-e3 Bot Inis/zmtz/Drzoidberg_PEQTGC.ini
-e3 Bot Inis/zmtz/Critters_PEQTGC.ini
-e3 Bot Inis/zmtz/Kalortpor_PEQTGC.ini
-e3 Bot Inis/zmtz/Electricfence_PEQTGC.ini
-e3 Bot Inis/zmtz/Cremora_PEQTGC.ini
-e3 Bot Inis/zmtz/Lane_PEQTGC.ini
-e3 Bot Inis/zmtz/Mammary_PEQTGC.ini
-e3 Bot Inis/zmtz/Deodorant_PEQTGC.ini
-e3 Bot Inis/zmtz/Creamo_PEQTGC.ini
-e3 Bot Inis/zmtz/Marmot_PEQTGC.ini
-e3 Bot Inis/zmtz/Newskin_PEQTGC.ini
-e3 Bot Inis/zmtz/Ointment_PEQTGC.ini
-e3 Bot Inis/zmtz/Muddy_PEQTGC.ini
-e3 Bot Inis/zmtz/Odor_PEQTGC.ini
-e3 Bot Inis/zmtz/Pontoon_PEQTGC.ini
-e3 Bot Inis/zmtz/Lawndart_PEQTGC.ini
-e3 Bot Inis/zmtz/Redhotchili_PEQTGC.ini
-e3 Bot Inis/zmtz/Nramember_PEQTGC.ini
 tail.mac
-e3 Bot Inis/normal/Balron_PEQTGC.ini
-e3 Bot Inis/normal/Balron_PEQTGC.ini
-e3 Bot Inis/normal/Balron_PEQTGC.ini
-e3 Bot Inis/normal/Bonham_PEQTGC.ini
-e3 Bot Inis/normal/Ditherdown_PEQTGC.ini
-e3 Bot Inis/normal/Spaceghost_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Balron_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Coprolite_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Barrymanilow_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Bonham_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Boxsters_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Bosom_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Butfloss_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Caryelwes_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Clancybrown_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Clasper_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Cleavage_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Craic_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Creamo_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Cremora_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Skinf_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Mammary_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Marmot_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Lube_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Magners_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Lawndart_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Electricfence_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Flatulence_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Drzoidberg_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Kalortpor_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Druu_CreamTest.ini
-e3 Bot Inis/zmtz_pre/Lane_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Detras_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Fondle_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Ditherdown_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Newskin_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Deodorant_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Stefani_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Zorak_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Critters_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Nramember_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Muddy_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Odor_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Ointment_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Recall_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Redhotchili_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Spaceghost_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Tepes_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Taxes_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Tuica_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Pontoon_PEQTGC.ini
 e3 Macro Inis/doorquery.txt
 ground.mac
-e3 Bot Inis/Moinkay_CreamTest.ini
 Coho2.mac
+Loopcast.mac
+feign.mac
+hidesneak.mac
+NULL.ini
+e3 Bot Inis/zmtz/*
+e3 Bot Inis/zmtz_pre/*
+e3 Bot Inis/foresight/*
+e3 Bot Inis/Recall_PEQTGC.ini
+e3 Bot Inis/Callmemaybe_PEQTGC.ini
 e3 Bot Inis/Cerltwo_CreamTest.ini
 e3 Bot Inis/Ranga_CreamTest.ini
 e3 Bot Inis/Monky_CreamTest.ini
 e3 Bot Inis/Abeast_Akkas PEQ Installer.ini
 e3 Bot Inis/Druu_CreamTest.ini
 e3 Bot Inis/Echs_CreamTest.ini
-Loopcast.mac
-feign.mac
-hidesneak.mac
-NULL.ini
-e3 Bot Inis/Serjy_CreamTest.ini
-e3 Bot Inis/zmtz_pre/Lush_PEQTGC.ini
-e3 Bot Inis/zmtz/Bushmills_PEQTGC.ini
-e3 Bot Inis/zmtz/Lush_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Jamesons_PEQTGC.ini
-e3 Bot Inis/zmtz/Jamesons_PEQTGC.ini
-e3 Bot Inis/zmtz_pre/Bushmills_PEQTGC.ini
+e3 Bot Inis/Moinkay_CreamTest.ini
+testinv.mac
+e3 Includes/e3_Alerts - Copy.inc
