@@ -83,6 +83,7 @@ NULL.ini
 e3 Bot Inis/zmtz/*
 e3 Bot Inis/zmtz_pre/*
 e3 Bot Inis/foresight/*
+e3 Bot Inis/endurance/*
 e3 Bot Inis/Recall_PEQTGC.ini
 e3 Bot Inis/Callmemaybe_PEQTGC.ini
 e3 Bot Inis/Cerltwo_CreamTest.ini
@@ -94,3 +95,5 @@ e3 Bot Inis/Echs_CreamTest.ini
 e3 Bot Inis/Moinkay_CreamTest.ini
 testinv.mac
 e3 Includes/e3_Alerts - Copy.inc
+e3 Includes/e3_Alerts_slim.inc
+e3 Includes/e3_Alerts.inc
