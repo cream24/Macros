@@ -944,9 +944,21 @@ SUB EVENT_Swap_Items(line, IniEntry)
 			/if (${Ini[${Character_Ini},Swap Items,${IniEntry}].Arg[${i},/].Length}) /goto :SwapLoop
 		} else {
 			| If I'm swapping in a 2 hander, while dual wielding.
-			/if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].Type.Left[2].Equal[2H]} && ${Bool[${InvSlot[Offhand].Item}]}) /unequip Offhand
-      /if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].ItemSlot}==14) /unequip Offhand
-      /if (${slotToSwap.Equal[Offhand]} && ${FindItem[${itemToSwap}].ItemSlot}==13) /unequip Mainhand
+			/if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].Type.Left[2].Equal[2H]} && ${Bool[${InvSlot[Offhand].Item}]}) {
+			  /unequip Offhand
+			  /delay 2
+			  /call PlaceInFirstFreeSlot
+      }
+      /if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].ItemSlot}==14) {
+        /unequip Offhand
+        /delay 2
+        /call PlaceInFirstFreeSlot
+      }
+      /if (${slotToSwap.Equal[Offhand]} && ${FindItem[${itemToSwap}].ItemSlot}==13) {
+        /unequip Mainhand
+        /delay 2
+        /call PlaceInFirstFreeSlot
+      }
 			| Swap in item.
       /if (${Debug} || ${Debug_Basics}) /echo Equipping [${itemToSwap}] ${slotToSwap}
 			/call SwapItem "${itemToSwap}" ${slotToSwap}
