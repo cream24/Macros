@@ -74,7 +74,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		/goto :skipCast 
 	}
 	|- Check the Immune List
-	/if (${Select[imm${pendingCastID}-${Target.CleanName},${immuneList}]}) {
+	/if (${Select[${pendingCastID}_${castTargetName},${immuneList}]}) {
 		/if (${Debug} || ${Debug_Casting}) /bc ${Target.CleanName} is immune to ${pendingCastID}, skipping cast
 		/varset castReturn CAST_IMMUNE
 		/goto :skipCast 		
