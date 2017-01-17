@@ -80,8 +80,8 @@ Sub ROG_Setup
 
 SUB ROG_MacroSettings
 /if (${Debug}) /echo |- ROG_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#2" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Buffs" 1
 /if (${Debug}) /echo <== ROG_MacroSettings -|
 /RETURN
 

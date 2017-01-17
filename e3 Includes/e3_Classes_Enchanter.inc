@@ -311,26 +311,26 @@ Sub ENC_Background_Events
 /return
 
 SUB ENC_MacroSettings
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#1" "check_Charm" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#2" "check_Mez" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#3" "check_Rune" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#4" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#5" "check_Debuffs" 1
-  /call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#6" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#7" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#8" "check_AE" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#9" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#10" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Charm" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Mez" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Rune" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Debuffs" 1
+  /call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_AE" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Pets" 1
 /RETURN
 
 
 SUB ENC_CharacterSettings
 	/call WriteToIni "${Character_Ini},Enchanter,AutoRune (On/Off)" Off
 	/call WriteToIni "${Character_Ini},Enchanter,AutoMez (On/Off)" Off
-	/call WriteToIni "${Character_Ini},Enchanter,RuneTarget#1"
-	/call WriteToIni "${Character_Ini},Enchanter,RuneSpell#1"
-  /call WriteToIni "${Character_Ini},Enchanter,Mez#1"
-	/call WriteToIni "${Character_Ini},Enchanter,Charm#1"
+	/call WriteToIni "${Character_Ini},Enchanter,RuneTarget"
+	/call WriteToIni "${Character_Ini},Enchanter,RuneSpell"
+  /call WriteToIni "${Character_Ini},Enchanter,Mez"
+	/call WriteToIni "${Character_Ini},Enchanter,Charm"
   /call WriteToIni "${Character_Ini},Enchanter,GatherMana Pct" 10
 /RETURN
 

@@ -32,11 +32,11 @@ Sub WIZ_Setup
 
 SUB WIZ_MacroSettings
 /if (${Debug}) /echo |- WIZ_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#1" "check_Burns" 1
-  /call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#2" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#3" "check_AE" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#4" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#5" "check_Harvest" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Burns" 1
+  /call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_AE" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Harvest" 1
 /if (${Debug}) /echo <== WIZ_MacroSettings -|
 /RETURN
 
@@ -44,7 +44,7 @@ SUB WIZ_CharacterSettings
 /if (${Debug}) /echo |- WIZ_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},Wizard,Evac Spell"
 	/call WriteToIni "${Character_Ini},Wizard,Auto-Harvest (On/Off)" Off
-	/call WriteToIni "${Character_Ini},Wizard,Harvest#1"
+	/call WriteToIni "${Character_Ini},Wizard,Harvest"
 /if (${Debug}) /echo <== WIZ_CharacterSettings -|
 /RETURN
 

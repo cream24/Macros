@@ -168,6 +168,9 @@ Sub tanking_Background_Events
   /doevents TogglePeelTank
 /return
 
+Sub tanking_CharacterSettings
+/return
+
 Sub tanking_Setup
   /declare mainTank string outer
   /declare currentPuller string outer

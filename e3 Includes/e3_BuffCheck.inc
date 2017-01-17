@@ -13,6 +13,7 @@ SUB check_Buffs
 	/if (${Debug} || ${Debug_BuffCheck}) /echo |- buffCheck ==>
 	/if (${BuffCheck} ) {
 		/if (!${ActionTaken} && !${activeTimer} && ${BuffCombatCheck} && !${idle} && (!${medBreak} || ${Me.Combat}))	/call buffBots "CombatBuffs2D"
+    /if (!${ActionTaken} && !${activeTimer} && ${procBuff} && !${idle} && (!${medBreak} || ${Me.Combat}))	        /call buffProcs
 		/if (!${ActionTaken} && ${InstantBuffs2D.Size[1]})		/call buffBots "InstantBuffs2D"
 		/if (!${ActionTaken} && !${combatTimer} && !${activeTimer} && ${Me.CombatState.NotEqual[COMBAT]} && !${Assisting} && !${Me.Moving} && ${BuffCheck}) {
 			/if (!${ActionTaken} && ${SelfBuffs2D.Size[1]})	/call buffBots "SelfBuffs2D"
@@ -135,6 +136,39 @@ SUB meleeCombatBuffs(ArrayName, int s)
   }
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== meleeCombatBuffs -|
 /RETURN
+
+|--------------------------------------------------------|
+|- Casts Proc Buffs (e.x: Panther, Mana Flare           -|
+|--------------------------------------------------------|
+SUB buffProcs
+/if (${Debug} || ${Debug_BuffCheck}) /echo |- buffProcs ==>
+  /if (!${ActionTaken}) {
+    /declare t int local
+    /declare g int local
+
+    /for t 1 to ${ProcBuffs2D.Size[1]}
+      /for g 1 to ${Math.Calc[${Group.GroupSize}-1]}
+        /if (${Group.Member[${g}].ID}) {
+          /if (${procBuffClass.Find[${Group.Member[${g}].Class.ShortName}]}) {
+            /if (!${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${t},${iSpellID}]} ]} && !${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${t},${iCheckFor}]} ]}) {
+              /call check_Ready "ProcBuffs2D" ${t}
+              /if (${Macro.Return}) {
+                /call check_Distance ${Group.Member[${g}].ID} ${ProcBuffs2D[${t},${iMyRange}]}
+                /if (${Macro.Return}) {
+                  /call check_Mana "ProcBuffs2D" ${t}
+                  /if (${Macro.Return}) {
+                    /call e3_Cast ${Group.Member[${g}].ID} "ProcBuffs2D" ${t}
+                  } else /if (${Debug} || ${Debug_Cures}) /echo ${ProcBuffs2D[${t},${iCastName}]} failed mana check
+                } else /if (${Debug} || ${Debug_Cures}) /echo ${ProcBuffs2D[${t},${iCastName}]} is too far away
+              } else /if (${Debug} || ${Debug_Cures}) /echo ${ProcBuffs2D[${t},${iCastName}]} is not ready for ${Group.Member[${g}]}
+            }
+          }
+        }
+      /if (!${ActionTaken}) /next g
+    /if (!${ActionTaken})  /next t
+  }
+/if (${Debug} || ${Debug_BuffCheck}) /echo <==  buffProcs -|
+/return
 |--------------------------------------------------------|
 |- Casts GroupBuffs array on the specified buffTargetID.-|
 |--------------------------------------------------------|
@@ -241,6 +275,9 @@ Sub buffCheck_Setup
 	/declare BuffCombatCheck		  bool outer FALSE
 	/declare min_BuffCheckHealth 	int outer 80
 	/declare buffRecastTime			  int outer 60
+
+  /if (${Ini[${Character_Ini},Buffs,Proc Buff Class].Length})     /call IniToVar "${Character_Ini},Buffs,Proc Buff Class"     procBuffClass string outer
+  /if (${Ini[${Character_Ini},Buffs,Proc Buff (On/Off)].Length})	/call IniToVar "${Character_Ini},Buffs,Proc Buff (On/Off)"	procBuff bool outer
   /call buff_SpellArrays
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== buffCheck_Setup -|
 /return
@@ -251,6 +288,7 @@ SUB buff_SpellArrays
   /call #IniToArray "${Character_Ini},Buffs,Group Buff#"		GroupBuffs
   /call #IniToArray "${Character_Ini},Buffs,Bot Buff#"			BotBuffs
   /call #IniToArray "${Character_Ini},Buffs,Combat Buff#"		CombatBuffs
+  /call #IniToArray "${Character_Ini},Buffs,Proc Buff#"		  ProcBuffs
 
   /if (${CombatBuffs.Size})	/varset BuffCombatCheck TRUE
   /if (${InstantBuffs.Size} || ${SelfBuffs.Size} || ${BotBuffs.Size} || ${CombatBuffs.Size}) /varset BuffCheck TRUE
@@ -260,6 +298,7 @@ SUB buff_SpellArrays
   /if (${BotBuffs.Size})		  /call BuildSpellArray "BotBuffs"			"BotBuffs2D"
   /if (${CombatBuffs.Size}) 	/call BuildSpellArray "CombatBuffs"		"CombatBuffs2D"
   /if (${GroupBuffs.Size})	  /call BuildSpellArray "GroupBuffs"		"GroupBuffs2D"
+  /if (${ProcBuffs.Size})	    /call BuildSpellArray "ProcBuffs"		  "ProcBuffs2D"
 
   /declare s int local
   /if (${InstantBuffs2D.Size[1]}) {
@@ -285,11 +324,20 @@ SUB buffCheck_MacroSettings
 /RETURN
 
 SUB buffCheck_CharacterSettings
-	/call WriteToIni "${Character_Ini},Buffs,Instant Buff#1"
-	/call WriteToIni "${Character_Ini},Buffs,Self Buff#1"
-	/call WriteToIni "${Character_Ini},Buffs,Bot Buff#1"
-	/call WriteToIni "${Character_Ini},Buffs,Combat Buff#1"
-	/call WriteToIni "${Character_Ini},Buffs,Group Buff#1"
+	/call WriteToIni "${Character_Ini},Buffs,Instant Buff"
+	/call WriteToIni "${Character_Ini},Buffs,Self Buff"
+	/call WriteToIni "${Character_Ini},Buffs,Bot Buff"
+	/call WriteToIni "${Character_Ini},Buffs,Combat Buff"
+	/call WriteToIni "${Character_Ini},Buffs,Group Buff"
+  /if (${Select[${Me.Class.ShortName},ENC,SHM]}) {
+    /call WriteToIni "${Character_Ini},Buffs,Proc Buff (On/Off)" Off
+    /call WriteToIni "${Character_Ini},Buffs,Proc Buff"
+    /if (${Me.Class.ShortName.Equal[SHM]}) {
+      /call WriteToIni "${Character_Ini},Buffs,Proc Buff Class" "WAR/BRD/ROG/MNK/BER/RNG"
+    } else {
+      /call WriteToIni "${Character_Ini},Buffs,Proc Buff Class" "WIZ/MAG
+    }
+  }
 /RETURN
 
 Sub buffCheck_Aliases

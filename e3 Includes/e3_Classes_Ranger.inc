@@ -12,13 +12,13 @@ Sub RNG_Setup
 
 SUB RNG_MacroSettings
 /if (${Debug}) /echo |- RNG_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#2" "check_Heals" 1
-  /call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#3" "check_Cures" 1
-  /call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#4" "check_AE" 1
-	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#5" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#6" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#7" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_Heals" 1
+  /call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_Cures" 1
+  /call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_AE" 1
+	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function" "check_Buffs" 1
 /if (${Debug}) /echo <== RNG_MacroSettings -|
 /RETURN
 

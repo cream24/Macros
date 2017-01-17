@@ -172,23 +172,25 @@ SUB EVENT_make_MacroSettingsIni
 	/echo Creating macro settings files...
 	/call WriteToIni "${genSettings_Ini},General,Macro Output Channel" /bc
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Mode (On/Off)" Off
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#1" background 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#2" basics 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#3" casting 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#4" begForBuffs 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#5" buffCheck 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#6" cures 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#7" pet 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#8" heal 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#9" healChain 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#10" assist 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#11" class 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#12" corpseSummon 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#13" loot 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#14" sell 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#15" smoothMoves 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#16" Wait4Rez 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#17" buy 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" background 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" basics 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" casting 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" begForBuffs 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" buffCheck 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" cures 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" pet 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" heal 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" healChain 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" assist 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" class 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" corpseSummon 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" loot 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" sell 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" smoothMoves 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" Wait4Rez 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" buy 1
+  /call WriteToIni "${advSettings_Ini},Included Setups,Include" alerts 1
+  /call WriteToIni "${advSettings_Ini},Included Setups,Include" tanking 1
 	
 	/delay 15
 

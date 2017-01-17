@@ -717,16 +717,16 @@ SUB heal_CharacterSettings
 
 	| If I'm a healer, add e3_Macro_Heals.inc entries.
 	/if (${Select[${Me.Class.ShortName},CLR,DRU,SHM,BST,PAL,RNG]}) {
-		/call WriteToIni "${Character_Ini},Heals,Tank#1"
-		/call WriteToIni "${Character_Ini},Heals,Important Bot#1"
-		/call WriteToIni "${Character_Ini},Heals,Pet Owner#1"
-		/call WriteToIni "${Character_Ini},Heals,Tank Heal#1"
-		/call WriteToIni "${Character_Ini},Heals,Important Heal#1"
-		/call WriteToIni "${Character_Ini},Heals,All Heal#1"
-		/call WriteToIni "${Character_Ini},Heals,Pet Heal#1"
-		/call WriteToIni "${Character_Ini},Heals,Heal Over Time Spell#1"
-    /if (${Select[${Me.Class.ShortName},CLR,DRU,PAL]})	/call WriteToIni "${Character_Ini},Heals,Group Heal#1"
-    /if (${Select[${Me.Class.ShortName},CLR,SHM]}) /call WriteToIni "${Character_Ini},Heals,;Group Hot#1" "Not Implemented"
+		/call WriteToIni "${Character_Ini},Heals,Tank"
+		/call WriteToIni "${Character_Ini},Heals,Important Bot"
+		/call WriteToIni "${Character_Ini},Heals,Pet Owner"
+		/call WriteToIni "${Character_Ini},Heals,Tank Heal"
+		/call WriteToIni "${Character_Ini},Heals,Important Heal"
+		/call WriteToIni "${Character_Ini},Heals,All Heal"
+		/call WriteToIni "${Character_Ini},Heals,Pet Heal"
+		/call WriteToIni "${Character_Ini},Heals,Heal Over Time Spell"
+    /if (${Select[${Me.Class.ShortName},CLR,DRU,PAL]})	/call WriteToIni "${Character_Ini},Heals,Group Heal"
+    /if (${Select[${Me.Class.ShortName},CLR,SHM]}) /call WriteToIni "${Character_Ini},Heals,;Group Hot" "Not Implemented"
     /call WriteToIni "${Character_Ini},Heals,Who to Heal" "Tanks/ImportantBots/All/Pets"
 		/call WriteToIni "${Character_Ini},Heals,Who to HoT" "Tanks/ImportantBots/All/Pets"
 	}

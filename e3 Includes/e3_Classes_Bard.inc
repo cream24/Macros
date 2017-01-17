@@ -290,15 +290,15 @@ Sub BRD_Background_Events
 
 SUB BRD_MacroSettings
 	| Adv Settings
-	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#2" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function" "check_Buffs" 1
 /RETURN
 
 SUB BRD_CharacterSettings
 	/call WriteToIni "${Character_Ini},Bard,Auto-Melody"
   /call WriteToIni "${Character_Ini},Bard,AutoMez (On/Off)" Off
-  /call WriteToIni "${Character_Ini},Bard,Mez#1"
-  /call WriteToIni "${Character_Ini},Bard,Charm#1"
+  /call WriteToIni "${Character_Ini},Bard,Mez"
+  /call WriteToIni "${Character_Ini},Bard,Charm"
 /RETURN
 
 Sub BRD_Aliases

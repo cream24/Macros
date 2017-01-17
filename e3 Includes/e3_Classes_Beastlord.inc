@@ -3,28 +3,54 @@
 |- Written by Killians of PEQ												-|
 |----------------------------------------------------------------------------|
 Sub BST_Setup
+  /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Growl Combat (On/Off)" petGrowlCombat bool outer
+  /call #INItoArray "${Character_Ini},Pets,Pet Growl#" petGrowl
+  /if (${petGrowl.Size}>0) /call BuildSpellArray "petGrowl"	"petGrowl2D"
 /return
 
 |----------------------------------------------------------------------------|
 SUB BST_MacroSettings
 /if (${Debug}) /echo |- BST_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#2" "check_Debuffs" 1
-  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#3" "check_Heals" 1
-  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#4" "check_Cures" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#5" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#6" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#7" "check_Pets" 1
-  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#8" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Debuffs" 1
+  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Heals" 1
+  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Cures" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Pets" 1
+  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_DoTs" 1
 /if (${Debug}) /echo <== BST_MacroSettings -|
 /RETURN
 
 SUB BST_CharacterSettings
+  /call WriteToIni "${Character_Ini},Pets,Pet Growl"
+  /call WriteToIni "${Character_Ini},Pets,Pet Growl Combat (On/Off)" On
 /RETURN
 
 Sub BST_Aliases
 /return
 
+Sub pet_Growl
+/if (${Debug} || ${Debug_Pets}) /echo |- petGrowl ==>
+  /declare s int local
+  /for s 1 to ${petGrowl2D.Size[1]}
+|/echo ${petBuffs2D[${s},${iCastName}]} stack ${petBuffs2D[${s},${iSpellName}]} ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} has !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}
+|removing ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} for now as balikor's mark reports non-stacking
+  /if (!${Bool[${Me.PetBuff[${petGrowl2D[${s},${iSpellName}]}]}]} && !${Bool[${Me.PetBuff[${petGrowl2D[${s},${iCheckFor}]}]}]}) {
+    /call check_Ready "petGrowl2D" ${s}
+    /if (${Macro.Return}) {
+      /if (${Me.Pet.Distance} < ${petGrowl2D[${s},${iMyRange}]}) {
+        /call check_Mana "petGrowl2D" ${s}
+        /if (${Macro.Return}) {
+          /call e3_Cast ${Me.Pet.ID} "petGrowl2D" ${s}
+        }
+      }
+    }
+  }
+  :skipBuff
+  /if (!${ActionTaken}) /next s
+/if (${Debug} || ${Debug_Pets}) /echo <== petGrowl -|
+/return
 |----------------------------------------------------------------------------|
 #event AE_POS "#*# tells you, 'AEPOS'"
 sub Event_AE_POS(string line)

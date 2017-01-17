@@ -34,7 +34,7 @@ SUB event_UseCorpseSummoner(line, ChatSender)
 		/if (${Zone.ID} == 344) {
 
 			| Find a starting point
-			/declare startingPoint string outer
+			/if (!${Defined[startingPoint]}) /declare startingPoint string outer
 			/if (${LineOfSight[400,250:${Me.Loc.Replace[ ,]}]}) {
 				/varset startingPoint 400,250
 			} else /if (${LineOfSight[400,-250:${Me.Loc.Replace[ ,]}]}) {
@@ -92,7 +92,7 @@ SUB event_UseCorpseSummoner(line, ChatSender)
 		}
 	}
 
-/if (${Debug} || ${Debug_CorpseSummoning}) /echo <== event_UseCoprseSummoner -|
+/if (${Debug} || ${Debug_CorpseSummoning}) /echo <== event_UseCorpseSummoner -|
 /RETURN
 
 
@@ -158,7 +158,9 @@ SUB withdraw_Plat
 	} else {
 	
 		| Move to the banker.
-		/call MoveTo -SpawnID|${Spawn[npc A Shrewd Banker].ID}
+		/call TrueTarget ${Spawn[npc A Shrewd Banker].ID}
+		/call MoveTo -Loc|${Target.Y},${Target.X}
+		|/call MoveTo -SpawnID|${Spawn[npc A Shrewd Banker].ID}
 		
 		/if (${Target.Distance} > 15) {
 			/docommand ${ChatToggle} I failed to move to the banker

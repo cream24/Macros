@@ -318,14 +318,14 @@ SUB MAG_Setup
 SUB MAG_MacroSettings
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_MacroSettings ==>
 	| Adv Settings
-  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#1" "check_CoH" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#2" "check_Buffs" 1
-  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#3" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#4" "check_Pets" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#5" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#6" "check_Ae" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#7" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#8" "check_PetWeapons" 1
+  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_CoH" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Buffs" 1
+  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Ae" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_PetWeapons" 1
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_MacroSettings -|
 /RETURN
 

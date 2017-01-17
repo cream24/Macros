@@ -340,15 +340,16 @@ Sub CLR_Setup
 |----------------------------------------------------------------------------|
 SUB CLR_MacroSettings
 /if (${Debug}) /echo |- CLR_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#1" "check_DivineArb" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#2" "check_Yaulp" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#3" "check_celestialRegen" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#4" "check_healChain" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#5" "check_Heals" 1
-  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#6" "check_Cures" 1
-  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#7" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#8" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#9" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_DivineArb" 1
+  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Yaulp" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_celestialRegen" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_healChain" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Heals" 1
+  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Cures" 1
+  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Nukes" 1
 /if (${Debug}) /echo <== CLR_MacroSettings -|
 /RETURN
 

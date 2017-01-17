@@ -12,6 +12,10 @@ SUB check_Pets
 		/if (!${Me.Pet.ID} && !${ActionTaken} && ${petSpell2D.Size[1]} && ${SpawnCount[pc ${Me}]} && (${petSummonCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call summonPet
 		/if (${Me.Pet.ID} && !${ActionTaken} && ${petBuffs2D.Size[1]} && (${petBuffCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call buffPet
 		/if (${Me.Pet.ID} && !${ActionTaken} && ${petAutoShrink} && !${combatTimer}) /call check_AutoShrink
+
+    /if (${Me.Class.ShortName.Equal[BST]}) {
+      /if (${Me.Pet.ID} && !${ActionTaken} && ${petGrowl2D.Size[1]} && (${petGrowlCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call pet_Growl
+    }
 	}
 /if (${Debug} || ${Debug_Pets}) /echo <== check_Pets -|
 /RETURN
