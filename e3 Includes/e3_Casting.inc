@@ -281,17 +281,19 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		} else /if (${interruptFlag}) {		
 			/varset castReturn CAST_CANCELLED
 		} else /if (${castReturn.Equal[CAST_RESIST]}) {
-			/if (${Target.ID}) /docommand ${ChatToggle} ** ${Target.Name} resisted ${pendingCast} **
+			/if (${Debug_Casting} && ${Target.ID}) /docommand ${ChatToggle} ** ${Target.Name} resisted ${pendingCast} **
 		} else /if (${castReturn.Equal[CAST_IMMUNE]}) {
       /docommand ${ChatToggle} ${Target.Name} is immune to ${pendingCast} **
 			/varset immuneList ${immuneList}${pendingCastID}_${castTargetName},
     |dont create a nohold timer for detrimental AE spells
 		} else /if (${castReturn.Equal[CAST_TAKEHOLD]} && ${Select[${ArrayName},TargetAE_Spells2D,PBAE_Spells2D]}==0) {
-      /docommand ${ChatToggle} ** ${pendingCast} did not take hold on ${castTargetName} **
-			/if (${Defined[nht${targetID}-${pendingCastID}]}) {
-				/varset nht${targetID}-${pendingCastID} ${noHoldDelay}
-			} else {
-				/call CreateTimer "nht${targetID}-${pendingCastID}" "${noHoldDelay}"
+      /if (${Target.ID}) {
+				/docommand ${ChatToggle} ** ${pendingCast} did not take hold on ${castTargetName} **
+				/if (${Defined[nht${targetID}-${pendingCastID}]}) {
+					/varset nht${targetID}-${pendingCastID} ${noHoldDelay}
+				} else {
+					/call CreateTimer "nht${targetID}-${pendingCastID}" "${noHoldDelay}"
+				}
 			}
 		} else /if (${Select[${castReturn},CAST_OUTDOORS,CAST_COMPONENTS,CAST_UNKNOWN]}) {
 			/docommand ** ${ChatToggle} Adding to failureList due to Return Events CAST_OUTDOORS,CAST_COMPONENT,CAST_UNKNOWN

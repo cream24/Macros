@@ -122,17 +122,17 @@ SUB AssistOff
 /if (${Debug} || ${Debug_Assists}) /echo |- AssistOff -| ==>
 	| Interrupt spells, turn off attack.
 	|/echo in assistoff
-	/if (${AllowControl}) {
+	|/if (${AllowControl}) {
 		/if (${Me.Casting.ID} && !${Spell[${Me.Casting}].SpellType.Find[beneficial]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 		/if (${Me.Combat})    /attack off
 		/if (${Me.AutoFire})  /autofire off
-    /delay 10 !${Me.Combat}
-    /delay 10 !${Me.AutoFire}
-	}
+	|}
   /if (${Me.Pet.ID}) {
     /pet back off
     /pet hold
   }
+  /delay 30 !${Me.Casting.ID} && !${Me.Combat} && !${Me.AutoFire}
+
 	/varset Assisting FALSE
 	/varset AssistTarget 0
 	/varset AllowControl FALSE
@@ -237,7 +237,7 @@ SUB check_AssistStatus
         | If I am < 50% life turn off attack (unless tank/stick front)
         | why does not moving matter.. && !${Bool[${Int[${Target.Speed}]}]}
         /if (${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]} && ${AssistStickPoint.NotEqual[front]}) {
-          /if (${Me.PctHPs} < 50 ) /attack off
+          /if (${Me.PctHPs} < 80 ) /attack off
           /stick off
         } else {
           | If the mob is not targeting me
@@ -411,15 +411,18 @@ SUB EVENT_getCloser
 SUB check_AutoAssist
 /if (${Debug} || ${Debug_Assists}) /echo |- check_AutoAssist ==>
 	/if (!${Assisting}) {
-		| First check if I am attacking something
 		|/echo ${auto_AssistOn} engagepct ${EngagePct}
-		/if (${Target.ID} && ${Me.Combat} || ${Target.ID} && ${Spell[${Me.Casting.ID}].SpellType.Equal[Detrimental]}) {
-			/if (${Target.PctHPs} < ${EngagePct} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]} && ${Target.ID} != ${PauseTarget}) {
-				/if (${Debug} || ${Debug_Assists}) /echo I am attacking, engaging Assist functions
-				/if (${NetBots.Client.Arg[${i}, ].Equal[${Me.CleanName}]}) /delay 15
-				/call EVENT_Assist "<${Me.CleanName}> Assist on ${Target.ID}" ${Me.CleanName} ${Target.ID}
+		/if ((${Target.ID} && ${Me.Combat}) || (${Target.ID} && ${Spell[${Me.Casting.ID}].SpellType.Equal[Detrimental]})) {
+			/if (${Target.PctHPs} < ${EngagePct} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
+			  /if ((!${Bool[${PauseTarget}]} || ${Target.ID} != ${PauseTarget}) && (!${Bool[${Me.Pet.ID}]} || ${Target.ID} != ${Me.Pet.ID})) {
+          /if (${Debug} || ${Debug_Assists}) /echo I am attacking, engaging Assist functions
+          /assistme
+          |/call EVENT_Assist "<${Me.CleanName}> Assist on ${Target.ID}" ${Me.CleanName} ${Target.ID}
+        }
 			}
-		| Check all other netbots
+    }
+    |why do you need to check other netbots when one of them will engage all via event_assist above??
+		|** Check all other netbots
 		} else {
 			/declare i int local
 			/for i 1 to ${NetBots.Counts}
@@ -440,7 +443,7 @@ SUB check_AutoAssist
 					}
 				}
 			/if (!${Assisting}) /next i
-		}
+		} **|
 	}
 /if (${Debug} || ${Debug_Assists}) /echo <== check_AutoAssist -|
 /RETURN
@@ -1346,43 +1349,43 @@ Sub assist_Setup
 	| [Melee Abilities].
   /call #INItoArray "${Character_Ini},Melee Abilities,Ability#" MyAbilities
 
-| Epic Definitions for EpicBurn - warr, shd, pal,
-/if (${FindItemCount["Prismatic Dragon Blade"]})                /declare EpicName string outer "Prismatic Dragon Blade"
-/if (${FindItemCount["Blade of Vesagran"]})                     /declare EpicName string outer "Blade of Vesagran"
-|/if (${FindItemCount["Savage Lord's Totem"]})                   /declare EpicName string outer "Savage Lord's Totem"
-|/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
-/if (${FindItemCount["Raging Taelosian Alloy Axe"]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
-/if (${FindItemCount["Vengeful Taelosian Blood Axe"]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
-/if (${FindItemCount["Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"
-/if (${FindItemCount["Staff of Everliving Brambles"]})          /declare EpicName string outer "Staff of Everliving Brambles"
-/if (${FindItemCount["Fistwraps of Celestial Discipline"]})     /declare EpicName string outer "Fistwraps of Celestial Discipline"
-/if (${FindItemCount["Transcended Fistwraps of Immortality"]})  /declare EpicName string outer "Transcended Fistwraps of Immortality"
-/if (${FindItemCount["Redemption"]})                            /declare EpicName string outer "Redemption"
-/if (${FindItemCount["Nightbane, Sword of the Valiant"]})       /declare EpicName string outer "Nightbane, Sword of the Valiant"
-/if (${FindItemCount["Heartwood Blade"]})                       /declare EpicName string outer "Heartwood Blade"
-/if (${FindItemCount["Aurora, the Heartwood Blade"]})           /declare EpicName string outer "Aurora, the Heartwood Blade"
-/if (${FindItemCount["Fatestealer"]})                           /declare EpicName string outer "Fatestealer"
-/if (${FindItemCount["Nightshade, Blade of Entropy"]})          /declare EpicName string outer "Nightshade, Blade of Entropy"
-/if (${FindItemCount["Innoruuk's Voice"]})                      /declare EpicName string outer "Innoruuk's Voice"
-/if (${FindItemCount["Innoruuk's Dark Blessing"]})              /declare EpicName string outer "Innoruuk's Dark Blessing"
-/if (${FindItemCount["Crafted Talisman of Fates"]})             /declare EpicName string outer "Crafted Talisman of Fates"
-/if (${FindItemCount["Blessed Spiritstaff of the Heyokah"]})    /declare EpicName string outer "Blessed Spiritstaff of the Heyokah"
-/if (${FindItemCount["Staff of Prismatic Power"]})              /declare EpicName string outer "Staff of Prismatic Power"
-/if (${FindItemCount["Staff of Phenomenal Power"]})             /declare EpicName string outer "Staff of Phenomenal Power"
-/if (${FindItemCount["Soulwhisper"]})                           /declare EpicName string outer "Soulwisper"
-/if (${FindItemCount["Deathwhisper"]})                          /declare EpicName string outer "Deathwisper"
-|/if (${FindItemCount["Champions Sword of Eternal Power"]}) /declare EpicName string outer "Champions Sword of Eternal Power"
-|/if (${FindItemCount["Kreljnok's Sword of Eternal Power"]}) /declare EpicName string outer "Kreljnok's Sword of Eternal Power"
-|/if (${FindItemCount["Staff of Elemental Essence"]}) /declare EpicName string outer "Staff of Elemental Essence"
-|/if (${FindItemCount["Focus of Primal Elements"]}) /declare EpicName string outer "Focus of Primal Elements"
-|/if (${FindItemCount["Oculus of Percussion"]}) /declare EpicName string outer "Oculus of Percussion"
-|/if (${FindItemCount["Staff of Eternal Eloquence"]}) /declare EpicName string outer "Staff of Eternal Eloquence"
-|/if (${FindItemCount["Harmony of the Soul"]}) /declare EpicName string outer "Harmony of the Soul"
-|/if (${FindItemCount["Aegis of Superior Divinity"]}) /declare EpicName string outer "Aegis of Superior Divinity"
+  | Epic Definitions for EpicBurn - warr, shd, pal,
+  /if (${FindItemCount["Prismatic Dragon Blade"]})                /declare EpicName string outer "Prismatic Dragon Blade"
+  /if (${FindItemCount["Blade of Vesagran"]})                     /declare EpicName string outer "Blade of Vesagran"
+  |/if (${FindItemCount["Savage Lord's Totem"]})                   /declare EpicName string outer "Savage Lord's Totem"
+  |/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
+  /if (${FindItemCount["Raging Taelosian Alloy Axe"]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
+  /if (${FindItemCount["Vengeful Taelosian Blood Axe"]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
+  /if (${FindItemCount["Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"
+  /if (${FindItemCount["Staff of Everliving Brambles"]})          /declare EpicName string outer "Staff of Everliving Brambles"
+  /if (${FindItemCount["Fistwraps of Celestial Discipline"]})     /declare EpicName string outer "Fistwraps of Celestial Discipline"
+  /if (${FindItemCount["Transcended Fistwraps of Immortality"]})  /declare EpicName string outer "Transcended Fistwraps of Immortality"
+  /if (${FindItemCount["Redemption"]})                            /declare EpicName string outer "Redemption"
+  /if (${FindItemCount["Nightbane, Sword of the Valiant"]})       /declare EpicName string outer "Nightbane, Sword of the Valiant"
+  /if (${FindItemCount["Heartwood Blade"]})                       /declare EpicName string outer "Heartwood Blade"
+  /if (${FindItemCount["Aurora, the Heartwood Blade"]})           /declare EpicName string outer "Aurora, the Heartwood Blade"
+  /if (${FindItemCount["Fatestealer"]})                           /declare EpicName string outer "Fatestealer"
+  /if (${FindItemCount["Nightshade, Blade of Entropy"]})          /declare EpicName string outer "Nightshade, Blade of Entropy"
+  /if (${FindItemCount["Innoruuk's Voice"]})                      /declare EpicName string outer "Innoruuk's Voice"
+  /if (${FindItemCount["Innoruuk's Dark Blessing"]})              /declare EpicName string outer "Innoruuk's Dark Blessing"
+  /if (${FindItemCount["Crafted Talisman of Fates"]})             /declare EpicName string outer "Crafted Talisman of Fates"
+  /if (${FindItemCount["Blessed Spiritstaff of the Heyokah"]})    /declare EpicName string outer "Blessed Spiritstaff of the Heyokah"
+  /if (${FindItemCount["Staff of Prismatic Power"]})              /declare EpicName string outer "Staff of Prismatic Power"
+  /if (${FindItemCount["Staff of Phenomenal Power"]})             /declare EpicName string outer "Staff of Phenomenal Power"
+  /if (${FindItemCount["Soulwhisper"]})                           /declare EpicName string outer "Soulwisper"
+  /if (${FindItemCount["Deathwhisper"]})                          /declare EpicName string outer "Deathwisper"
+  |/if (${FindItemCount["Champions Sword of Eternal Power"]}) /declare EpicName string outer "Champions Sword of Eternal Power"
+  |/if (${FindItemCount["Kreljnok's Sword of Eternal Power"]}) /declare EpicName string outer "Kreljnok's Sword of Eternal Power"
+  |/if (${FindItemCount["Staff of Elemental Essence"]}) /declare EpicName string outer "Staff of Elemental Essence"
+  |/if (${FindItemCount["Focus of Primal Elements"]}) /declare EpicName string outer "Focus of Primal Elements"
+  |/if (${FindItemCount["Oculus of Percussion"]}) /declare EpicName string outer "Oculus of Percussion"
+  |/if (${FindItemCount["Staff of Eternal Eloquence"]}) /declare EpicName string outer "Staff of Eternal Eloquence"
+  |/if (${FindItemCount["Harmony of the Soul"]}) /declare EpicName string outer "Harmony of the Soul"
+  |/if (${FindItemCount["Aegis of Superior Divinity"]}) /declare EpicName string outer "Aegis of Superior Divinity"
 
-/call assist_SpellArrays
+  /call assist_SpellArrays
 
-/if (${Debug} || ${Debug_Assists}) /echo <== assist_Setup -|
+  /if (${Debug} || ${Debug_Assists}) /echo <== assist_Setup -|
 /return
 
 |------------------------------------------------------------------------------------------------
@@ -1568,6 +1571,8 @@ Sub assist_Aliases
 |--------------------------------------------------------------------------------|
 Sub assist_Background_Events
   |/echo assistbg ${Time}
+  /if (${auto_AssistOn}) /call check_AutoAssist
+  /if (${currentTank.Equal[${Me}]}) /call tankKill
   /doevents Assist
   /doevents BackOff
   /if (${Assisting}) {
@@ -1594,6 +1599,11 @@ Sub assist_Background_Events
   /doevents TargetAEOn
   /doevents SwarmPets
   /doevents NukeSet
-  /if (${auto_AssistOn}) /call check_AutoAssist
+  /doevents SetTank
+  /doevents DisableTank
+  /doevents ToggleOfftank
+
   |/echo assistbg ${Time}
 /return
+
+

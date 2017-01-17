@@ -145,13 +145,19 @@ SUB check_Active
 			/varset Old_cursorID 0
 		}
 	}
-  /if (${Me.Moving} || ${Corpse.Open}) /varset activeTimer 15
+  /if (${Me.Moving} || ${Corpse.Open}) {
+    /if (${Me.Class.ShortName.Equal[War]}) {
+      /varset activeTimer 6
+    } else {
+      /varset activeTimer 12
+    }
+  }
 	| Check AutoAttack
 	/if (${Me.Combat}) {
 		/if (!${Target.ID} || ${Target.Type.Equal[corpse]} && !${Assisting} || (${Spawn[${Target.ID}].Type.Equal[PC]} && !${Toggle-PvP})) /attack off
 	}
   | If windows are open
-	/if (${Window[BigBankWnd].Open} || ${Window[MerchantWnd].Open} || ${Window[TradeWnd].Open} || ${Window[GuildBankWnd].Open} || ${Window[MerchantWnd].Open}) {
+	/if (${Window[BigBankWnd].Open} || ${Window[MerchantWnd].Open} || ${Window[TradeWnd].Open} || ${Window[GuildBankWnd].Open}) {
 		/varset activeTimer 30
 		/doevents flush
 	}
