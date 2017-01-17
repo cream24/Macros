@@ -197,7 +197,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 
                     /if (${Me.Book[${whatToCast}]} && !${Bool[${Me.Gem[${whatToCast}]}]}) /call memorize_spell "${whatToCast}" ${DefaultGem}
                     |/delay 5s ${Me.SpellReady[${spellName}]}
-                    /delay 20s ${Me.SpellReady[${spellName}]} || ${Me.ItemReady[=${spellName}]} || ${Me.AbilityReady[${spellName}]}
+                    /delay 20s ${Me.SpellReady[${whatToCast}]} || ${Me.ItemReady[=${whatToCast}]} || ${Me.AbilityReady[${whatToCast}]}
 										/casting "${whatToCast}" ${DefaultGem} "-targetid|${Spawn[pc =${newChatSender}].ID}" -maxtries|3
 										/delay 20s !${Cast.Status.Find[C]}
 									}

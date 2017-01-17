@@ -22,20 +22,11 @@ SUB BST_MacroSettings
 /if (${Debug}) /echo <== BST_MacroSettings -|
 /RETURN
 
-SUB BST_CharacterSettings
-  /call WriteToIni "${Character_Ini},Pets,Pet Growl"
-  /call WriteToIni "${Character_Ini},Pets,Pet Growl Combat (On/Off)" On
-/RETURN
-
-Sub BST_Aliases
-/return
-
+|----------------------------------------------------------------------------|
 Sub pet_Growl
 /if (${Debug} || ${Debug_Pets}) /echo |- petGrowl ==>
   /declare s int local
   /for s 1 to ${petGrowl2D.Size[1]}
-|/echo ${petBuffs2D[${s},${iCastName}]} stack ${petBuffs2D[${s},${iSpellName}]} ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} has !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}
-|removing ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} for now as balikor's mark reports non-stacking
   /if (!${Bool[${Me.PetBuff[${petGrowl2D[${s},${iSpellName}]}]}]} && !${Bool[${Me.PetBuff[${petGrowl2D[${s},${iCheckFor}]}]}]}) {
     /call check_Ready "petGrowl2D" ${s}
     /if (${Macro.Return}) {
@@ -47,10 +38,10 @@ Sub pet_Growl
       }
     }
   }
-  :skipBuff
   /if (!${ActionTaken}) /next s
 /if (${Debug} || ${Debug_Pets}) /echo <== petGrowl -|
 /return
+
 |----------------------------------------------------------------------------|
 #event AE_POS "#*# tells you, 'AEPOS'"
 sub Event_AE_POS(string line)
@@ -68,4 +59,12 @@ sub Event_AE_POS(string line)
 |----------------------------------------------------------------------------|
 Sub BST_Background_Events
   /doevents AE_POS
+/return
+
+SUB BST_CharacterSettings
+  /call WriteToIni "${Character_Ini},Pets,Pet Growl"
+  /call WriteToIni "${Character_Ini},Pets,Pet Growl Combat (On/Off)" On
+/RETURN
+
+Sub BST_Aliases
 /return
