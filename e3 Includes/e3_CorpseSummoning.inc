@@ -490,7 +490,7 @@ SUB corpseSummon_Setup
 
 SUB corpseSummon_MacroSettings
 	/call WriteToIni "${advSettings_Ini},Debug,Debug CorpseSummoning (On/Off)" Off
-	/call WriteToIni "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)"
+	/call WriteToIni "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)" Off
 /RETURN
 
 SUB corpseSummon_CharacterSettings
