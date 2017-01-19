@@ -1224,7 +1224,7 @@ SUB event_FullBurn(line, ChatSender)
 |--------------------------------------------------------------------------------|
 SUB useBurns(ArrayName)
 /if (${Debug} || ${Debug_Assists}) /echo |- useBurns Target=${burnTarget}- Array=${ArrayName} ==>
-  /echo useburnstart ${Time}
+  |/echo useburnstart ${Time}
 	/declare i int local
 	/for i 1 to ${${ArrayName}.Size[1]}
     /call check_Ready "${ArrayName}" ${i}
@@ -1235,10 +1235,11 @@ SUB useBurns(ArrayName)
       /g useBurns ${Time} : ${ArrayName}-${${ArrayName}[${i},${iCastName}]}
       /call e3_Cast ${AssistTarget} "${ArrayName}" "${i}"
     } else {
-      /echo NotReady: ${i} ${${ArrayName}[${i},${iCastName}]}
+      /if (${Debug} || ${Debug_Assists}) /echo NotReady: ${i} ${${ArrayName}[${i},${iCastName}]}
     }
-  /if (!${ActionTaken}) /next i
+    /delay 1
   :skipCurrent
+  /if (!${ActionTaken}) /next i
 /if (${Debug} || ${Debug_Assists}) /echo <== useBurns -|
 /RETURN
 
