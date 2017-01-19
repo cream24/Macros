@@ -1301,6 +1301,32 @@ SUB event_NukeSet(line, ChatSender, NukeArray)
 /if (${Debug} || ${Debug_Assists})  /echo <== event_NukeSet -|
 /RETURN
 
+#event CombatMode "<#1#> CombatMode #2#"
+sub event_CombatMode(line, ChatSender, parms)
+  /if (${Debug} || ${Debug_Assists})  /echo |-- Entering Combat Mode --|
+  
+  |-Verify the event
+  /call #CreateVars string outer argPart InclusionPart
+  /call #SplitInclusionArgs "${parms}" argPart InclusionPart
+  /if (${Debug} || ${Debug_Assists}) /echo argPart: ${argPart} InclusionPart: ${InclusionPart}  
+
+  /call #verifyEvent "${ChatSender}" "${line}"
+  /if (!${Macro.Return}) /return
+  
+  /if (${argPart.Equal[melee]}) {
+    /varset AssistType Melee
+    /delay 2
+    /swap melee
+    /delay 2
+  }
+  /if ( ${argPart.Equal[ranged]}) {
+    /varset AssistType Ranged
+    /delay 2
+    /swap ranged
+    /delay 2
+  }
+  /if (${Debug} || ${Debug_Assists})  /echo |-- Leaving Combat Mode ---|
+/return
 
 |--------------------------------------------------------------------------------|
 Sub assist_Setup
@@ -1564,6 +1590,8 @@ Sub assist_Aliases
 |	/squelch /alias /pvpOff /bc Toggle PvP OFF
 	/squelch /alias /AssistType /bc //varset Assist Type
 	/squelch /alias /ns /bc NukeSet
+	/squelch /alias /combatmode /bc combatmode
+	/squelch /alias /cm /bc combatmode
 
 /if (${Debug} || ${Debug_Assists}) /echo <== assist_Aliases -|
 /return
@@ -1602,7 +1630,7 @@ Sub assist_Background_Events
   /doevents SetTank
   /doevents DisableTank
   /doevents ToggleOfftank
-
+  /doevents CombatMode
   |/echo assistbg ${Time}
 /return
 
