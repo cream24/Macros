@@ -306,7 +306,7 @@ Sub ENC_Background_Events
 	/doevents add_RuneTarget
 	/doevents remove_RuneTarget
 
-	/if (${Assisting} && ${Bool[${gatherManaPCT}]} && ${Me.PctMana} < ${gatherManaPCT} && ${Me.AltAbilityReady[Gather Mana]}) /casting "Gather Mana" -maxtries|3
+	/if (${Assisting} && ${Bool[${gatherManaPCT}]} && ${Me.PctMana} < ${gatherManaPCT} && ${Me.AltAbilityReady[Gather Mana]} && ${Me.CombatState.Equal[COMBAT]}) /casting "Gather Mana" -maxtries|3
 
 /return
 
