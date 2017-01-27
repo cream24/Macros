@@ -68,7 +68,7 @@ SUB e3_Setup(modeSelect)
 	/echo Loading e3 v${macroVersion}...
 
 	| create a macro data
-	/if (!${Ini[${MacroData_Ini}].Length}) {
+   /if (!${${IniMode}[${MacroData_Ini}].Length}) {
 		/echo Welcome to e3! preforming first time setup...
 		/call make_macroDataIni
 	}
@@ -76,43 +76,43 @@ SUB e3_Setup(modeSelect)
 | Import file paths ======================================================================================================= 
 
 	| General Settings
-	/if (!${Ini[${MacroData_Ini},File Paths,General Settings].Length}) {
+   /if (!${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [General Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
 		/endmacro
 	} else {
-		/declare genSettings_Ini string outer ${Ini[${MacroData_Ini},File Paths,General Settings]}
+      /declare genSettings_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,General Settings]}
 	}
 
 	| Advanced Settings
-	/if (!${Ini[${MacroData_Ini},File Paths,Advanced Settings].Length}) {
+   /if (!${${IniMode}[${MacroData_Ini},File Paths,Advanced Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [Advanced Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
 		/endmacro
 	} else {
-		/declare advSettings_Ini string outer ${Ini[${MacroData_Ini},File Paths,Advanced Settings]}
+		/declare advSettings_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,Advanced Settings]}
 	}
 	
 	| Bot Settings
-	/if (!${Ini[${MacroData_Ini},File Paths,Bot Settings].Length}) {
+	/if (!${${IniMode}[${MacroData_Ini},File Paths,Bot Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [Bot Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
 		/endmacro
 	} else {
-		/declare Character_Ini string outer ${Ini[${MacroData_Ini},File Paths,Bot Settings]}
+		/declare Character_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,Bot Settings]}
 	}
 	
  |Create Ini files ========================================================================================================
-	/if (${Bool[${Ini[${genSettings_Ini}]}]} && !${Ini[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /echo New version of e3 detected. Hold on to your nuggets!
+	/if (${Bool[${${IniMode}[${genSettings_Ini}]}]} && !${${IniMode}[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /echo New version of e3 detected. Hold on to your nuggets!
 	
 	| Macro Setting Inis
-	/if (!${Ini[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]} || !${Bool[${Ini[${genSettings_Ini}]}]}) /call EVENT_make_MacroSettingsIni
+	/if (!${${IniMode}[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]} || !${Bool[${${IniMode}[${genSettings_Ini}]}]}) /call EVENT_make_MacroSettingsIni
 	
 	| Generate Character_Ini.
-	/if (!${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Bot_Ini version].Equal[${macroVersion}]} || !${Bool[${Ini[${Character_Ini}]}]}) /call EVENT_make_CharacterSettingsIni
+	/if (!${${IniMode}[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Bot_Ini version].Equal[${macroVersion}]} || !${Bool[${${IniMode}[${Character_Ini}]}]}) /call EVENT_make_CharacterSettingsIni
 	
 	| Macro Aliases
-	/if (!${Ini[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /call EVENT_updateAliases
+	/if (!${${IniMode}[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /call EVENT_updateAliases
 
 	| Update macro version in e3 Data.ini
-	/if (!${Ini[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /call WriteToIni "${MacroData_Ini},e3 Build,Version" "${macroVersion}" 1
+	/if (!${${IniMode}[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) /call WriteToIni "${MacroData_Ini},e3 Build,Version" "${macroVersion}" 1
 	
 | Import ini settings ===================================================================================================== 
 	
@@ -123,7 +123,7 @@ SUB e3_Setup(modeSelect)
 	
 	| Chat Channel
 	/declare ChatToggle string outer /bc
-	/if (${Ini[${Macro_Ini},General,Macro Output Channel].Length}) /call IniToVar "${Macro_Ini},General,Macro Output Channel" ChatToggle string outer
+	/if (${${IniMode}[${Macro_Ini},General,Macro Output Channel].Length}) /call IniToVar "${Macro_Ini},General,Macro Output Channel" ChatToggle string outer
 
 	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
 	/call #IniToArray "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
@@ -136,7 +136,7 @@ SUB e3_Setup(modeSelect)
 	/next i
 
   |Set Turbo per class based on configuration
-  /if (${Ini[${advSettings_Ini},Turbo,${Me.Class.ShortName}].Length}) /declare classTurbo int outer ${Ini[${advSettings_Ini},Turbo,${Me.Class.ShortName}]}
+  /if (${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}].Length}) /declare classTurbo int outer ${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}]}
   /squelch /turbo ${classTurbo}
 
 	/echo e3 loaded - Turbo ${classTurbo}

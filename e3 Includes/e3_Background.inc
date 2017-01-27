@@ -147,9 +147,11 @@ SUB check_Active
 	}
   /if (${Me.Moving} || ${Corpse.Open}) {
     /if (${Me.Class.ShortName.Equal[War]}) {
-      /varset activeTimer 6
+      /varset activeTimer 5
+    } else /if (${Me.Class.ShortName.Equal[BRD]}) {
+      /varset activeTimer 5
     } else {
-      /varset activeTimer 12
+      /varset activeTimer 10
     }
   }
 	| Check AutoAttack

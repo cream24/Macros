@@ -54,6 +54,7 @@ SUB check_AutoShrink
 		  /echo casting tiny comp
 			/casting "Tiny Companion" "-targetid|${Me.Pet.ID}"
 		}
+    /delay 1s ${Me.Casting.ID}
 		/delay 5s !${Me.Casting.ID}
   }
 /if (${Debug} || ${Debug_Pets}) /echo <== check_AutoShrink -|

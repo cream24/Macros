@@ -603,7 +603,7 @@ SUB heal_Setup
 	|~~~~~~~~~~~~ Interrupt heal if target >= this PCTHps ~~~~~~~~~~|
 	/declare interruptHealPct			int outer 95
 	|~~~~ Only interrupt if cast time left <=  (1/10th seconds) ~~~~|
-	/declare interruptTankCastSec		int outer 6
+	/declare interruptTankCastSec		int outer 3
 	/declare interruptImportantCastSec	int outer 18
 	/declare interruptAllCastSec		float outer 25
 

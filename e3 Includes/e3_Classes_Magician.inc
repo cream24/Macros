@@ -348,6 +348,16 @@ SUB MAG_Aliases
 
 |----------------------------------------------------------------------------|
 SUB MAG_Background_Events
+|**
+	/if (${Bool[${Me.AltAbility[Companion of Necessity]}]} && ${Me.AltAbilityReady[Companion of Necessity]}) {
+		/if (${Assisting} && ${Me.CombatState.Equal[Combat]} && ${Target.Named} && ${Target.Level} >= ${Math.Calc[${Me.Level}+3]} && !${Select[${Me.TargetOfTarget.Class},WAR,PAL,SHD]} && ${Spawn[${Target.ID}].PlayerState}==4) {
+			/if (${Me.Casting.ID}) /call interrupt
+			/delay 1s !${Me.Casting.ID}
+			/gu ${Target.Name} has aggro on ${Me.TargetOfTarget.Name}, casting Companion of Necessity
+			/casting "Companion of Necessity"
+		}
+	}
+**|
   /doevents auto_coh
   /doevents petWeapons
   /doevents distributePetWeapons

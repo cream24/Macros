@@ -53,4 +53,13 @@ Sub WIZ_Aliases
 
 Sub WIZ_Background_Events
 	/if (${Me.Pet.ID} && ${Me.Pet.Race.Name.NotEqual[Gnomework]} && ${MacroQuest.Server.Equal[PEQTGC]}) /pet get lost
+
+  /if (${Bool[${Me.AltAbility[Mind Crash]}]} && ${Me.AltAbilityReady[Mind Crash]}) {
+    /if (${Assisting} && ${Me.CombatState.Equal[Combat]} && ${Target.Named} && ${Target.Level} >= ${Math.Calc[${Me.Level}+3]} && ${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]} && ${Spawn[${Target.ID}].PlayerState}==4) {
+      /if (${Me.Casting.ID}) /call interrupt
+      /delay 1s !${Me.Casting.ID}
+      /echo \ay I have aggro on a dangerous target, casting Mind Crash!
+      /casting "Mind Crash"
+    }
+  }
 /return

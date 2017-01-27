@@ -222,6 +222,9 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				} else {
 				  /delay 1
 				}
+        /call alerts_Background_Events
+				|this will make tank and important heals ignore everything but subToRun
+        /if (${Select[${ArrayName},tankHeals,importantHeals]}) /goto :cast_still_pending
 				|- Other reasons to cancel
         /if (!${Assisting} && ${SpawnCount[=${FollowTarget}]} && ${Spawn[=${FollowTarget}].Distance} < ${LeashLength} && (${Spawn[=${FollowTarget}].Distance} > 20 || ${NetBots[${FollowTarget}].Moving}) ) {
           /if (${Debug} || ${Debug_Casting}) /echo following interrupt
@@ -236,8 +239,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
           /goto :interrupted
 				}
 				|-Dead target and I'm not using a detrimental AE or self buff
-				|/echo ${${ArrayName}[${ArrayIndex},${iCastName}]} ${${ArrayName}[${ArrayIndex},${iTargetType}]}
-				/if (!${Bool[${Target.ID}]} && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Targeted AE,Corpse,Self]}) {
+				/if ((!${Bool[${Target.ID}]} || ${Spawn[${Target.ID}].Dead}) && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Targeted AE,Corpse,Self]}) {
           /if (${Debug} || ${Debug_Casting}) /echo target corpse called interrupt
 					/call interrupt
           /goto :interrupted
@@ -267,7 +269,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/doevents clickit
 				/doevents bark
 				/doevents vetAA_Background_Events
-				/call alerts_Background_Events
+
         |/varset Debug_Casting FALSE
 			}
 			/goto :cast_still_pending

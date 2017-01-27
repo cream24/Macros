@@ -126,12 +126,12 @@ SUB AssistOff
 		/if (${Me.Casting.ID} && !${Spell[${Me.Casting}].SpellType.Find[beneficial]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 		/if (${Me.Combat})    /attack off
 		/if (${Me.AutoFire})  /autofire off
+    /delay 5 !${Me.Combat} && !${Me.AutoFire}
 	|}
   /if (${Me.Pet.ID}) {
     /pet back off
     /pet hold
   }
-  /delay 30 !${Me.Casting.ID} && !${Me.Combat} && !${Me.AutoFire}
 
 	/varset Assisting FALSE
 	/varset AssistTarget 0
