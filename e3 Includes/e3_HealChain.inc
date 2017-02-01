@@ -446,11 +446,11 @@ SUB set_ChainTarget
 				/varset Chain_Target ${Spawn[pc ${Chain_TankList.Arg[${i},,]}].CleanName}
 				/if (${Debug} || ${Debug_HealChain}) /echo |- set_ChainTarget -| Chain_Target= [${Chain_Target}].
 			} else {
-				/varcalc i ${i} + 1
+				/varcalc i ${i}+1
 				/goto :check_Chain_TankList
 			}
 		} else {
-			/varcalc i ${i} + 1
+			/varcalc i ${i}+1
 			/goto :check_Chain_TankList
 		}
 	}

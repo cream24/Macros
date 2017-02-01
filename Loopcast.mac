@@ -8,6 +8,7 @@ Sub Main(gemNumber)
 	:Loop
 	/if (!${Me.SpellReady[${gemNumber}]}) {
 		/delay 1s
+		/if (${Cursor.ID}) /autoinv
 		/goto :Loop
 	} else {
 		/cast ${gemNumber}
