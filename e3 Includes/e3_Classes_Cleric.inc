@@ -287,7 +287,7 @@ Sub defineRezSpell
     /varset rezSpell Blessing of Resurrection
   } else /if (${Me.Book[Reviviscence]}) {
     /varset rezSpell Reviviscence
-  } else /if (${Me.Book[Resurection]}) {
+  } else /if (${Me.Book[Resurrection]}) {
     /varset rezSpell Resurection
   } else /if (${Me.Book[Restoration]}) {
     /varset rezSpell Restoration

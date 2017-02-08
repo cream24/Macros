@@ -356,7 +356,7 @@ SUB EVENT_engage_ChainHeal(ling, ChatSender, chainTiming_Setting, chainTank_Sett
 #EVENT end_ChainHeal "#1# tells the raid#*#Stop chain#*#"
 #EVENT end_ChainHeal "#1# tell your raid#*#Stop chain#*#"
 SUB EVENT_end_ChainHeal(line, ChatSender)
-/if (${Debug} || ${Debug_HealChain}) /echo |- EVET_end_ChainHeal ==>
+/if (${Debug} || ${Debug_HealChain}) /echo |- EVENT_end_ChainHeal ==>
 	
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
@@ -367,7 +367,7 @@ SUB EVENT_end_ChainHeal(line, ChatSender)
 		/varset Chain_Status PAUSE_CHAIN
 	}
 
-/if (${Debug} || ${Debug_HealChain}) /echo <== EVET_end_ChainHeal -|
+/if (${Debug} || ${Debug_HealChain}) /echo <== EVENT_end_ChainHeal -|
 /RETURN
 
 | There is a place for the chain to break down in this script
@@ -524,11 +524,12 @@ SUB EVENT_set_LastHealer(line, ChatSender, time_Hour, time_Min, time_Sec)
 		/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 		
 		/declare next_Delay int local
-		
-		/varcalc next_Delay ${time_Sec} + ${Chain_Timing}
 
-		/varset Chain_NextHealTimer ${Math.Calc[${next_Delay} - ${Time.Time24.Arg[3,:]}].Int}s
-    /if (${Chain_NextHealTimer}>=60) /varcalc ${Chain_NextHealTimer}-60
+		/varcalc next_Delay ${time_Sec} + ${Chain_Timing}
+    /if (${Debug} || ${Debug_HealChain}) /echo next_Delay ${next_Delay}, time_Sec ${time_Sec}, Chain_Timing ${Chain_Timing}
+		/varset Chain_NextHealTimer ${Math.Calc[${Math.Calc[${next_Delay} - ${Time.Time24.Arg[3,:]}].Int}*10]}
+    /if (${Chain_NextHealTimer}>=600) /varcalc Chain_NextHealTimer ${Chain_NextHealTimer}-600
+    /if (${Chain_NextHealTimer}>=60) /varcalc Chain_NextHealTimer ${Chain_NextHealTimer}-60
 
     /if (${Debug} || ${Debug_HealChain}) /echo |- Chain_NextHealTimer -| set to ${Chain_NextHealTimer}: ${next_Delay} - ${Time.Time24.Arg[3,:]}
 		/varset Chain_LastHealer ${ChatSender}
@@ -558,28 +559,29 @@ SUB healChain_Setup
 /RETURN
 
 SUB chainHeal_Events
-  /doevents set_LastHealer
-  /doevents add_ChainMember
-  /doevents remove_ChainMember
-  /doevents set_ChainList
-  /doevents lock_ChainList
-  /doevents set_ChainTiming
-  /doevents lock_ChainTiming
-  /doevents lock_MemberList
-  /doevents engage_ChainHeal
-  /doevents end_ChainHeal
-  /doevents remove_ChainMember
+    /doevents set_LastHealer
+    /doevents add_ChainMember
+    /doevents remove_ChainMember
+    /doevents set_ChainList
+    /doevents lock_ChainList
+    /doevents set_ChainTiming
+    /doevents lock_ChainTiming
+    /doevents lock_MemberList
+    /doevents engage_ChainHeal
+    /doevents end_ChainHeal
+    /doevents remove_ChainMember
 /RETURN
 
 Sub healChain_Background_Events
-
-	/doevents build_HealChain
-  /doevents join_HealChain
-  /doevents set_TankList
-  /doevents start_HealChain
-	/doevents unload_HealChain
-  /doevents end_ChainHeal
-  /call chainHeal_Events
+  /if (${Me.Class.ShortName.Equal[Clr]} || ${Me.Class.ShortName.Equal[Dru]}) {
+    /doevents build_HealChain
+    /doevents join_HealChain
+    /doevents set_TankList
+    /doevents start_HealChain
+    /doevents unload_HealChain
+    /doevents end_ChainHeal
+    /call chainHeal_Events
+  }
 /return
 
 SUB healChain_MacroSettings
