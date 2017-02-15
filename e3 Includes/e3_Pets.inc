@@ -30,12 +30,19 @@ SUB summonPet
     /call check_Zone
     /return
   }
-	/call e3_Cast ${Me.ID} "petSpell2D" 1
-    /if (${Me.Pet.ID} && ${petTaunt}) {
-      /pet taunt on
-    } else {
-      /pet taunt off
+  /call check_Ready "petSpell2D" 1
+  /if (${Macro.Return}) {
+    /call check_Mana "petSpell2D" 1
+    /if (${Macro.Return}) {
+	    /call e3_Cast ${Me.ID} "petSpell2D" 1
     }
+  }
+
+  /if (${Me.Pet.ID} && ${petTaunt}) {
+    /pet taunt on
+  } else {
+    /pet taunt off
+  }
 	/if (${Debug} || ${Debug_Pets}) /echo <== summonPet -|
 /RETURN
 
@@ -150,7 +157,7 @@ SUB event_suspendMinion(live, ChatSender)
       /docommand ${ChatToggle} Suspending my pet...
       /if (${Me.AltAbilityReady[Suspended Minion]}) {
         /if (${Me.Casting.ID}) /call interrupt
-        /casting "Suspended Minion|alt" -maxtries 2
+        /casting "Suspended Minion|alt" -maxtries|2
         /delay 5s !${Me.Pet.ID}
         /varset currently_Suspended TRUE
       }
@@ -174,7 +181,7 @@ SUB event_returnMinion(line, ChatSender)
     /if (${suspend_Pets}) {
       /docommand ${ChatToggle} Returning my pet...
       /if (${currently_Suspended}) {
-        /casting "Suspended Minion|alt" -maxtries 2
+        /casting "Suspended Minion|alt" -maxtries|2
         /varset currently_Suspended FALSE
       }
       /varset suspend_Pets FALSE

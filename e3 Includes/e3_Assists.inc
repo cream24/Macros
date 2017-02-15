@@ -859,7 +859,7 @@ SUB Event_AEOn(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- Event_AllAEOn ==>
   /call verifyEvent "${ChatSender}" "${line}"
   /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-  /echo ${ChatSender} ret ${Macro.Return} ln ${line}
+  |/echo ${ChatSender} ret ${Macro.Return} ln ${line}
 |    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
     /if (${PBAE_Spells2D.Size[1]} || ${TargetAE_Spells2D.Size[1]}) {
