@@ -201,17 +201,54 @@ SUB check_Active
 SUB completePendingExchange
 /if (${Debug} || ${Debug_Background}) /echo |- completePendingExchanges ==>
 	| Check for the item needing to be swapped back.
-	/if (${Zone.ID}==306) /return
-	/declare itemToSwapBack string local ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[1,/]}
-  /declare swapItemSlot ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[2,/]}
+	/if (${Zone.ID}==306 ) /return
+	/declare itemToSwapBack string local
+  /declare swapItemSlot string local
+  /declare pendingslot int local 0
   |/echo ${itemToSwapBack} ${itemToSwapBack.Length}  ${swapItemSlot} ${swapItemSlot.Length}
-  /if (!${Bool[${itemToSwapBack}]} || !${Bool[${swapItemSlot}]}) /return
+  /varset itemToSwapBack ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[1,/]}
+  /varset swapItemSlot ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[2,/]}
+  /varset pendingslot 0
+  |/echo 0 ${itemToSwapBack} ${swapItemSlot}
+  /if (!${Bool[${itemToSwapBack}]} || !${Bool[${swapItemSlot}]}) {
+    /varset itemToSwapBack ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#1].Arg[1,/]}
+    /varset swapItemSlot ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#1].Arg[2,/]}
+		/varset pendingslot 1
+		|/echo 1 ${itemToSwapBack} ${swapItemSlot}
+		/if (!${Bool[${itemToSwapBack}]} || !${Bool[${swapItemSlot}]}) {
+      /varset itemToSwapBack ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#2].Arg[1,/]}
+      /varset swapItemSlot ${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#2].Arg[2,/]}
+			/varset pendingslot 2
+			|/echo 2 ${itemToSwapBack} ${swapItemSlot}
+    }
+  }
 
   /if (${Me.Inventory[${swapItemSlot}].Name.Equal[${itemToSwapBack}]})  {
-    /if (${itemToSwapBack.NotEqual[NONE]}) /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" NONE 1
+  	|/echo if1
+    /if (${itemToSwapBack.NotEqual[NONE]}) {
+			/if (${pendingslot}==0)	{
+				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" NONE 1
+			} else /if (${pendingslot}==1) {
+				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#1" NONE 1
+			} else /if (${pendingslot}==2) {
+				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#2" NONE 1
+			}
+    }
   } else /if (!${FindItemCount[${itemToSwapBack}]}) {
-    /if (${Debug} || ${Debug_Background}) /echo Could not find [${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[1,/]}], skipping swapback.
+		|/echo if2
+    /if (${Debug} || ${Debug_Background}) {
+			/if (${itemToSwapBack.NotEqual[NONE]}) {
+				/if (${pendingslot}==0)	{
+					/echo Could not find [${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange].Arg[1,/]}], skipping swapback.
+				} else /if (${pendingslot}==1) {
+					/echo Could not find [${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#1].Arg[1,/]}], skipping swapback.
+				} else /if (${pendingslot}==2) {
+					/echo Could not find [${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#2].Arg[1,/]}], skipping swapback.
+				}
+			}
+    }
   } else {
+		|/echo if3
 		| Set a retry timer in case the first attempt fails
 		/declare swapRetryTimer timer local 30
 		:SwapBackLoop
@@ -225,11 +262,17 @@ SUB completePendingExchange
 			/if (${retryTimer}) {
 				/goto :SwapBackLoop
 			} else {
-				/bc I have failed to swap ${itemToSwapBack} back.
+				/bc I have failed to swap ${itemToSwapBack} back to slot ${swapItemSlot}.
 			}
 		} else {
 			| If the item was returned to it's correct slot
-			/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" NONE 1
+			/if (${pendingslot}==0)	{
+				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" NONE 1
+			} else /if (${pendingslot}==1) {
+				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#1" NONE 1
+			} else /if (${pendingslot}==2) {
+				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#2" NONE 1
+			}
 		}
 	}
 /if (${Debug} || ${Debug_Background}) /echo <== completePendingExchanges -|

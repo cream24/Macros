@@ -504,7 +504,7 @@ SUB nextCH
 	/rs ${Time.Time24} [${Me.PctMana}m] Casting ${If[${Me.Class.ShortName.Equal[clr]},CH,KR]} on ${Spawn[pc =${Chain_Target}].Name} next heal in [${Chain_Timing}s]
 	| /echo /if (${Chain_TimingAdjustment}) /delay ${Chain_TimingAdjustment}
 	| /if (${Chain_TimingAdjustment}) /delay ${Chain_TimingAdjustment}
-	/casting "${If[${Me.Class.ShortName.Equal[clr]},Complete Heal,Karana's Renewal]}" "-targetid|${Spawn[pc =${Chain_Target}].ID}"
+	/casting "${If[${Me.Class.ShortName.Equal[clr]},Complete Heal,Karana's Renewal]}" "-targetid|${Spawn[pc =${Chain_Target}].ID}" -maxtries|3
 	| Check for timing adjustment on next cast
 	/if (${castReturn.Equal[SUCCESS]} && ${adjustment_Timer} > 0) /varset Chain_TimingAdjustment ${adjustment_Timer}
 /if (${Debug} || ${Debug_HealChain}) /echo <== nextCH -|
@@ -573,7 +573,7 @@ SUB chainHeal_Events
 /RETURN
 
 Sub healChain_Background_Events
-  /if (${Me.Class.ShortName.Equal[Clr]} || ${Me.Class.ShortName.Equal[Dru]}) {
+  |/if (${Me.Class.ShortName.Equal[CLR]} || ${Me.Class.ShortName.Equal[DRU]}) {
     /doevents build_HealChain
     /doevents join_HealChain
     /doevents set_TankList
@@ -581,7 +581,7 @@ Sub healChain_Background_Events
     /doevents unload_HealChain
     /doevents end_ChainHeal
     /call chainHeal_Events
-  }
+  |}
 /return
 
 SUB healChain_MacroSettings
