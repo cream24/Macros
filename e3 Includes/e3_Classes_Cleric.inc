@@ -88,12 +88,17 @@ sub Event_Rez(string line, string ChatSender)
     /call check_CorpseRezzable
     |/echo checkcanrez ${Macro.Return}
     /if (${canRez}==1) {
-      /call check_Ready "rezArray2D" 1
+      /call check_Mana "rezArray2D" 1
       /if (${Macro.Return}) {
-        /tell ${ChatSender} Wait4Rez
-        /call e3_cast ${Spawn[${ChatSender}'s].ID} "rezArray2D" 1
+        /call check_Ready "rezArray2D" 1
+        /if (${Macro.Return}) {
+          /tell ${ChatSender} Wait4Rez
+          /call e3_cast ${Spawn[${ChatSender}'s].ID} "rezArray2D" 1
+        } else {
+          /echo ${rezArray2D[1,${iCastName}]} is not ready to cast
+        }
       } else {
-        /echo ${rezArray2D[1,${iCastName}]} is not ready to cast
+        /echo Not enough mana to cast ${rezArray2D[1,${iCastName}]}
       }
     } else {
       /tell ${ChatSender} Your corpse ${Target.Name} is not eligible for rez
