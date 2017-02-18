@@ -229,8 +229,8 @@ SUB EVENT_GateToLobby(line, ChatSender, eventParams)
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |--------Included Bot-----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
+	|    |-----------Valid User----------|    |--------Included Bot-----------|			|-----------In Zone-------------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Throne of Heroes]}) {
 			/docommand ${ChatToggle} Throne of Heroes is not ready.
