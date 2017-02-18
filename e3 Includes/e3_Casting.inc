@@ -341,13 +341,11 @@ Sub memorize_spell(spellName,gemNum)
   /memorize "${spellName}" ${gemNum}
   /delay 5s ${Bool[${Me.Gem[${spellName}]}]}
   /if (${Me.CombatState.NotEqual[COMBAT]}) {
-    :checkMem
-      /delay 2s ${Me.SpellReady[${spellName}]}
-      /varcalc secWaited ${secWaited}+1
-      /call Background_Events
-      /if (${secWaited} < 5) /goto :checkMem
+  	|not in combat delay 3seconds+ recast time until spell is ready
+    /delay ${Math.Calc[3+${Spell[${spellName}].RecastTime}/1000]}s ${Me.SpellReady[${spellName}]}
   } else {
-    /delay 2s ${Me.SpellReady[${spellName}]}
+    | if im in combat, only delay if the spell recast time is 3 or fewer seconds
+    /if (${Math.Calc[${Spell[${spellName}].RecastTime}/1000]} <=3) /delay 3s ${Me.SpellReady[${spellName}]}
   }
 /RETURN
 |------------------------------------------------|
