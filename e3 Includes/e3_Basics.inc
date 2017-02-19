@@ -289,8 +289,8 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
       /if (${Me.Invis}) /doability hide
 			/if (${Me.Sneaking}) /doability sneak
     }
-    /call TrueTarget ${msgTarget}
 		:retry_Bark
+		/call TrueTarget ${msgTarget}
 		|/echo barking ${barkMsg} at ${barkTarget}
     /if (${Me.Invis}) /makemevisible
 

@@ -293,7 +293,7 @@ Sub defineRezSpell
   } else /if (${Me.Book[Reviviscence]}) {
     /varset rezSpell Reviviscence
   } else /if (${Me.Book[Resurrection]}) {
-    /varset rezSpell Resurection
+    /varset rezSpell Resurrection
   } else /if (${Me.Book[Restoration]}) {
     /varset rezSpell Restoration
   } else /if (${Me.Book[Resuscitate]}) {
