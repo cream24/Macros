@@ -1,0 +1,28 @@
+#turbo
+Sub Main
+
+	
+	:Loop
+		/if (${Me.Skill[67]}>374) /goto :exiting
+		/if (${FindItemCount[=Mead]} > 0 ) {
+			/useitem mead
+		} else {
+			/gu I have no booze
+			/target vuli ironstove
+			/delay 3
+			/click right target 
+			/delay 2s
+			/notify MerchantWnd ItemList listselect ${Window[MerchantWnd].Child[ItemList].List[=Mead,2]}
+			/delay 1s
+			/buyitem ${Merchant.Item[=Mead].StackSize}
+			/delay 1s
+			/buyitem ${Merchant.Item[=Mead].StackSize}
+			/delay 1s
+			/buyitem ${Merchant.Item[=Mead].StackSize}
+			/delay 1s
+			/buyitem ${Merchant.Item[=Mead].StackSize}			
+		}
+	/delay 1s
+	/goto :Loop
+:exiting
+/return

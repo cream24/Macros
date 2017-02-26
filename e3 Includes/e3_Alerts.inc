@@ -74,7 +74,11 @@ SUB alerts_Background_Events
   /doevents dragornReflect
 /RETURN
 
-#event swapNoPierce "#*#You are affected by imprecision#*#"
+|#event swapNoPierce "#*#You are affected by imprecision#*#"
+|#event swapNoBlunt "#*#Your movements become rigid#*#"
+|#event swapNoSlash "#*#You feel very unlucky#*#"
+|#event swapNoH2H "#*#You lose your coordination#*#"
+
 |no fire
 SUB event_swapNoPierce
   /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
@@ -89,7 +93,6 @@ SUB event_swapNoPierce
 }
 /return
 
-#event swapNoBlunt "#*#Your movements become rigid#*#"
 |no cold
 SUB event_swapNoBlunt
   /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
@@ -104,7 +107,6 @@ SUB event_swapNoBlunt
   }
 /return
 
-#event swapNoSlash "#*#You feel very unlucky#*#"
 |no magic
 SUB event_swapNoSlash
   /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
@@ -117,7 +119,6 @@ SUB event_swapNoSlash
   }
 /return
 
-#event swapNoH2H "#*#You lose your coordination#*#"
 |no poison/disease
 SUB event_swapNoH2H
   /if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
@@ -336,7 +337,7 @@ SUB event_GotExp
 
 #event dragornPBAE "#*#You notice that the Dragorn before you is preparing to cast a devastating close-range spell."
 |#event dragornBlast "You notice that the Dragorn before you is making preparations to cast a devastating spell.  Doing enough damage to him might interrupt the process."
-#event dragornThorn "#*#The Dragorn before you is sprouting sharp spikes."
+|#event dragornThorn "#*#The Dragorn before you is sprouting sharp spikes."
 #event dragornReflect "#*#The Dragorn before you is developing an anti-magic aura."
 
 Sub Event_dragornPBAE

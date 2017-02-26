@@ -41,6 +41,10 @@ SUB EVENT_build_HealChain(line, ChatSender, eventParams)
 				} else {
 					/delay 10
 					/tell ${ChatSender} Add Me
+					/if (!${Me.Gem[Complete Heal]}) {
+						/memorize "Complete Heal" 7
+						/delay 2s
+					}
 				}
 			}
 		}

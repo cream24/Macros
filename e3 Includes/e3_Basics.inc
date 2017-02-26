@@ -376,8 +376,9 @@ SUB EVENT_clickIt(line, ChatSender)
 |    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		/declare debug_clickit bool local FALSE
+    /echo received clickit
 		/if (${debug_clickit}) /echo ${ChatSender} ${Zone.ShortName} ${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}
-		/if (${debug_clickit} && ${ChatSender.Equal[${Me.Name}]}) /delay 5s
+		/if (${debug_clickit} && ${ChatSender.Equal[${Me.Name}]}) /delay 4s
     /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 		|**
 		| Move to the person who calls ClickIT
@@ -429,7 +430,7 @@ SUB EVENT_clickIt(line, ChatSender)
         /varset closestDoorID ${Switch.ID}
 				/if (${debug_clickit}) /echo no door in file, picked closest door ${Switch.ID}
 		  } else {
-        /echo \ay Aborting ClickIt: I could not find an acceptable door < 100 3D units
+        /echo \ay Aborting ClickIt: I could not find an acceptable door < 150 3D units
         /return
 		  }
 
@@ -1817,7 +1818,7 @@ Sub basics_Setup
 	/declare medBreak bool outer FALSE
 	/declare medBreak_Hold bool outer FALSE
 	/declare medbreak_Popup_Timer timer outer
-	/declare clickitRandomDelay int outer 10
+	/declare clickitRandomDelay int outer 7
 
 	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoKSWeaponSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string outer
