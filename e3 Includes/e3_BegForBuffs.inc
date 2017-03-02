@@ -366,7 +366,11 @@ SUB event_portRelay(line, destination)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- EVENT_portRelay ==>
 
 	/if (${Group} && ${Me.CleanName.Equal[${Group.Leader}]}) {
-		/g Port ${destination}
+    /if (${Select[${Me.Class.ShortName},WIZ,DRU]}) {
+      /call event_Chat "group" "${Me.Name}" "Port ${destination}"
+    } else {
+      /g Port ${destination}
+    }
 	}
 
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_portRelay -|

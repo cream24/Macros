@@ -234,7 +234,7 @@ SUB completePendingExchange
 				/call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#2" NONE 1
 			}
     }
-  } else /if (!${FindItemCount[${itemToSwapBack}]}) {
+  } else /if (!${FindItemCount[=${itemToSwapBack}]}) {
 		|/echo if2
     /if (${Debug} || ${Debug_Background}) {
 			/if (${itemToSwapBack.NotEqual[NONE]}) {

@@ -248,6 +248,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
 #EVENT bark "#1# tell your party, 'Bark at #2# #3#'"
 SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Bark ==>
+  |/echo received bark
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
@@ -267,6 +268,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 				/return
 			}
 		}
+		/if (${ChatSender.Equal[${Me}]}) /delay 3s
 		/declare barkTarget string outer ${Spawn[id ${msgTarget}].CleanName}
 		/declare barkReturned bool outer FALSE
 		/declare retryTimer timer local 35s
@@ -376,9 +378,9 @@ SUB EVENT_clickIt(line, ChatSender)
 |    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		/declare debug_clickit bool local FALSE
-    /echo received clickit
+    |/echo received clickit ${ChatSender} ${ChatSender.Equal[${Me}]}
 		/if (${debug_clickit}) /echo ${ChatSender} ${Zone.ShortName} ${Ini[e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#1].Length}
-		/if (${debug_clickit} && ${ChatSender.Equal[${Me.Name}]}) /delay 4s
+		/if (${ChatSender.Equal[${Me}]}) /delay 3s
     /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 		|**
 		| Move to the person who calls ClickIT
@@ -576,7 +578,7 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
 
 		/declare locToStart string local ${eventParams.Arg[1, ].Arg[1,,]},${eventParams.Arg[1, ].Arg[2,,]}
 		/declare startHeading float local ${eventParams.Arg[1, ].Arg[3,,]}
-		/declare retryTimer timer local 300
+		/declare retryTimer timer local 15s
 		/declare miscTimer timer local
 		/declare startZone int local ${Zone.ID}
 	
@@ -608,13 +610,13 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
 					}
 				} else {
 				
-					| -Face the zone and run foward for 15 seconds.
+					| -Face the zone and run foward for 6 seconds.
 					/face fast heading ${Math.Calc[${startHeading}*-1]}
 					/delay 5
 					/keypress forward hold
 					
 					| -Wait to zone.
-					/delay 100 !${Zone.ID} || ${Zone.ID} != ${startZone}
+					/delay 6s !${Zone.ID} || ${Zone.ID} != ${startZone}
 					/if (!${Zone.ID}) /delay 600 ${Zone.ID}
 	
 					| -Check if I zoned.
