@@ -575,7 +575,7 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-
+    /if (${ChatSender.Equal[${Me}]}) /delay 2s
 		/declare locToStart string local ${eventParams.Arg[1, ].Arg[1,,]},${eventParams.Arg[1, ].Arg[2,,]}
 		/declare startHeading float local ${eventParams.Arg[1, ].Arg[3,,]}
 		/declare retryTimer timer local 15s
