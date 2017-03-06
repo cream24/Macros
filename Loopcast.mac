@@ -1,11 +1,14 @@
-#turbo
+#event OutOfStuff "You are missing some required components."
+
 Sub Main(gemNumber)
 
-	/if (${Me.Sitting}) {
-	  /stand
-	}
 	
 	:Loop
+	/doevents
+	/if (${Me.PctMana} < 10) {
+		/sit on
+		/delay 15s
+	}
 	/if (!${Me.SpellReady[${gemNumber}]}) {
 		/delay 1s
 		/if (${Cursor.ID}) /autoinv
@@ -16,4 +19,8 @@ Sub Main(gemNumber)
 		/goto :Loop
 	}
 
+/return
+
+Sub Event_OutOfStuff 
+/endmacro 
 /return
