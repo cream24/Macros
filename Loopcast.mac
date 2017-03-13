@@ -4,10 +4,12 @@ Sub Main(gemNumber)
 
 	
 	:Loop
+	/if (${Cursor.ID}) /autoinv
 	/doevents
 	/if (${Me.PctMana} < 10) {
 		/sit on
 		/delay 15s
+		/goto :Loop
 	}
 	/if (!${Me.SpellReady[${gemNumber}]}) {
 		/delay 1s

@@ -82,7 +82,7 @@ SUB event_Assist(line, ChatSender, int MobID)
             } else /if (${AssistType.Equal[ranged]}) {
               /if (${Debug} || ${Debug_Assists}) /echo autofire on
               /squelch /face fast id ${AssistTarget}
-              /autofire on
+              /if (!${Me.AutoFire}) /autofire on
               /if (${Target.Distance} < 35 || ${Target.Distance} > ${RangedStickDistance}) /squelch /stick hold moveback ${RangedStickDistance}
             }
 					/if (${Debug} || ${Debug_Assists}) /echo Assist=${Assisting} || AssistTarget=${AssistTarget} || AllowControl=${AllowControl}
