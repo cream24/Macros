@@ -461,21 +461,36 @@ SUB check_Nukes
 
    /for s 1 to ${Nukes2D.Size[1]}
     /varset castIndex ${s}
+    /echo ${s} ${castIndex} ${Nukes2D[${castIndex},${iCastName}]}
 
     | skip casting if a delay is defined
     /if (${castDelay${Nukes2D[${castIndex},${iCastID}]}}) {
       /if (${Debug} || ${Debug_Assists}) /echo skipping nukes, /delay from previous cast
       /return
     }
+    |if im burning and /noburn is set, skip the spell
+    |if noburn and rotate is defined, then skip this spell and set lastSuccessfulCast to this spell, so the next spell can be used
+    /if ((${use_QuickBurns} || ${use_LongBurns} || ${use_FullBurns}) && ${Nukes2D[${castIndex},${iNoBurn}]}) {
+      /if (${Nukes2D[${castIndex},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
+        /if (${Debug} || ${Debug_Assists}) /echo setting lastSuccessfulCast to ${lastSuccessfulCast} because noburn and rotate defined
+        /varset lastSuccessfulCast ${Nukes2D[${castIndex},${iCastName}]}
+      } else {
+        /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
+        /goto :skipCast
+      }
+    }
     | if /rotate is defined, and the current array index was the last successful cast, skip to next index
-    /if (${Nukes2D[${s},${iCastName}].Equal[${lastSuccessfulCast}]} && ${Nukes2D[${s},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
+    /if (${Nukes2D[${castIndex},${iCastName}].Equal[${lastSuccessfulCast}]} && ${Nukes2D[${castIndex},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
       /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]} /rotate is defined
       /goto :skipCast
     }
     | if i have Gift Of Mana find a spell with /GoM
     /if (${Bool[${Me.Song[Gift of Mana].ID}]}) {
       /for m 1 to ${Nukes2D.Size[1]}
-        /if (${Nukes2D[${m},${iGiftOfMana}]}) /varset castIndex ${m}
+        /if (${Nukes2D[${m},${iGiftOfMana}]}) {
+          /varset castIndex ${m}
+          /varset lastSuccessfulCast 0
+        }
       /next m
     }
     |if i have aggro and /noaggro is set, skip the spell
@@ -483,13 +498,8 @@ SUB check_Nukes
       /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have aggro and /noaggro is set
       /goto :skipCast
     }
-    |if im burning and /noburn is set, skip the spell
-    /if ((${use_QuickBurns} || ${use_LongBurns} || ${use_FullBurns}) && ${Nukes2D[${castIndex},${iNoBurn}]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
-      /goto :skipCast
-    }
     | if i have spell damage reduction recourse and the mob has more than 25% health or i have < 10% mana, skip cast.  cast anyway if i have GoM to avoid losing it
-    /if ((${Me.Buff[Weave of Weakness].ID} || ${Me.Buff[Flames of Weakness].ID}) && (${Target.PctHPs} > 25 || ${Me.PctMana} < 10) && !${Bool[${Me.Song[Gift of Mana].ID}]}) {
+    /if ((${Me.Buff[Weave of Weakness].ID} || ${Me.Buff[Flames of Weakness].ID}) && (${Target.PctHPs} > 25 || ${Me.PctMana} < 10) && !${Bool[${Me.Song[Gift of Mana].ID}]} && !(${use_QuickBurns} || ${use_LongBurns} || ${use_FullBurns})) {
       /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have spell damage reduction
       /goto :skipCast
     }
