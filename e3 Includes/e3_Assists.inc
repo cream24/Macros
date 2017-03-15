@@ -461,7 +461,7 @@ SUB check_Nukes
 
    /for s 1 to ${Nukes2D.Size[1]}
     /varset castIndex ${s}
-    /echo ${s} ${castIndex} ${Nukes2D[${castIndex},${iCastName}]}
+    /if (${Debug} || ${Debug_Assists}) /echo ${s} ${castIndex} ${Nukes2D[${castIndex},${iCastName}]}
 
     | skip casting if a delay is defined
     /if (${castDelay${Nukes2D[${castIndex},${iCastID}]}}) {
