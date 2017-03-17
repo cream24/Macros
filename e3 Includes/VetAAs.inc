@@ -1,7 +1,7 @@
 |------------------------------------------------------------|
 |- Uses 'Lessons of the Devoted', on all bots who are able.	-|
 |------------------------------------------------------------|
-#EVENT Lessons "[#1#] Lesson of the Devoted#2#"
+#EVENT Lessons "[#1#] Lesson of the Devoted"
 #EVENT Lessons "<#1#> Lesson of the Devoted#2#"
 #EVENT Lessons "#1# tells you, 'Lesson of the Devoted'"
 #EVENT Lessons "#1# tells the group, 'Lesson of the Devoted'"
@@ -15,7 +15,7 @@ SUB EVENT_Lessons(line, ChatSender)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Lesson of the Devoted]}) {
-			/docommand ${ChatToggle} Lesson of the Devoted is not ready.
+			/docommand ${ChatToggle} [Lesson of the Devoted] is not ready.
 		} else {
 			/if (${Twist.Twisting}) /call pauseTwist
 			/casting "Lesson of the Devoted" -maxtries|3
@@ -28,7 +28,7 @@ SUB EVENT_Lessons(line, ChatSender)
 |----------------------------------------------------------------|
 |- Uses 'Infusion of the Faithful', on all bots who are able.	-|
 |----------------------------------------------------------------|
-#EVENT Infusion "[#1#] Infusion of the Faithful#2#"
+#EVENT Infusion "[#1#] Infusion of the Faithful"
 #EVENT Infusion "<#1#> Infusion of the Faithful#2#"
 #EVENT Infusion "#1# tells you, 'Infusion of the Faithful'"
 #EVENT Infusion "#1# tells the group, 'Infusion of the Faithful'"
@@ -56,7 +56,7 @@ SUB EVENT_Infusion(line, ChatSender, eventParams)
 |--------------------------------------------------------|
 |- Uses 'Staunch Recovery', on all bots who are able.	-|
 |--------------------------------------------------------|
-#EVENT Staunch "[#1#] Staunch Recovery#2#"
+#EVENT Staunch "[#1#] Staunch Recovery"
 #EVENT Staunch "<#1#> Staunch Recovery#2#"
 #EVENT Staunch "#1# tells you, 'Staunch Recovery'"
 #EVENT Staunch "#1# tells the group, 'Staunch Recovery'"
@@ -70,7 +70,7 @@ SUB EVENT_Staunch(line, ChatSender, eventParams)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Staunch Recovery]}) {
-			/docommand ${ChatToggle} Staunch Recovery is not ready.
+			/docommand ${ChatToggle} [Staunch Recovery] is not ready.
     } else {
       /if (${Twist.Twisting}) /call pauseTwist
       /casting "Staunch Recovery"  -maxtries|3
@@ -83,7 +83,7 @@ SUB EVENT_Staunch(line, ChatSender, eventParams)
 |--------------------------------------------------------|
 |- Uses 'Steadfast Servant', on all bots who are able.	-|
 |--------------------------------------------------------|
-#EVENT Servant "[#1#] Steadfast Servant#2#"
+#EVENT Servant "[#1#] Steadfast Servant"
 #EVENT Servant "<#1#> Steadfast Servant#2#"
 #EVENT Servant "#1# tells you, 'Steadfast Servant'"
 #EVENT Servant "#1# tells the group, 'Steadfast Servant'"
@@ -97,7 +97,7 @@ SUB EVENT_Servant(line, ChatSender, eventParams)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Steadfast Servant]}) {
-			/docommand ${ChatToggle} Steadfast Servant is not ready.
+			/docommand ${ChatToggle} [Steadfast Servant] is not ready.
 		} else {
       /if (${Twist.Twisting}) /call pauseTwist
 			/casting "Steadfast Servant" -maxtries|3
@@ -110,7 +110,7 @@ SUB EVENT_Servant(line, ChatSender, eventParams)
 |----------------------------------------------------------------|
 |- Uses 'Intensity of the Resolute', on all bots who are able.	-|
 |----------------------------------------------------------------|
-#EVENT Intensity "[#1#] Intensity of the Resolute#2#"
+#EVENT Intensity "[#1#] Intensity of the Resolute"
 #EVENT Intensity "<#1#> Intensity of the Resolute#2#"
 #EVENT Intensity "#1# tells you, 'Intensity of the Resolute'"
 #EVENT Intensity "#1# tells the group, 'Intensity of the Resolute'"
@@ -124,7 +124,7 @@ SUB EVENT_Intensity(line, ChatSender, eventParams)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Intensity of the Resolute]}) {
-			/docommand ${ChatToggle} Intensity of the Resolute is not ready.
+			/docommand ${ChatToggle} [Intensity of the Resolute] is not ready.
     } else {
       /if (${Twist.Twisting}) /call pauseTwist
       /casting "Intensity of the Resolute" -maxtries|3
@@ -136,7 +136,7 @@ SUB EVENT_Intensity(line, ChatSender, eventParams)
 |----------------------------------------------------------------|
 |- Uses 'Armor of Experience', on all bots who are able.	      -|
 |----------------------------------------------------------------|
-#EVENT Armor "[#1#] Armor of Experience#2#"
+#EVENT Armor "[#1#] Armor of Experience"
 #EVENT Armor "<#1#> Armor of Experience#2#"
 #EVENT Armor "#1# tells you, 'Armor of Experience'"
 #EVENT Armor "#1# tells the group, 'Armor of Experience'"
@@ -150,7 +150,7 @@ SUB EVENT_Armor(line, ChatSender, eventParams)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Armor of Experience]}) {
-			/docommand ${ChatToggle} Armor of Experience is not ready.
+			/docommand ${ChatToggle} [Armor of Experience] is not ready.
     } else {
       /if (${Twist.Twisting}) /call pauseTwist
       /casting "Armor of Experience" -maxtries|3
@@ -162,7 +162,7 @@ SUB EVENT_Armor(line, ChatSender, eventParams)
 |--------------------------------------------------------|
 |- Uses 'Expedient Recovery', on all bots who are able.	-|
 |--------------------------------------------------------|
-#EVENT RecoverCorpses "[#1#] Expedient Recovery#2#"
+#EVENT RecoverCorpses "[#1#] Expedient Recovery"
 #EVENT RecoverCorpses "<#1#> Expedient Recovery#2#"
 #EVENT RecoverCorpses "#1# tells you, 'Expedient Recovery'"
 #EVENT RecoverCorpses "#1# tells the group, 'Expedient Recovery'"
@@ -176,7 +176,7 @@ SUB EVENT_RecoverCorpses(line, ChatSender, eventParams)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Expedient Recovery]}) {
-			/docommand ${ChatToggle} Expedient Recovery is not ready.
+			/docommand ${ChatToggle} [Expedient Recovery] is not ready.
     } else {
       /if (${Twist.Twisting}) /call pauseTwist
       /if (${Me.Casting.ID}) /call interrupt
@@ -191,7 +191,7 @@ SUB EVENT_RecoverCorpses(line, ChatSender, eventParams)
 |- Arms MGB on all bots who are able.	  -|
 |- Use, /bc MGB, or /tell 'Name' [MGB]	-|
 |----------------------------------------|
-#EVENT MGB "[#1#] Mass Group Buff#2#"
+#EVENT MGB "[#1#] Mass Group Buff"
 #EVENT MGB "<#1#> Mass Group Buff#2#"
 #EVENT MGB "#1# tells you, 'Mass Group Buff'"
 #EVENT MGB "#1# tells the group, 'Mass Group Buff'"
@@ -206,7 +206,7 @@ SUB EVENT_MGB(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (${Me.AltAbility[Mass Group Buff]}) {
 			/if (!${Me.AltAbilityReady[Mass Group Buff]}) {
-				/docommand ${ChatToggle} Mass Group Buff is not ready.
+				/docommand ${ChatToggle} [Mass Group Buff] is not ready.
       } else {
         /if (${Twist.Twisting}) /call pauseTwist
         /casting "Mass Group Buff" -maxtries|3
@@ -219,7 +219,7 @@ SUB EVENT_MGB(line, ChatSender, eventParams)
 |--------------------------------------------------------|
 |- Uses 'Throne of Heroes', on all bots who are able.	-|
 |--------------------------------------------------------|
-#EVENT GateToLobby "[#1#] Throne of Heroes#2#"
+#EVENT GateToLobby "[#1#] Throne of Heroes"
 #EVENT GateToLobby "<#1#> Throne of Heroes#2#"
 #EVENT GateToLobby "#1# tells you, 'Throne of Heroes'"
 #EVENT GateToLobby "#1# tells the group, 'Throne of Heroes'"
@@ -233,7 +233,7 @@ SUB EVENT_GateToLobby(line, ChatSender, eventParams)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Throne of Heroes]}) {
-			/docommand ${ChatToggle} Throne of Heroes is not ready.
+			/docommand ${ChatToggle} [Throne of Heroes] is not ready.
     } else {
       /if (${Twist.Twisting}) /call pauseTwist
       /if (${Me.Casting.ID}) /call interrupt

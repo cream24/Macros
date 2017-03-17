@@ -1106,7 +1106,7 @@ SUB check_Burns
 |----------------------------------------------------|
 |- Engages EpicBurns 								                -|
 |----------------------------------------------------|
-#EVENT EpicBurn "<#1#> Epic Burn"
+#EVENT EpicBurn "<#1#> Epic Burn#2#"
 #EVENT EpicBurn "#1# tells you, 'Epic Burn'"
 #EVENT EpicBurn "#1# tells the group, 'Epic Burn'"
 #EVENT EpicBurn "#1# tell your party, 'Epic Burn'"
@@ -1134,7 +1134,7 @@ SUB event_EpicBurn(line, ChatSender)
 |----------------------------------------------------|
 |- Engages QuickBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
-#EVENT QuickBurn "<#1#> Quick Burn"
+#EVENT QuickBurn "<#1#> Quick Burn#2#"
 #EVENT QuickBurn "#1# tells you, 'Quick Burn'"
 #EVENT QuickBurn "#1# tells the group, 'Quick Burn'"
 #EVENT QuickBurn "#1# tell your party, 'Quick Burn'"
@@ -1167,7 +1167,7 @@ SUB event_QuickBurn(line, ChatSender)
 |----------------------------------------------------|
 |- Engages LongBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
-#EVENT LongBurn "<#1#> Long Burn"
+#EVENT LongBurn "<#1#> Long Burn#2#"
 #EVENT LongBurn "#1# tells you, 'Long Burn'"
 #EVENT LongBurn "#1# tells the group, 'Long Burn'"
 #EVENT LongBurn "#1# tell your party, 'Long Burn'"
@@ -1200,7 +1200,7 @@ SUB event_LongBurn(line, ChatSender)
 |----------------------------------------------------|
 |- Engages FullBurns listed in the Character_Ini.	-|
 |----------------------------------------------------|
-#EVENT FullBurn "<#1#> Full Burn"
+#EVENT FullBurn "<#1#> Full Burn#2#"
 #EVENT FullBurn "#1# tells you, 'Full Burn'"
 #EVENT FullBurn "#1# tells the group, 'Full Burn'"
 #EVENT FullBurn "#1# tell your party, 'Full Burn'"
