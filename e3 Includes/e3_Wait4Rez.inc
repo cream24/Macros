@@ -18,6 +18,7 @@
 #EVENT dead	"You died."
 SUB EVENT_dead
 /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_Dead ==>
+	/call AssistOff
 	/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
 	/if (${use_Wait4Rez}) {
 		| Alert master that a bot has died.
@@ -33,7 +34,6 @@ SUB EVENT_dead
 		/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
 		/call Wait4Rez
 	}
-	/call AssistOff
 /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_Dead -|
 /RETURN
 
@@ -154,7 +154,7 @@ SUB Wait4Rez(functionCall)
 |- Declares variables and settings used in Wait4Rez functions.	-|
 |----------------------------------------------------------------|
 SUB Wait4Rez_Setup
-/call INItoVar "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool outer
+	/call INItoVar "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool outer
 	/call INItoVar "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" use_Wait4Rez bool outer
 	/call INItoVar "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" Wait4RezAlert int outer
 	|/call INItoVar "${genSettings_Ini},Wait4Rez,Loot Bag Delay" BagDelay int outer

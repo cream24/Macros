@@ -439,7 +439,7 @@ SUB EVENT_clickIt(line, ChatSender)
 		}
 		/squelch /doortarget id ${closestDoorID}
 		/if (${DoorTarget.Distance} > 20) {
-			/declare moveTimer timer local 5s
+			/declare moveTimer timer local 3s
 			/netfollow off
 			/stick off
 			/squelch /face door fast
@@ -449,7 +449,7 @@ SUB EVENT_clickIt(line, ChatSender)
 			/if (${DoorTarget.Distance} > 20 && ${Bool[${moveTimer}]}) /goto :continueMoveTo
 		}
 		/if (${DoorTarget.Distance} > 20) {
-			/echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 10s
+			/echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 3s
 			/moveto off
 			/return
 		} else {
@@ -1792,14 +1792,26 @@ SUB EVENT_reportMana(line,ChatSender)
 		/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 		|-    |-----------Valid User----------|    |-----------In Zone-------------|	|--------Included Bot-----------|
 		/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {   	
-			/if (${Me.PctMana}<100) /docommand ${ChatToggle} ${Me.PctMana}m
+			/if (${Me.PctMana}<100) /docomand ${ChatToggle} ${Me.PctMana}m
 			|${If[${Me.PctMana}!=100, - Full Mana in ${Math.Calc[((${Me.MaxMana}-${Me.CurrentMana})/${Me.ManaRegen})*6]}s,]}
 		}
 	/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_reportMana [${Me.PctMana}m] -|
 }
 /RETURN
 
-
+|---------------------------|
+#EVENT campDesktop "<#1#> CampDesktop"
+SUB campDesktop(line,ChatSender)
+	/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_reportMana ==>
+	/call verifyEvent "${ChatSender}" "${line}"
+	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
+	|-    |-----------Valid User----------|    |-----------In Zone-------------|	|--------Included Bot-----------|
+	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
+		/camp desktop
+		/end
+	}
+	/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_reportMana [${Me.PctMana}m] -|
+/RETURN
 
 Sub basics_Setup
 /call INItoVar "${advSettings_Ini},Debug,Debug Basics (On/Off)" Debug_Basics bool outer
@@ -1891,6 +1903,7 @@ Sub basics_Background_Events
   /doevents runThruZone
   /doevents macroHelp
   /doevents exp_group
+  /doevents campdesktop
 |		/varset event_counter 1
 |	} else {
 |		/varcalc event_counter ${event_counter}+1

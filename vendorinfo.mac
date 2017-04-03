@@ -1,0 +1,19 @@
+Sub Main
+/if (!${Window[MerchantWnd].Open}) {
+	/echo open the merchant window, and make sure its targeted
+	/return
+}
+/echo Dumping Merchant List: ${Target.CleanName}
+/mqlog ${Target.CleanName} ${Target.Race} ${Target.Gender} ${Target.X} ${Target.Y} ${Target.Z} ${Target.Heading}
+/declare i int local
+	/for i 1 to ${Merchant.Items}
+		|/echo ${i} ${Merchant.Item[${i}].MerchQuantity}
+		/if (${Merchant.Item[${i}].MerchQuantity} < 0) {
+		  /mqlog , ${Target.ID} , ${i} , ${Merchant.Item[${i}].ID}
+		}
+	/next i
+/mqlog -----------------------------------------------
+/echo Done
+
+
+/return

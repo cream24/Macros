@@ -324,21 +324,21 @@ SUB event_GotExp
 /return
 
 
-#event goNorth "#*#The north side looks safe.#*#"
-#event goSouth "#*#The south side looks safe.#*#"
-#event goEast "#*#The east side looks safe.#*#"
-#event goWest "#*#The west side looks safe.#*#"
-#event goCenter "#*#The center looks safe.#*#"
+|#event goNorth "#*#The north side looks safe.#*#"
+|#event goSouth "#*#The south side looks safe.#*#"
+|#event goEast "#*#The east side looks safe.#*#"
+|#event goWest "#*#The west side looks safe.#*#"
+|#event goCenter "#*#The center looks safe.#*#"
 #event goDuck "#*#From the corner of your eye, you notice a Kyv taking aim at your head. You should duck."
 |#event goStandstill "From the corner of your eye, you notice a Kyv taking aim near your position. He appears to be leading the target, anticipating your next movement. You should stand still."
 |#event goMove "From the corner of your eye, you notice a Kyv taking aim at your position. You should move."
 #event goWeapon "#*#hand begins to heat up dramatically. You should remove it."
 #event goRings "#*#Your rings constrict and bite into your fingers#*#"
 
-#event dragornPBAE "#*#You notice that the Dragorn before you is preparing to cast a devastating close-range spell."
+|#event dragornPBAE "#*#You notice that the Dragorn before you is preparing to cast a devastating close-range spell."
 |#event dragornBlast "You notice that the Dragorn before you is making preparations to cast a devastating spell.  Doing enough damage to him might interrupt the process."
 |#event dragornThorn "#*#The Dragorn before you is sprouting sharp spikes."
-#event dragornReflect "#*#The Dragorn before you is developing an anti-magic aura."
+|#event dragornReflect "#*#The Dragorn before you is developing an anti-magic aura."
 
 Sub Event_dragornPBAE
   /popup Dragorn PBAE Inc

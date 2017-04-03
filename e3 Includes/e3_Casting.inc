@@ -340,13 +340,16 @@ Sub memorize_spell(spellName,gemNum)
   /declare secWaited int local 0
   /memorize "${spellName}" ${gemNum}
   /delay 5s ${Bool[${Me.Gem[${spellName}]}]}
-  /if (${Me.CombatState.NotEqual[COMBAT]}) {
-  	|not in combat delay 3seconds+ recast time until spell is ready
-    /delay ${Math.Calc[3+${Spell[${spellName}].RecastTime}/1000]}s ${Me.SpellReady[${spellName}]}
-  } else {
-    | if im in combat, only delay if the spell recast time is 3 or fewer seconds
-    /if (${Math.Calc[${Spell[${spellName}].RecastTime}/1000]} <=3) /delay 3s ${Me.SpellReady[${spellName}]}
-  }
+  |do not wait for detrimental spells
+  /if (${Spell[${spellName}].Beneficial}) {
+		/if (${Me.CombatState.NotEqual[COMBAT]}) {
+			|not in combat delay 3seconds+ recast time until spell is ready
+			/delay ${Math.Calc[3+${Spell[${spellName}].RecastTime}/1000]}s ${Me.SpellReady[${spellName}]}
+		} else {
+			| if im in combat, only delay if the spell recast time is 3 or fewer seconds
+			/if (${Math.Calc[${Spell[${spellName}].RecastTime}/1000]} <=3) /delay 3s ${Me.SpellReady[${spellName}]}
+		}
+	}
 /RETURN
 |------------------------------------------------|
 |- concept from KA                        	    -|

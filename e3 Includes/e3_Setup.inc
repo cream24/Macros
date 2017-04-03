@@ -76,7 +76,8 @@ SUB e3_Setup(modeSelect)
 | Import file paths ======================================================================================================= 
 
 	| General Settings
-   /if (!${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length}) {
+	|/echo ${IniMode}  ${MacroData_Ini} ${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length} ${${IniMode}[${MacroData_Ini},File Paths,General Settings].Upper}
+  /if (!${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [General Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
 		/endmacro
 	} else {
