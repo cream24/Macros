@@ -270,7 +270,7 @@ SUB check_AssistStatus
 |- e3_casting is not used, for performance, as these are short recast low impact only
 |------------------------------------------------|
 SUB CombatAbilities
-/varset Debug TRUE
+|/varset Debug TRUE
   /if (${Debug} || ${Debug_Assists}) /echo |- CombatAbilities ==>
   /declare i int local
 | Prereq/priorities
@@ -305,7 +305,7 @@ SUB CombatAbilities
     |/echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName} ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbilityReady[Backstab]}
       /if (${Me.CombatAbilityReady[${Abilities2D[${i},${iCastName}]}]}) {
         |/echo myend ${Me.PctEndurance} minend ${minEnd} endcost ${Spell[${abilityName}].EnduranceCost} ${Me.Endurance}
-        /if (${Me.PctEndurance} >= ${Abilities2D[${i},${iMinEnd}]} && ${Spell[${Abilities2D[${i},${iCastName}]}].EnduranceCost} <= ${Me.Endurance}) {
+        /if (${Me.PctEndurance} >= ${Abilities2D[${i},${iMinEnd}]} && ${Abilities2D[${i},${iMinEnd}]} <= ${Me.Endurance}) {
           |/echo ready ${abilityName} ${Me.CombatAbilityReady[${abilityName}]}
           /disc ${abilityName}
           /delay 3 !${Me.CombatAbilityReady[${Abilities2D[${i},${iCastName}]}]}
@@ -316,7 +316,7 @@ SUB CombatAbilities
   /next i
 
   /if (${Debug} || ${Debug_Assists}) /echo <== CombatAbilities -|
-/varset Debug FALSE
+|/varset Debug FALSE
 /RETURN
 
 |--------------------------------------------------------|
