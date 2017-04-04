@@ -218,7 +218,7 @@ SUB ListToArray(ArrayName, Data, varScope, delimiter)
 |--------------------------------------------------------|
 SUB BuildSpellArray(ArrayName, NewArrayName)
 	/if (!${Defined[SpellProp]}) {
-		/declare SpellProp[34] string outer 0
+		/declare SpellProp[35] string outer 0
 		/varset SpellProp[1] CastName
 		/varset SpellProp[2] CastType
 		/varset SpellProp[3] TargetType
@@ -253,6 +253,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     /varset SpellProp[32] GiftOfMana
     /varset SpellProp[33] CheckForID
     /varset SpellProp[34] SpellID
+		/varset SpellProp[35] PctAggro
 	}
 
   /if (${Defined[${NewArrayName}]}) /deletevar ${NewArrayName}
@@ -293,6 +294,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
   /if (!${Defined[iGiftOfMana]})		/declare iGiftOfMana int outer 32
   /if (!${Defined[iCheckForID]})		/declare iCheckForID int outer 33
   /if (!${Defined[iSpellID]})		/declare iSpellID int outer 34
+  /if (!${Defined[iPctAggro]})		/declare iPctAggro int outer 35
 
 	/declare i int local
 	/declare printAll bool local FALSE
@@ -615,6 +617,9 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/if (${${ArrayName}[${i}].Find[/MinEnd|]}) {
 			/call argueString MinEnd| "${${ArrayName}[${i}]}"
 			/varset ${NewArrayName}[${i},${iMinEnd}] ${Macro.Return}
+		} else {
+		  |default to casting until out of endurance
+      /varset ${NewArrayName}[${i},${iMinEnd}] 0
 		}
 		/if (${printAll}) /echo MinEnd ${${NewArrayName}[${i},${iMinEnd}]}
 
@@ -635,6 +640,16 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     | get GiftOfMana
     /if (${${ArrayName}[${i}].Find[/GoM]}) /varset ${NewArrayName}[${i},${iGiftOfMana}] 1
     /if (${printAll}) /echo GiftOfMana ${${NewArrayName}[${i},${iGiftOfMana}]}
+
+    | get iPctAggro
+    /if (${${ArrayName}[${i}].Find[/PctAggro|]}) {
+      /call argueString PctAggro| "${${ArrayName}[${i}]}"
+      /varset ${NewArrayName}[${i},${iPctAggro}] ${Macro.Return}
+    } else {
+      |default PctAggro to 0, cast even when aggro target
+      /varset	${NewArrayName}[${i},${iPctAggro}] 0
+    }
+    /if (${printAll}) /echo PctAggro ${${NewArrayName}[${i},${iPctAggro}]}
 
     |default casting while invis to 0 which impies no casting while invis
     /varset	${NewArrayName}[${i},${iCastInvis}] 0

@@ -47,11 +47,12 @@ sub AutoHide
 |------------------------------------------------|
 sub AutoEvade
 /if (${Debug}) /echo |- AutoEvade ==>
-	/if (${Me.AbilityReady[Hide]} && !${Bool[${Me.ActiveDisc.ID}]}) {
+|only use evade over 80% aggro, and only if im using a disc (burning)
+	/if (${Me.PctAggro} > 80 && !${Me.AbilityReady[Hide]} && !${Bool[${Me.ActiveDisc.ID}]}) {
 		/attack off
 		/delay 1s !${Me.Combat}	
 		/doability Hide
-		/delay 1s ${Me.Invis}
+		/delay 5 ${Me.Invis}
 		/attack on
 	}
 /if (${Debug}) /echo <== AutoEvade -|
@@ -89,6 +90,7 @@ SUB ROG_CharacterSettings
 /if (${Debug}) /echo |- ROG_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},${Me.Class},Auto-Hide (On/Off)" Off
 	/call WriteToIni "${Character_Ini},${Me.Class},Auto-Evade (On/Off)" On
+	/call WriteToIni "${Character_Ini},${Me.Class},Evade PctAggro" 75
 	/call WriteToIni "${Character_Ini},${Me.Class},Sneak Attack Discipline"
 /if (${Debug}) /echo <== ROG_CharacterSettings -|
 /RETURN

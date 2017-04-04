@@ -37,7 +37,7 @@ SUB Main(modeSelect)
 		/call check_Active
 		/call check_Idle
 
-		/if (${lifeSupport2D.Size[1]} && ${Me.PctHPs} <=80) /call check_lifeSupport
+		/if (${lifeSupport2D.Size[1]} && ${Me.PctHPs} < 99) /call check_lifeSupport
     |workaround for item cast array
     /if (${reloadOnLoot}) /call reloadSpellArrays
 
