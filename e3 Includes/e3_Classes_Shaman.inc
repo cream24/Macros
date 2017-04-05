@@ -15,7 +15,11 @@ SUB check_Canni
           /if (${Macro.Return}) {
             /call check_Mana "canniSpells2D" ${s}
             /if (${Macro.Return}) {
-              /call e3_Cast ${Me.ID} "canniSpells2D" ${s}
+            	/if (!${canniSpells2D[${s},${iCastName}].Equal[Cannibalization]} || ${Me.CurrentHPs} > 2000) {
+								/if (${canniSpells2D[${s},${iMinHP}]} >= ${Me.PctHPs}) {
+              		/call e3_Cast ${Me.ID} "canniSpells2D" ${s}
+                }
+							}
             }
           }
         }
