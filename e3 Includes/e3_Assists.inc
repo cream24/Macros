@@ -444,7 +444,7 @@ SUB check_AutoAssist
 |- Casts direct damage spells on a specified target.	  -|
 |--------------------------------------------------------|
 SUB check_Nukes
-/varset Debug true
+|/varset Debug true
 /if (${Debug} || ${Debug_Assists}) /echo |- check_Nukes ==>
 	/if (${Nukes2D.Size[1]} && ${Assisting} && ${use_Nukes}) {
 	  /declare castIndex int local
@@ -530,7 +530,7 @@ SUB check_Nukes
     /if (!${ActionTaken}) /next s
   }
 /if (${Debug} || ${Debug_Assists}) /echo <== check_Nukes -|
-/varset Debug false
+|/varset Debug false
 /RETURN
 
 |----------------------------------------------------|
