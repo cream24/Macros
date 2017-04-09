@@ -280,9 +280,10 @@ SUB CombatAbilities
   /if (${AutoEvade}) /call AutoEvade
 
   /for i 1 to ${Abilities2D.Size[1]}
+    |/echo ${Abilities2D[${i},${iCastName}]}
     |skip the ability if current aggro is less than defined PctAggro or the taret is not a Named
     /if (${Abilities2D[${i},${iPctAggro}]} > 0 && (${Me.PctAggro} < ${Abilities2D[${i},${iPctAggro}]} || !${Target.Named})) {
-      /echo skipping ${Abilities2D[${i},${iCastName}]}, current aggro ${Me.PctAggro} defined ${Abilities2D[${i},${iPctAggro}]} named ${Target.Named}
+      /if (${Debug} || ${Debug_Assists}) /echo skipping ${Abilities2D[${i},${iCastName}]}, current aggro ${Me.PctAggro} defined ${Abilities2D[${i},${iPctAggro}]} named ${Target.Named}
       /next i
     }
     /if (${Abilities2D[${i},${iCastType}].Equal[Ability]}) {
@@ -304,10 +305,10 @@ SUB CombatAbilities
     } else /if (${Abilities2D[${i},${iCastType}].Equal[Disc]}) {
     |/echo car ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbility[${abilityName}]} ${abilityName} ${Me.CombatAbilityReady[${abilityName}]} ${Me.CombatAbilityReady[Backstab]}
       /if (${Me.CombatAbilityReady[${Abilities2D[${i},${iCastName}]}]}) {
-        |/echo myend ${Me.PctEndurance} minend ${minEnd} endcost ${Spell[${abilityName}].EnduranceCost} ${Me.Endurance}
-        /if (${Me.PctEndurance} >= ${Abilities2D[${i},${iMinEnd}]} && ${Abilities2D[${i},${iMinEnd}]} <= ${Me.Endurance}) {
+        |/echo ${Abilities2D[${i},${iCastName}]} myend ${Me.PctEndurance} >= minend ${Abilities2D[${i},${iMinEnd}]} and endcost ${Spell[${Abilities2D[${i},${iCastName}]}].EnduranceCost} <= ${Me.Endurance}
+        /if (${Me.PctEndurance} >= ${Abilities2D[${i},${iMinEnd}]} && ${Spell[${Abilities2D[${i},${iCastName}]}].EnduranceCost} <= ${Me.Endurance}) {
           |/echo ready ${abilityName} ${Me.CombatAbilityReady[${abilityName}]}
-          /disc ${abilityName}
+          /disc ${Abilities2D[${i},${iCastName}]}
           /delay 3 !${Me.CombatAbilityReady[${Abilities2D[${i},${iCastName}]}]}
           |/echo post disc
         }
