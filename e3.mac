@@ -69,6 +69,8 @@ SUB Main(modeSelect)
 			/if (${medBreak}) /call check_MedBreak
 			| Maintain macro timers
 			/if (${timerArray.Size}) /call check_macroTimers
+			|prevent breakongm from disabling moveutils
+			|/squelch /stick imsafe
 		}
 |/echo main ${Time}
 /if (${Debug}) {
