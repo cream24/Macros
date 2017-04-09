@@ -11,6 +11,11 @@
 #include e3 Includes\e3_Setup.inc
 
 SUB Main(modeSelect)
+  /declare Debug bool outer false
+	/if (${Debug}) {
+		/echo Enter Main
+		/delay 5
+	}
   /declare macroVersion string outer 6.0
   /declare IniMode string outer
   /call #RequirePlugin MQ2IniExt
@@ -20,8 +25,15 @@ SUB Main(modeSelect)
   } else {
     /varset IniMode Ini
   }
+	/if (${Debug}) {
+		/echo Pre Setup
+		/delay 5
+	}
   /call e3_Setup "${modeSelect}"
-
+	/if (${Debug}) {
+		/echo Post Setup
+		/delay 5
+	}
   /declare i int local
 :MainLoop
 /if (${Debug}) /echo |- MainLoop ==>

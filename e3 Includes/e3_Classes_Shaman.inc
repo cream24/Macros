@@ -70,11 +70,14 @@ Sub SHM_Aliases
 #event AE_AA "#*# tells you, 'AEAA'"
 sub Event_AE_AA(string line)
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Ancestral Aid]}) {
-      /bc MGB Ancestral Aid inc...
-      /rs MGB Ancestral Aid inc...
-		 /casting "Mass Group Buff|alt" -maxtries|3
-		 /delay 5
-		 /casting "Ancestral Aid|alt" -maxtries|3
+     /bc MGB Ancestral Aid inc...
+     /casting "Mass Group Buff|alt" "-maxtries|3"
+     /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
+     /delay 5
+     /casting "Ancestral Aid|alt" "-maxtries|3"
+     /delay 5 !${Me.AltAbilityReady[Ancestral Aid]}
+     /casting "Ancestral Aid|alt" "-maxtries|3"
+     /rs MGB Ancestral Aid inc...
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...
    } else /bc Ancestral Aid is not available...

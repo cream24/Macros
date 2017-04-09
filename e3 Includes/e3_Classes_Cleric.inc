@@ -381,19 +381,35 @@ Sub CLR_Aliases
 sub Event_AE_CR(string line)
 /if (${Me.Class.ShortName.Equal[CLR]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Celestial Regeneration]}) {
-      /bc MGB Celestial Regeneration inc...
-      /rs MGB Celestial Regeneration inc...
+     /bc MGB Celestial Regeneration inc...
      /casting "Mass Group Buff|alt" "-maxtries|3"
+     /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
      /delay 5
      /casting "Celestial Regeneration|alt" "-maxtries|3"
+     /delay 5 !${Me.AltAbilityReady[Celestial Regeneration]}
+     /casting "Celestial Regeneration|alt" "-maxtries|3"
+     /rs MGB Celestial Regeneration inc...
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...
    } else /bc Celestial Regeneration is not available...
 }
 /return
 
+|----------------------------------------------------------------------------|
+#event WardofPurity "#*# tells you, 'WardofPurity'"
+sub Event_WardofPurity(string line)
+  /if (${Me.Class.ShortName.Equal[CLR]}) {
+    /if (${Me.AltAbilityReady[Ward of Purity]}) {
+      /bc Ward of Purity inc...
+      /casting "Ward of Purity|alt" "-maxtries|3"
+      /rs Ward of Purity inc...
+    } else /bc Ward of Purity is not available...
+  }
+/return
+
 Sub CLR_Background_Events
   /doevents AE_CR
   /doevents AE_Rez
   /doevents Rez
+  /doevents WardofPurity
 /return

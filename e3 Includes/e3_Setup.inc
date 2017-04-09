@@ -53,7 +53,6 @@
 SUB e3_Setup(modeSelect)
 /if (${Debug}) /echo |- e3_Setup ==>
 
-	/declare Debug bool outer FALSE
   /declare reloadOnLoot bool outer FALSE
   /declare missingSpellItem string outer
 

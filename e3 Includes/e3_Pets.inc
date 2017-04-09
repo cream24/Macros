@@ -10,11 +10,11 @@ SUB check_Pets
 	/if (!${ActionTaken} && !${suspend_Pets} && !${activeTimer}) {
 	  /if (${Me.Pet.ID} && ${petHeal2D.Size[1]}) /call check_petHeal
 		/if (!${Me.Pet.ID} && !${ActionTaken} && ${petSpell2D.Size[1]} && ${SpawnCount[pc ${Me}]} && (${petSummonCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call summonPet
-    /if (${BuffCheck} && ${Me.Pet.ID} && !${ActionTaken} && !${activeTimer} && ${petBuffs2D.Size[1]} && ${petBuffCombat} && !${idle} && (!${medBreak} || ${Me.Combat}))	/call buffPet
+    /if (${BuffCheck} && ${Me.Pet.ID} && !${ActionTaken} && !${activeTimer} && ${petBuffs2D.Size[1]} && !${medBreak} && !${idle} && (${petBuffCombat} || !${Me.Combat}))	/call buffPet
 		/if (${BuffCheck} && ${Me.Pet.ID} && !${ActionTaken} && !${activeTimer} && ${petAutoShrink} && !${combatTimer}) /call check_AutoShrink
 
     /if (${Me.Class.ShortName.Equal[BST]}) {
-      /if (${Me.Pet.ID} && !${ActionTaken} && ${petGrowl2D.Size[1]} && (${petGrowlCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call pet_Growl
+      /if (${Me.Pet.ID} && !${ActionTaken} && !${activeTimer} && !${medBreak} && !${idle} && ${petGrowl2D.Size[1]} && (${petGrowlCombat} || !${Me.Combat})) /call pet_Growl
     }
 	}
 /if (${Debug} || ${Debug_Pets}) /echo <== check_Pets -|
@@ -52,13 +52,13 @@ SUB check_AutoShrink
 /if (${Debug} || ${Debug_Pets}) /echo |- check_AutoShrink ==>
 	/if (${Me.Pet.ID} && ${Me.Pet.Height}>1) {
 		/if (${FindItemCount[=Gemstone of Dark Flame]}) {
-		  /echo casting gemstone shrink
+      /if (${Debug} || ${Debug_Pets}) /echo casting gemstone shrink
 			/casting "Gemstone of Dark Flame" "-targetid|${Me.Pet.ID}"
 		} else /if 	(${FindItemCount[=Symbol of Ancient Summoning]}) {
-		  /echo casting symbol shrink
+      /if (${Debug} || ${Debug_Pets}) /echo casting symbol shrink
 			/casting "Symbol of Ancient Summoning" "-targetid|${Me.Pet.ID}"
 		} else /if (${Me.Book[Tiny Companion]}) {
-		  /echo casting tiny comp
+      /if (${Debug} || ${Debug_Pets}) /echo casting tiny comp
 			/casting "Tiny Companion" "-targetid|${Me.Pet.ID}"
 		}
     /delay 1s ${Me.Casting.ID}
@@ -134,6 +134,10 @@ SUB buffPet
         /call check_Mana "petBuffs2D" ${s}
         /if (${Macro.Return}) {
           /call e3_Cast ${Me.Pet.ID} "petBuffs2D" ${s}
+          /delay 3 ${Target.BuffsPopulated}
+          /if (${castReturn.Equal[CAST_SUCCESS]} && ${Me.Pet.ID} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}) {
+            /call CreateTimer "nht${Target.ID}-${buffSpellID}" "${noHoldDelay}"
+          }
         }
       }
     }

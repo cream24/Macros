@@ -274,9 +274,9 @@ SUB CombatAbilities
   /if (${Debug} || ${Debug_Assists}) /echo |- CombatAbilities ==>
   /declare i int local
 | Prereq/priorities
-  /if (${doTaunt}) {
-    /if (${Me.PctAggro}< 100) /doability Taunt
-  }
+  /if (${doTaunt} && ${Me.AbilityReady[Taunt]} && ${Me.PctAggro}< 100) /doability Taunt
+  /if (${smartTaunt} && ${Me.AbilityReady[Taunt]} && ${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}==0) /doability Taunt
+
   /if (${AutoEvade}) /call AutoEvade
 
   /for i 1 to ${Abilities2D.Size[1]}
@@ -1372,6 +1372,7 @@ Sub assist_Setup
 | ------------------------------------- Import Character_Ini Settings.
 	/if (${Ini[${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)].Length})  /call IniToVar "${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)" AssistType string outer
   /if (${Ini[${Character_Ini},Assist Settings,Taunt(On/Off)].Length})                   /call IniToVar "${Character_Ini},Assist Settings,Taunt(On/Off)" doTaunt bool outer
+  /if (${Ini[${Character_Ini},Assist Settings,SmartTaunt(On/Off)].Length})              /call IniToVar "${Character_Ini},Assist Settings,SmartTaunt(On/Off)" smartTaunt bool outer
 	/if (${Ini[${Character_Ini},Assist Settings,Melee Stick Point].Length})               /call IniToVar "${Character_Ini},Assist Settings,Melee Stick Point" AssistStickPoint string outer
 	/if (${Ini[${Character_Ini},Assist Settings,Melee Distance].Length})                  /call IniToVar "${Character_Ini},Assist Settings,Melee Distance" AssistDistanceSetting string outer
 	/if (${Ini[${Character_Ini},Assist Settings,Ranged Distance].Length})                 /call IniToVar "${Character_Ini},Assist Settings,Ranged Distance" RangedStickDistance string outer
@@ -1527,6 +1528,7 @@ SUB assist_CharacterSettings
   /if (${Select[${Me.Class.ShortName},PAL,SHD,WAR]}) {
     /call WriteToIni "${Character_Ini},Assist Settings,Melee Stick Point" Front
     /call WriteToIni "${Character_Ini},Assist Settings,Taunt(On/Off)" Off
+    /call WriteToIni "${Character_Ini},Assist Settings,SmartTaunt(On/Off)" On
   } else {
     /call WriteToIni "${Character_Ini},Assist Settings,Melee Stick Point" Behind
   }

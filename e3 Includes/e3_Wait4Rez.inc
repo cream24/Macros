@@ -148,6 +148,7 @@ SUB Wait4Rez(functionCall)
 		/docommand ${ChatToggle} Ready to die again!
 	}
 	/doevents flush
+	/if (${NetBots[${NetBots.Client[1]}].CombatState}>=3) /bc buff me
 /RETURN
 
 |----------------------------------------------------------------|

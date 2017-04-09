@@ -177,6 +177,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
 		} else {
       /if (${Stick.Active}) /squelch /stick off
       /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+      /if (${Assisting}  || ${Me.Combat}) /call AssistOff
 			| -Set WhereTo.
 			/declare moveTo_Name string local
 			/declare WhereTo string local ${If[${eventParams.Arg[1, ].Find[/]} || ${eventParams.Arg[1, ].Equal[me]} || ${eventParams.Arg[1, ].Equal[here]},${ChatSender},${eventParams.Arg[1, ]}]}
@@ -654,18 +655,28 @@ SUB EVENT_dropInvis(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_dropInvis -|
 /RETURN
 
-|----------------------------------------|
-|- Drops invis on connected NetBots.	-|
+
 |----------------------------------------|
 #EVENT dropBuff "<#1#> Drop Buff #2#"
 SUB EVENT_dropBuff(line, ChatSender, buffName)
   /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_dropInvis ==>
 | -Verify the event
   /call verifyEvent "${ChatSender}" "${line}"
+  /echo ${buffName}
   /if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 |    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-    /removebuff ${buffName}
+    /if (${buffName.Equal[All]}) {
+      /declare i int local 1
+      /for i 1 to 22
+      /if (${Me.Buff[${i}].ID}) {
+        /squelch /removebuff ${Me.Buff[${i}].Name}
+        /delay 1
+      }
+      /next i
+    } else {
+      /removebuff ${buffName}
+    }
   }
   /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_dropInvis -|
 /RETURN
@@ -1008,14 +1019,13 @@ SUB EVENT_castItem(line, itemToUse)
 /RETURN
 
 |----------------------------------------------------|
-|- Ends the macro before a bot finishes camping.	-|
+|- Ends the macro before a bot finishes camping.	  -|
 |----------------------------------------------------|
-#EVENT EndMacro "It will take about 5 more seconds to prepare your camp."
+#EVENT EndMacro "It will take about 20 more seconds to prepare your camp."
 SUB EVENT_EndMacro
 	/echo User is camping, ending macro.
 	/endmacro
 /RETURN
-
 
 
 |------------------------------------------------|

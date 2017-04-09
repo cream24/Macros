@@ -109,15 +109,16 @@ Sub check_rune
 #event charmOn "#1# tells you, 'Charm on #2#'"
 sub event_charmOn(line, ChatSender, targetID)
   /if (${Me.Class.ShortName.Equal[ENC]} || ${Me.Class.ShortName.Equal[BRD]}) {
-    /if (${Debug} || ${Debug_Ench}) /echo |- remove_RuneTarget ==>
-      /if ((${Spawn[id ${targetID}].Distance} < 240 && !${Spawn[id ${targetID}].Named} && ${Spawn[id ${targetID}].Level} <= ${Me.Level} && ${SpawnCount[npc id ${targetID}]}>0) || ${targetID}==${Me.Pet.ID}) {
+    /if (${Debug} || ${Debug_Ench}) /echo |-  charmOn ==>
+    |&& (!${Spawn[id ${targetID}].Named} || ${Spawn[id ${targetID}].CleanName.Equal[Coerced Lieutenant]})
+      /if ((${Spawn[id ${targetID}].Distance} < 240 && ${Spawn[id ${targetID}].Level} <= ${Me.Level} && ${SpawnCount[npc id ${targetID}]}>0) || ${targetID}==${Me.Pet.ID}) {
         /varset charmTarget ${targetID}
         /varset doCharm TRUE
         /docommand ${ChatToggle} << Charm enabled ${Spawn[id ${charmTarget}].CleanName} >>
       } else {
         /docommand ${ChatToggle} << ${Spawn[id ${targetID}].CleanName} is not eligible for charm >>
       }
-    /if (${Debug}) /echo <== remove_RuneTarget -|
+    /if (${Debug}) /echo <== charmOn -|
   }
 /return
 
@@ -125,14 +126,14 @@ sub event_charmOn(line, ChatSender, targetID)
 #event charmOff "<#1#> Charm Off"
 #event charmOff "#1# tells you, 'Charm Off'"
 sub event_charmOff(line, ChatSender)
+/if (${Debug} || ${Debug_Ench}) /echo |- charmOff ==>
   /if (${Me.Class.ShortName.Equal[ENC]} || ${Me.Class.ShortName.Equal[BRD]}) {
-    /if (${Debug} || ${Debug_Ench}) /echo |- remove_RuneTarget ==>
       /if (${doCharm}) {
         /docommand ${ChatToggle} << Charm Disabled ${Spawn[id ${charmTarget}].CleanName} >>
         /varset doCharm FALSE
         /varset charmTarget 0
       }
-    /if (${Debug}) /echo <== remove_RuneTarget -|
+    /if (${Debug}) /echo <== charmOff -|
   }
 /return
 

@@ -339,7 +339,7 @@ Sub check_Ready(ArrayName, int ArrayIndex)
 Sub memorize_spell(spellName,gemNum)
   /declare secWaited int local 0
   /memorize "${spellName}" ${gemNum}
-  /delay 5s ${Bool[${Me.Gem[${spellName}]}]}
+  /delay 3s ${Bool[${Me.Gem[${spellName}]}]}
   |do not wait for detrimental spells
   /if (${Spell[${spellName}].Beneficial}) {
 		/if (${Me.CombatState.NotEqual[COMBAT]}) {
