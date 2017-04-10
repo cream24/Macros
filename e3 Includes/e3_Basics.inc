@@ -1041,8 +1041,9 @@ SUB EVENT_medOn(line, ChatSender)
 	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
 		| Check that I'm a caster, and not a bard
 |		/if (${Me.Class.CanCast} && ${Me.Class.ShortName.NotEqual[BRD]}) {
-		/if (${Me.Class.ShortName.NotEqual[BRD]} && ${Me.Class.ShortName.NotEqual[WAR]}) {	
-			| Check range
+		|/if (${Me.Class.ShortName.NotEqual[BRD]} && ${Me.Class.ShortName.NotEqual[WAR]}) {
+    /if (${Me.Class.ShortName.NotEqual[BRD]}) {
+				| Check range
 			/if (${Spawn[pc ${ChatSender}].Distance} < ${MaxResponseDist}) {
 				/docommand ${ChatToggle} Meditating...
         | Set medbreak variables
