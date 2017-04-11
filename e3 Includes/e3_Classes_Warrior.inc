@@ -3,6 +3,7 @@
 |- Written by Killians of PEQ																								-|
 |----------------------------------------------------------------------------|
 Sub WAR_Setup
+ /if (${Me.Name.Equal[Lush]}) /log on
 /return
 
 SUB WAR_MacroSettings

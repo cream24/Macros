@@ -275,7 +275,11 @@ SUB CombatAbilities
   /declare i int local
 | Prereq/priorities
   /if (${doTaunt} && ${Me.AbilityReady[Taunt]} && ${Me.PctAggro}< 100) /doability Taunt
-  /if (${smartTaunt} && ${Me.AbilityReady[Taunt]} && ${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}==0) /doability Taunt
+  /if (${smartTaunt} && ${Me.AbilityReady[Taunt]} && ${Bool[${Me.TargetOfTarget.Class.ShortName}]} && ${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}==0) {
+    /bc Taunting ${Target.CleanName} : ${Me.TargetOfTarget.Class.ShortName} ${Me.TargetOfTarget.Name} has aggro
+    /doability Taunt
+  }
+
 
   /if (${AutoEvade}) /call AutoEvade
 
