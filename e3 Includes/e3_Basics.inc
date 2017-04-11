@@ -1803,7 +1803,7 @@ SUB EVENT_reportMana(line,ChatSender)
 		/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
 		|-    |-----------Valid User----------|    |-----------In Zone-------------|	|--------Included Bot-----------|
 		/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {   	
-			/if (${Me.PctMana}<100) /docomand ${ChatToggle} ${Me.PctMana}m
+			/if (${Me.PctMana}<100) /docommand ${ChatToggle} ${Me.PctMana}m
 			|${If[${Me.PctMana}!=100, - Full Mana in ${Math.Calc[((${Me.MaxMana}-${Me.CurrentMana})/${Me.ManaRegen})*6]}s,]}
 		}
 	/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_reportMana [${Me.PctMana}m] -|
