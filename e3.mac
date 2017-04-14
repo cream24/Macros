@@ -73,6 +73,10 @@ SUB Main(modeSelect)
 			|/squelch /stick imsafe
 		}
 |/echo main ${Time}
+  /if (${MoveUtils.GM}) {
+    /stick imsafe
+    /echo GM Safe kicked in, issued /stick imsafe.  you may need to reissue /followme or /assiston
+  }
 /if (${Debug}) {
 	/echo <== MainLoop -|
 	/delay 5
