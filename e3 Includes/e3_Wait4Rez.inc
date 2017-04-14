@@ -148,7 +148,7 @@ SUB Wait4Rez(functionCall)
 		/docommand ${ChatToggle} Ready to die again!
 	}
 	/doevents flush
-	/if (${NetBots[${NetBots.Client[1]}].CombatState}>=3) /bc buff me
+	/if (${buffAfterRez} && ${NetBots[${NetBots.Client[1]}].CombatState}>=3) /bc buff me
 /RETURN
 
 |----------------------------------------------------------------|
@@ -158,14 +158,14 @@ SUB Wait4Rez_Setup
 	/call INItoVar "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool outer
 	/call INItoVar "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" use_Wait4Rez bool outer
 	/call INItoVar "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" Wait4RezAlert int outer
-	|/call INItoVar "${genSettings_Ini},Wait4Rez,Loot Bag Delay" BagDelay int outer
-	|/call INItoVar "${genSettings_Ini},Wait4Rez,Loot Item Delay" ItemDelay int outer
+	/call INItoVar "${genSettings_Ini},Wait4Rez,Request Buffs After Rez (On/Off)" buffAfterRez bool outer
 /RETURN
 
 SUB Wait4Rez_MacroSettings
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" On
 	/call WriteToIni "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" 1
+	/call WriteToIni "${genSettings_Ini},Wait4Rez,Request Buffs After Rez (On/Off)" On
 /RETURN
 
 SUB Wait4Rez_CharacterSettings
