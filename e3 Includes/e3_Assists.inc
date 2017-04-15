@@ -593,7 +593,7 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
         /call TrueTarget ${spellTarget}
         /delay 1
       }
-      |/echo ${Target.Name} ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} dru ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}
+      /echo ${Target.Name} ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} dru ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}
       /if (!${Bool[${${spellTimer}}]} && ${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]} && ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
         /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 - ${longTermRecastTime}
         /call createTimer "${spellTimer}" "${spellRecast}s"
@@ -614,9 +614,9 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
         } else /goto :skipCast
       } else /goto :skipCast
 
-      |/echo retu ${castReturn}  res ${Cast.Result}
-      |/echo maxtries ${${ArrayName}[${i},${iMaxTries}]} rescount ${resistCount} ${${resistCount}}
-      |/echo castname ${${ArrayName}[${i},${iCastName}]} stored ${Cast.Stored.Name} return  ${castReturn}
+      /echo retu ${castReturn}  res ${Cast.Result}
+      /echo maxtries ${${ArrayName}[${i},${iMaxTries}]} rescount ${resistCount} ${${resistCount}}
+      /echo castname ${${ArrayName}[${i},${iCastName}]} stored ${Cast.Stored.Name} return  ${castReturn}
       | If the spell was resisted.
       /if (${Cast.Stored.Name.Equal[${${ArrayName}[${i},${iSpellName}]}]} && ${castReturn.Equal[CAST_RESIST]}) {
         /if (!${Defined[${resistCount}]}) {
