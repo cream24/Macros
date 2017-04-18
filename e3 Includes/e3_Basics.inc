@@ -1334,9 +1334,8 @@ SUB EVENT_Evacuate(line, ChatSender)
 	| -Verify the event
 	/call verifyEvent "${ChatSender}" "${line}"
 	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |--------Included Bot-----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
-
+  |    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|
+  /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]}) {
 		| -Attempt to evac.
 		/if (${Me.AltAbilityReady[Exodus]}) {
 			/docommand ${ChatToggle} Evacuating!
@@ -1609,7 +1608,7 @@ SUB EVENT_listGroups
 #EVENT groupUp "<#1#> Group #2#"
 SUB EVENT_groupUp(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_groupUp ==>
-
+|/varset Debug true
 | -Verify the event
   /call verifyEvent "${ChatSender}" "${line}"
   /varset ChatSender ${Macro.Return.Arg[1,_]}
@@ -1667,6 +1666,7 @@ SUB EVENT_groupUp(line, ChatSender, eventParams)
   }
   :skip
 :skip
+|/varset Debug false
 /if (${Debug}) /echo <== EVENT_groupUp -|
 /RETURN
 

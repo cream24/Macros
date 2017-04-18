@@ -5,6 +5,7 @@
 | 3- checks all netbot curing: CureAll#
 |----------------------------------------------------------------------------|
 Sub check_Cures
+|/declare Debug_Cures bool local TRUE
 	/declare t int local
 	/declare n int local
   /declare g int local
@@ -15,7 +16,9 @@ Sub check_Cures
   /if (!${ActionTaken} && ${doCures}) {
     /declare curePlayer string local
     /for t 1 to ${cureTargets2D.Size[1]}
-      /varset curePlayer ${cureTargets2D[${t},${iCastTarget}]}
+    /varset curePlayer ${cureTargets2D[${t},${iCastTarget}]}
+      /if (${Debug} || ${Debug_Cures}) /echo Checking ${curePlayer} ${NetBots[${curePlayer}].Buff.Find[${Spell[${cureTargets2D[${t},${iCheckFor}]}].ID} ]} ${NetBots[${curePlayer}]}
+      /if (${Debug} || ${Debug_Cures}) /echo for ${cureTargets2D[${t},${iCheckFor}]} sid ${Spell[${cureTargets2D[${t},${iCheckFor}]}].ID}
       |/echo ${SpawnCount[pc =${curePlayer}]}
       /if (${SpawnCount[pc =${curePlayer}]} && ${NetBots[${curePlayer}].Buff.Find[${Spell[${cureTargets2D[${t},${iCheckFor}]}].ID} ]}) {
         /call check_Ready "cureTargets2D" ${t}
@@ -66,7 +69,7 @@ Sub check_Cures
     } else {
       /for n ${NetBots.Counts} downto 1
     }
-      |/echo ${NetBots.Client[${n}]} sp ${SpawnCount[pc =${NetBots.Client[${n}]}]} bf ${NetBots[${NetBots.Client[${n}]}].Buff.Find[${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID} ]} sp ${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID}
+    /if (${Debug} || ${Debug_Cures}) /echo ${NetBots.Client[${n}]} sp ${SpawnCount[pc =${NetBots.Client[${n}]}]} bf ${NetBots[${NetBots.Client[${n}]}].Buff.Find[${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID} ]} sp ${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID}
       /if (${SpawnCount[pc =${NetBots.Client[${n}]}]} && ${NetBots[${NetBots.Client[${n}]}].Buff.Find[${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID} ]}) {
         /call check_Ready "cureAllTargets2D" ${t}
         |/echo check_Ready ${Macro.Return}

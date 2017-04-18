@@ -32,10 +32,12 @@ sub check_DivineArb
 			/if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
 				/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 &&  ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
 					/if (${NetBots[${Group.Member[${i}]}].PctHPs}<${DivineArb_Pct}) {
-						/if (${FindItemCount[Harmony of the Soul]} && ${FindItem[Harmony of the Soul].Timer}==0) {
-              /casting "Harmony of the Soul|item"
+					  /if (${Me.ItemReady[Aegis of Superior Divinity]}) {
+					    /casting "Aegis of Superior Divinity|item" -maxtries|3
+						} else /if (${Me.ItemReady[Harmony of the Soul]}) {
+						  /casting "Harmony of the Soul|item" -maxtries|3
 						} else /if (${Me.AltAbilityReady[Divine Arbitration]}) {
-              /casting "Divine Arbitration|alt"
+              /casting "Divine Arbitration|alt" -maxtries|3
 						}
 					}
 				}

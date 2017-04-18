@@ -1398,7 +1398,7 @@ Sub assist_Setup
   |/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
   /if (${FindItemCount["Raging Taelosian Alloy Axe"]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
   /if (${FindItemCount["Vengeful Taelosian Blood Axe"]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
-  |/if (${FindItemCount["Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"
+  /if (${FindItemCount["Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"
   /if (${FindItemCount["Staff of Everliving Brambles"]})          /declare EpicName string outer "Staff of Everliving Brambles"
   /if (${FindItemCount["Fistwraps of Celestial Discipline"]})     /declare EpicName string outer "Fistwraps of Celestial Discipline"
   /if (${FindItemCount["Transcended Fistwraps of Immortality"]})  /declare EpicName string outer "Transcended Fistwraps of Immortality"
