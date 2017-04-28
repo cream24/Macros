@@ -72,7 +72,34 @@ SUB alerts_Background_Events
   /doevents dragornBlast
   /doevents dragornThorn
   /doevents dragornReflect
+  /doevents angmask
 /RETURN
+
+#event angmask "#*#You feel a gaze of deadly power focusing on you#*#"
+Sub event_angmask
+  /rs ~~~Mask on Me~~~
+
+  /if (!${Bool[${FindItem[=Mirrored Mask]}]}) {
+    /bc [+r+] I dont have a Mirrored Mask
+    /return
+  } else /if (${FindItem[=Mirrored Mask].ItemSlot} >=23 ) {
+    /declare OMM_Mask string local ${Me.Inventory[face].Name}
+    /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange#1" "${OMM_Mask}/face" 1
+    /call SwapItem "Mirrored Mask" "face"
+    /delay 3s ${Me.Inventory[face].Name.Equal[Mirrored Mask]}
+  }
+  /if (${Me.Inventory[face].Name.Equal[Mirrored Mask]}) {
+    /declare numtries int local=0
+    /if (${Me.Casting.ID}) /call interrupt
+    :retry
+    /varcalc numtries ${numtries}+1
+    /casting "Mirrored Mask" -maxtries|3
+    /delay 1s
+    /if (!${Bool[${Me.Song[Reflective Skin]}]} && ${numtries} < 5) /goto :retry
+    /if (${OMM_Mask.Length}) /call SwapItem "${OMM_Mask}" "face"
+  }
+  /rs ~~~Mask on Me~~~ ${Bool[${Me.Song[Reflective Skin]}]}
+/return
 
 |#event swapNoPierce "#*#You are affected by imprecision#*#"
 |#event swapNoBlunt "#*#Your movements become rigid#*#"
