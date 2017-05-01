@@ -892,16 +892,18 @@ Sub PlaceInFirstFreeSlot
   /declare p int local
   /declare i int local
   /for p 1 to 8
-  /for i 1 to 10
-  /if (!${Bool[${Me.Inventory[pack${p}].Item[${i}]}]}) {
-    |/ech pack ${p} slot ${i}
-    /if (!${Window[pack${p}].Open}) /itemnotify pack${p} rightmouseup
-    /delay 2
-    /itemnotify in pack${p} ${i} leftmouseup
-    /delay 3
-    /return
-  }
-  /next i
+		/if (${Bool[${Me.Inventory[pack${p}].Container}]}) {
+			/for i 1 to ${Me.Inventory[pack${p}].Container}
+				/if (!${Bool[${Me.Inventory[pack${p}].Item[${i}]}]}) {
+					|/ech pack ${p} slot ${i}
+					/if (!${Window[pack${p}].Open}) /itemnotify pack${p} rightmouseup
+					/delay 2
+					/itemnotify in pack${p} ${i} leftmouseup
+					/delay 3
+					/return
+				}
+			/next i
+		}
   /next p
 /return
 |----------------------------------------------------------------------------|
