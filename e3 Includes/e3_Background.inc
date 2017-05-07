@@ -28,7 +28,11 @@ SUB check_Zone
 	| Check Auto-Melody
   /if (${Defined[autoMelody]} && !${songSet.Length}) /call EVENT_startMelody "<${Me}> melody ${autoMelody}" "${Me}" "${autoMelody}"
 
-	/if (${Me.Pet.ID}) /squelch /pet follow
+	/if (${Me.Pet.ID}) {
+		/squelch /pet follow
+		/squelch /pet taunt off
+		/squelch /pet ghold on
+	}
 
   /call check_autoTribute
 /if (${Debug} || ${Debug_Background}) /echo <== check_Zone -|

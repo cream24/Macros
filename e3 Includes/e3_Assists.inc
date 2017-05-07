@@ -130,7 +130,7 @@ SUB AssistOff
 	|}
   /if (${Me.Pet.ID}) {
     /pet back off
-    /pet hold
+    /pet ghold on
   }
 
 	/varset Assisting FALSE
@@ -370,7 +370,7 @@ SUB Event_EnrageOn(line, RageOn)
     /if (${AssistStickPoint.Equal[behind]} && (${Stick.Behind} || ${Stick.MoveBehind}) && !${Me.TargetOfTarget.Name.Equal[${Me.Name}]} && !${Macro.Return}) /return
     /attack off
     /if (${Me.Pet.ID}) {
-      /pet hold
+      /pet ghold on
       /pet back off
     }
   }
