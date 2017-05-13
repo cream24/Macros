@@ -69,6 +69,7 @@ Sub SHM_Aliases
 |----------------------------------------------------------------------------|
 #event AE_AA "#*# tells you, 'AEAA'"
 sub Event_AE_AA(string line)
+	/if (${Me.Class.ShortName.Equal[SHM]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Ancestral Aid]}) {
      /bc MGB Ancestral Aid inc...
      /casting "Mass Group Buff|alt" "-maxtries|3"
@@ -81,6 +82,7 @@ sub Event_AE_AA(string line)
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...
    } else /bc Ancestral Aid is not available...
+	}
 /return
 
 |----------------------------------------------------------------------------|

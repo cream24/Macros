@@ -45,6 +45,7 @@ Sub pet_Growl
 |----------------------------------------------------------------------------|
 #event AE_POS "#*# tells you, 'AEPOS'"
 sub Event_AE_POS(string line)
+  /if (${Me.Class.ShortName.Equal[BST]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Paragon of Spirit]}) {
      /bc MGB Paragon of Spirit inc...
      /casting "Mass Group Buff|alt" "-maxtries|3"
@@ -57,6 +58,7 @@ sub Event_AE_POS(string line)
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...
    } else /bc Paragon of Spirit is not available...
+  }
 /return
 
 |----------------------------------------------------------------------------|

@@ -31,6 +31,7 @@ Sub RNG_Aliases
 
 #event AE_AOH "#*# tells you, 'AEAOH'"
 sub Event_AE_AOH(string line)
+  /if (${Me.Class.ShortName.Equal[RNG]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Auspice of the Hunter]}) {
      /bc MGB Auspice of the Hunter inc...
      /casting "Mass Group Buff|alt" "-maxtries|3"
@@ -43,6 +44,7 @@ sub Event_AE_AOH(string line)
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...
    } else /bc Auspice of the Hunter is not available...
+  }
 /return
 
 Sub RNG_Background_Events
