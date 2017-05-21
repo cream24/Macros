@@ -11,7 +11,7 @@ SUB check_Pets
     /if (${Me.Pet.ID} && ${petHeal2D.Size[1]}) /call check_petHeal
     /if (!${Me.Pet.ID} && !${ActionTaken} && ${petSpell2D.Size[1]} && ${SpawnCount[pc ${Me}]} && (${petSummonCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call summonPet
     /if (${Debug} || ${Debug_Pets}) /echo buffcheck ${BuffCheck} petid ${Me.Pet.ID} action !${ActionTaken} active !${activeTimer} size ${petBuffs2D.Size[1]} med !${medBreak} idle !${idle} pbc ${petBuffCombat} combat !${Me.Combat}
-    /if (${BuffCheck} && ${Me.Pet.ID} && ${petBuffs2D.Size[1]} && !${medBreak} && !${idle} && (${petBuffCombat} || !${Me.Combat}))	/call buffPet
+    /if (${BuffCheck} && ${Me.Pet.ID} && ${petBuffs2D.Size[1]} && !${medBreak} && (${petBuffCombat} || !${Me.Combat}))	/call buffPet
     /if (${BuffCheck} && ${Me.Pet.ID} && ${petAutoShrink} && !${combatTimer}) /call check_AutoShrink
 
     /if (${Me.Class.ShortName.Equal[BST]}) {
