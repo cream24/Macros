@@ -1312,6 +1312,66 @@ SUB event_NukeSet(line, ChatSender, NukeArray)
         /varset use_Nukes TRUE
         /echo \ag Switched to [${nukesToUse}] - ${Nukes2D.Size[1]} spells
       }
+    } else /if (${Me.Class.ShortName.Equal[ROG]}) {
+      /declare s int local
+      /declare cbpi int local
+      /declare sbpi int local
+      /call #IniToArray "${Character_Ini},Buffs,Combat Buff#"	CombatBuffs
+      /for s 1 to ${CombatBuffs.Size}
+        /if (${CombatBuffs[${s}].Find[XII]}) {
+          /varset cbpi ${s}
+          /if (${Debug} || ${Debug_Assists}) /echo poison found in ${cbpi} ${CombatBuffs[${cbpi}].Find[XII]} ${CombatBuffs[${cbpi}]}
+        }
+      /next s
+
+      /call #IniToArray "${Character_Ini},Buffs,Self Buff#" SelfBuffs
+      /for s 1 to ${SelfBuffs.Size}
+      /if (${SelfBuffs[${s}].Find[XII]}) {
+        /varset sbpi ${s}
+        /echo poison found in ${sbpi} ${SelfBuffs[${sbpi}].Find[XII]} ${SelfBuffs[${sbpi}]}
+      }
+      /next s
+
+      /if (${NukeArray.Find[poison]}) {
+        /if (${FindItemCount[=Bite of the Shissar XII]} > 0 ) {
+          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "Bite of the Shissar XII"
+          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "Bite of the Shissar XII"
+          /removebuff Solusek's Burn Poison VI
+          /removebuff E`ci's Lament Poison VI
+          /echo Poison set to: Bite of the Shissar XII
+        } else {
+          /echo I do not have any Bite of the Shissar XII, poison unchanged
+        }
+      } else /if (${NukeArray.Find[fire]}) {
+        /if (${FindItemCount[=Solusek's Burn XII]} > 0 ) {
+          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "Solusek's Burn XII"
+          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "Solusek's Burn XII"
+          /removebuff Bite of the Shissar Poison VI
+          /removebuff E`ci's Lament Poison VI
+          /echo Poison set to: Solusek's Burn XII
+        } else {
+          /echo I do not have any Solusek's Burn XII, poison unchanged
+        }
+      } else /if (${NukeArray.Find[cold]}) {
+        /if (${FindItemCount[=E`ci's Lament XII]} > 0 ) {
+          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "E`ci's Lament XII"
+          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "E`ci's Lament XII"
+          /removebuff Solusek's Burn Poison VI
+          /removebuff Bite of the Shissar Poison VI
+          /echo Poison set to: E`ci's Lament XII
+        } else {
+          /echo I do not have any E`ci's Lament XII, poison unchanged
+        }
+      }
+      /if (${CombatBuffs.Size}) /call BuildSpellArray "CombatBuffs"	"CombatBuffs2D"
+      /if (${SelfBuffs.Size})   /call BuildSpellArray "SelfBuffs"	"SelfBuffs2D"
+
+      /for s 1 to ${CombatBuffs2D.Size[1]}
+        /echo [${CombatBuffs2D[${s},${iCastName}]}]
+      /next s
+      /for s 1 to ${SelfBuffs2D.Size[1]}
+      /echo [${SelfBuffs2D[${s},${iCastName}]}]
+      /next s
     }
   }
 /if (${Debug} || ${Debug_Assists})  /echo <== event_NukeSet -|
@@ -1392,30 +1452,30 @@ Sub assist_Setup
 
 
   | Epic Definitions for EpicBurn - warr, shd, pal,
-  /if (${FindItemCount["Prismatic Dragon Blade"]})                /declare EpicName string outer "Prismatic Dragon Blade"
-  /if (${FindItemCount["Blade of Vesagran"]})                     /declare EpicName string outer "Blade of Vesagran"
+  /if (${FindItemCount[="Prismatic Dragon Blade"]})                /declare EpicName string outer "Prismatic Dragon Blade"
+  /if (${FindItemCount[="Blade of Vesagran"]})                     /declare EpicName string outer "Blade of Vesagran"
   |/if (${FindItemCount["Savage Lord's Totem"]})                   /declare EpicName string outer "Savage Lord's Totem"
   |/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
-  /if (${FindItemCount["Raging Taelosian Alloy Axe"]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
-  /if (${FindItemCount["Vengeful Taelosian Blood Axe"]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
-  /if (${FindItemCount["Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"
-  /if (${FindItemCount["Staff of Everliving Brambles"]})          /declare EpicName string outer "Staff of Everliving Brambles"
-  /if (${FindItemCount["Fistwraps of Celestial Discipline"]})     /declare EpicName string outer "Fistwraps of Celestial Discipline"
-  /if (${FindItemCount["Transcended Fistwraps of Immortality"]})  /declare EpicName string outer "Transcended Fistwraps of Immortality"
-  /if (${FindItemCount["Redemption"]})                            /declare EpicName string outer "Redemption"
-  /if (${FindItemCount["Nightbane, Sword of the Valiant"]})       /declare EpicName string outer "Nightbane, Sword of the Valiant"
-  /if (${FindItemCount["Heartwood Blade"]})                       /declare EpicName string outer "Heartwood Blade"
-  /if (${FindItemCount["Aurora, the Heartwood Blade"]})           /declare EpicName string outer "Aurora, the Heartwood Blade"
-  /if (${FindItemCount["Fatestealer"]})                           /declare EpicName string outer "Fatestealer"
+  /if (${FindItemCount[="Raging Taelosian Alloy Axe"]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
+  /if (${FindItemCount[="Vengeful Taelosian Blood Axe"]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
+  /if (${FindItemCount[="Staff of Living Brambles"]})              /declare EpicName string outer "Staff of Living Brambles"
+  /if (${FindItemCount[="Staff of Everliving Brambles"]})          /declare EpicName string outer "Staff of Everliving Brambles"
+  /if (${FindItemCount[="Fistwraps of Celestial Discipline"]})     /declare EpicName string outer "Fistwraps of Celestial Discipline"
+  /if (${FindItemCount[="Transcended Fistwraps of Immortality"]})  /declare EpicName string outer "Transcended Fistwraps of Immortality"
+  /if (${FindItemCount[="Redemption"]})                            /declare EpicName string outer "Redemption"
+  /if (${FindItemCount[="Nightbane, Sword of the Valiant"]})       /declare EpicName string outer "Nightbane, Sword of the Valiant"
+  /if (${FindItemCount[="Heartwood Blade"]})                       /declare EpicName string outer "Heartwood Blade"
+  /if (${FindItemCount[="Aurora, the Heartwood Blade"]})           /declare EpicName string outer "Aurora, the Heartwood Blade"
+  /if (${FindItemCount[="Fatestealer"]})                           /declare EpicName string outer "Fatestealer"
   /if (${FindItemCount["Nightshade, Blade of Entropy"]})          /declare EpicName string outer "Nightshade, Blade of Entropy"
-  /if (${FindItemCount["Innoruuk's Voice"]})                      /declare EpicName string outer "Innoruuk's Voice"
-  /if (${FindItemCount["Innoruuk's Dark Blessing"]})              /declare EpicName string outer "Innoruuk's Dark Blessing"
-  /if (${FindItemCount["Crafted Talisman of Fates"]})             /declare EpicName string outer "Crafted Talisman of Fates"
-  /if (${FindItemCount["Blessed Spiritstaff of the Heyokah"]})    /declare EpicName string outer "Blessed Spiritstaff of the Heyokah"
-  /if (${FindItemCount["Staff of Prismatic Power"]})              /declare EpicName string outer "Staff of Prismatic Power"
-  /if (${FindItemCount["Staff of Phenomenal Power"]})             /declare EpicName string outer "Staff of Phenomenal Power"
-  /if (${FindItemCount["Soulwhisper"]})                           /declare EpicName string outer "Soulwisper"
-  /if (${FindItemCount["Deathwhisper"]})                          /declare EpicName string outer "Deathwisper"
+  /if (${FindItemCount[="Innoruuk's Voice"]})                      /declare EpicName string outer "Innoruuk's Voice"
+  /if (${FindItemCount[="Innoruuk's Dark Blessing"]})              /declare EpicName string outer "Innoruuk's Dark Blessing"
+  /if (${FindItemCount[="Crafted Talisman of Fates"]})             /declare EpicName string outer "Crafted Talisman of Fates"
+  /if (${FindItemCount[="Blessed Spiritstaff of the Heyokah"]})    /declare EpicName string outer "Blessed Spiritstaff of the Heyokah"
+  /if (${FindItemCount[="Staff of Prismatic Power"]})              /declare EpicName string outer "Staff of Prismatic Power"
+  /if (${FindItemCount[="Staff of Phenomenal Power"]})             /declare EpicName string outer "Staff of Phenomenal Power"
+  /if (${FindItemCount[="Soulwhisper"]})                           /declare EpicName string outer "Soulwisper"
+  /if (${FindItemCount[="Deathwhisper"]})                          /declare EpicName string outer "Deathwisper"
   |/if (${FindItemCount["Champions Sword of Eternal Power"]}) /declare EpicName string outer "Champions Sword of Eternal Power"
   |/if (${FindItemCount["Kreljnok's Sword of Eternal Power"]}) /declare EpicName string outer "Kreljnok's Sword of Eternal Power"
   |/if (${FindItemCount["Staff of Elemental Essence"]}) /declare EpicName string outer "Staff of Elemental Essence"

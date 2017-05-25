@@ -1,0 +1,37 @@
+#event OutOfStuff "You are missing some required components."
+
+Sub Main(gemNumber)
+
+/declare counter int local 0
+/declare memaxmana int local
+/declare mecurrmana int local
+/declare manacost int local
+/declare pctpres int local
+	
+	:Loop
+	/if (${Me.PctMana} < 20) {
+		/if (${Me.Standing}) /sit on
+		/delay 15s
+		/goto :Loop
+	}
+	/if (!${Me.SpellReady[${gemNumber}]}) {
+		/if (${Me.Standing}) /sit on
+		/delay 1s
+		/goto :Loop
+	} else {
+		/varcalc counter ${counter}+1
+		/cast ${gemNumber}
+		/delay 10s !${Me.Casting.ID}
+		/varset mecurrmana ${Me.CurrentMana}
+		/varset memaxmana ${Me.MaxMana}
+		/varcalc manacost ${memaxmana}-${mecurrmana}
+		/varcalc pctpres ((525-${manacost})/525)*100
+		/mqlog ${counter},${mecurrmana},${memaxmana},525,${manacost},${pctpres}
+		/goto :Loop
+	}
+
+/return
+
+Sub Event_OutOfStuff 
+/endmacro 
+/return
