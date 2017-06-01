@@ -3,21 +3,21 @@
 |- Written by Killians of PEQ											-|
 |------------------------------------------------------------------------|
 Sub MNK_Setup
-  /declare speedFocusSwapped bool outer false
+  /if (!${Defined[speedFocusSwapped]}) /declare speedFocusSwapped bool global FALSE
   /declare speedFocusSwapTimer timer outer
 /return
 
 Sub MNK_Background_Events
-|  /if (!${speedFocusSwapTimer}) {
-|    /if (${Bool[${Me.ActiveDisc}]} && ${Me.ActiveDisc.Name.Equal[Speed Focus Discipline]}) {
-|      /varset speedFocusSwapped true
-|      /swap SpeedFocus
-|      /varset speedFocusSwapTimer 30s
-|    } else /if (${speedFocusSwapped}) {
-|      /swap main
-|      /varset speedFocusSwapped false
-|    }
-|  }
+  /if (!${speedFocusSwapTimer}) {
+    /if (${Bool[${Me.ActiveDisc}]} && ${Me.ActiveDisc.Name.Equal[Speed Focus Discipline]}) {
+      /varset speedFocusSwapped true
+      /swap SpeedFocus
+      /varset speedFocusSwapTimer 30s
+    } else /if (${speedFocusSwapped}) {
+      /swap main
+      /varset speedFocusSwapped false
+    }
+  }
 /return
 
 SUB MNK_MacroSettings

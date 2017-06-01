@@ -947,7 +947,10 @@ SUB EVENT_Swap_Items(line, IniEntry)
 		/echo \ay << Swap_Items: I have no listing for [${IniEntry}]. >>
 	} else {
 		/if (${Cursor.ID}) /call ClearCursor
-		/if (${Bool[${Me.Casting}]} && ${Me.Class.ShortName.NotEqual[BRD]}) /delay 300 !${Bool[${Me.Casting}]}
+		/if (${Bool[${Me.Casting}]} && ${Me.Class.ShortName.NotEqual[BRD]}) {
+		  /delay 3s !${Bool[${Me.Casting}]}
+      /call interrupt
+    }
 	
 		/declare i int local 1
 		/declare itemToSwap string local

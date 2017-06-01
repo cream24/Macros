@@ -33,12 +33,13 @@ sub check_DivineArb
 				/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 &&  ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
             /if (${Me.Casting.ID}) /call interrupt
 					  /if (${Me.ItemReady[Aegis of Superior Divinity]}) {
-              /bc [+g] Casting Aegis of Superior Divinity
+              /bc [+g+] Casting Aegis of Superior Divinity
 					    /casting "Aegis of Superior Divinity|item" -maxtries|2
 						} else /if (${Me.ItemReady[Harmony of the Soul]}) {
+              /bc [+g+] Casting Harmony of the Soul
 						  /casting "Harmony of the Soul|item" -maxtries|2
 						} else /if (${Me.AltAbilityReady[Divine Arbitration]}) {
-              /bc [+g] Casting Divine Arbitration
+              /bc [+g+] Casting Divine Arbitration
               /casting "Divine Arbitration|alt" -maxtries|2
 						}
 				}

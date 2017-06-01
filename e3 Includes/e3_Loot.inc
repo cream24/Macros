@@ -83,10 +83,9 @@ SUB loot_It
       /if (${Spawn[id ${corpseID}].Distance} < 15 && ${Spawn[id ${corpseID}].DistanceZ} < 15) {
         | If looter is a bard, pause melody.
 
-
         /if (${Debug} || ${Debug_Loot}) /echo ${Target.ID}
         /loot
-        /delay 1
+        /delay 2
         | Check to see if the corpse can be looted
         /doevents NotYourKill
         /delay 15 ${Window[LootWnd].Open} || ${Bool[${Macro.Return.Equal[SKIP_LOOT]}]}
