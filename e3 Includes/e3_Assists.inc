@@ -1362,6 +1362,10 @@ SUB event_NukeSet(line, ChatSender, NukeArray)
         } else {
           /echo I do not have any E`ci's Lament XII, poison unchanged
         }
+      } else {
+        /removebuff Solusek's Burn Poison VI
+        /removebuff Bite of the Shissar Poison VI
+        /removebuff E`ci's Lament Poison VI
       }
       /if (${CombatBuffs.Size}) /call BuildSpellArray "CombatBuffs"	"CombatBuffs2D"
       /if (${SelfBuffs.Size})   /call BuildSpellArray "SelfBuffs"	"SelfBuffs2D"

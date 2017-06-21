@@ -191,11 +191,11 @@ SUB EVENT_RecoverCorpses(line, ChatSender, eventParams)
 |- Arms MGB on all bots who are able.	  -|
 |- Use, /bc MGB, or /tell 'Name' [MGB]	-|
 |----------------------------------------|
-#EVENT MGB "[#1#] Mass Group Buff"
-#EVENT MGB "<#1#> Mass Group Buff#2#"
+|#EVENT MGB "[#1#] Mass Group Buff"
+|#EVENT MGB "<#1#> Mass Group Buff#2#"
 #EVENT MGB "#1# tells you, 'Mass Group Buff'"
-#EVENT MGB "#1# tells the group, 'Mass Group Buff'"
-#EVENT MGB "#1# tell your party, 'Mass Group Buff'"
+|#EVENT MGB "#1# tells the group, 'Mass Group Buff'"
+|#EVENT MGB "#1# tell your party, 'Mass Group Buff'"
 SUB EVENT_MGB(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_MGB ==>
 	| -Verify the event

@@ -37,7 +37,6 @@ sub Event_AE_AOH(string line)
      /casting "Mass Group Buff|alt" "-maxtries|3"
      /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
      /delay 5
-     /casting "Ancestral Aid|alt" "-maxtries|3"
      /delay 5 !${Me.AltAbilityReady[Auspice of the Hunter]}
      /casting "Auspice of the Hunter|alt" "-maxtries|3"
      /rs MGB Auspice of the Hunter inc...
