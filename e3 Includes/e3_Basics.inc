@@ -1297,16 +1297,16 @@ SUB EVENT_gate(line, ChatSender)
 		/if (!${Me.Book[gate]}) {
 			/if (${FindItem[Philter of Major Translocation].ID}) {
 				/docommand ${ChatToggle} Preparing to gate...
-				/call e3_Cast ${Me.ID} "Philter of Major Translocation"
+				/casting "Philter of Major Translocation" -maxtries|2
 			} else /if (${FindItem[Vial of Swirling Smoke].ID}) {
 				/docommand ${ChatToggle} Preparing to gate...
-				/call e3_Cast ${Me.ID} "Vial of Swirling Smoke"
+				/casting "Vial of Swirling Smoke" -maxtries|2
 			} else {
 				/docommand ${ChatToggle} I am not able to gate at this time.
 			}
 		} else {
 			/docommand ${ChatToggle} Preparing to gate...
-			/call e3_Cast ${Me.ID} "Gate/GiveUpTimer|30s"
+			/casting "Gate" -maxtries|2
 		}
 	}
 
