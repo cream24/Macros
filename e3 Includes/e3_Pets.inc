@@ -235,9 +235,9 @@ SUB pet_MacroSettings
 SUB pet_CharacterSettings
 /if (${Debug} || ${Debug_Pets}) /echo |- pet_CharacterSettings ==>
 	/if (${Select[${Me.Class.ShortName},BST,ENC,MAG,NEC,SHD,SHM]}) {	
-		/call WriteToIni "${Character_Ini},Pets,Pet Spell#1"
-    /call WriteToIni "${Character_Ini},Pets,Pet Heal#1"
-		/call WriteToIni "${Character_Ini},Pets,Pet Buff#1"
+		/call WriteToIni "${Character_Ini},Pets,Pet Spell"
+    /call WriteToIni "${Character_Ini},Pets,Pet Heal"
+		/call WriteToIni "${Character_Ini},Pets,Pet Buff"
     /if (${Select[${Me.Class.ShortName},BST,MAG,NEC]}) /call WriteToIni "${Character_Ini},Pets,Pet Mend (Pct)"
     /call WriteToIni "${Character_Ini},Pets,Pet Taunt (On/Off)" Off
     /call WriteToIni "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" Off

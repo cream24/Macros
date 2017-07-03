@@ -72,11 +72,11 @@ SUB NEC_MacroSettings
 SUB NEC_CharacterSettings
 /if (${Debug}) /echo |- NEC_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},${Me.Class},Lich Spell"
-	/call WriteToIni "${Character_Ini},${Me.Class},LifeTap#1"
+	/call WriteToIni "${Character_Ini},${Me.Class},LifeTap"
 	/call WriteToIni "${Character_Ini},${Me.Class},Mana Dump (On/Off)"
   |/call WriteToIni "${Character_Ini},${Me.Class},Mana Dump Engage Pct" 70
-	/call WriteToIni "${Character_Ini},${Me.Class},Who to Mana Dump#1"
-	/call WriteToIni "${Character_Ini},${Me.Class},Mana Dump#1"
+	/call WriteToIni "${Character_Ini},${Me.Class},Who to Mana Dump"
+	/call WriteToIni "${Character_Ini},${Me.Class},Mana Dump"
 /if (${Debug}) /echo <== NEC_CharacterSettings -|
 /RETURN
 

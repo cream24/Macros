@@ -802,7 +802,7 @@ SUB SmoothMoves_Setup
 /call INItoVar "${advSettings_Ini},Debug,Debug SmoothMoves (On/Off)" Debug_SmoothMoves bool outer
 /if (${Debug} || ${Debug_SmoothMoves}) /echo |- SmoothMoves_Setup ==>
 	| Add Casting File Paths
-	/if (!${Ini[${MacroData_Ini},File Paths,Saved Routes].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Saved Routes" "Macro Inis\Saved Routes.ini" 1
+	/if (!${Ini[${MacroData_Ini},File Paths,Saved Routes].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Saved Routes" "e3 Macro Inis\Saved Routes.ini" 1
 	| Import Saved Routes.ini
 	/if (!${Ini[${MacroData_Ini},File Paths,Saved Routes].Length}) {
 		/echo ERROR: Could not find designated file path for [Saved Routes.ini], please review [${MacroData_Ini}] and restart.

@@ -12,8 +12,8 @@
 SUB check_Buffs
 	/if (${Debug} || ${Debug_BuffCheck}) /echo |- buffCheck ==>
 	/if (${BuffCheck}) {
-		/if (!${ActionTaken} && !${activeTimer} && !${medBreak} && !${idle} && (${BuffCombatCheck} || !${Me.Combat}))	/call buffBots "CombatBuffs2D"
-    /if (!${ActionTaken} && !${activeTimer} && !${medBreak} && ${procBuff} && !${idle} && (${BuffCombatCheck} || !${Me.Combat})) /call buffProcs
+		/if (!${ActionTaken} && !${activeTimer} && !${medBreak} && !${idle} && ${BuffCombatCheck})	/call buffBots "CombatBuffs2D"
+    /if (!${ActionTaken} && !${activeTimer} && !${medBreak} && ${procBuff} && !${idle} && ${BuffCombatCheck}) /call buffProcs
 		/if (!${ActionTaken} && ${InstantBuffs2D.Size[1]})		/call buffBots "InstantBuffs2D"
 		/if (!${ActionTaken} && !${activeTimer} && !${combatTimer} && ${Me.CombatState.NotEqual[COMBAT]} && !${Assisting} && !${Me.Moving} && ${BuffCheck}) {
 			/if (!${ActionTaken} && ${SelfBuffs2D.Size[1]})	/call buffBots "SelfBuffs2D"

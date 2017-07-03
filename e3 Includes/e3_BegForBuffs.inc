@@ -476,23 +476,12 @@ SUB begForBuffs_Setup
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- setup_BegForBuffs ==>
 	|Add SpellAlias File Path.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Spell Aliases File" "e3 Macro Inis\Spell Aliases.ini" 1
-	|Add Spell List File Path.
-	/if (!${Ini[${MacroData_Ini},File Paths,Spell List Files].Length}) {
-		/noparse /ini "e3 Macro Inis\e3 Data.ini" "File Paths" "Spell List Files" "Macro Inis\Spell List-${Me.Class.ShortName}.ini"
-	}
 	|Import SpellAliases_Ini.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) {
 		/echo ERROR: Could not find designated file path for [Spell Aliases], please review [${MacroData_Ini}] and restart.
 		/endmacro
 	} else {
 		/declare SpellAliases_Ini string outer ${Ini[${MacroData_Ini},File Paths,Spell Aliases File]}
-	}
-	|Import SpellList_Ini.
-	/if (!${Ini[${MacroData_Ini},File Paths,Spell List Files].Length}) {
-		/echo ERROR: Could not find designated file path for [Spell List Files], please review [${MacroData_Ini}] and restart.
-		/endmacro
-	} else {
-		/declare SpellList_Ini string outer ${Ini[${MacroData_Ini},File Paths,Spell List Files]}
 	}
 	/if (!${Ini[${SpellAliases_Ini}].Length}) /call MakeSpellAliases_Ini
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== setup_BegForBuffs -|

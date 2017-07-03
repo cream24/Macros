@@ -1333,49 +1333,51 @@ SUB event_NukeSet(line, ChatSender, NukeArray)
       /next s
 
       /if (${NukeArray.Find[poison]}) {
-        /if (${FindItemCount[=Bite of the Shissar XII]} > 0 ) {
-          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "Bite of the Shissar XII"
-          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "Bite of the Shissar XII"
-          /removebuff Solusek's Burn Poison VI
-          /removebuff E`ci's Lament Poison VI
-          /echo Poison set to: Bite of the Shissar XII
+        /if (${FindItemCount[=${poisonPR}]} > 0 ) {
+          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "${poisonPR}"
+          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "${poisonPR}"
+          /squelch ${Me.Buff[${FindItem[=${poisonFR}].Spell}].Remove}
+          /squelch ${Me.Buff[${FindItem[=${poisonCR}].Spell}].Remove}
+          /echo Poison set to: ${poisonPR}
         } else {
-          /echo I do not have any Bite of the Shissar XII, poison unchanged
+          /echo I do not have any ${poisonPR}, poison unchanged
         }
       } else /if (${NukeArray.Find[fire]}) {
         /if (${FindItemCount[=Solusek's Burn XII]} > 0 ) {
-          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "Solusek's Burn XII"
-          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "Solusek's Burn XII"
-          /removebuff Bite of the Shissar Poison VI
-          /removebuff E`ci's Lament Poison VI
-          /echo Poison set to: Solusek's Burn XII
+          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "${poisonFR}"
+          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "${poisonFR}"
+          /squelch ${Me.Buff[${FindItem[=${poisonPR}].Spell}].Remove}
+          /squelch ${Me.Buff[${FindItem[=${poisonCR}].Spell}].Remove}
+          /echo Poison set to: ${poisonFR}
         } else {
-          /echo I do not have any Solusek's Burn XII, poison unchanged
+          /echo I do not have any ${poisonFR}, poison unchanged
         }
       } else /if (${NukeArray.Find[cold]}) {
-        /if (${FindItemCount[=E`ci's Lament XII]} > 0 ) {
-          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "E`ci's Lament XII"
-          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "E`ci's Lament XII"
-          /removebuff Solusek's Burn Poison VI
-          /removebuff Bite of the Shissar Poison VI
-          /echo Poison set to: E`ci's Lament XII
+        /if (${FindItemCount[=${poisonCR}]} > 0 ) {
+          /if (${cbpi}) /varset CombatBuffs[${cbpi}] "${poisonCR}"
+          /if (${sbpi}) /varset SelfBuffs[${sbpi}] "${poisonCR}"
+          /squelch ${Me.Buff[${FindItem[=${poisonPR}].Spell}].Remove}
+          /squelch ${Me.Buff[${FindItem[=${poisonfR}].Spell}].Remove}
+          /echo Poison set to: ${poisonCR}
         } else {
-          /echo I do not have any E`ci's Lament XII, poison unchanged
+          /echo I do not have any ${poisonCR}, poison unchanged
         }
       } else {
-        /removebuff Solusek's Burn Poison VI
-        /removebuff Bite of the Shissar Poison VI
-        /removebuff E`ci's Lament Poison VI
+        /squelch ${Me.Buff[${FindItem[=${poisonPR}].Spell}].Remove}
+        /squelch ${Me.Buff[${FindItem[=${poisonFR}].Spell}].Remove}
+        /squelch ${Me.Buff[${FindItem[=${poisonCR}].Spell}].Remove}
       }
       /if (${CombatBuffs.Size}) /call BuildSpellArray "CombatBuffs"	"CombatBuffs2D"
       /if (${SelfBuffs.Size})   /call BuildSpellArray "SelfBuffs"	"SelfBuffs2D"
 
-      /for s 1 to ${CombatBuffs2D.Size[1]}
-      /if (${Debug} || ${Debug_Assists}) /echo [${CombatBuffs2D[${s},${iCastName}]}]
-      /next s
-      /for s 1 to ${SelfBuffs2D.Size[1]}
-      /if (${Debug} || ${Debug_Assists}) /echo [${SelfBuffs2D[${s},${iCastName}]}]
-      /next s
+      /if (${Debug} || ${Debug_Assists}) {
+        /for s 1 to ${CombatBuffs2D.Size[1]}
+         /echo [${CombatBuffs2D[${s},${iCastName}]}]
+        /next s
+        /for s 1 to ${SelfBuffs2D.Size[1]}
+          /echo [${SelfBuffs2D[${s},${iCastName}]}]
+        /next s
+      }
     }
   }
 /if (${Debug} || ${Debug_Assists})  /echo <== event_NukeSet -|
@@ -1399,7 +1401,7 @@ sub event_CombatMode(line, ChatSender, parms)
     /swap melee
     /delay 2
   }
-  /if ( ${argPart.Equal[ranged]}) {
+  /if (${argPart.Equal[ranged]}) {
     /varset AssistType Ranged
     /delay 2
     /swap ranged
@@ -1606,42 +1608,55 @@ SUB assist_CharacterSettings
   /call WriteToIni "${Character_Ini},Assist Settings,Auto-Assist Engage Percent" 98
 	| If I'm a melee class, add Melee Abilities entries.
 	/if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {
-		/if (!${Ini[${Character_Ini},Melee Abilities].Length}) /call WriteToIni "${Character_Ini},Melee Abilities,Ability#1"
+		/if (!${Ini[${Character_Ini},Melee Abilities].Length}) /call WriteToIni "${Character_Ini},Melee Abilities,Ability"
 	}
 	| If I'm a casting class, add Nuke entries.
 	/if (${Select[${Me.Class.ShortName},BST,CLR,DRU,ENC,MAG,PAL,NEC,RNG,SHD,SHM,WIZ]}) {
-		/if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,Nuke#1"
+		/if (!${Ini[${Character_Ini},Nukes].Length}) {
+      /call WriteToIni "${Character_Ini},Nukes,Nuke"
+      /if (${Select[${Me.Class.ShortName},DRU,RNG,MAG,WIZ]}) {
+        /call WriteToIni "${Character_Ini},Nukes,BigFire"
+        /call WriteToIni "${Character_Ini},Nukes,FastFire"
+        /call WriteToIni "${Character_Ini},Nukes,LureFire"
+      }
+      /if (${Select[${Me.Class.ShortName},RNG,WIZ,SHM]}) {
+        /call WriteToIni "${Character_Ini},Nukes,BigCold"
+        /call WriteToIni "${Character_Ini},Nukes,FastCold"
+        /call WriteToIni "${Character_Ini},Nukes,LureCold"
+      }
+      /if (${Select[${Me.Class.ShortName},MAG,WIZ]}) {
+        /call WriteToIni "${Character_Ini},Nukes,BigMagic"
+        /call WriteToIni "${Character_Ini},Nukes,FastMagic"
+        /call WriteToIni "${Character_Ini},Nukes,LureMagic"
+      }
+    }
 	}
-  /if (${Select[${Me.Class.ShortName},DRU,RNG,MAG,WIZ]}) {
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,BigFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,FastFire#1"
-    /if (!${Ini[${Character_Ini},Nukes].Length}) /call WriteToIni "${Character_Ini},Nukes,LureFire#1"
-  }
+
 
 	| If I'm a casting class, add DoT entries.
 	/if (${Select[${Me.Class.ShortName},BST,DRU,ENC,NEC,RNG,SHD,SHM]}) {
 		/if (!${Ini[${Character_Ini},DoTs].Length}) {
-			/call WriteToIni "${Character_Ini},DoTs,DoT on Assist#1"
-			/call WriteToIni "${Character_Ini},DoTs,DoT on Command#1"
+			/call WriteToIni "${Character_Ini},DoTs,DoT on Assist"
+			/call WriteToIni "${Character_Ini},DoTs,DoT on Command"
 		}
 	}
 	| If I'm a casting class, add Debuff entries.
 	/if (${Select[${Me.Class.ShortName},BST,DRU,ENC,MAG,NEC,SHM,RNG]}) {
 		/if (!${Ini[${Character_Ini},Debuffs].Length}) {
-			/call WriteToIni "${Character_Ini},Debuffs,Debuff on Assist#1"
-			/call WriteToIni "${Character_Ini},Debuffs,Debuff on Command#1"
+			/call WriteToIni "${Character_Ini},Debuffs,Debuff on Assist"
+			/call WriteToIni "${Character_Ini},Debuffs,Debuff on Command"
 		}
 	}
 	| If I'm a casting class, add AE entries.
 	/if (${Select[${Me.Class.ShortName},CLR,ENC,DRU,MAG,SHM,WIZ,RNG]}) {
-		/if (!${Ini[${Character_Ini},TargetAE].Length}) /call WriteToIni "${Character_Ini},TargetAE,TargetAE#1"
-    /if (!${Ini[${Character_Ini},PBAE].Length}) /call WriteToIni "${Character_Ini},PBAE,PBAE#1"
+		/if (!${Ini[${Character_Ini},TargetAE].Length}) /call WriteToIni "${Character_Ini},TargetAE,TargetAE"
+    /if (!${Ini[${Character_Ini},PBAE].Length}) /call WriteToIni "${Character_Ini},PBAE,PBAE"
 	}
 	| Burn entries.
 	/if (!${Ini[${Character_Ini},Burn].Length}) {
-		/call WriteToIni "${Character_Ini},Burn,Quick Burn#1"
-    /call WriteToIni "${Character_Ini},Burn,Long Burn#1"
-		/call WriteToIni "${Character_Ini},Burn,Full Burn#1"
+		/call WriteToIni "${Character_Ini},Burn,Quick Burn"
+    /call WriteToIni "${Character_Ini},Burn,Long Burn"
+		/call WriteToIni "${Character_Ini},Burn,Full Burn"
 	}
 /if (${Debug} || ${Debug_Assists}) /echo <== assist_CharacterSettings -|
 /RETURN
@@ -1718,5 +1733,3 @@ Sub assist_Background_Events
   /doevents CombatMode
   |/echo assistbg ${Time}
 /return
-
-

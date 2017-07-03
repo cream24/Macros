@@ -171,6 +171,9 @@ Sub tanking_Background_Events
 Sub tanking_CharacterSettings
 /return
 
+Sub tanking_Aliases
+/return
+
 Sub tanking_Setup
   /declare mainTank string outer
   /declare currentPuller string outer

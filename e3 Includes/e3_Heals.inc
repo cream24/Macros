@@ -713,7 +713,7 @@ SUB heal_CharacterSettings
 /if (${Debug} || ${Debug_Heals}) /echo |- heal_CharacterSettings ==>
 
 	| LifeSupport entries.
-	/call WriteToIni "${Character_Ini},Life Support,Life Support#1"
+	/call WriteToIni "${Character_Ini},Life Support,Life Support"
 
 	| If I'm a healer, add e3_Macro_Heals.inc entries.
 	/if (${Select[${Me.Class.ShortName},CLR,DRU,SHM,BST,PAL,RNG]}) {

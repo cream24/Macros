@@ -209,7 +209,7 @@ SUB EVENT_make_MacroSettingsIni
 	/call WriteToIni "${advSettings_Ini},Turbo,ROG" 30 0
 	/call WriteToIni "${advSettings_Ini},Turbo,SHD" 35 0
 	/call WriteToIni "${advSettings_Ini},Turbo,SHM" 80 0
-	/call WriteToIni "${advSettings_Ini},Turbo,WAR" 25 0
+	/call WriteToIni "${advSettings_Ini},Turbo,WAR" 30 0
 	/call WriteToIni "${advSettings_Ini},Turbo,WIZ" 30 0
 
 	/delay 15

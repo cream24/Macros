@@ -333,7 +333,7 @@ SUB MAG_MacroSettings
 SUB MAG_CharacterSettings
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},Magician,Auto-Pet Weapons (On/Off)"
-	/call WriteToIni "${Character_Ini},Magician,Summoned Pet Item#1"
+	/call WriteToIni "${Character_Ini},Magician,Summoned Pet Item"
 
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_CharacterSettings -|
 /RETURN

@@ -323,7 +323,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
         } else {
           /varset reloadOnLoot TRUE
           /varset missingSpellItem ${tmp_castname}
-          /bc [${${ArrayName}[${i}]}] : i do not have this spell|aa|ability|disc|item accessible
+          /bc [${${ArrayName}[${i}]}] : ${tmp_castname} i do not have this spell|aa|ability|disc|item accessible
           /beep
           /call RemoveArrayElement "${ArrayName}" "${ArrayName}[${i}]"
         }

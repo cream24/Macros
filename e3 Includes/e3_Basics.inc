@@ -1783,27 +1783,27 @@ SUB EVENT_exp_group(line,ChatSender, expToggle)
 			/if (${Defined[NoKSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${NoKSWeaponSet}].Length}) /swap ${NoKSWeaponSet}
       /if (${Me.Class.ShortName.Equal[Rog]}) {
 				/varset strikeDisc 0
+				/declare poisonInUse string local
         /declare i int local
         :remove_poisons
+					/if (${Me.Buff[${FindItem[=${poisonPR}].Spell}]}) /varset poisonInUse ${poisonPR}
+					/if (${Me.Buff[${FindItem[=${poisonFR}].Spell}]}) /varset poisonInUse ${poisonFR}
+					/if (${Me.Buff[${FindItem[=${poisonCR}].Spell}]}) /varset poisonInUse ${poisonCR}
+
           /for i 1 to ${CombatBuffs2D.Size[1]}
-            /if (${CombatBuffs2D[${i},${iCastName}].Find[${expNoPoison}]}) {
+            /if (${CombatBuffs2D[${i},${iCastName}].Find[${poisonInUse}]}) {
               /call RemoveSpellArrayElement "CombatBuffs2D" ${i}
               /goto :remove_poisons
             }
           /next i
           /for i 1 to ${SelfBuffs2D.Size[1]}
-          /if (${SelfBuffs2D[${i},${iCastName}].Find[${expNoPoison}]}) {
-            /call RemoveSpellArrayElement "SelfBuffs2D" ${i}
-            /goto :remove_poisons
-          }
+            /if (${SelfBuffs2D[${i},${iCastName}].Find[${poisonInUse}]}) {
+              /call RemoveSpellArrayElement "SelfBuffs2D" ${i}
+              /goto :remove_poisons
+            }
           /next i
-          /for i 1 to ${BotBuffs2D.Size[1]}
-          /if (${BotBuffs2D[${i},${iCastName}].Find[${expNoPoison}]}) {
-            /call RemoveSpellArrayElement "BotBuffs2D" ${i}
-            /goto :remove_poisons
-          }
-          /next i
-        /squelch ${Me.Buff[${expNoPoison}].Remove}
+        /squelch ${Me.Buff[${FindItem[=${poisonInUse}].Spell}].Remove}
+
       }
       /echo \ag NoKS Mode Activated - do not get exp
     }
@@ -1865,7 +1865,6 @@ Sub basics_Setup
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_NukeSet].Length}) 			/call IniToVar "${genSettings_Ini},ExpGroup,NoKS_NukeSet" NoKSNukeSet string outer
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_NukeSet].Length}) 				/call IniToVar "${genSettings_Ini},ExpGroup,KS_NukeSet" KSNukeSet string outer
-	/if (${Ini[${genSettings_Ini},ExpGroup,NoPoison].Length}) 					/call IniToVar "${genSettings_Ini},ExpGroup,NoPoison" expNoPoison string outer
 
 	/declare MaxResponseDist int outer 250
 	/if (${Ini[${genSettings_Ini},General,Max Response Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Response Distance]}]}) /call IniToVar "${genSettings_Ini},General,Max Response Distance" MaxResponseDist int outer
@@ -1949,7 +1948,6 @@ SUB basics_MacroSettings
 	/call WriteToIni "${genSettings_Ini},ExpGroup,NoKS_NukeSet" NoExp
 	/call WriteToIni "${genSettings_Ini},ExpGroup,KS_WeaponSet" Main
 	/call WriteToIni "${genSettings_Ini},ExpGroup,KS_NukeSet" Exp
-	/call WriteToIni "${genSettings_Ini},ExpGroup,NoPoison" "Bite of the Shissar"
 
 /if (${Debug} || ${Debug_Basics}) /echo <== basics_MacroSettings -|
 /RETURN

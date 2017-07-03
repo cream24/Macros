@@ -15,7 +15,7 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 		/if (${Ini[${Character_Ini},${melodyName} Melody].Length}) {	
 			/if (${Debug}) /echo |- EVENT_saveMelody -| Overwriting [${melodyName}] melody...
 			/for i 1 to 8
-				/if (${Ini[${Character_Ini},${melodyName} Melody,Song#${i}].Length}) /call WriteToIni "${Character_Ini},${melodyName} Melody,Song#${i}" *PLACEHOLDER 1
+				/if (${Ini[${Character_Ini},${melodyName} Melody,Song].Length}) /call WriteToIni "${Character_Ini},${melodyName} Melody,Song#${i}" *PLACEHOLDER 1
 			/next i
 		}
 		/echo Saving [${melodyName}] melody...
@@ -29,7 +29,7 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 			}
 		} else {
 			/echo Song#${i}=${Me.Gem[${songsToSave.Arg[${i}, ]}]}/gem|${songsToSave.Arg[${i}, ]}
-			/call WriteToIni "${Character_Ini},${melodyName} Melody,Song#${i}" "${Me.Gem[${songsToSave.Arg[${i}, ]}]}/gem|${songsToSave.Arg[${i}, ]}" ${If[${Ini[${Character_Ini},${melodyName} Melody,Song#${i}].Length},1,0]}
+			/call WriteToIni "${Character_Ini},${melodyName} Melody,Song" "${Me.Gem[${songsToSave.Arg[${i}, ]}]}/gem|${songsToSave.Arg[${i}, ]}" ${If[${Ini[${Character_Ini},${melodyName} Melody,Song].Length},1,0]}
 		}
 		/varcalc i ${i} + 1
 		/if (${songsToSave.Arg[${i}, ].Length}) /goto :check_nextSong

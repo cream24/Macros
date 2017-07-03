@@ -10,6 +10,14 @@ Sub SHD_Setup
 /return
 
 SUB SHD_MacroSettings
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Tanking" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_lifeTap" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Pets" 1
 /RETURN
 
 SUB SHD_CharacterSettings
@@ -20,14 +28,6 @@ SUB SHD_CharacterSettings
 
 Sub SHD_Aliases
 /if (${Debug}) /echo |- SHD_Aliases ==>
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Tanking" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_lifeTap" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Pets" 1
 /if (${Debug}) /echo <== SHD_Aliases -|
 /return
 

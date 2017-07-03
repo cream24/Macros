@@ -64,9 +64,17 @@ Sub ROG_Setup
   /declare strikeTimer timer outer
 	/call IniToVar "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
 	/call IniToVar "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
+  /call IniToVar "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
+  /call IniToVar "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
+  /call IniToVar "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
+
+  |/if (!${Defined[poisonPR]}) /declare poisonPR string outer Bite of the Shissar XII
+  |/if (!${Defined[poisonFR]}) /declare poisonPR string outer Solusek's Burn XII
+  |/if (!${Defined[poisonCR]}) /declare poisonPR string outer E`ci's Lament XII
+
 	| Assassin Strikes
 	/call IniToVar "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
-	/declare strikeDisc 		string outer ${strikeDiscStr.Arg[1,/]}
+	/declare strikeDisc string outer ${strikeDiscStr.Arg[1,/]}
 	/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}	
 	/declare strikeDiscMinEnd	int outer 0
 
@@ -80,19 +88,22 @@ Sub ROG_Setup
 /return
 
 SUB ROG_MacroSettings
-/if (${Debug}) /echo |- ROG_MacroSettings ==>
+	/if (${Debug}) /echo |- ROG_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Burns" 1
 	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Buffs" 1
-/if (${Debug}) /echo <== ROG_MacroSettings -|
+	/if (${Debug}) /echo <== ROG_MacroSettings -|
 /RETURN
 
 SUB ROG_CharacterSettings
-/if (${Debug}) /echo |- ROG_CharacterSettings ==>
+	/if (${Debug}) /echo |- ROG_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},${Me.Class},Auto-Hide (On/Off)" Off
 	/call WriteToIni "${Character_Ini},${Me.Class},Auto-Evade (On/Off)" On
 	/call WriteToIni "${Character_Ini},${Me.Class},Evade PctAggro" 75
 	/call WriteToIni "${Character_Ini},${Me.Class},Sneak Attack Discipline"
-/if (${Debug}) /echo <== ROG_CharacterSettings -|
+	/call WriteToIni "${Character_Ini},${Me.Class},PoisonPR" "Bite of the Shissar XII"
+	/call WriteToIni "${Character_Ini},${Me.Class},PoisonFR" "Solusek's Burn XII"
+	/call WriteToIni "${Character_Ini},${Me.Class},PoisonCR" "E`ci's Lament XII"
+	/if (${Debug}) /echo <== ROG_CharacterSettings -|
 /RETURN
 
 Sub ROG_Aliases
