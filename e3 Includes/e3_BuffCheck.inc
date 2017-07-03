@@ -39,7 +39,7 @@ SUB buffBots(ArrayName)
 	/declare currentBuffs		string local
 	/declare currentSongs		string local
 
-/varset Debug_BuffCheck FALSE
+ |/varset Debug_BuffCheck FALSE
  /for s 1 to ${${ArrayName}.Size[1]}
 	/if (${Debug} || ${Debug_BuffCheck}) /echo buffing ${${ArrayName}[${s},${iCastName}]} on ${${ArrayName}[${s},${iCastTarget}]} checkFor ${${ArrayName}[${s},${iCheckFor}]}
 
@@ -106,8 +106,6 @@ SUB buffBots(ArrayName)
   :skipBuff
  /if (!${ActionTaken}) /next s
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== buffBots -|
-
-  /varset Debug_BuffCheck FALSE
 /RETURN
 
 |--------------------------------------------------------|
