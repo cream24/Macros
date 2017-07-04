@@ -43,7 +43,7 @@ SUB SHM_MacroSettings
 /if (${Debug}) /echo |- SHM_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#1" "check_Debuffs" 1
 	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#2" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#2" "check_Heals" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#3" "check_Heals" 1
 	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#4" "check_Cures" 1
   /call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#5" "check_Buffs" 1
 	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#6" "check_DoTs" 1

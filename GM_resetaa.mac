@@ -1,0 +1,8 @@
+sub main
+	/for i 1 to ${NetBots.Counts}
+		/target id ${NetBots[${NetBots.Client[${i}]}].ID}
+		/delay 5
+		/echo ${NetBots[${NetBots.Client[1]}].ID}
+	/next i
+return
+
