@@ -10,14 +10,14 @@ Sub SHD_Setup
 /return
 
 SUB SHD_MacroSettings
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Tanking" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_lifeTap" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#1" "check_Tanking" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#2" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#3" "check_lifeTap" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#4" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#5" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#6" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#7" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},SHD Functions,SHD Function#8" "check_Pets" 1
 /RETURN
 
 SUB SHD_CharacterSettings

@@ -577,7 +577,8 @@ Sub Event_goRings
   |[3] = { "The Dragorn before you is sprouting sharp spikes.", 5698, self_cast },
 
 SUB alerts_CharacterSettings
-/RETURN
-
+/return
 Sub alerts_Aliases
+/return
+Sub alerts_MacroSettings
 /return

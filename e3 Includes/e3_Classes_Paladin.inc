@@ -11,13 +11,13 @@ Sub PAL_Setup
 
 SUB PAL_MacroSettings
 /if (${Debug}) /echo |- PAL_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Tanking" 1
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Yaulp" 1
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Heals" 1
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Cures" 1
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#1" "check_Tanking" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#2" "check_Yaulp" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#3" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#4" "check_Heals" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#5" "check_Cures" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#6" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#7" "check_Nukes" 1
 
 /if (${Debug}) /echo <== PAL_MacroSettings -|
 /RETURN

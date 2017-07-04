@@ -1954,9 +1954,6 @@ SUB basics_MacroSettings
 
 SUB basics_CharacterSettings
 /if (${Debug} || ${Debug_Basics}) /echo |- basics_CharacterSettings ==>
-	/if (!${Ini[${Character_Ini},Swap Items].Length}) /call WriteToIni "${Character_Ini},Swap Items,;Melee" "Ruby of Determined Assault|Ranged"
-  /if (!${Ini[${Character_Ini},Swap Items].Length}) /call WriteToIni "${Character_Ini},Swap Items,;Ranged" "Bow of the Tempest|Ranged"
-	/if (!${Ini[${Character_Ini},Use Items].Length}) /call WriteToIni "${Character_Ini},Use Items,;Shrink" "Bracelet of the Shadow Hive"
 /if (${Debug} || ${Debug_Basics}) /echo <== basics_CharacterSettings -|
 /RETURN
 

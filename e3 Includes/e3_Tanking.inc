@@ -173,6 +173,8 @@ Sub tanking_CharacterSettings
 
 Sub tanking_Aliases
 /return
+Sub tanking_MacroSettings
+/return
 
 Sub tanking_Setup
   /declare mainTank string outer

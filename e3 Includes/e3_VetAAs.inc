@@ -244,7 +244,6 @@ SUB EVENT_GateToLobby(line, ChatSender, eventParams)
 /if (${Debug}) /echo <== EVENT_GateToLobby -|
 /RETURN
 
-
 SUB vetAA_Background_Events
 	/doevents Lessons
 	/doevents GateToLobby
@@ -257,7 +256,14 @@ SUB vetAA_Background_Events
 	/doevents Infusion
 /RETURN
 
-Sub VetAAs_Aliases
+SUB vetAA_MacroSettings
+/return
+SUB vetAA_CharacterSettings
+/return
+SUB vetAA_Setup
+/return
+
+Sub VetAA_Aliases
 /if (${Debug}) /echo |- VetAAs_Aliases ==>
 	/squelch /alias /Lessons /bc Lesson of the Devoted
 	/squelch /alias /Lesson /bc Lesson of the Devoted

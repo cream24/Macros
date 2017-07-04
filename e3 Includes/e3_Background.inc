@@ -33,8 +33,6 @@ SUB check_Zone
 		/squelch /pet taunt off
 		/squelch /pet ghold on
 	}
-
-  /call check_autoTribute
 /if (${Debug} || ${Debug_Background}) /echo <== check_Zone -|
 /RETURN
 
@@ -289,13 +287,9 @@ SUB check_autoTribute
 /if (${Debug}) 	/echo |- check_autoTribute -| Idle = ${idle} -- SafeZone = ${safeZone}
 	| If idle is TRUE, and my remaining TributeTimer is < 10, turn off Tribute.
 	/if (!${tributeZone} && ${Me.TributeActive}) {
-	  /if (${Me.TributeTimer} <= 10) {
-        /if (!${idle}) {
-          /echo AutoTribute - Turning tribute off.
-        } else {
-          /echo AutoTribute - I'm idle.  Turning tribute off.
-        }
-        /call toggleTribute
+	  /if (${Me.TributeTimer} <= 10 && ${idle}) {
+      /echo AutoTribute - I'm idle.  Turning tribute off.
+      /call toggleTribute
     }
   } else /if (${tributeZone} && !${Me.TributeActive}) {
     /if (${Me.CurrentFavor} > 500) {
@@ -303,7 +297,6 @@ SUB check_autoTribute
       /call toggleTribute
     }
   }
-  /if (${Me.TributeActive} && !${HUD_tributeTimer}) /varset HUD_tributeTimer ${HUD_tributeTimerFlashInterval}
 /if (${Debug}) /echo <== check_autoTribute -|
 /RETURN
 
@@ -313,6 +306,7 @@ SUB toggleTribute
   /keypress TOGGLE_TRIBUTEBENEFITWIN
   /notify TBW_PersonalPage TBWP_ActivateButton leftmouseup
   /keypress TOGGLE_TRIBUTEBENEFITWIN
+  /if (${Me.TributeActive} && !${HUD_tributeTimer}) /varset HUD_tributeTimer ${HUD_tributeTimerFlashInterval}
 /if (${Debug}) /echo <== toggleTribute -|			
 /RETURN
 

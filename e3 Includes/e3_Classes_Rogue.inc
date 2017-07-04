@@ -48,7 +48,7 @@ sub AutoHide
 sub AutoEvade
 /if (${Debug}) /echo |- AutoEvade ==>
 |only use evade over 80% aggro, and only if im using a disc (burning)
-	/if (${Me.PctAggro} > 60 && ${Me.AbilityReady[Hide]} && !${Bool[${Me.ActiveDisc.ID}]}) {
+	/if (${Me.PctAggro} > ${evadePctAggro} && ${Me.AbilityReady[Hide]} && !${Bool[${Me.ActiveDisc.ID}]}) {
 		/attack off
 		/delay 1s !${Me.Combat}	
 		/doability Hide
@@ -64,6 +64,7 @@ Sub ROG_Setup
   /declare strikeTimer timer outer
 	/call IniToVar "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
 	/call IniToVar "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
+  /call IniToVar "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int outer
   /call IniToVar "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
   /call IniToVar "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
   /call IniToVar "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
@@ -89,8 +90,8 @@ Sub ROG_Setup
 
 SUB ROG_MacroSettings
 	/if (${Debug}) /echo |- ROG_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#1" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#2" "check_Buffs" 1
 	/if (${Debug}) /echo <== ROG_MacroSettings -|
 /RETURN
 

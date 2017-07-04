@@ -724,11 +724,11 @@ SUB heal_CharacterSettings
 		/call WriteToIni "${Character_Ini},Heals,Important Heal"
 		/call WriteToIni "${Character_Ini},Heals,All Heal"
 		/call WriteToIni "${Character_Ini},Heals,Pet Heal"
-		/call WriteToIni "${Character_Ini},Heals,Heal Over Time Spell"
+    /if (${Select[${Me.Class.ShortName},CLR,DRU,PAL,SHM]}) /call WriteToIni "${Character_Ini},Heals,Heal Over Time Spell"
     /if (${Select[${Me.Class.ShortName},CLR,DRU,PAL]})	/call WriteToIni "${Character_Ini},Heals,Group Heal"
-    /if (${Select[${Me.Class.ShortName},CLR,SHM]}) /call WriteToIni "${Character_Ini},Heals,;Group Hot" "Not Implemented"
+    |/if (${Select[${Me.Class.ShortName},CLR,SHM]}) /call WriteToIni "${Character_Ini},Heals,;Group Hot" "Not Implemented"
     /call WriteToIni "${Character_Ini},Heals,Who to Heal" "Tanks/ImportantBots/All/Pets"
-		/call WriteToIni "${Character_Ini},Heals,Who to HoT" "Tanks/ImportantBots/All/Pets"
+    /if (${Select[${Me.Class.ShortName},CLR,DRU,PAL,SHM]}) /call WriteToIni "${Character_Ini},Heals,Who to HoT"
 	}
 
 /if (${Debug} || ${Debug_Heals}) /echo <== heal_CharacterSettings -|

@@ -513,7 +513,7 @@ SUB begForBuffs_MacroSettings
 	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Casting Buff"
 	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC"
 	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Requests Off"
-	/call WriteToIni "${Character_Ini},Buffs,Restricted Spells"
+	|/call WriteToIni "${Character_Ini},Buffs,Restricted Spells"
 /RETURN
 
 

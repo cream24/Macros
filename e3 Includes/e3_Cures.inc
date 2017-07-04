@@ -190,10 +190,10 @@ Sub cure_spellArrays
 |--------------------------------------------|
 SUB cures_CharacterSettings
   /if (${Select[${Me.Class.ShortName},DRU,SHM,CLR,PAL,BST,RNG]}) {
-    /call WriteToIni "${Character_Ini},Cures,Cure#1"
-    /call WriteToIni "${Character_Ini},Cures,CureAll#1"
+    /call WriteToIni "${Character_Ini},Cures,Cure"
+    /call WriteToIni "${Character_Ini},Cures,CureAll"
     /if (${Select[${Me.Class.ShortName},DRU,SHM,CLR,PAL]}) /call WriteToIni "${Character_Ini},Cures,AutoRadiant (On/Off)" Off
-    /if (${Select[${Me.Class.ShortName},DRU,SHM,CLR,PAL]}) /call WriteToIni "${Character_Ini},Cures,RadiantCure#1" "Fulmination/MinSick|1"
+    /if (${Select[${Me.Class.ShortName},DRU,SHM,CLR,PAL]}) /call WriteToIni "${Character_Ini},Cures,RadiantCure" "Fulmination/MinSick|1"
   }
 /RETURN
 

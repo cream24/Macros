@@ -1,5 +1,5 @@
 |--------------------------------|
-|- e3.mac	v6.0				-|
+|- e3.mac	v6.1				-|
 |- Written by Killians of PEQ.	-|
 |- Rework  by Creamo of PEQ.	-|
 |--------------------------------|
@@ -16,7 +16,7 @@ SUB Main(modeSelect)
 		/echo Enter Main
 		/delay 5
 	}
-  /declare macroVersion string outer 6.0
+  /declare macroVersion string outer 6.1
   /declare IniMode string outer
   /call #RequirePlugin MQ2IniExt
   /if (${Macro.Return}) {
@@ -48,6 +48,7 @@ SUB Main(modeSelect)
 		/if (${Following} && !${Assisting}) /call check_Follow
 		/call check_Active
 		/call check_Idle
+    /call check_autoTribute
 
 		/if (${lifeSupport2D.Size[1]} && ${Me.PctHPs} < 99) /call check_lifeSupport
     |workaround for item cast array
@@ -92,10 +93,6 @@ SUB Main(modeSelect)
 |    These are functions in the e3_setup Included Setups section
 SUB Background_Events
  | /echo bgs ${Time}
-  /call alerts_Background_Events
-  /call vetAA_Background_Events
-  /call check_autoTribute
-
 	/declare i int local
 	/for i 1 to ${macroSetups.Size}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_Background_Events
@@ -111,10 +108,10 @@ SUB Background_Events
 	|#3" casting - 0 events
 	|#4" begForBuffs - 4 events
 	|#5" buffCheck - 4 events
-	|#6" buy - 1 events
+	|#6" buy - 0 events
 	|#7" pet - 3 events
-	|#8" heal - 1 events
-	|#9" healChain - 1 events
+	|#8" heal - 0 events
+	|#9" healChain - 7 events
 	|#10" assist ~ 15 events
 	|#11" class - varies
 	|#12" corpseSummon - 0 events
