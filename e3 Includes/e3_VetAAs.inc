@@ -71,12 +71,16 @@ SUB EVENT_Staunch(line, ChatSender, eventParams)
 		| -Check AA is ready.
 		/if (!${Me.AltAbilityReady[Staunch Recovery]}) {
 			/docommand ${ChatToggle} [Staunch Recovery] is not ready.
-    } else {
-      /if (${Twist.Twisting}) /call pauseTwist
-      /casting "Staunch Recovery"  -maxtries|3
-      /delay 3s !${Me.Casting.ID}
-		}
-	}
+      /goto :skipstaunch
+    } else /if (${Me.PctMana}>20 && ${Me.PctEndurance}>20) {
+			/docommand ${ChatToggle} [Skipping Staunch Recovery]: mana and endurance over 20%
+      /goto :skipstaunch
+    }
+    /if (${Twist.Twisting}) /call pauseTwist
+    /casting "Staunch Recovery"  -maxtries|3
+    /delay 3s !${Me.Casting.ID}
+  }
+  :skipstaunch
 /if (${Debug}) /echo <== EVENT_Staunch -|
 /RETURN
 

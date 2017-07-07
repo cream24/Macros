@@ -1786,9 +1786,9 @@ SUB EVENT_exp_group(line,ChatSender, expToggle)
 				/declare poisonInUse string local
         /declare i int local
         :remove_poisons
-					/if (${Me.Buff[${FindItem[=${poisonPR}].Spell}]}) /varset poisonInUse ${poisonPR}
-					/if (${Me.Buff[${FindItem[=${poisonFR}].Spell}]}) /varset poisonInUse ${poisonFR}
-					/if (${Me.Buff[${FindItem[=${poisonCR}].Spell}]}) /varset poisonInUse ${poisonCR}
+					/if (${Bool[${Me.Buff[${FindItem[=${poisonPR}].Spell}]}]}) /varset poisonInUse ${poisonPR}
+					/if (${Bool[${Me.Buff[${FindItem[=${poisonFR}].Spell}]}]}) /varset poisonInUse ${poisonFR}
+					/if (${Bool[${Me.Buff[${FindItem[=${poisonCR}].Spell}]}]}) /varset poisonInUse ${poisonCR}
 
           /for i 1 to ${CombatBuffs2D.Size[1]}
             /if (${CombatBuffs2D[${i},${iCastName}].Find[${poisonInUse}]}) {
