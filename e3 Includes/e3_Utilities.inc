@@ -509,7 +509,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/if (${printAll}) /echo MinHP ${${NewArrayName}[${i},${iMinHP}]}	
 
 		| get HealPct
-		/if (${Select[${ArrayName},tankHeals,importantHeals,allHeals,hotSpells,groupHeals,lifeSupport,petHeal,petHeals]}) {
+		/if (${Select[${ArrayName},tankHeals,importantHeals,allHeals,hotSpells,groupHeals,lifeSupport,petHeal,petHeals,lifeTaps]}) {
 			/if (${${ArrayName}[${i}].Find[/HealPct|]}) {
 				/call argueString HealPct| "${${ArrayName}[${i}]}"
 				/varset ${NewArrayName}[${i},${iHealPct}] ${Macro.Return}
