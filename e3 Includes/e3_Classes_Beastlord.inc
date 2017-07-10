@@ -3,9 +3,6 @@
 |- Written by Killians of PEQ												-|
 |----------------------------------------------------------------------------|
 Sub BST_Setup
-  /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Growl Combat (On/Off)" petGrowlCombat bool outer
-  /call #INItoArray "${Character_Ini},Pets,Pet Growl#" petGrowl
-  /if (${petGrowl.Size}>0) /call BuildSpellArray "petGrowl"	"petGrowl2D"
 /return
 
 |----------------------------------------------------------------------------|
@@ -21,26 +18,6 @@ SUB BST_MacroSettings
   /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#8" "check_DoTs" 1
 /if (${Debug}) /echo <== BST_MacroSettings -|
 /RETURN
-
-|----------------------------------------------------------------------------|
-Sub pet_Growl
-/if (${Debug} || ${Debug_Pets}) /echo |- petGrowl ==>
-  /declare s int local
-  /for s 1 to ${petGrowl2D.Size[1]}
-  /if (!${Bool[${Me.PetBuff[${petGrowl2D[${s},${iSpellName}]}]}]} && !${Bool[${Me.PetBuff[${petGrowl2D[${s},${iCheckFor}]}]}]}) {
-    /call check_Ready "petGrowl2D" ${s}
-    /if (${Macro.Return}) {
-      /if (${Me.Pet.Distance} < ${petGrowl2D[${s},${iMyRange}]}) {
-        /call check_Mana "petGrowl2D" ${s}
-        /if (${Macro.Return}) {
-          /call e3_Cast ${Me.Pet.ID} "petGrowl2D" ${s}
-        }
-      }
-    }
-  }
-  /if (!${ActionTaken}) /next s
-/if (${Debug} || ${Debug_Pets}) /echo <== petGrowl -|
-/return
 
 |----------------------------------------------------------------------------|
 #event AE_POS "#*# tells you, 'AEPOS'"

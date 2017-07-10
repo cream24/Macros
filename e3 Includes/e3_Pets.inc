@@ -13,10 +13,6 @@ SUB check_Pets
     /if (${Debug} || ${Debug_Pets}) /echo buffcheck ${BuffCheck} petid ${Me.Pet.ID} action !${ActionTaken} active !${activeTimer} size ${petBuffs2D.Size[1]} med !${medBreak} idle !${idle} pbc ${petBuffCombat} combat !${Me.Combat}
     /if (${BuffCheck} && ${Me.Pet.ID} && ${petBuffs2D.Size[1]} && !${medBreak} && (${petBuffCombat} || !${Me.Combat}))	/call buffPet
     /if (${BuffCheck} && ${Me.Pet.ID} && ${petAutoShrink} && !${combatTimer}) /call check_AutoShrink
-
-    /if (${Me.Class.ShortName.Equal[BST]}) {
-      /if (${Me.Pet.ID} && !${ActionTaken} && !${activeTimer} && !${medBreak} && !${idle} && ${petGrowl2D.Size[1]} && (${petGrowlCombat} || !${Me.Combat})) /call pet_Growl
-    }
 	}
 /if (${Debug} || ${Debug_Pets}) /echo <== check_Pets -|
 /RETURN
