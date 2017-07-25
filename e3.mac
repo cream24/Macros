@@ -1,5 +1,5 @@
 |--------------------------------|
-|- e3.mac	v6.1				-|
+|- e3.mac	v6.2				-|
 |- Written by Killians of PEQ.	-|
 |- Rework  by Creamo of PEQ.	-|
 |--------------------------------|
@@ -16,7 +16,7 @@ SUB Main(modeSelect)
 		/echo Enter Main
 		/delay 5
 	}
-  /declare macroVersion string outer 6.1
+  /declare macroVersion string outer 6.2
   /declare IniMode string outer
   /call #RequirePlugin MQ2IniExt
   /if (${Macro.Return}) {
