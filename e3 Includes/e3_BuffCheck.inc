@@ -368,11 +368,9 @@ SUB buffCheck_CharacterSettings
 	/call WriteToIni "${Character_Ini},Buffs,Bot Buff"
 	/call WriteToIni "${Character_Ini},Buffs,Combat Buff"
 	/call WriteToIni "${Character_Ini},Buffs,Group Buff"
-  /if (${Select[${Me.Class.ShortName},WAR,CLR,PAL]}) {
-    /call WriteToIni "${Character_Ini},Buffs,Cast Aura Combat (On/Off)" Off
-  } else {
-    /call WriteToIni "${Character_Ini},Buffs,Cast Aura Combat (On/Off)" On
-  }
+  /if (${Select[${Me.Class.ShortName},WAR,CLR,PAL]}) /call WriteToIni "${Character_Ini},Buffs,Cast Aura Combat (On/Off)" Off
+	/if (${Select[${Me.Class.ShortName},DRU,MNK,BER,BRD,ENC]}) /call WriteToIni "${Character_Ini},Buffs,Cast Aura Combat (On/Off)" On
+
   /if (${Select[${Me.Class.ShortName},ENC,SHM]}) {
     /call WriteToIni "${Character_Ini},Buffs,Proc Buff (On/Off)" Off
     /call WriteToIni "${Character_Ini},Buffs,Proc Buff"
