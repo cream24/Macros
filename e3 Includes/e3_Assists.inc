@@ -1120,17 +1120,17 @@ SUB event_EpicBurn(line, ChatSender)
   /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
       |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
   /if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-		/if (${Defined[EpicName]}) {
-			| -Verify the event
-			/call verifyEvent "${ChatSender}" "${line}"
-			/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-			|    |-----------Valid User----------|    |---------Included Bot----------|    |-------------In Zone-----------|    |------------In Range------------|
-			/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-				/docommand ${ChatToggle} Using Epic Burns...
-        /casting ${EpicName} item -maxtries|3
-        /delay 10 !${Me.Casting.ID}
-			}
-		}
+    /declare s int local
+    /for s 1 to ${EpicBurns2D.Size[1]}
+      /call check_Ready "EpicBurns2D" ${s}
+      /if (${Macro.Return}) {
+        /call check_Distance ${AssistTarget} ${EpicBurns2D[1,${iMyRange}]}
+        /if (${Macro.Return}) {
+          /docommand ${ChatToggle} Using Epic Burns...
+          /call e3_Cast ${AssistTarget} "EpicBurns2D" ${s}
+        }
+      }
+    /next s
   }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_EpicBurn -|
 /RETURN
@@ -1456,41 +1456,40 @@ Sub assist_Setup
 		/varset EngagePct 98
 	}
 
+  | Epic Definitions for EpicBurn -exclude defensive or buffs
+  /if (${FindItemCount[Prismatic Dragon Blade]})                /declare EpicName string outer Prismatic Dragon Blade
+  /if (${FindItemCount[Blade of Vesagran]})                     /declare EpicName string outer Blade of Vesagran
+  /if (${FindItemCount[Raging Taelosian Alloy Axe]})            /declare EpicName string outer Raging Taelosian Alloy Axe
+  /if (${FindItemCount[Vengeful Taelosian Blood Axe]})          /declare EpicName string outer Vengeful Taelosian Blood Axe
+  /if (${FindItemCount[Staff of Living Brambles]})              /declare EpicName string outer Staff of Living Brambles
+  /if (${FindItemCount[Staff of Everliving Brambles]})          /declare EpicName string outer Staff of Everliving Brambles
+  /if (${FindItemCount[Fistwraps of Celestial Discipline]})     /declare EpicName string outer Fistwraps of Celestial Discipline
+  /if (${FindItemCount[Transcended Fistwraps of Immortality]})  /declare EpicName string outer Transcended Fistwraps of Immortality
+  /if (${FindItemCount[Redemption]})                            /declare EpicName string outer Redemption
+  /if (${FindItemCount[Nightbane, Sword of the Valiant]})       /declare EpicName string outer Nightbane, Sword of the Valiant
+  /if (${FindItemCount[=Heartwood Blade]})                      /declare EpicName string outer Heartwood Blade
+  /if (${FindItemCount[Aurora, the Heartwood Blade]})           /declare EpicName string outer Aurora, the Heartwood Blade
+  /if (${FindItemCount[Fatestealer]})                           /declare EpicName string outer Fatestealer
+  /if (${FindItemCount[Nightshade, Blade of Entropy]})          /declare EpicName string outer Nightshade, Blade of Entropy
+  /if (${FindItemCount[Innoruuk's Voice]})                      /declare EpicName string outer Innoruuk's Voice
+  /if (${FindItemCount[Innoruuk's Dark Blessing]})              /declare EpicName string outer Innoruuk's Dark Blessing
+  /if (${FindItemCount[Crafted Talisman of Fates]})             /declare EpicName string outer Crafted Talisman of Fates
+  /if (${FindItemCount[Blessed Spiritstaff of the Heyokah]})    /declare EpicName string outer Blessed Spiritstaff of the Heyokah
+  /if (${FindItemCount[Staff of Prismatic Power]})              /declare EpicName string outer Staff of Prismatic Power
+  /if (${FindItemCount[Staff of Phenomenal Power]})             /declare EpicName string outer Staff of Phenomenal Power
+  /if (${FindItemCount[=Soulwhisper]})                          /declare EpicName string outer Soulwisper
+  /if (${FindItemCount[=Deathwhisper]})                         /declare EpicName string outer Deathwisper
 
-  | Epic Definitions for EpicBurn - warr, shd, pal,
-  /if (${FindItemCount[Prismatic Dragon Blade]})                /declare EpicName string outer "Prismatic Dragon Blade"
-  /if (${FindItemCount[Blade of Vesagran]})                     /declare EpicName string outer "Blade of Vesagran"
-  |/if (${FindItemCount["Savage Lord's Totem"]})                   /declare EpicName string outer "Savage Lord's Totem"
-  |/if (${FindItemCount["Spiritcaller Totem of the Feral"]})       /declare EpicName string outer "Spiritcaller Totem of the Feral"
-  /if (${FindItemCount[Raging Taelosian Alloy Axe]})            /declare EpicName string outer "Raging Taelosian Alloy Axe"
-  /if (${FindItemCount[Vengeful Taelosian Blood Axe]})          /declare EpicName string outer "Vengeful Taelosian Blood Axe"
-  /if (${FindItemCount[Staff of Living Brambles]})              /declare EpicName string outer "Staff of Living Brambles"
-  /if (${FindItemCount[Staff of Everliving Brambles]})          /declare EpicName string outer "Staff of Everliving Brambles"
-  /if (${FindItemCount[Fistwraps of Celestial Discipline]})     /declare EpicName string outer "Fistwraps of Celestial Discipline"
-  /if (${FindItemCount[Transcended Fistwraps of Immortality]})  /declare EpicName string outer "Transcended Fistwraps of Immortality"
-  /if (${FindItemCount[Redemption]})                            /declare EpicName string outer "Redemption"
-  /if (${FindItemCount[Nightbane, Sword of the Valiant]})       /declare EpicName string outer "Nightbane, Sword of the Valiant"
-  /if (${FindItemCount[=Heartwood Blade]})                       /declare EpicName string outer "Heartwood Blade"
-  /if (${FindItemCount[Aurora, the Heartwood Blade]})           /declare EpicName string outer "Aurora, the Heartwood Blade"
-  /if (${FindItemCount[Fatestealer]})                           /declare EpicName string outer "Fatestealer"
-  /if (${FindItemCount[Nightshade, Blade of Entropy]})          /declare EpicName string outer "Nightshade, Blade of Entropy"
-  /if (${FindItemCount[Innoruuk's Voice]})                      /declare EpicName string outer "Innoruuk's Voice"
-  /if (${FindItemCount[Innoruuk's Dark Blessing]})              /declare EpicName string outer "Innoruuk's Dark Blessing"
-  /if (${FindItemCount[Crafted Talisman of Fates]})             /declare EpicName string outer "Crafted Talisman of Fates"
-  /if (${FindItemCount[Blessed Spiritstaff of the Heyokah]})    /declare EpicName string outer "Blessed Spiritstaff of the Heyokah"
-  /if (${FindItemCount[Staff of Prismatic Power]})              /declare EpicName string outer "Staff of Prismatic Power"
-  /if (${FindItemCount[Staff of Phenomenal Power]})             /declare EpicName string outer "Staff of Phenomenal Power"
-  /if (${FindItemCount[=Soulwhisper]})                           /declare EpicName string outer "Soulwisper"
-  /if (${FindItemCount[=Deathwhisper]})                          /declare EpicName string outer "Deathwisper"
-  |/if (${FindItemCount["Champions Sword of Eternal Power"]}) /declare EpicName string outer "Champions Sword of Eternal Power"
-  |/if (${FindItemCount["Kreljnok's Sword of Eternal Power"]}) /declare EpicName string outer "Kreljnok's Sword of Eternal Power"
-  |/if (${FindItemCount["Staff of Elemental Essence"]}) /declare EpicName string outer "Staff of Elemental Essence"
-  |/if (${FindItemCount["Focus of Primal Elements"]}) /declare EpicName string outer "Focus of Primal Elements"
-  |/if (${FindItemCount["Oculus of Percussion"]}) /declare EpicName string outer "Oculus of Percussion"
-  |/if (${FindItemCount["Staff of Eternal Eloquence"]}) /declare EpicName string outer "Staff of Eternal Eloquence"
-  |/if (${FindItemCount["Harmony of the Soul"]}) /declare EpicName string outer "Harmony of the Soul"
-  |/if (${FindItemCount["Aegis of Superior Divinity"]}) /declare EpicName string outer "Aegis of Superior Divinity"
+  /if (${FindItemCount[=Bladewhisper Chain Vest of Journeys]})  /declare AnguishChest string outer Bladewhisper Chain Vest of Journeys
+  /if (${FindItemCount[=Farseeker's Plate Chestguard of Harmony]})  /declare AnguishChest string outer Farseeker's Plate Chestguard of Harmony
+  /if (${FindItemCount[=Wrathbringer's Chain Chestguard of the Vindicator]})  /declare AnguishChest string outer Wrathbringer's Chain Chestguard of the Vindicator
+  /if (${FindItemCount[=Savagesoul Jerkin of the Wilds]})       /declare AnguishChest string outer Savagesoul Jerkin of the Wilds
+  /if (${FindItemCount[=Glyphwielder's Tunic of the Summoner]})  /declare AnguishChest string outer Glyphwielder's Tunic of the Summoner
+  /if (${FindItemCount[=Bladewhisper Chain Vest of Journeys]})  /declare AnguishChest string outer Bladewhisper Chain Vest of Journeys
+  /if (${FindItemCount[=Whispering Tunic of Shadows]})  /declare AnguishChest string outer Whispering Tunic of Shadows
 
+  /if (${Defined[EpicName]}) /call BuildArray EpicBurns "${EpicName}"
+  /if (${Defined[AnguishChest]}) /call BuildArray EpicBurns "${AnguishChest}"
   /call assist_SpellArrays
 
   /if (${Debug} || ${Debug_Assists}) /echo <== assist_Setup -|
@@ -1527,22 +1526,23 @@ SUB assist_SpellArrays
   } else /if (${Me.Class.ShortName.Equal[BRD]}) {
     /if (${Bool[${Me.AltAbility[Song of Stone]}]})   /call BuildArray "swarmPets" "Song of Stone"
   } else /if (${Me.Class.ShortName.Equal[CLR]}) {
-    /if (${Bool[${Me.AltAbility[Celestial Hammer]}]})   /call BuildArray "swarmPets" "Celestial Hammer"
+    /if (${Bool[${Me.AltAbility[Celestial Hammer]}]}) /call BuildArray "swarmPets" "Celestial Hammer"
   }
 
-  /if (${MyAbilities.Size} > 0)		    /call BuildSpellArray "MyAbilities"	      "Abilities2D"
-  /if (${MyNukes.Size} > 0)		        /call BuildSpellArray "MyNukes"	          "Nukes2D"
+  /if (${MyAbilities.Size})		    /call BuildSpellArray "MyAbilities"	      "Abilities2D"
+  /if (${MyNukes.Size})		        /call BuildSpellArray "MyNukes"	          "Nukes2D"
 
-  /if (${PBAE_Spells.Size} > 0)		    /call BuildSpellArray "PBAE_Spells"	      "PBAE_Spells2D"
-  /if (${TargetAE_Spells.Size} > 0)		/call BuildSpellArray "TargetAE_Spells" 	"TargetAE_Spells2D"
-  /if (${Assist_Debuffs.Size} > 0)		/call BuildSpellArray "Assist_Debuffs" 		"Assist_Debuffs2D"
-  /if (${Command_Debuffs.Size} > 0)		/call BuildSpellArray "Command_Debuffs" 	"Command_Debuffs2D"
-  /if (${Assist_DoTs.Size} > 0)	      /call BuildSpellArray "Assist_DoTs" 	    "Assist_DoTs2D"
-  /if (${Command_DoTs.Size} > 0)	    /call BuildSpellArray "Command_DoTs" 	    "Command_DoTs2D"
-  /if (${QuickBurns.Size} > 0)	      /call BuildSpellArray "QuickBurns" 	      "QuickBurns2D"
-  /if (${LongBurns.Size} > 0)	        /call BuildSpellArray "LongBurns" 	      "LongBurns2D"
-  /if (${FullBurns.Size} > 0)	        /call BuildSpellArray "FullBurns" 	      "FullBurns2D"
-  /if (${swarmPets.Size} > 0)	        /call BuildSpellArray "swarmPets" 	      "swarmPets2D"
+  /if (${PBAE_Spells.Size})		    /call BuildSpellArray "PBAE_Spells"	      "PBAE_Spells2D"
+  /if (${TargetAE_Spells.Size})		/call BuildSpellArray "TargetAE_Spells" 	"TargetAE_Spells2D"
+  /if (${Assist_Debuffs.Size})		/call BuildSpellArray "Assist_Debuffs" 		"Assist_Debuffs2D"
+  /if (${Command_Debuffs.Size})		/call BuildSpellArray "Command_Debuffs" 	"Command_Debuffs2D"
+  /if (${Assist_DoTs.Size})	      /call BuildSpellArray "Assist_DoTs" 	    "Assist_DoTs2D"
+  /if (${Command_DoTs.Size})	    /call BuildSpellArray "Command_DoTs" 	    "Command_DoTs2D"
+  /if (${QuickBurns.Size})	      /call BuildSpellArray "QuickBurns" 	      "QuickBurns2D"
+  /if (${LongBurns.Size})	        /call BuildSpellArray "LongBurns" 	      "LongBurns2D"
+  /if (${FullBurns.Size})	        /call BuildSpellArray "FullBurns" 	      "FullBurns2D"
+  /if (${swarmPets.Size})	        /call BuildSpellArray "swarmPets" 	      "swarmPets2D"
+  /if (${EpicBurns.Size})         /call BuildSpellArray "EpicBurns" 	      "EpicBurns2D"
 
 |  /declare i int local
 |  /if (${Nukes2D.Size} >0) {

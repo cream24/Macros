@@ -47,19 +47,19 @@ SUB summonPet
 |- Automatically shrinks pets to min size	-|
 SUB check_AutoShrink
 /if (${Debug} || ${Debug_Pets}) /echo |- check_AutoShrink ==>
-	/if (${Me.Pet.ID} && ${Me.Pet.Height}>1) {
-		/if (${FindItemCount[=Gemstone of Dark Flame]}) {
-      /if (${Debug} || ${Debug_Pets}) /echo casting gemstone shrink
-			/casting "Gemstone of Dark Flame" "-targetid|${Me.Pet.ID}"
-		} else /if 	(${FindItemCount[=Symbol of Ancient Summoning]}) {
-      /if (${Debug} || ${Debug_Pets}) /echo casting symbol shrink
-			/casting "Symbol of Ancient Summoning" "-targetid|${Me.Pet.ID}"
-		} else /if (${Me.Book[Tiny Companion]}) {
-      /if (${Debug} || ${Debug_Pets}) /echo casting tiny comp
-			/casting "Tiny Companion" "-targetid|${Me.Pet.ID}"
-		}
-    /delay 1s ${Me.Casting.ID}
-		/delay 5s !${Me.Casting.ID}
+	/if (${Me.Pet.ID} && ${Me.Pet.Height}>1 && ${Me.Pet.Distance}) {
+    /declare s int local
+    /for s 1 to ${petShrink2D.Size[1]}
+      /call check_Ready "petShrink2D" ${s}
+      /if (${Macro.Return}) {
+        /if (${Me.Pet.Distance} < ${petShrink2D[${s},${iMyRange}]}) {
+          /call check_Mana "petShrink2D" ${s}
+          /if (${Macro.Return}) {
+            /call e3_Cast ${Me.Pet.ID} "petShrink2D" ${s}
+          }
+        }
+      }
+    /if (!${ActionTaken}) /next s
   }
 /if (${Debug} || ${Debug_Pets}) /echo <== check_AutoShrink -|
 /RETURN
@@ -206,6 +206,16 @@ Sub pet_Setup
     /if (${Ini[${Character_Ini},Pets,Pet Summon Combat (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Summon Combat (On/Off)" petSummonCombat bool outer
     /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call INItoVar "${Character_Ini},Pets,Pet Buff Combat (On/Off)" petBuffCombat bool outer
 	}
+
+  /if (${FindItemCount[=Gemstone of Dark Flame]}) {
+    /call BuildArray petShrink "Gemstone of Dark Flame"
+  } else /if (${FindItemCount[=Symbol of Ancient Summoning]}) {
+    /call BuildArray petShrink "Symbol of Ancient Summoning"
+  }
+  /if (${Me.Book[Tiny Companion]}) {
+    /call BuildArray petShrink "Tiny Companion"
+  }
+
 	/call pet_spellArrays
 /if (${Debug} || ${Debug_Pets}) /echo <== pet_Setup -|
 /return
@@ -220,6 +230,7 @@ SUB pet_spellArrays
   /if (${petSpell.Size}>0) /call BuildSpellArray "petSpell"	"petSpell2D"
   /if (${petBuffs.Size}>0) /call BuildSpellArray "petBuffs"	"petBuffs2D"
   /if (${petHeal.Size}>0) /call BuildSpellArray "petHeal"	"petHeal2D"
+  /if (${petShrink.Size}>0) /call BuildSpellArray "petShrink"	"petShrink2D"
 /RETURN
 
 |------------------------------------------------------------------------|

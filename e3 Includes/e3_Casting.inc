@@ -47,13 +47,13 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   /declare oldItem			string local
 	/declare i						int local
 
-	/if (!${${ArrayName}[${ArrayIndex},${iCastInvis}]} && ${Me.Invis}) {
-    /echo invisskip ${pendingCast} ${Spawn[id ${targetID}].Name}  ${targetID}
-	} else {
-    /echo cast ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name}  ${targetID}
-  }
+	|/if (!${${ArrayName}[${ArrayIndex},${iCastInvis}]} && ${Me.Invis}) {
+  |  /echo invisskip ${pendingCast} ${Spawn[id ${targetID}].Name} ${targetID}
+	|} else {
+  |  /echo cast ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name}  ${targetID}
+  |}
 	|/call explodeforcallstack
-  /varset Debug_Casting FALSE
+  |/varset Debug_Casting FALSE
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | Checks to abort casting due to previous failures
 
@@ -64,6 +64,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
       /makemevisible
     } else /if (!${${ArrayName}[${ArrayIndex},${iCastInvis}]}) {
       /varset castReturn CAST_INVISIBLE
+			/echo SkipCast-Invis ${pendingCast} ${Spawn[id ${targetID}].Name} ${targetID}
       /goto :skipCast
     }
   }
@@ -71,18 +72,21 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	/if (${Bool[${nht${targetID}-${pendingCastID}}]}) {
 		/if (${Debug} || ${Debug_Casting}) /bc [${pendingCast}] Did not take hold last time I cast it on ${targetID}.  Waiting [${nht${targetID}-${pendingCastID}}] until I try again.
 		/varset castReturn CAST_TAKEHOLD
+		/echo SkipCast-NoHold ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 		/goto :skipCast 
 	}
 	|- Check the Immune List
 	/if (${Select[${pendingCastID}_${castTargetName},${immuneList}]}) {
 		/if (${Debug} || ${Debug_Casting}) /bc ${Target.CleanName} is immune to ${pendingCastID}, skipping cast
 		/varset castReturn CAST_IMMUNE
+		/echo SkipCast-Immune ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 		/goto :skipCast 		
 	}
 	|- Check for spells listed in the failureList: reset on zone
 	/if (${Select[${${ArrayName}[${ArrayIndex},${iCastName}]},${failureList}]}) {
 		/if (${Debug} || ${Debug_Casting}) /echo [${pendingCast}] Is listed in the failureList in this zone.
 		/varset castReturn FAILURELIST
+		/echo SkipCast-Failure ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 		/goto :skipCast 
 	}
 	|- Reagent Check *|
@@ -90,6 +94,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		/bc Cannot cast [${pendingCast}], I do not have any [${${ArrayName}[${ArrayIndex},${iReagent}]}], removing this spell from array. Restock and Reload Macro
 		/call RemoveSpellArrayElement "${ArrayName}" "${ArrayIndex}"
 		/varset castReturn REAGENT
+		/echo SkipCast-NoReagent ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 		/beep
 		/goto :skipCast
 	} else /if (${Bool[${${ArrayName}[${ArrayIndex},${iReagent}]}]} && ${FindItemCount[=${${ArrayName}[${ArrayIndex},${iReagent}]}]} <= ${reagentWarningCount}) {
@@ -107,6 +112,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 :wait_for_misc
   /if (${${ArrayName}[${ArrayIndex},${iTargetType}].Find[pet]} && (!${Bool[${Me.Pet.ID}]} || ${Me.Pet.Distance} > ${${ArrayName}[${ArrayIndex},${iMyRange}]})) {
     /call CreateTimer "nht${targetID}-${pendingCastID}" "${noHoldPetDelay}"
+		/echo SkipCast-PetRange ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
     /goto :skipCast
   }
 	/if (${Me.Feigning}) {
@@ -124,6 +130,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   /if (!${${ArrayName}[${ArrayIndex},${iSpellType}].Find[Beneficial]} && !${Spawn[id ${targetID}].LineOfSight}) {
     /if (${Debug} || ${Debug_Casting}) /echo I cannot see [${Spawn[id ${targetID}].CleanName}]
     /varset castReturn CAST_CANNOTSEE
+		/echo SkipCast-LoS ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
     /goto :skipCast
   }
 
@@ -135,6 +142,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 |  Casting
 :cast_spell
+	/echo Casting ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 	|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	|Use Disc
 	/if (${${ArrayName}[${ArrayIndex},${iCastType}].Equal[Disc]}) {
@@ -205,7 +213,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		/if (${Cast.Status.Find[C]}) {
 		  |dont allow item swap/must equip interrupts to avoid crashes
 		  /if (${oldItem.Length}) {
-		    /delay 2
+		    /delay 1
 		    /goto :cast_still_pending
 		  }
 			/if (!${interruptFlag}) {

@@ -175,12 +175,12 @@ SUB buffProcs
 SUB checkAuras
   /if (${Debug} || ${Debug_BuffCheck}) /echo sub checkAuras ==>
   /if (!${Bool[${Me.Aura[1]}]}) {
-    /if (${Select[${Me.Class.ShortName},WAR,BER,MNK]}) {
-      /doability ${auraSpell}
-      /delay 4s !${Me.Casting.ID}
-    } else {
-      /casting ${auraSpell} ${DefaultGem}
-      /delay 4s !${Me.Casting.ID}
+    /call check_Ready "auraSpells2D" 1
+    /if (${Macro.Return}) {
+      /call check_Mana "auraSpells2D" 1
+      /if (${Macro.Return}) {
+          /call e3_Cast ${Me.ID} "auraSpells2D" "1"
+      }
     }
   }
   /if (${Debug} || ${Debug_BuffCheck}) /echo <== sub checkAuras
@@ -299,25 +299,27 @@ Sub buffCheck_Setup
 	/declare auraSpell string outer
 
 |--  doability
-	/if (${Me.CombatAbility[Myrmidon's Aura]}) /varset auraSpell "Myrmidon's Aura"
-	/if (${Me.CombatAbility[Champion's Aura]}) /varset auraSpell "Champion's Aura"
-	/if (${Me.CombatAbility[Disciple's Aura]}) /varset auraSpell "Disciple's Aura"
-	/if (${Me.CombatAbility[Master's Aura]}) /varset auraSpell "Master's Aura"
-	/if (${Me.CombatAbility[Aura of Rage]}) /varset auraSpell "Aura of Rage"
-	/if (${Me.CombatAbility[Bloodlust Aura]}) /varset auraSpell "Bloodlust Aura"
+	/if (${Me.CombatAbility[Myrmidon's Aura]}) /varset auraSpell Myrmidon's Aura
+	/if (${Me.CombatAbility[Champion's Aura]}) /varset auraSpell Champion's Aura
+	/if (${Me.CombatAbility[Disciple's Aura]}) /varset auraSpell Disciple's Aura
+	/if (${Me.CombatAbility[Master's Aura]}) /varset auraSpell Master's Aura
+	/if (${Me.CombatAbility[Aura of Rage]}) /varset auraSpell Aura of Rage
+	/if (${Me.CombatAbility[Bloodlust Aura]}) /varset auraSpell Bloodlust Aura
 |-- casting
-	/if (${Me.Book[Aura of Insight]}) /varset auraSpell "Aura of Insight"
-	/if (${Me.Book[Aura of the Muse]}) /varset auraSpell "Aura of the Muse"
-  /if (${Me.Book[Aura of the Zealot]}) /varset auraSpell "Aura of the Zealot"
-  /if (${Me.Book[Aura of the Pious]}) /varset auraSpell "Aura of the Pious"
-  /if (${Me.Book[Aura of the Grove]}) /varset auraSpell "Aura of the Grove"
-  /if (${Me.Book[Aura of Life]}) /varset auraSpell "Aura of Life"
-  /if (${Me.Book[Beguiler's Aura]}) /varset auraSpell "Beguiler's Aura"
-  /if (${Me.Book[Illusionist's Aura]}) /varset auraSpell "Illusionist's Aura"
-  /if (${Me.Book[Holy Aura]}) /varset auraSpell "Holy Aura"
-  /if (${Me.Book[Blessed Aura]}) /varset auraSpell "Blessed Aura"
+	/if (${Me.Book[Aura of Insight]}) /varset auraSpell Aura of Insight
+	/if (${Me.Book[Aura of the Muse]}) /varset auraSpell Aura of the Muse
+  /if (${Me.Book[Aura of the Zealot]}) /varset auraSpell Aura of the Zealot
+  /if (${Me.Book[Aura of the Pious]}) /varset auraSpell Aura of the Pious
+  /if (${Me.Book[Aura of the Grove]}) /varset auraSpell Aura of the Grove
+  /if (${Me.Book[Aura of Life]}) /varset auraSpell Aura of Life
+  /if (${Me.Book[Beguiler's Aura]}) /varset auraSpell Beguiler's Aura
+  /if (${Me.Book[Illusionist's Aura]}) /varset auraSpell Illusionist's Aura
+  /if (${Me.Book[Holy Aura]}) /varset auraSpell Holy Aura
+  /if (${Me.Book[Blessed Aura]}) /varset auraSpell Blessed Aura
 
+  /if (${auraSpell.Length}) /call BuildArray auraSpells "${auraSpell}"
   /call buff_SpellArrays
+
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== buffCheck_Setup -|
 /return
 
@@ -338,6 +340,7 @@ SUB buff_SpellArrays
   /if (${CombatBuffs.Size}) 	/call BuildSpellArray "CombatBuffs"		"CombatBuffs2D"
   /if (${GroupBuffs.Size})	  /call BuildSpellArray "GroupBuffs"		"GroupBuffs2D"
   /if (${ProcBuffs.Size})	    /call BuildSpellArray "ProcBuffs"		  "ProcBuffs2D"
+  /if (${auraSpells.Size})    /call BuildSpellArray "auraSpells"		"auraSpells2D"
 
   /declare s int local
   /if (${InstantBuffs2D.Size[1]}) {
