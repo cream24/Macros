@@ -175,11 +175,21 @@ SUB buffProcs
 SUB checkAuras
   /if (${Debug} || ${Debug_BuffCheck}) /echo sub checkAuras ==>
   /if (!${Bool[${Me.Aura[1]}]}) {
-    /call check_Ready "auraSpells2D" 1
-    /if (${Macro.Return}) {
-      /call check_Mana "auraSpells2D" 1
+    /if (${Me.Class.ShortName.Equal[BRD]}) {
+      /if (${Twist.Twisting}) /call pauseTwist
+      /delay 3s !${Me.Casting.ID}
+      /call check_Ready "auraSpells2D" 1
       /if (${Macro.Return}) {
-          /call e3_Cast ${Me.ID} "auraSpells2D" "1"
+        /cast ${Me.Gem[${auraSpells2D[1,${iCastName}]}]}
+        /delay 5s !${Me.Casting.ID}
+      }
+    } else {
+      /call check_Ready "auraSpells2D" 1
+      /if (${Macro.Return}) {
+        /call check_Mana "auraSpells2D" 1
+        /if (${Macro.Return}) {
+            /call e3_Cast ${Me.ID} "auraSpells2D" "1"
+        }
       }
     }
   }

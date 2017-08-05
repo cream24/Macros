@@ -1456,38 +1456,40 @@ Sub assist_Setup
 		/varset EngagePct 98
 	}
 
-  | Epic Definitions for EpicBurn -exclude defensive or buffs
-  /if (${FindItemCount[Prismatic Dragon Blade]})                /declare EpicName string outer Prismatic Dragon Blade
-  /if (${FindItemCount[Blade of Vesagran]})                     /declare EpicName string outer Blade of Vesagran
-  /if (${FindItemCount[Raging Taelosian Alloy Axe]})            /declare EpicName string outer Raging Taelosian Alloy Axe
-  /if (${FindItemCount[Vengeful Taelosian Blood Axe]})          /declare EpicName string outer Vengeful Taelosian Blood Axe
-  /if (${FindItemCount[Staff of Living Brambles]})              /declare EpicName string outer Staff of Living Brambles
-  /if (${FindItemCount[Staff of Everliving Brambles]})          /declare EpicName string outer Staff of Everliving Brambles
-  /if (${FindItemCount[Fistwraps of Celestial Discipline]})     /declare EpicName string outer Fistwraps of Celestial Discipline
-  /if (${FindItemCount[Transcended Fistwraps of Immortality]})  /declare EpicName string outer Transcended Fistwraps of Immortality
-  /if (${FindItemCount[Redemption]})                            /declare EpicName string outer Redemption
-  /if (${FindItemCount[Nightbane, Sword of the Valiant]})       /declare EpicName string outer Nightbane, Sword of the Valiant
-  /if (${FindItemCount[=Heartwood Blade]})                      /declare EpicName string outer Heartwood Blade
-  /if (${FindItemCount[Aurora, the Heartwood Blade]})           /declare EpicName string outer Aurora, the Heartwood Blade
-  /if (${FindItemCount[Fatestealer]})                           /declare EpicName string outer Fatestealer
-  /if (${FindItemCount[Nightshade, Blade of Entropy]})          /declare EpicName string outer Nightshade, Blade of Entropy
-  /if (${FindItemCount[Innoruuk's Voice]})                      /declare EpicName string outer Innoruuk's Voice
-  /if (${FindItemCount[Innoruuk's Dark Blessing]})              /declare EpicName string outer Innoruuk's Dark Blessing
-  /if (${FindItemCount[Crafted Talisman of Fates]})             /declare EpicName string outer Crafted Talisman of Fates
-  /if (${FindItemCount[Blessed Spiritstaff of the Heyokah]})    /declare EpicName string outer Blessed Spiritstaff of the Heyokah
-  /if (${FindItemCount[Staff of Prismatic Power]})              /declare EpicName string outer Staff of Prismatic Power
-  /if (${FindItemCount[Staff of Phenomenal Power]})             /declare EpicName string outer Staff of Phenomenal Power
-  /if (${FindItemCount[=Soulwhisper]})                          /declare EpicName string outer Soulwisper
-  /if (${FindItemCount[=Deathwhisper]})                         /declare EpicName string outer Deathwisper
+  /if (!${Defined[EpicName]}) {
+    | Epic Definitions for EpicBurn -exclude defensive or buffs
+    /if (${FindItemCount[Prismatic Dragon Blade]})                /declare EpicName string outer Prismatic Dragon Blade
+    /if (${FindItemCount[Blade of Vesagran]})                     /declare EpicName string outer Blade of Vesagran
+    /if (${FindItemCount[Raging Taelosian Alloy Axe]})            /declare EpicName string outer Raging Taelosian Alloy Axe
+    /if (${FindItemCount[Vengeful Taelosian Blood Axe]})          /declare EpicName string outer Vengeful Taelosian Blood Axe
+    /if (${FindItemCount[Staff of Living Brambles]})              /declare EpicName string outer Staff of Living Brambles
+    /if (${FindItemCount[Staff of Everliving Brambles]})          /declare EpicName string outer Staff of Everliving Brambles
+    /if (${FindItemCount[Fistwraps of Celestial Discipline]})     /declare EpicName string outer Fistwraps of Celestial Discipline
+    /if (${FindItemCount[Transcended Fistwraps of Immortality]})  /declare EpicName string outer Transcended Fistwraps of Immortality
+    /if (${FindItemCount[Redemption]})                            /declare EpicName string outer Redemption
+    /if (${FindItemCount[Nightbane, Sword of the Valiant]})       /declare EpicName string outer Nightbane, Sword of the Valiant
+    /if (${FindItemCount[=Heartwood Blade]})                      /declare EpicName string outer Heartwood Blade
+    /if (${FindItemCount[Aurora, the Heartwood Blade]})           /declare EpicName string outer Aurora, the Heartwood Blade
+    /if (${FindItemCount[Fatestealer]})                           /declare EpicName string outer Fatestealer
+    /if (${FindItemCount[Nightshade, Blade of Entropy]})          /declare EpicName string outer Nightshade, Blade of Entropy
+    /if (${FindItemCount[Innoruuk's Voice]})                      /declare EpicName string outer Innoruuk's Voice
+    /if (${FindItemCount[Innoruuk's Dark Blessing]})              /declare EpicName string outer Innoruuk's Dark Blessing
+    /if (${FindItemCount[Crafted Talisman of Fates]})             /declare EpicName string outer Crafted Talisman of Fates
+    /if (${FindItemCount[Blessed Spiritstaff of the Heyokah]})    /declare EpicName string outer Blessed Spiritstaff of the Heyokah
+    /if (${FindItemCount[Staff of Prismatic Power]})              /declare EpicName string outer Staff of Prismatic Power
+    /if (${FindItemCount[Staff of Phenomenal Power]})             /declare EpicName string outer Staff of Phenomenal Power
+    /if (${FindItemCount[=Soulwhisper]})                          /declare EpicName string outer Soulwisper
+    /if (${FindItemCount[=Deathwhisper]})                         /declare EpicName string outer Deathwisper
+  }
 
-  /if (${FindItemCount[=Bladewhisper Chain Vest of Journeys]})  /declare AnguishChest string outer Bladewhisper Chain Vest of Journeys
-  /if (${FindItemCount[=Farseeker's Plate Chestguard of Harmony]})  /declare AnguishChest string outer Farseeker's Plate Chestguard of Harmony
-  /if (${FindItemCount[=Wrathbringer's Chain Chestguard of the Vindicator]})  /declare AnguishChest string outer Wrathbringer's Chain Chestguard of the Vindicator
-  /if (${FindItemCount[=Savagesoul Jerkin of the Wilds]})       /declare AnguishChest string outer Savagesoul Jerkin of the Wilds
-  /if (${FindItemCount[=Glyphwielder's Tunic of the Summoner]})  /declare AnguishChest string outer Glyphwielder's Tunic of the Summoner
-  /if (${FindItemCount[=Bladewhisper Chain Vest of Journeys]})  /declare AnguishChest string outer Bladewhisper Chain Vest of Journeys
-  /if (${FindItemCount[=Whispering Tunic of Shadows]})  /declare AnguishChest string outer Whispering Tunic of Shadows
-
+  /if (!${Defined[AnguishChest]}) {
+    /if (${FindItemCount[=Bladewhisper Chain Vest of Journeys]})  /declare AnguishChest string outer Bladewhisper Chain Vest of Journeys
+    /if (${FindItemCount[=Farseeker's Plate Chestguard of Harmony]})  /declare AnguishChest string outer Farseeker's Plate Chestguard of Harmony
+    /if (${FindItemCount[=Wrathbringer's Chain Chestguard of the Vindicator]})  /declare AnguishChest string outer Wrathbringer's Chain Chestguard of the Vindicator
+    /if (${FindItemCount[=Savagesoul Jerkin of the Wilds]})       /declare AnguishChest string outer Savagesoul Jerkin of the Wilds
+    /if (${FindItemCount[=Glyphwielder's Tunic of the Summoner]})  /declare AnguishChest string outer Glyphwielder's Tunic of the Summoner
+    /if (${FindItemCount[=Whispering Tunic of Shadows]})          /declare AnguishChest string outer Whispering Tunic of Shadows
+  }
   /if (${Defined[EpicName]}) /call BuildArray EpicBurns "${EpicName}"
   /if (${Defined[AnguishChest]}) /call BuildArray EpicBurns "${AnguishChest}"
   /call assist_SpellArrays
