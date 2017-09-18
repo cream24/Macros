@@ -43,17 +43,15 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 #EVENT startMelody "#1# tells you, 'Melody #2#'"
 SUB EVENT_startMelody(line, ChatSender, melodyName)
 /if (${Debug}) /echo |- EVENT_startMelody ==>
-	| -Verify the event
-	/declare memGem int local
-	/call verifyEvent "${ChatSender}" "${line}"
-	/varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
-		/if (${melodyName.Find[ /]}) /varset melodyName ${melodyName.Arg[1, /]}
-		/if (${Me.Class.ShortName.Equal[BRD]}) {			
+  /if (${Me.Class.ShortName.Equal[BRD]}) {
+    /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${melodyName}"
+    /if (!${c_eventArg}) /return
+      /declare memGem int local
+      /varset melodyName ${c_eventArgData}
+
 			| If I don't have the melodyName listed in my ini.
-      /call #IniToArray "${Character_Ini},${melodyName} Melody,Song#" melodyArray
-			/if (!${Bool[${melodyArray.Size}]}) {
+      /call IniToArrayV "${Character_Ini},${melodyName} Melody,Song#" melodyArray
+			/if (!${Defined[melodyArray]}) {
 				| If Stop, end, or pause were used, stop the melody.
 				/if (${Select[${melodyName},Stop,End,Pause]}) {
 					/varset playingMelody FALSE
@@ -79,8 +77,8 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
 						| If the song is not memmed, use mq2Cast to mem
 						/if (!${Me.Gem[${spellName}]}) {
 							/call argueString gem| "${melodyArray[${i}]}"
-              /if (${Bool[${Macro.Return}]}) {
-                /varset memGem ${Macro.Return}
+              /if (${Bool[${c_argueString}]}) {
+                /varset memGem ${c_argueString}
               } else {
                 /varset memGem ${DefaultGem}
               }
@@ -92,19 +90,17 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
 					}
 					/next i
 				}
-				
 				| If I have a songList, start singing the melody
 				/if (${Bool[${songList}]}) {
 					| Twist the newly built songList.
 					/varset playingMelody TRUE
 					/varset returnTwist FALSE
 					/varset songSet ${songList}
-					/docommand ${ChatToggle} Playing [${melodyName}] melody...
+					/docommand ${ChatToggle} Playing [${melodyName}].
 					/twist ${songSet}
 				}
 			}
 		}
-	}
 /if (${Debug}) /echo <== EVENT_startMelody -|
 /return
 
@@ -123,16 +119,17 @@ SUB pauseTwist
 |- Unpauses MQ2Twist after casting.	-|
 |------------------------------------|
 SUB unpauseTwist
-	/delay 20 !${Me.Casting.ID}
+	/delay 2 !${Me.Casting.ID}
 	/varset 	returnTwist FALSE
 	/squelch 	/twist ${songSet}
-	/delay 20 ${Me.Casting.ID}
+	/delay 2 ${Me.Casting.ID}
 /return
 
 
 |--------------------------------------------------------------|
 Sub check_bard_charm
-  /if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
+/if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
+/if (${Defined[charmArray2D]}) {
   /declare s int local
   /declare charmDuration int local
   /if (${doCharm} && ${Bool[${charmTarget}]}) {
@@ -146,16 +143,15 @@ Sub check_bard_charm
       /pet get lost
       /delay 1s !${Me.Pet.ID}
     }
-    |/if (!${Bool[${Me.Pet.ID}]} || ${charmTimer} < 3) {
     /if (!${Bool[${Me.Pet.ID}]}) {
       /bc [+r+] << ${Spawn[id ${charmTarget}].CleanName} is not Charmed! >> [+r+]
       /for s 1 to ${charmArray2D.Size[1]}
       /call check_Ready "charmArray2D" ${s}
-      /if (${Macro.Return}) {
+      /if (${c_Ready}) {
         /call check_Mana "charmArray2D" ${s}
-        /if (${Macro.Return}) {
+        /if (${c_Mana}) {
           /call check_Distance ${charmTarget} ${charmArray2D[${s},${iMyRange}]}
-          /if (${Macro.Return}) {
+          /if (${c_Dist}) {
             /docommand ${ChatToggle} << Charming ${charmTarget} ${Spawn[id ${charmTarget}].CleanName} with ${charmArray2D[${s},${iCastName}]} >>
             /call e3_Cast ${charmTarget} "charmArray2D" "${s}"
             /if (${Bool[${Me.Pet.ID}]}) {
@@ -199,9 +195,9 @@ Sub check_bard_charm
       /next s
     }
   }
-  /if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
+}
+/if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
 /return
-
 
 |--------------------------------------------------------------|
 | Mez mobs in ae radius that are not assist target
@@ -220,7 +216,7 @@ sub check_bard_mez
       /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 5)) {
         /for s 1 to ${mezArray2D.Size[1]}
             /call check_Distance ${mezTarg} ${mezArray2D[${s},${iMyRange}]}
-            /if (${Macro.Return}) {
+            /if (${c_Dist}) {
               /if (${mezArray2D[${s},${iCastType}].Equal[Spell]} && !${Bool[${Me.Gem[${mezArray2D[${s},${iCastName}]}]}]}) /call memorize_spell "${mezArray2D[${s},${iCastName}]}" ${mezArray2D[${s},${iSpellGem}]}
               /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
                 /if (${Twist.Twisting}) /call pauseTwist
@@ -245,47 +241,41 @@ sub check_bard_mez
 
 Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
-	/call InitoVar "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
-  /if (${Ini[${Character_Ini},Bard,AutoMez (On/Off)].Length}) /call IniToVar "${Character_Ini},Bard,AutoMez (On/Off)" autoMez bool outer
-  /call #IniToArray "${Character_Ini},Bard,Mez#"	  mezArray
-  /call #IniToArray "${Character_Ini},Bard,Charm#"	charmArray
+	/call iniToVarV "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
+  /call iniToVarV "${Character_Ini},Bard,AutoMez (On/Off)" autoMez bool outer
+  /call IniToArrayV "${Character_Ini},Bard,Mez#"	  mezArray
+  /call IniToArrayV "${Character_Ini},Bard,Charm#"	charmArray
   /declare returnTwist		bool outer FALSE
-  /declare playingMelody	bool outer FALSE
+  /declare playingMelody	bool outer TRUE
   /declare songSet string outer
   /declare resumeTwistDelay timer outer
 
-  /if (${Bool[${mezArray.Size}]}) {
+  /if (${Defined[mezArray]}) {
     /call BuildSpellArray "mezArray"	"mezArray2D"
   } else {
-    /if (${Defined[autoMez]}) /varset autoMez FALSE
+    /varset autoMez FALSE
   }
 
   /declare charmTarget int outer
-  /if (${Bool[${charmArray.Size}]}) {
+  /if (${Defined[charmArray]}) {
     /call BuildSpellArray "charmArray"	"charmArray2D"
     /declare doCharm bool outer TRUE
-    /declare charmTimer timer outer
+    /declare charmBuffTimer timer outer
   } else {
     /declare doCharm bool outer FALSE
   }
-
-  /declare charmBuffTimer timer outer
-
 /if (${Debug}) /echo <== BRD_Setup -|
 /return
 
 |------------------------------------|
-Sub BRD_Background_Events	
+Sub BRD_Background_Events
+  /if (${returnTwist} && !${Bool[${Me.Casting}]} && !${Twist.Twisting} && !${resumeTwistDelay}) /call unpauseTwist
 	/doevents saveMelody
 	/doevents startMelody
-	/if (${returnTwist} && !${Bool[${Me.Casting}]} && !${Twist.Twisting} && !${resumeTwistDelay}) /call unpauseTwist
-
   /doevents charmTarget
   /doevents toggleMez
   /doevents charmOn
   /doevents charmOff
-	| Check melody
-	|/if (!${ActionTaken} && ${playingMelody} && !${Twist.Twisting} && !${Bool[${Me.Casting}]} && ${Bool[${songSet}]}) /doevents startMelody
 /return
 
 SUB BRD_MacroSettings

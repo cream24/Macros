@@ -4,7 +4,7 @@
 |------------------------------------------------------------------------------------|
 Sub SHD_Setup
 /if (${Debug}) /echo |- SHD_Setup ==>
-	/call #IniToArray "${Character_Ini},${Me.Class},LifeTap#" lifeTaps
+	/call IniToArrayV "${Character_Ini},${Me.Class},LifeTap#" lifeTaps
 	/if (${lifeTaps.Size}) /call BuildSpellArray "lifeTaps"	"lifeTaps2D"
 /if (${Debug}) /echo <== SHD_Setup -|
 /return

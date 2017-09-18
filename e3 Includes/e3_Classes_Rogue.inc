@@ -61,30 +61,28 @@ sub AutoEvade
 
 Sub ROG_Setup
 /if (${Debug}) /echo |- ROG_Setup ==>
-  /declare strikeTimer timer outer
-	/call IniToVar "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
-	/call IniToVar "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
-  /call IniToVar "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int outer
-  /call IniToVar "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
-  /call IniToVar "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
-  /call IniToVar "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
-
-  |/if (!${Defined[poisonPR]}) /declare poisonPR string outer Bite of the Shissar XII
-  |/if (!${Defined[poisonFR]}) /declare poisonPR string outer Solusek's Burn XII
-  |/if (!${Defined[poisonCR]}) /declare poisonPR string outer E`ci's Lament XII
+	/call iniToVarV "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
+	/call iniToVarV "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
+  /call iniToVarV "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int outer
+  /call iniToVarV "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
+  /call iniToVarV "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
+  /call iniToVarV "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
 
 	| Assassin Strikes
-	/call IniToVar "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
-	/declare strikeDisc string outer ${strikeDiscStr.Arg[1,/]}
-	/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}	
-	/declare strikeDiscMinEnd	int outer 0
-
-  /if (${Bool[${strikeDisc}]} && !${AutoHide}) /docommand ${ChatToggle} I cannot use ${strikeDisc} without AutoHide On
-
-  /if (${strikeDiscStr.Find[/MinEnd]}) {
-    /call argueString MinEnd "${strikeDiscStr}"
-    /varset strikeDiscMinEnd ${Macro.Return}
+	/call iniToVarV "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
+	/if (${Defined[strikeDiscStr]}) {
+		/declare strikeDisc string outer ${strikeDiscStr.Arg[1,/]}
+		/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}
+		/declare strikeDiscMinEnd	int outer 0
+		/if (${strikeDiscStr.Find[/MinEnd]}) {
+			/call argueString MinEnd "${strikeDiscStr}"
+			/varset strikeDiscMinEnd ${c_argueString}
+		}
+		/if (${Defined[strikeDisc]} && !${AutoHide}) {
+			/docommand ${ChatToggle} I cannot use ${strikeDisc} without AutoHide On
+		}
 	}
+
 /if (${Debug}) /echo <== ROG_Setup -|
 /return
 

@@ -73,11 +73,11 @@ SUB event_UseCorpseSummoner(line, ChatSender)
 				/if (${FindItemCount[=${SoulStoneToUse}]}) /call summon_Corpse "${SoulStoneToUse}" 
 				
 				| Loot the corpse
-				/call IniToVar "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)" PLACEHOLDER bool local
+				/call iniToVarV "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)" PLACEHOLDER bool local
 				:lootNow
 				/if (${Bool[${Macro.Return}]} && ${Spawn[${Me}'s].ID}) /call event_LootNow "PLACEHOLDER" "${Me.CleanName}"
 
-				/call MoveTo -Loc|${startingPoint}
+				/call MoveToLoc ${startingPoint} 80
 				
 				:skip
 				/if (${Defined[startingPoint]}) /deletevar startingPoint
@@ -150,7 +150,7 @@ SUB withdraw_Plat
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- withdraw_Plat ==>
 
 	| Move to the startingPoint
-	/call MoveTo -Loc|${startingPoint}
+	/call MoveToLoc ${startingPoint} 80
 
 	| Look for the west side banker.
 	/if (!${Spawn[npc A Shrewd Banker].LineOfSight}) {
@@ -159,9 +159,8 @@ SUB withdraw_Plat
 	
 		| Move to the banker.
 		/call TrueTarget ${Spawn[npc A Shrewd Banker].ID}
-		/call MoveTo -Loc|${Target.Y},${Target.X}
-		|/call MoveTo -SpawnID|${Spawn[npc A Shrewd Banker].ID}
-		
+		/call MoveToLoc ${Target.Y} ${Target.X} 80
+
 		/if (${Target.Distance} > 15) {
 			/docommand ${ChatToggle} I failed to move to the banker
 		} else {
@@ -260,21 +259,18 @@ SUB buy_SoulStone(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- buy_SoulStone ==>
 
 	| Move to the startingPoint
-	/call MoveTo -Loc|${startingPoint}
+	/call MoveTo ${startingPoint} 80
 	
 	|-------------------------------------------------------------------------------------------------------------------------------------------------------------Look for the west side banker.
 	/if (!${Spawn[npc A Disciple of Luclin].LineOfSight}) {
 		/echo ERROR: I couldn't find the soulstone merchant.  Move to the Throne area, or the west side of The Guild Lobby, and try again.
 	} else {
-	
 		|--------------------------------------------------------------------------------------------------------------------------------------------------------------------Move to the banker.
-		/call MoveTo -SpawnID|${Spawn[npc A Disciple of Luclin].ID}
-		
+    /call TrueTarget ${Spawn[npc A Disciple of Luclin].ID}
+    /call MoveToLoc ${Target.Y} ${Target.X} 80
 		/if (${Target.Distance} > 15) {
 			/echo ERROR: I failed to move to the soulstone merchant. Move me to the west side of The Guild Lobby, and try again.
 		} else {
-		
-		
 			|-------------------------------------------------------------------------------------------------------------------------------------Create a retryTimer and set it for 30 seconds.
 			/declare retryTimer timer local ${GiveUpTimer}
 			/declare miscTimer timer local
@@ -338,71 +334,51 @@ SUB buy_SoulStone(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo <== buy_SoulStone -|
 /RETURN
 
-
-
+|-----------------------------------------
 SUB summon_Corpse(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- summon_Corpse ==>
-
 	| Move to the startingPoint
-	/call MoveTo -Loc|${startingPoint}
-	
-	|--------------------------------------------------------------------------------------------------------------------------------------------------------------Look for the corpse summoner.
+	/call MoveToLoc ${startingPoint} 80
+	|---Look for the corpse summoner.
 	/if (!${Spawn[npc A Priest of Luclin].LineOfSight}) {
 		/echo ERROR: I couldn't find the corpse summoner.  Move to the Throne area, or the west side of The Guild Lobby, and try again.
 	} else {
-	
-		|-----------------------------------------------------------------------------------------------------------------------------------------------------------Move to the corpse summoner.
-		/call MoveTo -SpawnID|${Spawn[npc A Priest of Luclin].ID}
-		
+		|---Move to the corpse summoner.
+    /call TrueTarget ${Spawn[npc A Priest of Luclin].ID}
+    /call MoveToLoc ${Target.Y} ${Target.X} 80
 		/if (${Target.Distance} > 15) {
 			/echo ERROR: I failed to move to the corpse summoner. Move me to the west side of The Guild Lobby, and try again.
 		} else {
-		
 			| Target the summoner
 			/if (${Target.ID} != ${Spawn[npc A Priest of Luclin].ID}) /call TrueTarget ${Spawn[npc A Priest of Luclin].ID}
-			
-		
-			|-------------------------------------------------------------------------------------------------------------------------------------Create a retryTimer and set it for 30 seconds.
+      |---Create a retryTimer and set it for 30 seconds.
 			/declare retryTimer timer local ${GiveUpTimer}
 			/declare miscTimer timer local
-		
-			|--------------------------------------------------------------------------------------------------------------------------------------------------------Declare counting variables.
 			/declare i int local
 			/declare e int local
-			
 			:summonCorpse
-			
 			/if (${Spawn[${Me}'s].ID}) /goto :check_ForCorpse
-			
-			|--------------------------------------------------------------Open InventoryWindow.
-
+			|---Open InventoryWindow.
 			/if (!${Window[InventoryWindow].Open}) /nomodkey /keypress i
 			/delay 10 ${Window[InventoryWindow].Open}
-			
-			|-------------------------------------------------------------------------------------------------------------If my inventory is not open.
+			|---If my inventory is not open.
 			/if (!${Window[InventoryWindow].Open}) {
-				
-				|-------------------------------------------------------------------------------------------------------------If there is still time, retry.
+				|---If there is still time, retry.
 				/if (${retryTimer}) {
 					/goto :summonCorpse
-				
-				|--------------------------------------------------------------------------------------------------------------------Else, announce to user.
+				|---Else, announce to user.
 				} else {
 					/echo ERROR: Failed to open my inventory.
 				}
-				
-			|----------------------------------------------------------------------------------------------------------------------------------------------Else, if my inventory is open.
+			|---Else, if my inventory is open.
 			} else {
-			
-				|------------------------------------------------------------------Search packslots.
-				/for i 1 to 8  
-				
-					|------------------------If the item in the packslot is a soulstone, pick it up.
+				|--Search packslots.
+				/for i 1 to 8
+					|---If the item in the packslot is a soulstone, pick it up.
 					/if (!${Me.Inventory[pack${i}].Container} && ${SoulStoneToUse.Equal[${Me.Inventory[pack${i}]}]}) {
 						/itemnotify pack${i} leftmouseup
 					} else {
-					
-						|-------------------------If the item in the packslot is a container, search it.
+						|---If the item in the packslot is a container, search it.
 						/for e 1 to ${Me.Inventory[pack${i}].Container}
 							/if (${SoulStoneToUse.Equal[${Me.Inventory[pack${i}].Item[${e}]}]}) {
 								/if (!${Window[pack${i}].Open}) /itemnotify pack${i} rightmouseup
@@ -412,65 +388,49 @@ SUB summon_Corpse(SoulStoneToUse)
 						/next e
 					}
 				/next i
-				
-				|----------------------------------------Check that the soulstone was picked up.	
+				|---Check that the soulstone was picked up.
 				/if (!${Cursor.ID}) {
-					
-					|-------------------------------------------------------------------------------------------------------------If there is still time, retry.
+					|---If there is still time, retry.
 					/if (${retryTimer}) {
 						/goto :summonCorpse
-					
-					|--------------------------------------------------------------------------------------------------------------------Else, announce to user.
+					|---Else, announce to user.
 					} else {
 						/echo ERROR: Failed to pick up my soulstone.
 					}
-					
-				|------------------------------------------------------------------------------------------------------------------------------------------Else, if the soulstone was picked up.
+				|---Else, if the soulstone was picked up.
 				} else {
-				
-					|-------------------------------------------Open trade with the corpse summoner.
+					|----Open trade with the corpse summoner.
 					/click left target
 					/delay 10 ${Window[GiveWnd].Open}
-					
-					|-------------------------------------------------------------------------------------------------------------If the GiveWnd did not open.
+					|---If the GiveWnd did not open.
 					/if (!${Window[GiveWnd].Open}) {
-					
-						|-------------------------------------------------------------------------------------------------------------If there is still time, retry.
+						|---If there is still time, retry.
 						/if (${retryTimer}) {
 							/goto :summonCorpse
-						
-						|--------------------------------------------------------------------------------------------------------------------Else, announce to user.
+						|---Else, announce to user.
 						} else {
 							/echo ERROR: Failed to open the give window.
 						}
-						
-					|----------------------------------------------------------------------------------------------------------------Else, if the give window is open.
+					|---Else, if the give window is open.
 					} else {
-					
-						|-----------------------------------------------------------------------Give the soulstone to the corpse summoner.
+						|---Give the soulstone to the corpse summoner.
 						/delay 5
 						/notify GiveWnd GVW_Give_Button leftmouseup
 						/delay 10 !${Window[GiveWnd].Open}
-						
-						|-------------------------------------------------------------------------------------------------------------If the GiveWnd did not open
+						|---If the GiveWnd did not open
 						/if (${Window[GiveWnd].Open} || ${FindItemCount[=${SoulStoneToUse}]}) {
-						
-							|-------------------------------------------------------------------------------------------------------------If there is still time, retry.
+							|---If there is still time, retry.
 							/if (${retryTimer}) {
 								/goto :summonCorpse
-							
-							|--------------------------------------------------------------------------------------------------------------------Else, announce to user.
+							|---Else, announce to user.
 							} else {
 								/echo ERROR: Failed to complete the trade.
 							}
-							
-						|----------------------------------------------------------------------------------------------------------------Else, if the give window is open.
+						|---Else, if the give window is open.
 						} else {
-						
 							:check_ForCorpse
-							|---------------------------------------------------------------------------------------Loot your summoned corpse.
+							|---Loot your summoned corpse.
 							/delay 3s ${Spawn[${Me}'s].ID}
-							
 							/if (!${Spawn[${Me}'s].ID}) /echo ERROR: My corpse did not appear.
 						}
 					}
@@ -478,29 +438,26 @@ SUB summon_Corpse(SoulStoneToUse)
 			}
 		}
 	}
-
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo <== summon_Corpse -|
 /RETURN
-
-
-
+|-----------------------------------------
 SUB corpseSummon_Setup
-/call INItoVar "${advSettings_Ini},Debug,Debug CorpseSummoning (On/Off)" Debug_CorpseSummoning bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug CorpseSummoning (On/Off)" Debug_CorpseSummoning bool outer
 /RETURN
-
+|-----------------------------------------
 SUB corpseSummon_MacroSettings
 	/call WriteToIni "${advSettings_Ini},Debug,Debug CorpseSummoning (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)" Off
 /RETURN
-
+|-----------------------------------------
 SUB corpseSummon_CharacterSettings
 /RETURN
-
+|-----------------------------------------
 Sub corpseSummon_Aliases
 	/squelch /alias /summoncorpses /bc Use Corpse Summoner
 	/squelch /alias /summoncorpse /echo Use Corpse Summoner
 /return
-
+|-----------------------------------------
 Sub corpseSummon_Background_Events
 	/doevents UseCorpseSummoner
 /return

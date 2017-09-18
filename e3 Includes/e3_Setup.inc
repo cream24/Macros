@@ -26,7 +26,6 @@
 #include e3 Includes\e3_Utilities.inc
 #include e3 Includes\e3_Wait4Rez.inc
 
-
 #include e3 Includes\e3_Classes_Bard.inc
 #include e3 Includes\e3_Classes_Beastlord.inc
 #include e3 Includes\e3_Classes_Berserker.inc
@@ -44,12 +43,6 @@
 #include e3 Includes\e3_Classes_Warrior.inc
 #include e3 Includes\e3_Classes_Wizard.inc
 
-#include e3 Includes\e3_VetAAs.inc
-#include e3 Includes\vyslib.inc
-#include e3 Includes\vyslib_items.inc
-
-
-
 SUB e3_Setup(modeSelect)
 /if (${Debug}) /echo |- e3_Setup ==>
 
@@ -60,7 +53,6 @@ SUB e3_Setup(modeSelect)
 
 	| The file path for e3 Data.ini will still need to be updated in corresponding includes because you must use /noparse to write variables to inis.
 	/declare MacroData_Ini string outer e3 Macro Inis\e3 Data.ini
-	/declare i int local
 
 	/call check_Plugins
 	
@@ -78,6 +70,7 @@ SUB e3_Setup(modeSelect)
 	|/echo ${IniMode}  ${MacroData_Ini} ${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length} ${${IniMode}[${MacroData_Ini},File Paths,General Settings].Upper}
   /if (!${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [General Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+    /beep
 		/endmacro
 	} else {
       /declare genSettings_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,General Settings]}
@@ -86,6 +79,7 @@ SUB e3_Setup(modeSelect)
 	| Advanced Settings
    /if (!${${IniMode}[${MacroData_Ini},File Paths,Advanced Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [Advanced Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+     /beep
 		/endmacro
 	} else {
 		/declare advSettings_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,Advanced Settings]}
@@ -94,6 +88,7 @@ SUB e3_Setup(modeSelect)
 	| Bot Settings
 	/if (!${${IniMode}[${MacroData_Ini},File Paths,Bot Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [Bot Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+    /beep
 		/endmacro
 	} else {
 		/declare Character_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,Bot Settings]}
@@ -124,20 +119,23 @@ SUB e3_Setup(modeSelect)
 	/if (${Debug}) /echo Importing user settings...
 	
 	| Debug
-	/if (!${modeSelect.Equal[Debug]}) /call IniToVar "${advSettings_Ini},Debug,Debug Mode (On/Off)" Debug bool outer
+	/if (!${modeSelect.Equal[Debug]}) /call iniToVarV "${advSettings_Ini},Debug,Debug Mode (On/Off)" Debug bool outer
 	
 	| Chat Channel
 	/declare ChatToggle string outer /bc
-	/if (${${IniMode}[${Macro_Ini},General,Macro Output Channel].Length}) /call IniToVar "${Macro_Ini},General,Macro Output Channel" ChatToggle string outer
+	/if (${${IniMode}[${genSettings_Ini},General,Macro Output Channel].Length}) /call iniToVarV "${genSettings_Ini},General,Macro Output Channel" ChatToggle string outer
 
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
-	/call #IniToArray "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
+	/call IniToArrayV  "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
 	
 | Setup Includes ========================================================================================================== 
 
+  /declare i int local
 	/for i 1 to ${macroSetups.Size}
+     |/g ${macroSetups[${i}]} ${Time} Start
 		/if (${macroSetups[${i}].Equal[class]}) /varset macroSetups[${i}] ${Me.Class.ShortName}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_Setup
+     |/g ${macroSetups[${i}]} ${Time} eND
 	/next i
 
   |Set Turbo per class based on configuration
@@ -196,7 +194,6 @@ SUB EVENT_make_MacroSettingsIni
 	/call WriteToIni "${advSettings_Ini},Included Setups,Include#17" buy 1
   /call WriteToIni "${advSettings_Ini},Included Setups,Include#18" alerts 1
   /call WriteToIni "${advSettings_Ini},Included Setups,Include#19" tanking 1
-  /call WriteToIni "${advSettings_Ini},Included Setups,Include#20" vetAA 1
 
 	/delay 15
 
@@ -221,7 +218,7 @@ SUB EVENT_make_MacroSettingsIni
 	/delay 15
 
 	| Import the array of Included Setups
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	| Call each setup
 	/declare i int local
@@ -262,7 +259,7 @@ SUB EVENT_make_CharacterSettingsIni
 /if (${Debug}) /echo |- make_CharacterSettingsIni ==>
 
 	/echo Creating ${Me.CleanName}'${If[${Me.CleanName.Right[1].Equal[s]},,s]} settings file...
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	/declare i int local
 	
@@ -299,7 +296,7 @@ SUB EVENT_updateAliases
 	/squelch /alias /debugon /varset Debug 1
 	/squelch /alias /debugoff /varset Debug 0
 
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	/declare i int local
 	

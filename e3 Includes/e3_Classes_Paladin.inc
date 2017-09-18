@@ -4,8 +4,8 @@
 |----------------------------------------------------------------------------|
 Sub PAL_Setup
 /if (${Debug}) /echo |- PAL_Setup ==>
-	/call InitoVar "${Character_Ini},Paladin,Auto-Yaulp (On/Off)" AutoYaulp bool outer
-	/call InitoVar "${Character_Ini},Paladin,Yaulp Spell" yaulpSpell string outer
+	/call iniToVarV "${Character_Ini},Paladin,Auto-Yaulp (On/Off)" AutoYaulp bool outer
+	/call iniToVarV "${Character_Ini},Paladin,Yaulp Spell" yaulpSpell string outer
 /if (${Debug}) /echo <== PAL_Setup -|
 /return
 

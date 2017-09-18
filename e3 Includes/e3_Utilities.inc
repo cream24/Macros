@@ -1,34 +1,10 @@
-|--------------------------------------------------------------------------------------------|
-|- e3_Functions.inc v2.0 ( originally designed to work with e3.mac )						-|
-|- Written by Killians of PEQ																-|
-|--------------------------------------------------------------------------------------------|
-|- This is e3's 'toolbox' which contains scripts used throughout e3's various functions.	-|
-|--------------------------------------------------------------------------------------------|
-
-|--------------------------------------------------------------------------------------------------------|
-|- Validates Ini entries from supplied Ini keys, and creates variables of the specified type and scope.	-|
-|--------------------------------------------------------------------------------------------------------|
-|- Returns validated Ini entries if scope is local, or creates variables of specified type and scope.	-|
-|--------------------------------------------------------------------------------------------------------|
-|- @param Ini_Key: The ini file, section, and entry to create a variable from.							-|
-|- @param VarToMake: The name of the variable you want to declare.										-|
-|- @param VarType: The type of variable to be declared.													-|
-|- @param VarScope: The scope of the variable to be declared.											-|
-|--------------------------------------------------------------------------------------------------------|
-|- Syntax: /call IniToVar IniKey VariableToMake VariableType VariableScope								-|
-|-	Ex:																									-|
-|--------------------------------------------------------------------------------------------------------|
-|-		To create an outer variable,  																	-|
-|-			/call IniToVar Bot_Killians.ini,AssistStick,StickDistance int outer							-|
-|--------------------------------------------------------------------------------------------------------|
-|-		To pass a local variable, 																		-|
-|-			/call IniToVar Bot_Killians.Ini,Basics,Use_Potion/Pct UNDEFINED string local				-|
-|-			/declare PotionName ${Macro.Return.Arg[1,/]}												-|
-|-			/declare PotionPct ${Macro.Return.Arg[2,/]}													-|
-|--------------------------------------------------------------------------------------------------------|
-SUB IniToVar(Ini_Key, VarToMake, VarType, VarScope)
+|------------------------------------------------------------------------------|
+|- Validates Ini entries from supplied Ini keys, and creates outer variables.	-|
+|- @param Ini_Key: The ini file, section, and entry to create a variable from.-|
+|- @param VarToMake: The name of the variable you want to declare.						-|
+|- @param VarType: The type of variable to be declared.												-|
+SUB IniToVar(Ini_Key, VarToMake, VarType)
 /if (${Debug}) /echo |- IniToVar [${Ini_Key}] ==>
-
 	| Check for the specified ini key.
 	/if (!${Ini[${Ini_Key}].Length}) {
 		/if (${Debug}) /echo [${Ini_Key}] not found.
@@ -38,29 +14,50 @@ SUB IniToVar(Ini_Key, VarToMake, VarType, VarScope)
 		/if (${VarType.Equal[bool]}) {
 			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
 			/if (!${Defined[new_VarName]}) /declare new_VarName string outer
-			/declare ${VarToMake} bool ${VarScope} ${If[${Select[${Ini[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
+			/declare ${VarToMake} bool outer ${If[${Select[${Ini[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
 			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
 		| Validate int.
 		} else /if (${VarType.Equal[Int]}) {
 			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/declare ${VarToMake} int ${VarScope} ${Ini[${Ini_Key}]}
+			/declare ${VarToMake} int outer ${Ini[${Ini_Key}]}
 			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
 		| Validate float.
 		} else /if (${VarType.Equal[Float]}) {
 			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/declare ${VarToMake} float ${VarScope} ${Ini[${Ini_Key}]}
+			/declare ${VarToMake} float outer ${Ini[${Ini_Key}]}
 			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
 		| Create string or timer.
 		} else {
 			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/declare ${VarToMake} ${VarType} ${VarScope} ${Ini[${Ini_Key}]}
+			/declare ${VarToMake} ${VarType} outer ${Ini[${Ini_Key}]}
 			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
 		}
 	}
-
 /if (${Debug}) /echo <== IniToVar -|
 /RETURN ${${VarToMake}}
 
+Sub IniToVarV_Deprecated(Ini_Key, VarToMake, VarType)
+  /if (${IniExt[${Ini_Key}].Length}) {
+    /if (${VarType.Equal[bool]}) {
+      /declare ${VarToMake} bool outer ${If[${Select[${IniExt[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
+    } else {
+      /declare ${VarToMake} ${VarType} outer ${IniExt[${Ini_Key}]}
+    }
+  }
+/return ${${VarToMake}}
+
+Sub IniToVarV(Ini_Key, VarToMake, VarType)
+  /if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+  /if (${VarType.Equal[bool]}) {
+    /declare ${VarToMake} bool outer ${If[${Select[${IniExt[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
+    /return ${${VarToMake}}
+  } else {
+    /if (${IniExt[${Ini_Key}].Length}) {
+      /declare ${VarToMake} ${VarType} outer ${IniExt[${Ini_Key}]}
+      /return ${${VarToMake}}
+    }
+  }
+/return
 |-----------------------
 |- Counts ini entries and creates a corresponding array
 |-----------------------
@@ -70,12 +67,10 @@ SUB IniToVar(Ini_Key, VarToMake, VarType, VarScope)
 |-----------------------
 |- Syntax: /call IniToArray IniKey ArrayName VariableScope
 |-	Ex: /call IniToArray "Settings.ini,General Settings,Debug Mode" Debug outer
-|-		/call IniToVar Bot_Killians.ini,Buffs,SelfBuffs MySelfBuffs local
+|-		/call iniToVarV Bot_Killians.ini,Buffs,SelfBuffs MySelfBuffs local
 |-----------------------
-SUB IniToArray(Ini_Key, ArrayName, ArrayScope)
-|/varset Debug TRUE
+SUB IniToArray(Ini_Key, ArrayName)
 /if (${Debug}) /echo |- IniToArray [${Ini_Key}] ==>
-
 	| Check for the specified ini key.
 	/if (!${Ini[${Ini_Key}1].Length}) {
 		/if (${Debug}) /echo [${Ini_Key}] not found.
@@ -94,7 +89,7 @@ SUB IniToArray(Ini_Key, ArrayName, ArrayScope)
 		
 		| Declare the array and copy ini entries
 		/if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
-		/declare ${ArrayName}[${count}] string ${If[${Defined[ArrayScope]},${ArrayScope},outer]}
+		/declare ${ArrayName}[${count}] string outer
 		
 		/for i 1 to ${${ArrayName}.Size}
 			/varset ${ArrayName}[${i}] ${Ini[${Ini_Key}${i}]}
@@ -110,10 +105,67 @@ SUB IniToArray(Ini_Key, ArrayName, ArrayScope)
 	}
 	/echo <== IniToArray -|
 }
-|/varset Debug FALSE
 /RETURN ${ArrayName}
 
+|-----------------------
+Sub IniToArrayV(IniKey, ArrayName)
+  /declare i int local 1
+  /declare j int local 1
+  /declare array_size int local 0
+  /declare ArrayScope string local outer
+  /if (${Bool[${Plugin[MQ2IniExt]}]}) {
+    /if (${IniKey.Right[1].Equal[#]} && ${IniExt[${IniKey}1].Length}) {
+      /call IniToArrayV_Deprecated "${IniKey}" "${ArrayName}"
+      /return
+    }
+    /if (${IniKey.Right[1].Equal[#]}) /varset IniKey ${IniKey.Left[-1]}
+    |/echo IniKey = ${IniKey} count = ${IniExt[${IniKey}].Count}
+    /if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
+    /if (${IniExt[${IniKey}].Index[1].Length}) {
+      /for i 1 to ${IniExt[${IniKey}].Count}
+      /if (${IniExt[${IniKey}].Index[${i}].Length}) {
+        /varcalc array_size ${array_size}+1
+      }
+      /next i
+      |/declare ${ArrayName}[${IniExt[${IniKey}].Count}] string ${ArrayScope}
+      /declare ${ArrayName}[${array_size}] string outer
+      /if (${IniExt[${IniKey}].Count}) {
+        /for i 1 to ${IniExt[${IniKey}].Count}
+        |/echo ${ArrayName}[${i}] ${IniExt[${IniKey}].Index[${i}]} Length: ${IniExt[${IniKey}].Index[${i}].Length}
+        /if (${IniExt[${IniKey}].Index[${i}].Length}) {
+          /varset ${ArrayName}[${j}] ${IniExt[${IniKey}].Index[${i}]}
+          /varcalc j ${j}+1
+        }
+        /next i
+      }
+    }
+  } else {
+    /call IniToArrayV_Deprecated "${IniKey}" "${ArrayName}"
+  }
+/return
 
+Sub IniToArrayV_Deprecated(IniKey, ArrayName)
+  /declare i int local 1
+|/declare IniKey ${File},${Section},${Key}
+  /declare ArrayScope string local outer
+
+  /if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
+  /if (${Ini[${IniKey}1].Length}) {
+    /declare count int local 0
+    :NextKey
+    /if (${Ini[${IniKey}${i}].Length}) {
+      /varset count ${i}
+      /varcalc i ${i}+1
+      /goto :NextKey
+    }
+    /declare ${ArrayName}[${count}] string ${ArrayScope}
+    /for i 1 to ${count}
+    /varset ${ArrayName}[${i}] ${Ini[${IniKey}${i}]}
+    /next i
+  } else {
+    /declare ${ArrayName}[0] string ${ArrayScope}
+  }
+/return
 
 |-----------------------
 |- Creates ini entries from supplied ini keys.
@@ -155,8 +207,6 @@ SUB WriteToIni(Ini_Key, WhatToWrite, bool OverWrite)
 /if (${Debug}) /echo <== WriteToIni -|
 /RETURN
 
-
-
 |--------------------------------------------------------|
 |- Creates new arrays, or stacks onto existing arrays.	-|
 |--------------------------------------------------------|
@@ -166,13 +216,11 @@ SUB WriteToIni(Ini_Key, WhatToWrite, bool OverWrite)
 |- @param ArrayName: Name of the array to build.		-|
 |- @param Data: Data you wish to add to the array.		-|
 |--------------------------------------------------------|
-SUB BuildArray(ArrayName, Data, varScope)
-/if (${Debug}) /echo |- BuildArray Adding [${ArrayName}-${Data}-${varScope}] ==>
-	/if (!${Defined[varScope]}) /declare varScope string local outer
-	
+SUB BuildArray(ArrayName, Data)
+/if (${Debug}) /echo |- BuildArray Adding [${ArrayName}-${Data}] ==>
 	| If the array is not defined, declare it.
 	/if (!${Defined[${ArrayName}]}) {
-		/declare ${ArrayName}[1] string ${varScope}
+		/declare ${ArrayName}[1] string outer
 		/varset ${ArrayName}[1] ${Data}
 	| Else, if the array is already defined.
 	} else {
@@ -188,7 +236,7 @@ SUB BuildArray(ArrayName, Data, varScope)
 		/deletevar ${ArrayName}
 		
 		| Build a resized array.
-		/declare ${ArrayName}[${Math.Calc[${${ArrayName}Copy.Size}+1].Int}] string ${varScope}
+		/declare ${ArrayName}[${Math.Calc[${${ArrayName}Copy.Size}+1].Int}] string outer
 		/for i 1 to ${${ArrayName}.Size}
 			/varset ${ArrayName}[${i}] ${${ArrayName}Copy[${i}]}
 		/next i
@@ -202,12 +250,11 @@ SUB BuildArray(ArrayName, Data, varScope)
 |--------------------------------------------------------|
 |- Creates a new array from a delimited string			-|
 |--------------------------------------------------------|
-SUB ListToArray(ArrayName, Data, varScope, delimiter)
+SUB ListToArray(ArrayName, Data, delimiter)
 	/declare i int local
 	/declare arraySize int local
 	/varcalc arraySize ${Data.Count[${delimiter}]} +1
-	/if (!${Defined[varScope]}) /declare varScope string outer	
-	/if (!${Defined[${ArrayName}]}) /declare ${ArrayName}[${arraySize}] string ${varScope}
+	/if (!${Defined[${ArrayName}]}) /declare ${ArrayName}[${arraySize}] string outer
 	/for i 1 to ${arraySize}
 		/varset ${ArrayName}[${i}] ${Data.Arg[${i},${delimiter}]}
 	/next i
@@ -217,8 +264,9 @@ SUB ListToArray(ArrayName, Data, varScope, delimiter)
 |- 2D array for spell casting/full e3_casting use
 |--------------------------------------------------------|
 SUB BuildSpellArray(ArrayName, NewArrayName)
+  |/echo Array ${ArrayName} ${NewArrayName}
 	/if (!${Defined[SpellProp]}) {
-		/declare SpellProp[35] string outer 0
+		/declare SpellProp[37] string outer 0
 		/varset SpellProp[1] CastName
 		/varset SpellProp[2] CastType
 		/varset SpellProp[3] TargetType
@@ -254,10 +302,13 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     /varset SpellProp[33] CheckForID
     /varset SpellProp[34] SpellID
 		/varset SpellProp[35] PctAggro
+		/varset SpellProp[36] Zone
+    /varset SpellProp[37] MinSick
 	}
 
   /if (${Defined[${NewArrayName}]}) /deletevar ${NewArrayName}
 	/declare ${NewArrayName}[${${ArrayName}.Size},${SpellProp.Size}] string outer 0
+	|/echo NA ${NewArrayName} ${ArrayName} ${${ArrayName}.Size} ${SpellProp.Size} ${${NewArrayName}.Size[1]}
 	/declare errMsg string local Review entry and restart macro
     
 	/if (!${Defined[iCastName]})		/declare iCastName int outer 1
@@ -295,6 +346,8 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
   /if (!${Defined[iCheckForID]})		/declare iCheckForID int outer 33
   /if (!${Defined[iSpellID]})		/declare iSpellID int outer 34
   /if (!${Defined[iPctAggro]})		/declare iPctAggro int outer 35
+	/if (!${Defined[iZone]})		/declare iZone int outer 36
+  /if (!${Defined[iMinSick]})		/declare iMinSick int outer 37
 
 	/declare i int local
 	/declare printAll bool local FALSE
@@ -332,10 +385,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
   /next i
 
 	/for i 1 to ${${ArrayName}.Size}
-		|/echo ${${ArrayName}[${i}]}
-		|/echo ${ArrayName} iteration ${i}
-		
-		| get SpellName
+    | get SpellName
 		/varset ${NewArrayName}[${i},${iCastName}] ${${ArrayName}[${i}].Arg[1,/]}
 		/if (${printAll}) /echo CastName ${${NewArrayName}[${i},${iCastName}]}
 
@@ -366,7 +416,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get SpellGem
 		/if (${${ArrayName}[${i}].Find[/Gem|]}) {
 			/call argueString Gem| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iSpellGem}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iSpellGem}] ${c_argueString}
 		} else {
 		  /varset ${NewArrayName}[${i},${iSpellGem}] ${DefaultGem}
 		}
@@ -375,21 +425,21 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get SubToRun
 		/if (${${ArrayName}[${i}].Find[/SubToRun|]}) {
 			/call argueString SubToRun| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iSubToRun}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iSubToRun}] ${c_argueString}
 		}
 		/if (${printAll}) /echo SubToRun ${${NewArrayName}[${i},${iSubToRun}]}
 		
 		| get GiveUpTimer
 		/if (${${ArrayName}[${i}].Find[/GiveUpTimer|]}) {
 			/call argueString GiveUpTimer| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iGiveUpTimer}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iGiveUpTimer}] ${c_argueString}
 		}
 		/if (${printAll}) /echo GiveUpTimer ${${NewArrayName}[${i},${iGiveUpTimer}]}
 		
 		| get MaxTries
 		/if (${${ArrayName}[${i}].Find[/MaxTries|]}) {
 			/call argueString MaxTries| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iMaxTries}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iMaxTries}] ${c_argueString}
 		} else {
       /varset ${NewArrayName}[${i},${iMaxTries}] 5
 		}
@@ -398,7 +448,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get CheckFor
 		/if (${${ArrayName}[${i}].Find[/CheckFor|]}) {
 			/call argueString CheckFor| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iCheckFor}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iCheckFor}] ${c_argueString}
 		} else {
       /varset ${NewArrayName}[${i},${iCheckFor}] -1
 		}
@@ -488,14 +538,14 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get MinMana
 		/if (${${ArrayName}[${i}].Find[/MinMana|]}) {
 			/call argueString MinMana| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iMinMana}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iMinMana}] ${c_argueString}
 		}
 		/if (${printAll}) /echo MinMana ${${NewArrayName}[${i},${iMinMana}]}	
 
 		| get MaxMana
 		/if (${${ArrayName}[${i}].Find[/MaxMana|]}) {
 			/call argueString MaxMana| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iMaxMana}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iMaxMana}] ${c_argueString}
 		} else {
 			/varset ${NewArrayName}[${i},${iMaxMana}] 100
 		}
@@ -504,7 +554,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get MinHP
 		/if (${${ArrayName}[${i}].Find[/MinHP|]}) {
 			/call argueString MinHP| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iMinHP}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iMinHP}] ${c_argueString}
 		}
 		/if (${printAll}) /echo MinHP ${${NewArrayName}[${i},${iMinHP}]}	
 
@@ -512,12 +562,12 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/if (${Select[${ArrayName},tankHeals,importantHeals,allHeals,hotSpells,groupHeals,lifeSupport,petHeal,petHeals,lifeTaps]}) {
 			/if (${${ArrayName}[${i}].Find[/HealPct|]}) {
 				/call argueString HealPct| "${${ArrayName}[${i}]}"
-				/varset ${NewArrayName}[${i},${iHealPct}] ${Macro.Return}
+				/varset ${NewArrayName}[${i},${iHealPct}] ${c_argueString}
 			} else {
 				/bc ${Me.Name} - ${errMsg} (Cannot find HealPct) : [${${ArrayName}[${i}]}]
 				/popup ${Me.Name} - ${errMsg} (Cannot find HealPct) : [${${ArrayName}[${i}]}] 
 				/beep					
-				/end
+				/endmacro
 			}
 		}		
 		|/if (${printAll}) /echo HealPct ${${NewArrayName}[${i},${iHealPct}]}
@@ -525,7 +575,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get Reagent
 		/if (${${ArrayName}[${i}].Find[/Reagent|]}) {
 			/call argueString Reagent| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iReagent}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iReagent}] ${c_argueString}
 		}
 		/if (${printAll}) /echo Reagent ${${NewArrayName}[${i},${iReagent}]}
 
@@ -560,14 +610,12 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		
 		| get NoBurn
 		/if (${${ArrayName}[${i}].Find[/NoBurn]}) {
-			|/call argueString NoBurn "${${ArrayName}[${i}]}"
 			/varset ${NewArrayName}[${i},${iNoBurn}] 1
 		}
 		/if (${printAll}) /echo NoBurn ${${NewArrayName}[${i},${iNoBurn}]}
 
 		| get NoAggro
 		/if (${${ArrayName}[${i}].Find[/NoAggro]}) {
-			|/call argueString NoAggro "${${ArrayName}[${i}]}"
 			/varset ${NewArrayName}[${i},${iNoAggro}] 1
 		}
 		/if (${printAll}) /echo NoAggro ${${NewArrayName}[${i},${iNoAggro}]}		
@@ -575,7 +623,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get Mode
 		/if (${${ArrayName}[${i}].Find[/Mode|]}) {
 			/call argueString Mode "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iMode}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iMode}] ${c_argueString}
 		}
 		/if (${printAll}) /echo Mode ${${NewArrayName}[${i},${iMode}]}
 
@@ -586,7 +634,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get Delay
 		/if (${${ArrayName}[${i}].Find[/Delay|]}) {
 			/call argueString Delay| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iDelay}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iDelay}] ${c_argueString}
 		}
 		/if (${printAll}) /echo Delay ${${NewArrayName}[${i},${iDelay}]}		
 
@@ -616,7 +664,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		| get MinEnd
 		/if (${${ArrayName}[${i}].Find[/MinEnd|]}) {
 			/call argueString MinEnd| "${${ArrayName}[${i}]}"
-			/varset ${NewArrayName}[${i},${iMinEnd}] ${Macro.Return}
+			/varset ${NewArrayName}[${i},${iMinEnd}] ${c_argueString}
 		} else {
 		  |default to casting until out of endurance
       /varset ${NewArrayName}[${i},${iMinEnd}] 0
@@ -644,12 +692,32 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     | get iPctAggro
     /if (${${ArrayName}[${i}].Find[/PctAggro|]}) {
       /call argueString PctAggro| "${${ArrayName}[${i}]}"
-      /varset ${NewArrayName}[${i},${iPctAggro}] ${Macro.Return}
+      /varset ${NewArrayName}[${i},${iPctAggro}] ${c_argueString}
     } else {
       |default PctAggro to 0, cast even when aggro target
       /varset	${NewArrayName}[${i},${iPctAggro}] 0
     }
     /if (${printAll}) /echo PctAggro ${${NewArrayName}[${i},${iPctAggro}]}
+
+    | get iZone - only for curing
+    /if (${${ArrayName}[${i}].Find[/Zone|]}) {
+      /call argueString Zone| "${${ArrayName}[${i}]}"
+      /varset ${NewArrayName}[${i},${iZone}] ${c_argueString}
+    } else {
+      |default to All zones
+      /varset	${NewArrayName}[${i},${iZone}] All
+    }
+    /if (${printAll}) /echo Zone ${${NewArrayName}[${i},${iZone}]}
+
+  | get iMinSick - only for curing
+    /if (${${ArrayName}[${i}].Find[/MinSick|]}) {
+      /call argueString MinSick| "${${ArrayName}[${i}]}"
+      /varset ${NewArrayName}[${i},${iMinSick}] ${c_argueString}
+    } else {
+      /varset	${NewArrayName}[${i},${iMinSick}] 0
+    }
+    /if (${printAll}) /echo Zone ${${NewArrayName}[${i},${iMinSick}]}
+
 
     |default casting while invis to 0 which impies no casting while invis
     /varset	${NewArrayName}[${i},${iCastInvis}] 0
@@ -657,7 +725,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/if (${printAll}) /echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		/next i	
 	
-	/deletevar ${ArrayName}
+	|/deletevar ${ArrayName}
 	
 /RETURN	${NewArrayName}
 
@@ -668,8 +736,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 |- @param Data: Data you wish to remove.			-|
 |----------------------------------------------------|
 SUB RemoveSpellArrayElement(ArrayName, ArrayIndex)
-|/varset Debug true
-/if (${Debug}) 	/echo |- RemoveSpellArrayElement ==> Removing [${ArrayIndex}] from [${ArrayName}]
+/if (${Debug}) 	/g |- RemoveSpellArrayElement ==> Removing [${ArrayIndex}] from [${ArrayName}] ${Time}
 	/declare o int local
 	/declare n int local 1
 	/declare p int local
@@ -710,8 +777,7 @@ SUB RemoveSpellArrayElement(ArrayName, ArrayIndex)
 	}
 	|/echo ${ArrayName} ${${ArrayName}.Size[1]}
 	|/mqpause
-/if (${Debug}) /echo <== RemoveSpellArrayElement -|
-|/varset Debug false
+/if (${Debug}) /g <== RemoveSpellArrayElement -| ${Time}
 /RETURN
 
 |----------------------------------------------------|
@@ -725,53 +791,58 @@ SUB RemoveArrayElement(ArrayName, Data)
 	/echo |- RemoveArrayElement ==>
 	/echo |- RemoveArrayElement -| Removing [${Data}] from [${ArrayName}]
 }
-
 	/declare remainingElements string local
 	/declare newArraySize int local
-
 	/declare i int local
-
 	| Count array elements that do not match 'Data'.
-	/for i 1 to ${${ArrayName}.Size}	
-
+	/for i 1 to ${${ArrayName}.Size}
 		/if (${${ArrayName}[${i}].NotEqual[${Data}]}) {
 			/varset remainingElements ${remainingElements}${${ArrayName}[${i}]},
 			/varcalc newArraySize ${newArraySize} + 1
 		}
-
 	/next i
-	
 	| If there are  elements remaining in the array, create a copy of the new array
 	/if (${newArraySize}) {
-	
 		/declare newArray[${newArraySize}] string local
-		
 		/for i 1 to ${newArraySize}
-		
 			/varset newArray[${i}] ${remainingElements.Arg[${i},,]}
-		
 		/next i
 	}
-	
 	| Delete the existing array.
 	/deletevar ${ArrayName}
-	
 	| If there is a new array to make
 	/if (${Defined[newArray]}) {
-
 		/declare ${ArrayName}[${newArray.Size}] string outer
-	
 		/for i 1 to ${newArray.Size}
-		
 			/varset ${ArrayName}[${i}] ${newArray[${i}]}
-		
 		/next i
 	}
-	
 /if (${Debug}) /echo <== RemoveArrayElement -|
 /RETURN
 
+|----------------------------------------------------|
+SUB RemoveArrayElements(ArrayName, ArrayIndexes)
+  /declare i int local
+  /declare n int local 0
+  /declare tempArray[${${ArrayName}.Size}] string local 0
 
+  /for i 1 to ${${ArrayName}.Size}
+    |/echo a ${${ArrayName}[${i}]} f ${Bool[${ArrayIndexes.Find[${i},]}]}
+    /if (!${Bool[${ArrayIndexes.Find[${i},]}]}) {
+      /varcalc n ${n}+1
+      /varset tempArray[${n}] ${${ArrayName}[${i}]}
+    }
+  /next i
+  /deletevar ${ArrayName}
+  /if (${n}>0) {
+    /declare ${ArrayName}[${n}] string outer
+    /for i 1 to ${n}
+      |/echo ${i} ${n} n ${ArrayName}[${i}] t tempArray[${i}]
+      /varset ${ArrayName}[${i}] ${tempArray[${i}]}
+    /next i
+  }
+  /deletevar tempArray
+/RETURN
 
 |------------------------------------------------------------|
 |- Reliably targets specified Target.IDs.					-|
@@ -779,7 +850,6 @@ SUB RemoveArrayElement(ArrayName, Data)
 |- @param TargetID: The ID of the spawn you wish to target.	-|
 |------------------------------------------------------------|
 SUB TrueTarget(TargetID)
-/if (${Debug}) /echo |- TrueTarget${If[${TargetID}, [${TargetID}],]} ==>
 	| Check if the target is in zone.
 	/if (${SpawnCount[id ${TargetID}]}) {
 			/squelch /target id ${TargetID}
@@ -787,7 +857,6 @@ SUB TrueTarget(TargetID)
 	} else {
 		/echo TrueTarget has no spawncount
 	}
-/if (${Debug}) /echo <== TrueTarget -|
 /RETURN
 
 |------------------------------------------------------------------------------------|
@@ -798,14 +867,11 @@ SUB TrueTarget(TargetID)
 |------------------------------------------------------------------------------------|
 SUB createTimer(timerName, timerSetting)
 /if (${Debug}) /echo |- createTimer ==>
-	| set existing timer.
 	/if (${Defined[${timerName}]}) {
     /varset ${timerName} ${timerSetting}
   } else {
-    | Declare new timer.
     /declare ${timerName} timer outer ${timerSetting}
-    | Add the timer's name to the timerArray.
-    /call BuildArray timerArray ${timerName} outer
+    /call BuildArray timerArray ${timerName}
   }
 /if (${Debug}) /echo <== createTimer -| created ${timerName} [${${timerName}}]
 /RETURN
@@ -817,24 +883,31 @@ SUB check_macroTimers
 /if (${Debug}) /echo |- check_macroTimers ==>
 	/declare i int local
 	/declare SpentTimerCounter int local
-
+	/declare SpentTimerList string local
+	|/declare startTimerCnt int local ${timerArray.Size}
+  |/declare endTimerCnt int local 0
 	| Check each entry of the timer array, count spent timers.	
 	/for i 1 to ${timerArray.Size}
-		/if (${Debug}) /echo Checking timer [${timerArray[${i}]} -- ${${timerArray[${i}]}}]
 		/if (!${${timerArray[${i}]}}) {
 			/varcalc SpentTimerCounter ${SpentTimerCounter} + 1
 			/if (${Defined[${timerArray[${i}]}]}) {
 				/if (${Debug}) /echo Deleting timer: ${timerArray[${i}]}
 				/deletevar ${timerArray[${i}]}
+				/varset SpentTimerList ${SpentTimerList}${i},
 			}
 		}
 	/next i
-	
 	| If all the timers listed on timerArray are spent, delete timerArray.
 	/if (${SpentTimerCounter}==${timerArray.Size}) {
 		/if (${Debug}) /echo All timers have been cleared.
 		/deletevar timerArray
+	} else {
+    /call RemoveArrayElements "timerArray" ${SpentTimerList}"
 	}
+	|/if (${Defined[timerArray]}) {
+	|  /varset endTimerCnt ${timerArray.Size}
+  |}
+  |/echo TimerArray start: ${startTimerCnt} end: ${endTimerCnt}
 /if (${Debug}) /echo <== check_macroTimers -|
 /RETURN
 
@@ -845,7 +918,6 @@ SUB check_macroTimers
 SUB ClearCursor
 /if (${Debug}) /echo |- ClearCursor ==>
 	/declare i int local 1
-
   :check_cursor
 	/if (${Cursor.ID}) {
     /autoinventory
@@ -853,7 +925,7 @@ SUB ClearCursor
       /beep
       /bc ${Me.Name} cannot clear cursor, ending macro
       /popup ${Me.Name} cannot clear cursor, ending macro
-      /end
+      /endmacro
     } else {
       /delay 1s !${Cursor.ID}
     }
@@ -866,8 +938,7 @@ SUB ClearCursor
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sub SwapItem(itemName,slotName)
-  /if (!${Bool[${itemName}]} || !${Bool[${slotName}]}) /return
-
+  /if (!${Defined[${itemName}]} || !${Defined[${slotName}]}) /return
   /if (${Cursor.ID}) /call ClearCursor
 	|if the item is in a bag rather than top level inventory slot, open the bag prior to exchange
 	/if (${Me.Inventory[${FindItem[=${itemName}].ItemSlot}].Container}) {
@@ -880,9 +951,10 @@ Sub SwapItem(itemName,slotName)
   /exchange "${itemName}" ${slotName}
 	/delay 5s ${Me.Inventory[${slotName}].Name.Equal[${itemName}]}
   /delay 1
-  /if (${Window[Pack${packSlot}].Open}) /itemnotify Pack${packSlot} rightmouseup
-  /delay 2s !${Window[Pack${packSlot}].Open}
-
+  /if (${Defined[packSlot]}) {
+    /if (${Window[Pack${packSlot}].Open}) /itemnotify Pack${packSlot} rightmouseup
+    /delay 2s !${Window[Pack${packSlot}].Open}
+  }
 	/delay 1s !${Cursor.ID}
 	/if (${Cursor.ID}) /call ClearCursor
 /return
@@ -906,155 +978,26 @@ Sub PlaceInFirstFreeSlot
 		}
   /next p
 /return
-|----------------------------------------------------------------------------|
-|- Triangulates distance between to points using the Pythagoras theorem.	-|
-|----------------------------------------------------------------------------|
-|- @param loc#1: Location 'A'												-|
-|- @param loc#2: Location 'B'												-|
-|----------------------------------------------------------------------------|
-SUB Triangulate_Distance(string loc#1, string loc#2)
-/RETURN ${Math.Sqrt[${Math.Calc[${loc#2.Arg[2,,]}-${loc#1.Arg[2,,]}]}*${Math.Calc[${loc#2.Arg[2,,]}-${loc#1.Arg[2,,]}]}+${Math.Calc[${loc#2.Arg[1,,]}-${loc#1.Arg[1,,]}]}*${Math.Calc[${loc#2.Arg[1,,]}-${loc#1.Arg[1,,]}]}]}
 
+|-------------------------------------------------------------|
+|- Use MQ2MoveUtils /moveto function, to move to destination.	||
+SUB MoveToLoc(yLoc,xLoc,timeToWait)
+|  /echo MoveToLoc ${yLoc} ${xLoc} ${timeToWait}
+  /declare arrivalDist int local 10
+  /if (!${Defined[timeToWait]}) /declare timeToWait 30
+  /declare moveTimer timer local ${timeToWait}
 
-|----------------------------------------------------------------------------------------------------|
-|- MoveTo																							-|
-|----------------------------------------------------------------------------------------------------|
-|- Attempts to utilize MQ2MoveUtils /moveto function, to move to a given destination.				-|
-|----------------------------------------------------------------------------------------------------|
-|- @param1 destination: Destinations can be provided as an ID, or loc, using the following syntax:	-|
-|-																									-|
-|- Move to a Spawn ID use, -SpawnID|#																-|
-|-		Ex.  /call MoveTo -SpawnID|${Target.ID}														-|
-|-																									-|
-|- Move to a Location use, -Loc|Y,X																	-|
-|-		Ex.  /call MoveTo -Loc|${Target.Y},${Target.X}												-|
-|----------------------------------------------------------------------------------------------------|
-SUB MoveTo(destinationInfo, int distCheck)
-/if (${Debug}) /echo |- MoveTo ==>
-
-	/declare X_Loc float local
-	/declare Y_Loc float local
-	/if (!${Defined[distCheck]}) /declare distCheck int local 10
-
-|---------------------------------------------------------Set MoveTo variables per destinationType.
-	/if (${destinationInfo.Find[-SpawnID]}) {
-		
-		/call TrueTarget ${destinationInfo.Arg[2,|]}
-		/varset Y_Loc ${Target.Y}
-		/varset X_Loc ${Target.X}
-		
-	} else /if (${destinationInfo.Find[-Loc]}) {
-
-		/varset Y_Loc ${destinationInfo.Arg[2,|].Arg[1,,]}
-		/varset X_Loc ${destinationInfo.Arg[2,|].Arg[2,,]}
-
-	} else {
-		/echo [${destinationInfo}] does not specify a valid destinationType.  Use -SpawnID|#, or, -Loc|Y,X to note your intended destinationType.
-	}
-
-	|-------------------------------------------------------------------------Check if target is too far.
-	/call Triangulate_Distance ${Me.Loc.Replace[ ,]} ${Y_Loc},${X_Loc}
-	/if (${Int[${Macro.Return}]} > ${MaxResponseDist}) {
-		/echo [${Spawn[id ${destination}].CleanName}] is too far away.
-	} else {
-
-	|---------------------------------------------------------------------Check if target is already close enough
-		/if (${Int[${Macro.Return}]} < 10) {
-			/if (${Debug}) /echo I am already at the destination.
-		} else {
-
-		| Declare a timer based on how far you have to move (1s for every 50 units + 3).
-			/declare retryTimer timer local ${Math.Calc[${Macro.Return} / 50 + 3].Int}s
-			
-		| Engage MQ2MoveUtils.
-			:retry_MoveToLoc
-			/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
-			/squelch /moveto loc ${Y_Loc} ${X_Loc} dist ${If[${Defined[distCheck]},${distCheck},10]}
-			/delay 10 ${Me.Moving} || ${MoveTo.Moving}
-			
-			:movingTo_Loop
-			
-			| Debug Echo
-			/if (${Debug} && !${spamTimer_MTLoop}) {
-				/echo |- MoveToSpawn -| :MoveTo_Loop
-				/call createTimer spamTimer_MTLoop 50
-			}
-
-			/call Background_Events
-			/call Triangulate_Distance ${Me.Loc.Replace[ ,]} ${Y_Loc},${X_Loc}
-			
-			/if (${MoveTo.Moving}) {
-				/if (${Macro.Return} > ${distCheck} && ${retryTimer}) {
-					/goto :movingTo_Loop
-				} else {
-					/squelch /stick off
-					/if (${Debug} && !${spamTimer_MTFAIL}) {
-						/echo I have failed to move to the intended target.
-						/call createTimer spamTimer_MTFAIL 30
-					}
-				}
-			} else {
-
-				/if (${Macro.Return} > ${Math.Calc[${distCheck} + ${Math.Calc[${distCheck} / 4].Int}].Int}) {
-					/if (${retryTimer}) {
-						/goto :retry_MoveToLoc
-					} else {
-						/if (${Debug} && !${spamTimer_MTFAIL}) {
-							/echo I have failed to move to the intended target.
-							/call createTimer spamTimer_MTFAIL 30
-						}
-					}
-				} else {
-					/squelch /stick off
-					/if (${Debug}) /echo I have arrived at my intended destination.
-					/delay 30 !${Me.Moving}
-				}
-			}
-		}
-	}
-
-/if (${Debug}) /echo <== MoveTo -|
-/RETURN
-
-
-|--------------------------------------------------------------------------|
-SUB argueString(WhatToFind, givenData)
-/if (${Debug}) /echo |- argueString ==>
-
-	/declare i int local 1
-	/declare foundData string local NULL
-	
-	:nextArg
-	/if (${givenData.Find[/]}) {		
-		/if (${givenData.Arg[${i},/].Find[${WhatToFind}]}) {		
-			/varset foundData ${givenData.Arg[${i},/].Arg[2,|]}
-			/if (${Debug}) /echo |- argueString -| Found [${WhatToFind}] - [${foundData}]		
-		} else {
-			/varcalc i ${i} + 1
-			/if (${givenData.Arg[${i},/].Length}) /goto :nextArg
-		}
-	} else {
-		/if (${givenData.Arg[${i}, ].Find[${WhatToFind}]}) {		
-			/varset foundData ${givenData.Arg[${i}, ].Arg[2,|]}
-			/if (${Debug}) /echo |- argueString -| Found [${WhatToFind}] - [${foundData}]		
-		} else {
-			/varcalc i ${i} + 1
-			/if (${givenData.Arg[${i}, ].Length}) /goto :nextArg
-		}
-	}
-
-/if (${Debug}) /echo <== argueString -|
-/RETURN ${foundData}
-
-
-|--------------------------------------------------------------------------|
-SUB check_selectedBots(selectedBots, ChatSender)
-	/declare botSelected bool local FALSE
-	/if (${selectedBots.Find[ ]}) /varset selectedBots ${selectedBots.Replace[ ,,]}
-	
-	/if (${Bool[${Select[priests,${selectedBots}]}]} && ${Bool[${Select[${Me.Class.ShortName},${PriestClasses}]}]} || ${Bool[${Select[healers,${selectedBots}]}]} && ${Bool[${Select[${Me.Class.ShortName},${PriestClasses}]}]} || ${Bool[${Select[ranged,${selectedBots}]}]} && ${Bool[${Select[${Me.Class.ShortName},${RangedClasses}]}]} || ${Bool[${Select[casters,${selectedBots}]}]} && ${Bool[${Select[${Me.Class.ShortName},${CasterClasses}]}]} || ${Bool[${Select[melee,${selectedBots}]}]} && ${Bool[${Select[${Me.Class.ShortName},${MeleeClasses}]}]} || ${Bool[${Select[me,${selectedBots}]}]} && ${Bool[${ChatSender.Equal[${Me.CleanName}]}]} || ${Bool[${Select[${Me.Class},${selectedBots}]}]} || ${Bool[${Select[${Me.Class.ShortName},${selectedBots}]}]} || ${Bool[${Select[${Me.CleanName},${selectedBots}]}]} || ${Bool[${Select[all,${selectedBots}]}]} || ${Bool[${Select[group,${selectedBots}]}]} && ${Bool[${Me.CleanName.Equal[${ChatSender}]}]} || ${Bool[${Select[group,${selectedBots}]}]} && ${Bool[${Group.Member[${ChatSender}]}]} || ${Bool[${Select[zone,${selectedBots}]}]} && ${Bool[${SpawnCount[pc ${ChatSender}]}]}) /varset botSelected TRUE
-
-/RETURN ${botSelected}
+  /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) /return
+  /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+  /squelch /moveto loc ${yLoc} ${xLoc} dist ${arrivalDist}
+  :retryMove
+  /call Background_Events
+  /delay ${Math.Calc[${timeToWait}/10]} ${Math.Distance[${yLoc},${xLoc}]} <=${arrivalDist}
+  /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) {
+    /moveto off
+    /return
+  } else /if (${moveTimer}) /goto :retryMove
+/return
 
 |--------------------------------------------------------------------------|
 |- Type Stuff
@@ -1073,14 +1016,113 @@ Sub Type(InStr)
 /return
 
 |--------------------------------------------------------------------------|
+SUB argueString(WhatToFind, givenData)
+	/declare i int local 1
+	/varset c_argueString NULL
+	:nextArg
+	/if (${givenData.Find[/]}) {		
+		/if (${givenData.Arg[${i},/].Find[${WhatToFind}]}) {		
+			/varset c_argueString ${givenData.Arg[${i},/].Arg[2,|]}
+		} else {
+			/varcalc i ${i} + 1
+			/if (${givenData.Arg[${i},/].Length}) /goto :nextArg
+		}
+	} else {
+		/if (${givenData.Arg[${i}, ].Find[${WhatToFind}]}) {		
+			/varset c_argueString ${givenData.Arg[${i}, ].Arg[2,|]}
+		} else {
+			/varcalc i ${i} + 1
+			/if (${givenData.Arg[${i}, ].Length}) /goto :nextArg
+		}
+	}
+/RETURN
+|--------------------------------------------------------------------------|
+Sub check_selectedBots(selectedBots, ChatSender)
+  /declare botSelected bool local FALSE
+  /if (${selectedBots.Find[ ]}) /varset selectedBots ${selectedBots.Replace[ ,,]}
+  /if (${Select[me,${selectedBots}]} && ${ChatSender.Equal[${Me.Name}]}) /varset botSelected TRUE
+  /if (${Select[${Me.Class.ShortName},${selectedBots}]}) /varset botSelected TRUE
+  /if (${Select[${Me.CleanName},${selectedBots}]}) /varset botSelected TRUE
+  /if (${Select[melee,${selectedBots}]} && ${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) /varset botSelected TRUE
+  /if (${Select[casters,${selectedBots}]} && ${Select[${Me.Class.ShortName},ENC,MAG,NEC,WIZ]}) /varset botSelected TRUE
+  /if (${Select[hybrids,${selectedBots}]} && ${Select[${Me.Class.ShortName},PAL,SHD,RNG,BST]}) /varset botSelected TRUE
+  /if (${Select[knights,${selectedBots}]} && ${Select[${Me.Class.ShortName},PAL,SHD]}) /varset botSelected TRUE
+  /if (${Select[tanks,${selectedBots}]} && ${Select[${Me.Class.ShortName},PAL,SHD,WAR]}) /varset botSelected TRUE
+  /if ((${Select[priests,${selectedBots}]} || ${Select[healers,${selectedBots}]}) && ${Select[${Me.Class.ShortName},CLR,DRU,SHM]}) /varset botSelected TRUE
+  |/if (${Select[all,${selectedBots}]} || ${Select[${Me.Class},${selectedBots}]} || ${Select[${Me.Class.ShortName},${selectedBots}]} || ${Select[${Me.CleanName},${selectedBots}]}) /varset botSelected TRUE
+  /if (${Select[group,${selectedBots}]} && ${NetBots[${ChatSender}].InGroup}) /varset botSelected TRUE
+  /if (${Select[raid,${selectedBots}]} && ${Raid.Members} > 0 && ${Bool[${Raid.Member[${ChatSender}]}]}) /varset botSelected TRUE
+  /if (${Select[zone,${selectedBots}]} && ${NetBots[${ChatSender}].InZone}) /varset botSelected TRUE
+  /if (${Select[leaders,${selectedBots}]} && ${Group}) /if (${Group.Leader.Name.Equal[${Me.Name}]}) /varset botSelected TRUE
+  |/echo csb ${selectedBots}-${ChatSender}-${botSelected}
+/return ${botSelected}
+|--------------------------------------------------------------------------|
+SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
+  |/gu cs ${ChatSender} el ${eventLine}
+  /varset c_eventArg FALSE
+  /varset c_eventArgData
+  /varset c_eventArgChatSender
+  /declare userValidated bool local TRUE
+  /declare includeBot bool local TRUE
+  /declare inZone bool local TRUE
+  /declare inRange bool local TRUE
+  |-Parse ChatSender.
+  /if (${ChatSender.Left[1].Compare[ ]}<0)  /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
+  /if (${ChatSender.Equal[You]})            /varset ChatSender ${Me.CleanName}
+  /if (${ChatSender.Equal[MQ2]})            /varset ChatSender ${Me.CleanName}
+  /if (${ChatSender.Right[5].Equal[(msg)]}) /varset ChatSender ${ChatSender.Left[-5]}
+
+  /if (${UZR.Find[U]} && !${NetBots[${ChatSender}].ID})     /varset userValidated FALSE
+  /if (${UZR.Find[Z]} && !${NetBots[${ChatSender}].InZone}) /varset inZone FALSE
+  /if (${UZR.Find[R]} && !${Spawn[pc =${ChatSender}].Distance3D}>${MaxResponseDist}) /varset inRange FALSE
+
+  |/echo ${eventLine.Right[1].Equal[']} ${eventLine} ${eventLine.Left[-1]}
+  /if (${eventLine.Right[1].Equal[']}) /varset eventLine ${eventLine.Left[-1]}
+  |/echo as ${c_argueString}
+  /if (${eventLine.Find[/only|]}) {
+    /varset includeBot FALSE
+    /call argueString only| "${eventLine}"
+    |/if (${check_selectedBots["${c_argueString}" ${ChatSender}]}) /varset includeBot TRUE
+    /call check_selectedBots "${c_argueString}" "${ChatSender}"
+    /if (${Macro.Return}) /varset includeBot TRUE
+  }
+  /if (${eventLine.Find[/exclude|]}) {
+    /call argueString exclude| "${eventLine}"
+    |/if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot FALSE
+    /call check_selectedBots "${c_argueString}" "${ChatSender}"
+    /if (${Macro.Return}) /varset includeBot FALSE
+  }
+  /if (${eventLine.Find[/not|]}) {
+    /call argueString not| "${eventLine}"
+    |/if (${check_selectedBots[${c_argueString} ${ChatSender}]}) /varset includeBot FALSE
+    /call check_selectedBots "${c_argueString}" "${ChatSender}"
+    /if (${Macro.Return}) /varset includeBot FALSE
+  }
+  /if (${eventLine.Find[/include|]}) {
+    /call argueString include| "${eventLine}"
+    |/if (${check_selectedBots[${c_argueString} ${ChatSender}]}) /varset includeBot TRUE
+    /call check_selectedBots "${c_argueString}" "${ChatSender}"
+    /if (${Macro.Return}) /varset includeBot TRUE
+  }
+  |/echo ${userValidated} && ${includeBot} && ${inRange} && ${inZone}
+  /if (${userValidated} && ${includeBot} && ${inRange} && ${inZone}) /varset c_eventArg TRUE
+  /varset c_eventArgChatSender ${ChatSender}
+  /if (${Bool[${ArgData}]}) {
+    /if (${ArgData.Find[/]}) {
+      /varset c_eventArgData ${ArgData.Left[${Math.Calc[${ArgData.Find[/]}-2]}]}
+    } else {
+      /varset c_eventArgData ${ArgData}
+    }
+  }
+  |/echo cs ${ChatSender} ad ${ArgData} find ${ArgData.Find[/]} erd ${c_eventArgData}
+/RETURN ${c_eventArg}
+|--------------------------------------------------------------------------|
 SUB verifyEvent(ChatSender, eventLine)
 /if (${Debug}) /echo |- verifyEvent ==>
-
 	/declare userValidated bool local FALSE
 	/declare includeBot bool local TRUE
 	/declare inZone bool local FALSE
 	/declare inRange bool local FALSE
-	/declare inAssistRange bool local FALSE
 
 	| -Reset ChatSender.
 	/if (${ChatSender.Left[1].Compare[ ]}<0) /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
@@ -1096,33 +1138,27 @@ SUB verifyEvent(ChatSender, eventLine)
 	| -Check inRange
 	/if (${SpawnCount[pc =${ChatSender} radius ${MaxResponseDist}]}) /varset inRange TRUE
 
-	| -Check for /only|
+	|/echo v${userValidated} z${inZone} o ${eventLine.Find[/only|]}
 	/if (${eventLine.Find[/only|]}) {
 		/varset includeBot FALSE
 		/call argueString only| "${eventLine}"
-		/call check_selectedBots "${Macro.Return}" "${ChatSender}"
-		/if (${Macro.Return}) /varset includeBot TRUE
+		/call check_selectedBots "${c_argueString}" "${ChatSender}"
+		/if (${c_checkSelectedBots}) /varset includeBot TRUE
 	}
-		
-	| -Check for /exclude|
 	/if (${eventLine.Find[/exclude|]}) {
 		/call argueString exclude| "${eventLine}"
-		/call check_selectedBots "${Macro.Return}" "${ChatSender}"
-		/if (${Macro.Return}) /varset includeBot FALSE
+		/call check_selectedBots "${c_argueString}" "${ChatSender}"
+		/if (${c_checkSelectedBots}) /varset includeBot FALSE
 	}
-	
-	| -Check for /not|
 	/if (${eventLine.Find[/not|]}) {
 		/call argueString not| "${eventLine}"
-		/call check_selectedBots "${Macro.Return}" "${ChatSender}"
-		/if (${Macro.Return}) /varset includeBot FALSE
+		/call check_selectedBots "${c_argueString}" "${ChatSender}"
+		/if (${c_checkSelectedBots}) /varset includeBot FALSE
 	}
-	
-	| -Check for /include|
 	/if (${eventLine.Find[/include|]}) {
 		/call argueString include| "${eventLine}"
-		/call check_selectedBots "${Macro.Return}" "${ChatSender}"
-		/if (${Macro.Return}) /varset includeBot TRUE
+		/call check_selectedBots "${c_argueString}" "${ChatSender}"
+		/if (${c_checkSelectedBots}) /varset includeBot TRUE
 	}
 	
 /if (${Debug}) {
@@ -1132,7 +1168,7 @@ SUB verifyEvent(ChatSender, eventLine)
 /RETURN ${ChatSender}_${userValidated}_${includeBot}_${inZone}_${inRange}
 
 
-
+|----------------------------------------------------------------------------|
 #EVENT macroHelp "[MQ2] Help"
 #EVENT macroHelp "<#*#> Help"
 #EVENT macroHelp "[MQ2] Help #1#"
@@ -1190,8 +1226,6 @@ SUB EVENT_macroHelp(line, chapter)
 /if (${Debug}) /echo <== EVENT_macroHelp -|
 /RETURN
 
-
-
 |----------------------------------------------------------------------------|
 |- Build an ini file, of a given name, that contains alphabetized sections.	-|
 |----------------------------------------------------------------------------|
@@ -1199,7 +1233,6 @@ SUB EVENT_macroHelp(line, chapter)
 |----------------------------------------------------------------------------|
 SUB Build_Alphabetized_Ini(Ini_File)
 /if (${Debug}) /echo |- Build_Alphabetized_Ini ==>
-
 	/ini "${Ini_File}" A "A is for"
 	/ini "${Ini_File}" B "B is for"
 	/ini "${Ini_File}" C "C is for"
@@ -1226,11 +1259,8 @@ SUB Build_Alphabetized_Ini(Ini_File)
 	/ini "${Ini_File}" X "X is for"
 	/ini "${Ini_File}" Y "Y is for"
 	/ini "${Ini_File}" Z "Z is for"
-  
 /if (${Debug}) /echo |- Build_Alphabetized_Ini ==>
 /RETURN
-
-
 
 |----------------------------------------------------------------------------|
 |- Build an ini file, of a given name, that contains alphabetized sections.	-|
@@ -1239,7 +1269,6 @@ SUB Build_Alphabetized_Ini(Ini_File)
 |----------------------------------------------------------------------------|
 SUB Build_Class_Ini(Ini_File)
 /if (${Debug}) /echo |- Build_Class_Ini ==>
-
 	/ini "${Ini_File}" Bard "Bard is for"
 	/ini "${Ini_File}" Beastlord "Beastlord is for"
 	/ini "${Ini_File}" Berserker "Berserker is for"
@@ -1256,6 +1285,5 @@ SUB Build_Class_Ini(Ini_File)
 	/ini "${Ini_File}" Shaman "Shaman is for"
 	/ini "${Ini_File}" Warrior "Warrior is for"
 	/ini "${Ini_File}" Wizard "Wizard is for"
-  
 /if (${Debug}) /echo |- Build_Class_Ini ==>
 /RETURN

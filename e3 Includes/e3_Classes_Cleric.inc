@@ -8,14 +8,12 @@
 |-		Over-all functionality / flow										-|
 |----------------------------------------------------------------------------|
 
-
-
 SUB check_Yaulp
 /if (${Debug}) /echo |- check_clrYaulp ==>
 	/if (${AutoYaulp} && !${medBreak})  {
 		/declare castName string local ${yaulpSpell.Arg[1,/]}
 		| Auto-yaulp spell
-		/if (!${Bool[${Me.Buff[${castName}]}]} && ${Me.PctMana} < 95 && ${Spell[${castName}].Stacks}) {
+		/if (!${Bool[${Me.Buff[${castName}]}]} && ${Me.PctMana} < 95 && ${Spell[${castName}].NewStacks}) {
 			/if (${Target.ID}) /declare tempTarget int local ${Target.ID}
 			/casting "${castName}" -invis
 		}
@@ -26,22 +24,20 @@ SUB check_Yaulp
 |----------------------------------------------------------------------------|
 sub check_DivineArb
 /if (${Debug}) /echo |- check_DivineArb ==>
-	/if (${DivineArb_Pct} && ${Group}>1 ) {
+	/if (${DivineArb_Pct} && ${Group}>1 && ${dArbArray2D.Size[1]}>0) {
 		/declare i int local
+		/declare s int local
 		/for i 0 to ${Group}
 			/if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
-				/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 &&  ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
-            /if (${Me.Casting.ID}) /call interrupt
-					  /if (${Me.ItemReady[Aegis of Superior Divinity]}) {
-              /bc [+g+] Casting Aegis of Superior Divinity
-					    /casting "Aegis of Superior Divinity|item" -maxtries|2
-						} else /if (${Me.ItemReady[Harmony of the Soul]}) {
-              /bc [+g+] Casting Harmony of the Soul
-						  /casting "Harmony of the Soul|item" -maxtries|2
-						} else /if (${Me.AltAbilityReady[Divine Arbitration]}) {
-              /bc [+g+] Casting Divine Arbitration
-              /casting "Divine Arbitration|alt" -maxtries|2
+				/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 && ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
+          /for s 1 to ${dArbArray2D.Size[1]}
+            /call check_Ready "dArbArray2D" ${s}
+            /if (${c_Ready}) {
+              /if (${Me.Casting.ID}) /call interrupt
+              /bc [+g+] Casting ${dArbArray2D[${s},${iCastName}]} for ${Group.Member[${i}]}-NB:${NetBots[${Group.Member[${i}]}].PctHPs},SP:${Spawn[pc ${Group.Member[${i}]}].PctHPs}
+              /call e3_Cast ${Me.ID} "dArbArray2D" ${s}
 						}
+          /if (!${ActionTaken}) /next s
 				}
 			}
 		/if (!${ActionTaken}) /next i
@@ -66,12 +62,27 @@ sub check_celestialRegen
 		
 		/if (${groupSize}) {
 			/varcalc averageHP ${averageHP} / ${groupSize}
-			/if (${averageHP} < ${celestialRegen_Pct})  /casting "Celestial Regeneration|alt" "-targetid|${Me.ID}" "-maxtries|2"
+			/if (${averageHP} < ${celestialRegen_Pct})  /casting "Celestial Regeneration|alt" "-targetid|${Me.ID}" -maxtries|2
 		}
 	}
 /if (${Debug}) /echo <== check_celestialRegen -|
 /return
 
+|----------------------------------------------------------------------------|
+#event wordHeal "<#1#> WordHeal"
+sub Event_wordHeal(line, ChatSender)
+  /call checkEventArgs "${ChatSender}" "${line}" "UZR"
+  /if (!${c_eventArg}) /return
+  /delay 5s !${Me.Casting.ID}
+  /call check_Ready "wordHeal2D" 1
+  /if (${c_Ready}) {
+    /call check_Mana "wordHeal2D" 1
+    /if (${c_Mana}) {
+      /bc [+g+] Casting ${wordHeal2D[1,${iCastName}]}
+      /call e3_Cast ${Me.ID} "wordHeal2D" 1
+    }
+  }
+/return
 |----------------------------------------------------------------------------|
 #event Rez "<#1#> Rez"
 #event Rez "<#*#> Rez On #1#"
@@ -79,31 +90,24 @@ sub check_celestialRegen
 #event Rez "#*# tells you, 'Rez On #1#'"
 #event Rez "#1# tells the group, 'Rez'"
 sub Event_Rez(string line, string ChatSender)
-  /call defineRezSpell
-  |/echo ${rezArray2D.Size[1]} ${rezArray2D[1,${iCastName}]}  ${rezArray2D[1,${iCastType}]}
-  |/return
 	/if (${ChatSender.Left[1].Compare[ ]}<0) /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
-	/if ( ${Me.Class.ShortName.Equal[CLR]} && ${Spawn[${ChatSender}'s].ID}) {
+	/if (${Me.Class.ShortName.Equal[CLR]} && ${Spawn[${ChatSender}'s].ID}) {
 	  /varset canRez 0
     /call defineRezSpell
-    /delay 15s ${Bool[${Cast.Status.Find[I]}]}
     /call TrueTarget ${Spawn[${ChatSender}'s].ID}
     |/echo ${Target.ID}
     /call check_CorpseRezzable
-    |/echo checkcanrez ${Macro.Return}
     /if (${canRez}==1) {
+      :checkReady
+      /call check_Ready "rezArray2D" 1
       /call check_Mana "rezArray2D" 1
-      /if (${Macro.Return}) {
-        /call check_Ready "rezArray2D" 1
-        /if (${Macro.Return}) {
-          /tell ${ChatSender} Wait4Rez
-          /call e3_cast ${Spawn[${ChatSender}'s].ID} "rezArray2D" 1
-        } else {
-          /echo ${rezArray2D[1,${iCastName}]} is not ready to cast
-        }
-      } else {
-        /echo Not enough mana to cast ${rezArray2D[1,${iCastName}]}
+      /if ((!${c_Ready} || !${c_Mana}) && ${Me.CombatState.NotEqual[COMBAT]}) {
+        /if (!${Me.Sitting}) /sit on
+        /delay 1s
+        /goto :checkReady
       }
+      /tell ${ChatSender} Wait4Rez
+      /call e3_cast ${Spawn[${ChatSender}'s].ID} "rezArray2D" 1
     } else {
       /tell ${ChatSender} Your corpse ${Target.Name} is not eligible for rez
     }
@@ -118,47 +122,45 @@ sub Event_Rez(string line, string ChatSender)
 #EVENT AE_Rez "#1# tells you, 'AERez'"
 SUB EVENT_AE_Rez(string line, string ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_AE_Rez ==>
-
+  /call defineRezSpell
   /call BuildCorpseList
-
 	/if (!${CorpseListSize}) {
 		/echo I couldn't find any corpses to ressurect...
 	} else {
     /if (${NetAdvPath.Status}==1) /squelch /netfollow off
     /if (${Stick.Active}) /squelch /stick off
 
-    /declare numIterations int local 3
+    /declare numIterations int local 2
     /declare i int local
     /declare n int local
 		/declare playerName string local
 		/declare corpseID int local
-		/declare corpseList string local ,
 
     /for n 1 to ${numIterations}
-      /varset otherRezzing
       /for i 1 to ${CorpseListSize}
         /varset canRez 0
         /varset corpseID ${CorpseListPriority[${i}]}
         /varset playerName ${Spawn[id ${corpseID}].CleanName}
         /varset playerName ${playerName.Arg[1,']}
 
-        /call defineRezSpell
-        /call TrueTarget ${corpseID}
-
-        |/echo ${corpseList} ${corpseID} ${corpseList.Find[,${corpseID},]}
-        /if (${corpseList.Find[,${corpseID},]}) {
-          /echo I have already rezzed ${playerName} - ${corpseID}
+        /if (${corpseList.Find[${corpseID},]}) {
+          /echo I have already rezzed ${playerName}-${corpseID}
           /goto :skipRez
         }
+        /if (${otherRezList.Find[${corpseID},]}) {
+          /echo Someone is already rezzing ${playerName}-${corpseID}
+          /goto :skipRez
+        }
+        /call TrueTarget ${corpseID}
+        /delay 1
         /call check_CorpseRezzable
-
-        |/echo ${playerName} cid${corpseID} canrez${canRez} dist${Target.Distance}
 
         /if (${canRez}!=1) {
           /echo ${Target.Name} is not eligible for rez
-          /next i
+          /goto :skipRez
         } else {
           /tell ${playerName} Wait4Rez
+          /delay 3
           /if (${Target.Distance} > 15 && ${Target.Distance} < 100) {
             /corpse
             /delay 2
@@ -167,72 +169,76 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
               /goto :skipRez
             }
           }
-          |check if anyone else has rezd the corpse this iteration
-          |corpse can be rezd and is in range
-          /call check_Ready "rezArray2D" 1
-          /if (${Macro.Return}) {
-            /doevents check_otherRezzing
-            |/echo or${otherRezzing} cid${corpseID}-
-            /if (${Select[${otherRezzing},${corpseID}-]}) {
-              /echo Someone is already rezzing ${playerName} ${corpseID}
-              /goto :skipRez
-            }
-            /bc Resurrecting-${corpseID}
-            /delay 1
-            /call e3_cast ${corpseID} "rezArray2D" 1
-            /if (${castReturn.Equal[CAST_SUCCESS]}) /varset corpseList ${corpseList}${corpseID},
-          } else {
-            /echo ${rezArray2D[1,${iCastName}]} is not ready to cast
-          }
-        }
 
+          :checkReady
+          /call check_Ready "rezArray2D" 1
+          /call check_Mana "rezArray2D" 1
+          /if ((!${c_Ready} || !${c_Mana}) && ${Me.CombatState.NotEqual[COMBAT]}) {
+            /if (!${Me.Sitting}) /sit on
+            /delay 1s
+            /goto :checkReady
+          }
+
+          |/gu oRezList ${otherRezList}
+          /if (${corpseList.Find[${corpseID},]}) {
+            /echo I have already rezzed ${playerName}-${corpseID}
+            /goto :skipRez
+          }
+          /if (${otherRezList.Find[${corpseID},]}) {
+            /echo Someone is already rezzing ${playerName}-${corpseID}
+            /goto :skipRez
+          }
+          /gu Resurrecting-${corpseID}
+          /squelch /bca //RezzingCorpseID ${Me} ${corpseID}
+          /call e3_cast ${corpseID} "rezArray2D" 1
+          /if (${castReturn.Equal[CAST_SUCCESS]}) /varset corpseList ${corpseList}${corpseID},
+        }
       :skipRez
     /next i
+    /call BuildCorpseList
+    /varset otherRezList
+    /varset corpseList
   /next n
-  /docommand ${ChatToggle} All viable corpses nearby, have been ressurected.
+  /docommand ${ChatToggle} All nearby corpses have been resurrected.
  }
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_AE_Rez -|
 /RETURN
 
 |----------------------------------------------------------------------------|
+#bind otherRezzing /RezzingCorpseID
+SUB Bind_otherRezzing(whoIsRezzing,corpse_id)
+  /if (${Me.Class.ShortName.Equal[CLR]}) {
+    /echo ${whoIsRezzing} rezzing ${corpse_id}, added to otherRezList
+    /varset otherRezList ${otherRezList}${corpse_id},
+  }
+/return
+
+|----------------------------------------------------------------------------|
 #event CorpseExpired "This corpse #1# be resurrected."
 Sub Event_CorpseExpired(line, corpseExpired)
 /if (${Debug}) /echo |- EVENT_CorpseExpired
-  /if (!${corpseExpired.Equal[cannot]}) {
-    /varset canRez 1
-  } else  {
+  /if (${corpseExpired.Equal[cannot]}) {
     /varset canRez 2
+  } else  {
+    /varset canRez 1
   }
-/return !${corpseExpired.Equal[cannot]}
-
-|----------------------------------------------------------------------------|
-#event check_otherRezzing "<#1#> Resurrecting-#2#"
-SUB event_check_otherRezzing(line, ChatSender,corpseID)
-  /if (${Me.Name.NotEqual[${ChatSender}]}) /varset otherRezzing ${otherRezzing}${corpseID}-
-  /echo ${line} ${ChatSender} ${corpseID} ${Target.ID} ${otherRezzing}
-/RETURN ${otherRezzing}
+/return
 
 |----------------------------------------------------------------------------|
 Sub check_CorpseRezzable
   /declare conTimer timer local 5s
   /declare returnResult bool local FALSE
   /declare corpseOwner string local
-  /consider
+  /doevents CorpseExpired flush
+  /varset canRez 0
   :waitForExpired
+  /consider
+  /delay 2
   /doevents CorpseExpired
   /if (${canRez}==0 && ${conTimer}) {
     /goto :waitForExpired
   }
-  /if (${canRez}==1) /varset returnResult TRUE
-
-|  /varset corpseOwner ${Target.CleanName}
-|  /varset corpseOwner ${corpseOwner.Arg[1,']}
-  |if corpse is a netbot, that netbot is targeting its corpse and looting, then dont try to rez
-|  /if (${NetBots[${corpseOwner}]} && ${NetBots[${corpseOwner}].TargetID}==${Target.ID} && ${NetBots[${corpseOwner}].State.Equal[BIND]}) {
-|    /varset canRez 2
-|  }
-|  /echo check_rezzable ${canRez}
-/RETURN ${returnResult}
+/RETURN
 
 |----------------------------------------------------------------------------|
 Sub BuildCorpseList
@@ -266,9 +272,9 @@ Sub BuildCorpseList
   }
   /next c
 
-  |add bst,enc,pal,rng
+  |add bst,enc,pal,rng,shd
   /for c 1 to ${CorpseListSize}
-  /if (${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName},BST,ENC,PAL,RNG]}) {
+  /if (${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName},PAL,SHD,RNG,BST,ENC,MAG,WIZ,NEC]}) {
     /varset CorpseListPriority[${p}] ${CorpseList[${c}]}
     /varcalc p ${p}+1
   }
@@ -276,7 +282,7 @@ Sub BuildCorpseList
 
   |add the rest
   /for c 1 to ${CorpseListSize}
-  /if (!${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName.Equal[CLR]},CLR,DRU,SHM,WAR,BST,ENC,PAL,RNG]}) {
+  /if (${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName},ROG,MNK,BER,BRD]}) {
     /varset CorpseListPriority[${p}] ${CorpseList[${c}]}
     /varcalc p ${p}+1
   }
@@ -317,7 +323,6 @@ Sub defineRezSpell
     /declare rezArray[1] string outer ${rezSpell}
     /if (${rezArray.Size}) {
       /call BuildSpellArray "rezArray" "rezArray2D"
-      |/varset rezArray2D[1,${iSubToRun}] check_CorpseRezzable
       }
   } else {
     /bc I do not have a resurrection spell available
@@ -332,17 +337,30 @@ Sub CLR_Setup
   | 2 cannot rez
   /declare canRez int outer 0
   /declare CorpseListSize int outer 0
-  /declare otherRezzing string outer
-	/call InitoVar "${Character_Ini},Cleric,Divine Arbitration (Pct)" DivineArb_Pct int outer
-	/call InitoVar "${Character_Ini},Cleric,Celestial Regeneration (Pct)" celestialRegen_Pct int outer
-	/call InitoVar "${Character_Ini},Cleric,Auto-Yaulp (On/Off)" AutoYaulp bool outer
-	/call InitoVar "${Character_Ini},Cleric,Yaulp Spell" yaulpSpell string outer
+  /declare otherRezList string outer
+  /declare corpseList string outer
+	/call iniToVarV "${Character_Ini},Cleric,Divine Arbitration (Pct)" DivineArb_Pct int outer
+	/call iniToVarV "${Character_Ini},Cleric,Celestial Regeneration (Pct)" celestialRegen_Pct int outer
+	/call iniToVarV "${Character_Ini},Cleric,Auto-Yaulp (On/Off)" AutoYaulp bool outer
+	/call iniToVarV "${Character_Ini},Cleric,Yaulp Spell" yaulpSpell string outer
 	/if (${AutoYaulp}) {
 		/if (!${Defined[yaulpSpell]} || !${yaulpSpell.Length} || !${Me.Book[${yaulpSpell.Arg[1,/]}]}) {
 			/echo ERROR! ${Character_Ini} > [Cleric] > Yaulp Spell is not correctly defined.  Please check this entry, and restart the macro.
 			/varset AutoYaulp FALSE
 		}
 	}
+
+  /if (${Bool[${Me.Book[Word Of Vivification]}]}) {
+    /call BuildArray wordHeal "Word Of Vivification"
+    /call BuildSpellArray "wordHeal" "wordHeal2D"
+  }
+
+  /if (${Bool[${FindItem[Aegis of Superior Divinity].InvSlot}]}) /call BuildArray dArbArray "Aegis of Superior Divinity"
+  /if (${Bool[${FindItem[Harmony of the Soul].InvSlot}]}) /call BuildArray dArbArray "Harmony of the Soul"
+  /if (${Bool[${Me.AltAbility[Divine Arbitration]}]}) /call BuildArray dArbArray "Divine Arbitration"
+  /if (${dArbArray.Size}>0) /call BuildSpellArray "dArbArray" "dArbArray2D"
+
+
 /if (${Debug}) /echo <== CLR_Setup -|
 /return
 
@@ -386,12 +404,12 @@ sub Event_AE_CR(string line)
 /if (${Me.Class.ShortName.Equal[CLR]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Celestial Regeneration]}) {
      /bc MGB Celestial Regeneration inc...
-     /casting "Mass Group Buff|alt" "-maxtries|3"
+     /casting "Mass Group Buff|alt" -maxtries|3
      /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
      /delay 5
-     /casting "Celestial Regeneration|alt" "-maxtries|3"
+     /casting "Celestial Regeneration|alt" -maxtries|3
      /delay 5 !${Me.AltAbilityReady[Celestial Regeneration]}
-     /casting "Celestial Regeneration|alt" "-maxtries|3"
+     /casting "Celestial Regeneration|alt" -maxtries|3
      /rs MGB Celestial Regeneration inc...
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...
@@ -399,21 +417,8 @@ sub Event_AE_CR(string line)
 }
 /return
 
-|----------------------------------------------------------------------------|
-#event WardofPurity "#*# tells you, 'WardofPurity'"
-sub Event_WardofPurity(string line)
-  /if (${Me.Class.ShortName.Equal[CLR]}) {
-    /if (${Me.AltAbilityReady[Ward of Purity]}) {
-      /bc Ward of Purity inc...
-      /casting "Ward of Purity|alt" "-maxtries|3"
-      /rs Ward of Purity inc...
-    } else /bc Ward of Purity is not available...
-  }
-/return
-
 Sub CLR_Background_Events
   /doevents AE_CR
   /doevents AE_Rez
   /doevents Rez
-  /doevents WardofPurity
 /return

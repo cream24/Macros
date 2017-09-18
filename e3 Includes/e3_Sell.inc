@@ -36,7 +36,7 @@ SUB EVENT_syncInventory
 	
 		| If there is an item in inventory slot ${i}
 		/if (${Bool[${InvSlot[pack${i}].Item}]}) {
-			/call get_lootSetting "pack${i}"
+			/call get_lootSetting "pack${i}" 0
 		
 			| If the item is a container..
 			/if (${InvSlot[pack${i}].Item.Container}) {
@@ -199,7 +199,7 @@ SUB openMerchant(int providedID)
 	
 		| Move to the merchant.
 		/call TrueTarget ${merchantID}
-		/call MoveTo -SpawnID|${merchantID}
+		/call MoveTo ${Target.Y} ${Target.X} 80
 	
 		| Open Trade with merchant.
 		/if (${Target.Distance} < 20) {
@@ -261,7 +261,6 @@ SUB closeMerchant
 |- Sells items in your inventory that have been flagged as [/Sell] in your Loot_Ini.	-|
 |----------------------------------------------------------------------------------------|
 SUB sellItems
-/varset Debug TRUE
 /if (${Debug} || ${Debug_Sell}) /echo |- sellItems ==>
 
 	/declare lootSetting string local
@@ -284,7 +283,6 @@ SUB sellItems
 					
 						| Get the loot setting for the item in pack slot 'i' slot 'e'
 						/call get_lootSetting "pack${i}" "${e}"
-						/varset lootSetting ${Macro.Return}
 					
 						| Destroy the item
 						/if (${lootSetting.Find[Destroy]}) {
@@ -364,8 +362,7 @@ SUB sellItems
 			} else {
 			
 				| Get the loot setting for the item in pack slot 'i'
-				/call get_lootSetting "pack${i}"
-				/varset lootSetting ${Macro.Return} 		
+				/call get_lootSetting "pack${i}" 0
 			
 				| Destroy the item
 				/if (${lootSetting.Find[Destroy]}) {
@@ -443,7 +440,6 @@ SUB sellItems
 	/next i
 
 /if (${Debug} || ${Debug_Sell}) /echo <== sellItems -|
-/varset Debug FALSE
 /RETURN
 
 
@@ -536,10 +532,10 @@ SUB destroyItems
 
 
 SUB sell_Setup
-/call INItoVar "${advSettings_Ini},Debug,Debug Sell (On/Off)" Debug_Sell bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Sell (On/Off)" Debug_Sell bool outer
 /if (${Debug} || ${Debug_Sell}) /echo |- sell_Setup ==>
 
-	/call IniToVar "${genSettings_Ini},Sell,Destroy Unsold Items(On/Off)" destroyUnsold bool outer
+	/call iniToVarV "${genSettings_Ini},Sell,Destroy Unsold Items(On/Off)" destroyUnsold bool outer
 
 /if (${Debug} || ${Debug_Sell}) /echo <== sell_Setup -|
 /RETURN

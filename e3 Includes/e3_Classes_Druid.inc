@@ -3,7 +3,7 @@
 |- Written by Killians of PEQ												-|
 |----------------------------------------------------------------------------|
 Sub DRU_Setup
-	/call IniToVar "${Character_Ini},Druid,Evac Spell" Evac_Spell string outer
+	/call iniToVarV "${Character_Ini},Druid,Evac Spell" Evac_Spell string outer
 /return
 
 SUB DRU_MacroSettings
@@ -31,12 +31,12 @@ sub Event_AE_SOW(string line)
 	/if (${Me.Class.ShortName.Equal[DRU]}) {
 	 /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Spirit of the Wood]}) {
 		 /bc MGB Spirit of the Wood inc...
-		 /casting "Mass Group Buff|alt" "-maxtries|3"
+		 /casting "Mass Group Buff|alt" -maxtries|3
 		 /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
 		 /delay 5
-		 /casting "Spirit of the Wood|alt" "-maxtries|3"
+		 /casting "Spirit of the Wood|alt" -maxtries|3
 		 /delay 5 !${Me.AltAbilityReady[Spirit of the Wood]}
-		 /casting "Spirit of the Wood|alt" "-maxtries|3"
+		 /casting "Spirit of the Wood|alt" -maxtries|3
 		 /rs MGB Spirit of the Wood inc...
 	 } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
 			/bc Mass Group Buff is not available...

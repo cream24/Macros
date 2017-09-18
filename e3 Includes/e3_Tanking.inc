@@ -123,9 +123,8 @@ SUB peelTank
 
 #event SetTank "<#1#> Set Tank #2# Puller #3#"
 SUB event_SetTank(line, ChatSender, tankName, pullerName)
-  /call verifyEvent "${ChatSender}" "${line}"
-  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-    |puller
+  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${pullerName}"
+  /if (!${c_eventArg}) /return
     /if (${pullerName.Equal[Off]}) {
       /varset currentPuller 0
     } else /if (${Bool[${NetBots[${pullerName}].InZone}]}) {

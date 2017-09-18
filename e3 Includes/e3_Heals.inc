@@ -4,8 +4,6 @@
 |------------------------------------------------------------------------|
 |- Contains heal related functions for e3.mac							-|
 |------------------------------------------------------------------------|
-
-
 |------------------------------------------------------------|
 |- Heals.inc's mainLoop hook.								-|	
 |------------------------------------------------------------|					
@@ -13,11 +11,11 @@
 |------------------------------------------------------------|
 SUB check_Heals
 /if (${Debug} || ${Debug_Heals}) /echo |- healLoop  ==>
+  /doevents wordHeal
 	/if (${do_GroupHeals}) 							      /call groupHeals
 	/if (!${ActionTaken} && ${healTanks}) 		/call heal_tanks
 	/if (!${ActionTaken} && ${healImportant}) /call heal_importantBots
 	/if (!${ActionTaken} && ${healAll}) 			/call heal_allbots
-  /if (!${ActionTaken} && ${healPets}) 			/call heal_Pets
 	/if (!${ActionTaken} && ${hotTanks}) 			/call hot_tanks
 	/if (!${ActionTaken} && ${hotImportant}) 	/call hot_importantBots
 	/if (!${ActionTaken} && ${hotAll}) 				/call hot_allbots
@@ -37,14 +35,14 @@ SUB check_lifeSupport
 		/for i 1 to ${lifeSupport2D.Size[1]}	
 			/if (${Me.PctHPs} <= ${lifeSupport2D[${i},${iHealPct}]}) {
 				/call check_Ready "lifeSupport2D" "${i}"
-				/if (${Macro.Return}) {
+				/if (${c_Ready}) {
 					/if (${Bool[${Me.AbilityReady[${lifeSupport2D[${i},${iCastName}]}]}]}) {
-            /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[Brd]}) /call interrupt
+            /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 						/doability "${lifeSupport2D[${i},${iCastName}]}"
 					} else {
 						/call check_Mana "lifeSupport2D" "${i}"
-						/if (${Macro.Return}) {
-							/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[Brd]}) /call interrupt
+						/if (${c_Mana}) {
+							/if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 							/call e3_Cast ${Me.ID} "lifeSupport2D" ${i}
 						}
 					}
@@ -68,14 +66,11 @@ SUB heal_tanks
 		/for s 1 to ${tankHeals2D.Size[1]}
 			/if (${Bool[${NetBots[${tanks[${t}]}].InZone}]} && ${NetBots[${tanks[${t}]}].PctHPs} <= ${tankHeals2D[${s},${iHealPct}]}) {
 				/call check_Ready "tankHeals2D" ${s}
-				|/echo check_Ready ${Macro.Return}
-				/if (${Macro.Return}) {
+				/if (${c_Ready}) {
 					/call check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]}
-					|/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
-					/if (${Macro.Return}) {
+					/if (${c_Dist}) {
 						/call check_Mana "tankHeals2D" ${s}
-						|/echo check_Mana ${Macro.Return}
-						/if (${Macro.Return}) {
+						/if (${c_Mana}) {
 							/varset currentBot ${tanks[${t}]}
 							/varset currentSpellIndx ${s}
 						}
@@ -104,17 +99,12 @@ SUB heal_importantBots
   /for t 1 to ${importantBots.Size}
     /for s 1 to ${importantHeals2D.Size[1]}
     /if (${Bool[${NetBots[${importantBots[${t}]}].InZone}]} && ${NetBots[${importantBots[${t}]}].PctHPs} <= ${importantHeals2D[${s},${iHealPct}]}) {
-      |/echo ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${importantHeals2D[${s},${iHealPct}]}
       /call check_Ready "importantHeals2D" ${s}
-      |/echo check_Ready ${Macro.Return}
-      /if (${Macro.Return}) {
+      /if (${c_Ready}) {
         /call check_Distance ${NetBots[${importantBots[${t}]}].ID} ${importantHeals2D[${s},${iMyRange}]}
-        |/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
-        /if (${Macro.Return}) {
+        /if (${c_Dist}) {
           /call check_Mana "importantHeals2D" ${s}
-          |/echo check_Mana ${Macro.Return} ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs}  ${NetBots[${currentBot}].PctHPs}
-          /if (${Macro.Return}) {
-            |/echo currbot ${Bool[${currentBotID}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${NetBots[${currentBot}].PctHPs}
+          /if (${c_Mana}) {
             /if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
               /varset currentBot ${importantBots[${t}]}
               /varset currentSpellIndx ${s}
@@ -155,14 +145,11 @@ SUB heal_Allbots
 		/for s 1 to ${allHeals2D.Size[1]}
 			/if (${Bool[${NetBots[${currClient}].InZone}]} && ${NetBots[${currClient}].PctHPs} <= ${allHeals2D[${s},${iHealPct}]}) {
 				/call check_Ready "allHeals2D" ${s}
-				|/echo check_Ready ${Macro.Return}
-				/if (${Macro.Return}) {
+				/if (${c_Ready}) {
 					/call check_Distance ${NetBots[${currClient}].ID} ${allHeals2D[${s},${iMyRange}]}
-					|/echo check_Distance ${NetBots[${currClient}].ID} ${allHeals2D[${s},${iMyRange}]} ${Macro.Return}
-					/if (${Macro.Return}) {
+					/if (${c_Dist}) {
 						/call check_Mana "allHeals2D" ${s}
-						|/echo check_Mana ${Macro.Return}
-						/if (${Macro.Return}) {
+						/if (${c_Mana}) {
 							/if (!${Bool[${currentBot}]} || ${NetBots[${currClient}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
 								/varset currentBot ${currClient}
 								/varset currentSpellIndx ${s}
@@ -196,12 +183,10 @@ SUB heal_pets
 		/for s 1 to ${petHeals2D.Size[1]}
 			/if (${NetBots[${petOwners[${t}]}].PetHP} <= ${petHeals2D[${s},${iHealPct}]}) {
 				/call check_Ready "petHeals2D" ${s}
-				|/echo check_Ready ${Macro.Return}
-				/if (${Macro.Return}) {
+				/if (${c_Ready}) {
 					/if (${Spawn[pc =${petOwners[${t}]}].Pet.Distance} < ${petHeals2D[${s},${iMyRange}]}) {
 						/call check_Mana "petHeals2D" ${s}
-						|/echo check_Mana ${Macro.Return}
-						/if (${Macro.Return}) {
+						/if (${c_Mana}) {
 							/if (!${Bool[${currentBot}]} || ${NetBots[${petOwners[${t}]}].PetHP} < ${NetBots[${currentBot}].PetHP}) {
 								/varset currentBot ${petOwners[${t}]}
 								/varset currentSpellIndx ${s}								
@@ -233,17 +218,13 @@ SUB hot_tanks
 		/for s 1 to ${hotSpells2D.Size[1]}
 			/if (${Bool[${NetBots[${tanks[${t}]}].InZone}]} && ${NetBots[${tanks[${t}]}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
 				/call check_HotTankStack "${tanks[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
-				|/echo hotstack ${Macro.Return} ${hotSpells2D[${s},${iSpellID}]} ${hotSpells2D[${s},${iCastID}]} ${hotSpells2D[${s},${iCastName}]}
-				/if (${Macro.Return}) {			
+				/if (${c_SubToRun}) {
 					/call check_Ready "hotSpells2D" ${s}
-					|/echo check_Ready ${Macro.Return}
-					/if (${Macro.Return}) {
+					/if (${c_Ready}) {
 						/call check_Distance ${NetBots[${tanks[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]}
-						|/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]} ${Macro.Return}
-						/if (${Macro.Return}) {
+						/if (${c_Dist}) {
 							/call check_Mana "hotSpells2D" ${s}
-							|/echo check_Mana ${Macro.Return}
-							/if (${Macro.Return}) {					
+							/if (${c_Mana}) {
 								/varset currentBot ${tanks[${t}]}
 								/varset currentSpellIndx ${s}
 							}
@@ -275,17 +256,13 @@ SUB hot_importantBots
     /for s 1 to ${hotSpells2D.Size[1]}
     /if (${Bool[${NetBots[${importantBots[${t}]}].InZone}]} && ${NetBots[${importantBots[${t}]}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
 		/call check_HotImportantBotStack "${importantBots[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
-		/if (${Macro.Return}) {	
+		/if (${c_SubToRun}) {
 		  /call check_Ready "hotSpells2D" ${s}
-		  |/echo check_Ready ${Macro.Return}
-		  /if (${Macro.Return}) {
+		  /if (${c_Ready}) {
 			/call check_Distance ${NetBots[${importantBots[${t}]}].ID} ${hotSpells2D[${s},${iMyRange}]}
-			|/echo check_Distance ${NetBots[${tanks[${t}]}].ID} ${tankHeals2D[${s},${iMyRange}]} ${Macro.Return}
-			/if (${Macro.Return}) {
+			/if (${c_Dist}) {
 			  /call check_Mana "hotSpells2D" ${s}
-			  |/echo check_Mana ${Macro.Return} ${importantBots[${t}]} ${NetBots[${importantBots[${t}]}].PctHPs}  ${NetBots[${currentBot}].PctHPs}
-			  /if (${Macro.Return}) {
-				|/echo currbot ${Bool[${currentBotID}]} ${NetBots[${importantBots[${t}]}].PctHPs} ${NetBots[${currentBot}].PctHPs}
+			  /if (${c_Mana}) {
 				/if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
 				  /varset currentBot ${importantBots[${t}]}
 				  /varset currentSpellIndx ${s}
@@ -326,16 +303,13 @@ SUB hot_Allbots
 		/for s 1 to ${hotSpells2D.Size[1]}
 			/if (${Bool[${NetBots[${currClient}].InZone}]} && ${NetBots[${currClient}].PctHPs} <= ${hotSpells2D[${s},${iHealPct}]}) {
 				/call check_HotAllStack "${currClient}" ${hotSpells2D[${s},${iSpellID}]}
-				/if (${Macro.Return}) {						
+				/if (${c_SubToRun}) {
 					/call check_Ready "hotSpells2D" ${s}
-					|/echo check_Ready ${Macro.Return}
-					/if (${Macro.Return}) {
+					/if (${c_Ready}) {
 						/call check_Distance ${NetBots[${currClient}].ID} ${hotSpells2D[${s},${iMyRange}]}
-						|/echo check_Distance ${NetBots[${currClient}].ID} ${hotSpells2D[${s},${iMyRange}]} ${Macro.Return}
-						/if (${Macro.Return}) {
+						/if (${c_Dist}) {
 							/call check_Mana "hotSpells2D" ${s}
-							|/echo check_Mana ${Macro.Return}
-							/if (${Macro.Return}) {
+							/if (${c_Mana}) {
 								/if (!${Bool[${currentBot}]} || ${NetBots[${currClient}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
 									/varset currentBot ${currClient}
 									/varset currentSpellIndx ${s}
@@ -371,14 +345,12 @@ SUB hot_pets
       /for s 1 to ${hotSpells2D.Size[1]}
       /if (${NetBots[${petOwners[${t}]}].PetHP} <= ${hotSpells2D[${s},${iHealPct}]}) {
         /call check_HotPetStack "${petOwners[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
-        /if (${Macro.Return}) {
+        /if (${c_SubToRun}) {
           /call check_Ready "hotSpells2D" ${s}
-          |/echo check_Ready ${Macro.Return}
-          /if (${Macro.Return}) {
+          /if (${c_Ready}) {
             /if (${Spawn[pc =${petOwners[${t}]}].Pet.Distance} < ${hotSpells2D[${s},${iMyRange}]}) {
               /call check_Mana "hotSpells2D" ${s}
-              |/echo check_Mana ${Macro.Return}
-              /if (${Macro.Return}) {
+              /if (${c_Mana}) {
                 /if (!${Bool[${currentBot}]} || ${NetBots[${petOwners[${t}]}].PetHP} < ${NetBots[${currentBot}].PetHP}) {
                   /varset currentBot ${petOwners[${t}]}
                   /varset currentSpellIndx ${s}
@@ -402,7 +374,7 @@ SUB hot_pets
 |- Check Tank hot stacking					    -|
 |------------------------------------------------|
 SUB check_HotTankStack(targetName, spellID)
-	/declare passCheck bool local TRUE
+	/varset c_SubToRun TRUE
 	/declare i int local
 	/if (!${Defined[targetName]}) {
 		/declare targShortBuff string local ${NetBots[${Target.CleanName}].ShortBuff.Replace[ ,,]}
@@ -410,19 +382,19 @@ SUB check_HotTankStack(targetName, spellID)
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
 	/if (${targShortBuff.Find[${spellID},]}) {
-	  /varset passCheck FALSE
+	  /varset c_SubToRun FALSE
   } else {
     /for i 1 to ${hotTankNoStack.Size}
-      /if (${Select[${hotTankNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+      /if (${Select[${hotTankNoStack[${i}]},${targShortBuff}]}) /varset c_SubToRun FALSE
     /next i
 	}
-/RETURN ${passCheck}
+/RETURN
 
 |------------------------------------------------|
 |- Check Important Bot hot stacking				-|
 |------------------------------------------------|
 SUB check_HotImportantBotStack(targetName, spellID)
-	/declare passCheck bool local TRUE
+	/varset c_SubToRun TRUE
 	/declare i int local
 	/if (!${Defined[targetName]}) {
 		/declare targShortBuff string local ${NetBots[${Target.CleanName}].ShortBuff.Replace[ ,,]}
@@ -430,19 +402,19 @@ SUB check_HotImportantBotStack(targetName, spellID)
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
   /if (${Bool[${spellID}]} && ${targShortBuff.Find[${spellID},]}) {
-    /varset passCheck FALSE
+    /varset c_SubToRun FALSE
   } else {
     /for i 1 to ${hotImportantNoStack.Size}
-      /if (${Select[${hotImportantNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+      /if (${Select[${hotImportantNoStack[${i}]},${targShortBuff}]}) /varset c_SubToRun FALSE
     /next i
   }
-/RETURN ${passCheck}
+/RETURN
 
 |------------------------------------------------|
 |- Check Netbot Bot hot stacking				-|
 |------------------------------------------------|
 SUB check_HotAllStack(targetName, spellID)
-	/declare passCheck bool local TRUE
+	/varset c_SubToRun TRUE
 	/declare i int local
 	/if (!${Defined[targetName]}) {
 		/declare targShortBuff string local ${NetBots[${Target.CleanName}].ShortBuff.Replace[ ,,]}
@@ -450,19 +422,19 @@ SUB check_HotAllStack(targetName, spellID)
 		/declare targShortBuff string local ${NetBots[${targetName}].ShortBuff.Replace[ ,,]}
 	}
   /if (${Bool[${spellID}]} && ${targShortBuff.Find[${spellID},]}) {
-    /varset passCheck FALSE
+    /varset c_SubToRun FALSE
   } else {
     /for i 1 to ${hotAllNoStack.Size}
-      /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+      /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset c_SubToRun FALSE
     /next i
   }
-/RETURN ${passCheck}
+/RETURN
 
 |------------------------------------------------|
 |- Check Pet hot stacking				-|
 |------------------------------------------------|
 SUB check_HotPetStack(targetName, spellID)
-  /declare passCheck bool local TRUE
+  /varset c_SubToRun TRUE
   /declare i int local
   /if (!${Defined[targetName]}) {
     /declare targShortBuff string local ${NetBots[${Target.CleanName}].PetBuff.Replace[ ,,]}
@@ -470,44 +442,44 @@ SUB check_HotPetStack(targetName, spellID)
     /declare targShortBuff string local ${NetBots[${targetName}].PetBuff.Replace[ ,,]}
   }
   /if (${Bool[${spellID}]} && ${targShortBuff.Find[${spellID},]}) {
-    /varset passCheck FALSE
+    /varset c_SubToRun FALSE
   } else {
     /for i 1 to ${hotAllNoStack.Size}
-      /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset passCheck FALSE
+      /if (${Select[${hotAllNoStack[${i}]},${targShortBuff}]}) /varset c_SubToRun FALSE
     /next i
   }
-/RETURN ${passCheck}
+/RETURN
 
 
 |----------------------------------------|
 |- Checks while casting tank heals		-|
 |----------------------------------------|
 SUB check_HealTankCasting
-	/declare passCheck bool local FALSE
-	/if (${castEndTime} > ${interruptTankCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset passCheck TRUE
+	/varset c_SubToRun FALSE
+	/if (${castEndTime} > ${interruptTankCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset c_SubToRun TRUE
   |/echo cth ${Target.CleanName} nb ${NetBots[${Target.CleanName}].PctHPs} s ${Spawn[${Target.CleanName}].PctHPs} cet ${castEndTime} ${passCheck} ${interruptTankCastSec}
-/RETURN ${passCheck}
+/RETURN
 |----------------------------------------|
 |- Checks while casting important heals	-|
 |----------------------------------------|
 SUB check_HealImportantCasting
-	/declare passCheck bool local FALSE
-	/if (${castEndTime} > ${interruptImportantCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset passCheck TRUE
-/RETURN ${passCheck} 
+	/varset c_SubToRun FALSE
+	/if (${castEndTime} > ${interruptImportantCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset c_SubToRun TRUE
+/RETURN
 |----------------------------------------|
 |- Checks while casting all heals		-|
 |----------------------------------------|
 SUB check_HealAllCasting
-	/declare passCheck bool local FALSE
-	/if (${castEndTime} > ${interruptAllCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset passCheck TRUE
-/RETURN ${passCheck} 
+	/varset c_SubToRun FALSE
+	/if (${castEndTime} > ${interruptAllCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset c_SubToRun TRUE
+/RETURN
 |----------------------------------------|
 |- Checks while casting all heals		-|
 |----------------------------------------|
 SUB check_HealPetCasting
-	/declare passCheck bool local FALSE
-	/if (${castEndTime} > ${interruptAllCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset passCheck TRUE
-/RETURN ${passCheck}
+	/varset c_SubToRun FALSE
+	/if (${castEndTime} > ${interruptAllCastSec} || ${Spawn[id ${Target.ID}].PctHPs} < ${interruptHealPct}) /varset c_SubToRun TRUE
+/RETURN
 
 |-------------------------------------------|
 |-Set Recent Heal Timer Based on CastReturn-|
@@ -525,32 +497,26 @@ SUB check_HealPetCasting
 |----------------------------------------|
 SUB check_HealGroupCasting(ArrayName, int ArrayIndex)
 /if (${Debug} || ${Debug_Heals}) /echo |- check_HealGroupCasting ==>
-	/declare passCheck		bool local FALSE
+	/varset c_SubToRun FALSE
 	/declare avgGrpHealth	int local ${Me.PctHPs}
 	/declare numLowHp		int local 0
 	/declare targetCount	int local 1
 	/declare g				int local
 	/if (${Me.PctHPs} <= ${${ArrayName}[${ArrayIndex},${iHealPct}]}) /varset numLowHp 1
-			
 	| Check range of group members, count number below pcthp and add their healths together.
 	/for g 1 to ${Group}
 		/call check_Distance ${Group.Member[${g}].ID} ${${ArrayName}[${ArrayIndex},${iMyRange}]}
-		/if (${Macro.Return}) {
+		/if (${c_Dist}) {
 			/varcalc targetCount ${targetCount} + 1
 			/varcalc avgGrpHealth ${avgGrpHealth} + ${NetBots[${Group.Member[${g}]}].PctHPs}
 			/if (${Bool[${NetBots[${Group.Member[${g}]}].ID}]} && ${NetBots[${Group.Member[${g}]}].PctHPs}  <= ${${ArrayName}[${ArrayIndex},${iHealPct}]}) /varcalc numLowHp ${numLowHp} + 1
 		}
-	|/echo ${NetBots[${Group.Member[${g}]}].PctHPs} ${${ArrayName}[${ArrayIndex},${iHealPct}]}
 	/next g
-	
 	| must have at least 3 targets and avg group health below HealPct					
 	/varcalc avgGrpHealth ${avgGrpHealth} / ${targetCount}
-|	  /echo numlow ${numLowHp} avgg ${avgGrpHealth} healpct ${${ArrayName}[${ArrayIndex},${iHealPct}]}
-	/if (${numLowHp} > 2 && ${avgGrpHealth} <= ${${ArrayName}[${ArrayIndex},${iHealPct}]}) /varset passCheck TRUE
-	
-	|/echo ${passCheck} ${numLowHp} ${avgGrpHealth}
+	/if (${numLowHp} > 2 && ${avgGrpHealth} <= ${${ArrayName}[${ArrayIndex},${iHealPct}]}) /varset c_SubToRun TRUE
 /if (${Debug} || ${Debug_Heals}) /echo <== check_HealGroupCasting -|	
-/RETURN ${passCheck}
+/RETURN
 
 |-----------------------------------------------|
 | Cast group heals when group has
@@ -565,12 +531,11 @@ SUB groupHeals
 		
 		/for s 1 to ${groupHeals2D.Size[1]}
 			/call check_HealGroupCasting "groupHeals2D" ${s}
-			/if (${Macro.Return}) {
+			/if (${c_SubToRun}) {
 				/call check_Mana "groupHeals2D" ${s}
-				/if (${Macro.Return}) {		
+				/if (${c_Mana}) {
 					/call check_Ready "groupHeals2D" ${s}
-					/if (${Macro.Return}) {	
-						|/echo check_HealGroupCasting
+					/if (${c_Ready}) {
 						/call e3_Cast ${Me.ID} "groupHeals2D" ${s}
 					}
 				}
@@ -586,7 +551,7 @@ SUB groupHeals
 |- Imports and validates ini settings from Character Ini,[Heals].	-|
 |--------------------------------------------------------------------|
 SUB heal_Setup
-/call INItoVar "${advSettings_Ini},Debug,Debug Heals (On/Off)" Debug_Heals bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Heals (On/Off)" Debug_Heals bool outer
 /if (${Debug} || ${Debug_Heals}) /echo |- heal_Setup ==>
 	| CONFIGURABLE
 	|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
@@ -617,16 +582,16 @@ SUB heal_Setup
   /declare hotAll bool outer FALSE
   /declare hotPets bool outer FALSE
 
-  /call ListToArray "hotTankNoStack"		  "${hotTankNoStackStr}"		  "outer" ","
-  /call ListToArray "hotImportantNoStack" "${hotImportantNoStackStr}" "outer" ","
-  /call ListToArray "hotAllNoStack"		    "${hotAllNoStackStr}" 		  "outer" ","
+  /call ListToArray "hotTankNoStack"		  "${hotTankNoStackStr}"		  ","
+  /call ListToArray "hotImportantNoStack" "${hotImportantNoStackStr}" ","
+  /call ListToArray "hotAllNoStack"		    "${hotAllNoStackStr}" 		  ","
 
   /if (${Bool[${Ini[${Character_Ini},Heals]}]}) {
-    /if (${Ini[${Character_Ini},Heals,Who to Heal].Length})		/call IniToVar "${Character_Ini},Heals,Who to Heal"		 WhoToHeal string outer
-    /if (${Ini[${Character_Ini},Heals,Who to HoT].Length})		/call IniToVar "${Character_Ini},Heals,Who to HoT"		 WhoToHoT string outer
-    /call #IniToArray "${Character_Ini},Heals,Tank#"           tanks
-    /call #IniToArray "${Character_Ini},Heals,Important Bot#"  importantBots
-    /call #IniToArray "${Character_Ini},Heals,Pet Owner#"      petOwners
+    /if (${Ini[${Character_Ini},Heals,Who to Heal].Length})		/call iniToVarV "${Character_Ini},Heals,Who to Heal"		 WhoToHeal string outer
+    /if (${Ini[${Character_Ini},Heals,Who to HoT].Length})		/call iniToVarV "${Character_Ini},Heals,Who to HoT"		 WhoToHoT string outer
+    /call IniToArrayV "${Character_Ini},Heals,Tank#"           tanks
+    /call IniToArrayV "${Character_Ini},Heals,Important Bot#"  importantBots
+    /call IniToArrayV "${Character_Ini},Heals,Pet Owner#"      petOwners
   }
 
   /call heal_SpellArrays
@@ -637,14 +602,14 @@ SUB heal_Setup
 |--------------------------------------------------------------------------------------------------------------------------------
 SUB heal_SpellArrays
 | Import settings from Character_Ini
-  /call #IniToArray "${Character_Ini},Life Support,Life Support#" lifeSupport
+  /call IniToArrayV "${Character_Ini},Life Support,Life Support#" lifeSupport
   /if (${Bool[${Ini[${Character_Ini},Heals]}]}) {
-    /call #IniToArray "${Character_Ini},Heals,Tank Heal#"             tankHeals
-    /call #IniToArray "${Character_Ini},Heals,Important Heal#"        importantHeals
-    /call #IniToArray "${Character_Ini},Heals,All Heal#"              allHeals
-    /call #IniToArray "${Character_Ini},Heals,Pet Heal#"              petHeals
-    /call #IniToArray "${Character_Ini},Heals,Heal Over Time Spell#"  hotSpells
-    /call #IniToArray "${Character_Ini},Heals,Group Heal#"            groupHeals
+    /call IniToArrayV "${Character_Ini},Heals,Tank Heal#"             tankHeals
+    /call IniToArrayV "${Character_Ini},Heals,Important Heal#"        importantHeals
+    /call IniToArrayV "${Character_Ini},Heals,All Heal#"              allHeals
+    /call IniToArrayV "${Character_Ini},Heals,Pet Heal#"              petHeals
+    /call IniToArrayV "${Character_Ini},Heals,Heal Over Time Spell#"  hotSpells
+    /call IniToArrayV "${Character_Ini},Heals,Group Heal#"            groupHeals
   }
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 | lets healers break invis to cast heal
@@ -654,23 +619,27 @@ SUB heal_SpellArrays
   /declare castAllHealWhileInvis			int local 1
 
 	|/echo t ${tanks.Size} th ${tankHeals.Size} wth ${WhoToHeal.Find[Tanks]}
-  /if (${WhoToHeal.Find[Tanks]} && ${tanks.Size} > 0 && ${tankHeals.Size} > 0)		                  /varset healTanks			TRUE
-  /if (${WhoToHeal.Find[ImportantBots]} && ${importantBots.Size} > 0 && ${importantHeals.Size} > 0)	/varset healImportant	TRUE
-  /if (${WhoToHeal.Find[All]} && ${allHeals.Size} > 0)										                          /varset healAll			 TRUE
-  /if (${WhoToHeal.Find[Pets]} && ${petOwners.Size}>0	&& ${petHeals.Size} > 0) 		                  /varset healPets			TRUE
-  /if (${WhoToHoT.Find[Tanks]} && ${tanks.Size} > 0	&& ${hotSpells.Size} > 0) 		                  /varset hotTanks			TRUE
-  /if (${WhoToHoT.Find[ImportantBots]} && ${importantBots.Size} > 0	&& ${hotSpells.Size} > 0)		    /varset hotImportant  TRUE
-  /if (${WhoToHoT.Find[All]} && ${hotSpells.Size} > 0)										                          /varset hotAll				TRUE
-  /if (${WhoToHoT.Find[Pets]} && ${petOwners.Size} > 0 && ${hotSpells.Size} > 0)                    /varset hotPets       TRUE
-  /if (${groupHeals.Size} > 0)	/varset do_GroupHeals	TRUE
+	/if (${Defined[WhoToHeal]}) {
+    /if (${WhoToHeal.Find[Tanks]} && ${Defined[tanks]} && ${Defined[tankHeals]})		                  /varset healTanks			TRUE
+    /if (${WhoToHeal.Find[ImportantBots]} && ${Defined[importantBots]} && ${Defined[importantHeals]}) /varset healImportant	TRUE
+    /if (${WhoToHeal.Find[All]} && ${Defined[allHeals]})										                          /varset healAll			  TRUE
+    /if (${WhoToHeal.Find[Pets]} && ${Defined[petOwners]} && ${Defined[petHeals]}) 		                /varset healPets			TRUE
+  }
+  /if (${Defined[WhoToHoT]}) {
+    /if (${WhoToHoT.Find[Tanks]} && ${Defined[tanks]} && ${Defined[hotSpells]}) 		                  /varset hotTanks			TRUE
+    /if (${WhoToHoT.Find[ImportantBots]} && ${Defined[importantBots]} && ${Defined[hotSpells]})		    /varset hotImportant  TRUE
+    /if (${WhoToHoT.Find[All]} && ${Defined[hotSpells]})										                          /varset hotAll				TRUE
+    /if (${WhoToHoT.Find[Pets]} && ${Defined[petOwners]} && ${Defined[hotSpells]})                    /varset hotPets       TRUE
+  }
+  /if (${Defined[groupHeals]})	                                                                    /varset do_GroupHeals	TRUE
 
   /if (${do_GroupHeals})			  /call BuildSpellArray "groupHeals"		  "groupHeals2D"
   /if (${healTanks})				    /call BuildSpellArray "tankHeals" 		  "tankHeals2D"
   /if (${healImportant})			  /call BuildSpellArray "importantHeals"	"importantHeals2D"
   /if (${healAll})				      /call BuildSpellArray "allHeals" 		    "allHeals2D"
   /if (${healPets})				      /call BuildSpellArray "petHeals" 		    "petHeals2D"
-  /if (${hotSpells.Size} > 0)		/call BuildSpellArray "hotSpells" 		  "hotSpells2D"
-  /if (${lifeSupport.Size} > 0)	/call BuildSpellArray "lifeSupport" 	  "lifeSupport2D"
+  /if (${Defined[hotSpells]})		/call BuildSpellArray "hotSpells" 		  "hotSpells2D"
+  /if (${Defined[lifeSupport]})	/call BuildSpellArray "lifeSupport" 	  "lifeSupport2D"
 
 |Set SubToRun for Heals, Hots are handled in respective function
   /declare i int local

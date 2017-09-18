@@ -85,14 +85,11 @@ Sub check_rune
     /for s 1 to ${runeArray2D.Size[1]}
       /if (${Bool[${NetBots[${runeTargets[${t}]}].InZone}]} && !${Bool[${NetBots[${runeTargets[${t}]}].Buff.Find[${runeArray2D[${s},${iCastID}]} ]}]}) {
         /call check_Ready "runeArray2D" ${s}
-        |/echo check_Ready ${Macro.Return} ${runeArray2D[${s},${iCastID}]} ${runeArray2D[${s},${iCastName}]} ${s}
-        /if (${Macro.Return}) {
+        /if (${c_Ready}) {
           /call check_Distance ${NetBots[${runeTargets[${t}]}].ID} ${runeArray2D[${s},${iMyRange}]}
-          |/echo check_Distance ${NetBots[${runeTargets[${t}]}].ID} ${runeArray2D[${s},${iMyRange}]} ${Macro.Return}
-          /if (${Macro.Return}) {
+          /if (${c_Dist}) {
             /call check_Mana "runeArray2D" ${s}
-            |/echo check_Mana ${Macro.Return}
-            /if (${Macro.Return}) {
+            /if (${c_Mana}) {
               /call e3_Cast ${NetBots[${runeTargets[${t}]}].ID} "runeArray2D" ${s}
             }
           }
@@ -157,29 +154,29 @@ sub event_toggleMez(line, ChatSender, mezToggle)
 |--------------------------------------------------------------|
 Sub check_charm
 /if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
+/if (${Defined[charmArray2D]}) {
   /declare s int local
   /declare charmDuration int local
   /if (${doCharm} && ${Bool[${charmTarget}]}) {
-  /if (${SpawnCount[npc id ${charmTarget}]}==0 && ${charmTarget}!=${Me.Pet.ID}) {
-    /docommand ${ChatToggle} Disabling Charm: ${charmTarget} is no longer a valid npc
-    /varset doCharm FALSE
-    /varset charmTarget 0
-    /return
-  }
+    /if (${SpawnCount[npc id ${charmTarget}]}==0 && ${charmTarget}!=${Me.Pet.ID}) {
+      /docommand ${ChatToggle} Disabling Charm: ${charmTarget} is no longer a valid npc
+      /varset doCharm FALSE
+      /varset charmTarget 0
+      /return
+    }
     /if (${Me.Pet.Race.Name.Equal[Invisible Man]}) {
       /pet get lost
       /delay 1s !${Me.Pet.ID}
     }
-    |/if (!${Bool[${Me.Pet.ID}]} || ${charmTimer} < 3) {
     /if (!${Bool[${Me.Pet.ID}]}) {
       /bc [+r+] << ${Spawn[id ${charmTarget}].CleanName} is not Charmed! >> [+r+]
       /for s 1 to ${charmArray2D.Size[1]}
       /call check_Ready "charmArray2D" ${s}
-      /if (${Macro.Return}) {
+      /if (${c_Ready}) {
         /call check_Mana "charmArray2D" ${s}
-        /if (${Macro.Return}) {
+        /if (${c_Mana}) {
           /call check_Distance ${charmTarget} ${charmArray2D[${s},${iMyRange}]}
-          /if (${Macro.Return}) {
+          /if (${c_Dist}) {
             /docommand ${ChatToggle} << Charming ${charmTarget} ${Spawn[id ${charmTarget}].CleanName} with ${charmArray2D[${s},${iCastName}]} >>
             /call e3_Cast ${charmTarget} "charmArray2D" "${s}"
             /if (${Bool[${Me.Pet.ID}]}) {
@@ -223,6 +220,7 @@ Sub check_charm
       /next s
     }
   }
+}
 /if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
 /return
 
@@ -243,11 +241,11 @@ sub check_mez
       /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 8)) {
         /for s 1 to ${mezArray2D.Size[1]}
           /call check_Ready "mezArray2D" ${s}
-          /if (${Macro.Return}) {
+          /if (${c_Ready}) {
             /call check_Mana "mezArray2D" ${s}
-            /if (${Macro.Return}) {
+            /if (${c_Mana}) {
               /call check_Distance ${mezTarg} ${mezArray2D[${s},${iMyRange}]}
-              /if (${Macro.Return}) {
+              /if (${c_Dist}) {
                 /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
                 /call e3_Cast ${mezTarg} "mezArray2D" "${s}"
               }
@@ -265,14 +263,15 @@ Sub ENC_Setup
   /declare Debug_Ench bool outer FALSE
   /declare autoRune bool outer FALSE
   /declare autoMez bool outer FALSE
-	/if (${Ini[${Character_Ini},Enchanter,AutoRune].Length}) /call IniToVar "${Character_Ini},Enchanter,AutoRune (On/Off)" autoRune bool outer
-	/if (${Ini[${Character_Ini},Enchanter,AutoMez (On/Off)].Length}) /call IniToVar "${Character_Ini},Enchanter,AutoMez (On/Off)" autoMez bool outer
-	/if (${Ini[${Character_Ini},Enchanter,GatherMana Pct].Length}) /call IniToVar "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int outer
 
-  /call #IniToArray "${Character_Ini},Enchanter,RuneTarget#"  runeTargets
-  /call #IniToArray "${Character_Ini},Enchanter,RuneSpell#"   runeArray
-  /call #IniToArray "${Character_Ini},Enchanter,Mez#"         mezArray
-  /call #IniToArray "${Character_Ini},Enchanter,Charm#"       charmArray
+	/if (${Ini[${Character_Ini},Enchanter,AutoRune].Length}) /call iniToVarV "${Character_Ini},Enchanter,AutoRune (On/Off)" autoRune bool outer
+	/if (${Ini[${Character_Ini},Enchanter,AutoMez (On/Off)].Length}) /call iniToVarV "${Character_Ini},Enchanter,AutoMez (On/Off)" autoMez bool outer
+	/if (${Ini[${Character_Ini},Enchanter,GatherMana Pct].Length}) /call iniToVarV "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int outer
+
+  /call IniToArrayV "${Character_Ini},Enchanter,RuneTarget#"  runeTargets
+  /call IniToArrayV "${Character_Ini},Enchanter,RuneSpell#"   runeArray
+  /call IniToArrayV "${Character_Ini},Enchanter,Mez#"         mezArray
+  /call IniToArrayV "${Character_Ini},Enchanter,Charm#"       charmArray
 
   /if (${Bool[${mezArray.Size}]}) {
     /call BuildSpellArray "mezArray"	"mezArray2D"
@@ -290,12 +289,12 @@ Sub ENC_Setup
   /if (${Bool[${charmArray.Size}]}) {
     /call BuildSpellArray "charmArray"	"charmArray2D"
     /declare doCharm bool outer TRUE
-    /declare charmTimer timer outer
+    /declare charmBuffTimer timer outer
+    |/declare charmTimer timer outer
   } else {
     /declare doCharm bool outer FALSE
   }
 
-  /declare charmBuffTimer timer outer
 /return
 
 Sub ENC_Background_Events

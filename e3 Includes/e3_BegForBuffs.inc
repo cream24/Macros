@@ -18,8 +18,8 @@
 |- @param ChatText: The message that was sent.							-|
 |------------------------------------------------------------------------|
 | Specify chat channels to monitor.
-|#chat group
-|#chat tell
+#chat group
+#chat tell
 SUB event_Chat(ChatChannel, ChatSender, ChatText)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- Event_Chat ==>
   |/echo ${ChatChannel} ${ChatSender} ${ChatText}
@@ -220,7 +220,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 				} else {
 				
 					| Check genSettings_Ini > [Buff Requests] > Allow Buff Requests (On/Off)
-					/call IniToVar "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
+					/call iniToVarV "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
 					/if (${Bool[${Macro.Return}]}) {
 						/goto :allowAccess
 					} else {
@@ -245,8 +245,6 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 	
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== Event_Chat -|
 /RETURN
-	
-	
 
 |--------------------------------------------------------|
 |- Relays buff requests from /tell and /group to EQBC.	-|
@@ -258,16 +256,13 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 #event buffRequestRelay "#1# tells you, 'Buff #*# |-|#2#'"
 SUB event_buffRequestRelay(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- event_buffRequestRelay ==>
-
 	| Verify the event
-	/call verifyEvent "${ChatSender}" "${ChatText}"
+	/call verifyEvent "${ChatSender}" "${eventParams}"
 	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-
-	|    |-----------Valid User----------|
+	|-----------Valid User----------|
 	/if (${Bool[${Macro.Return.Arg[2,_]}]}) {
-	
-		:allowAccess
 
+		:allowAccess
 		| Check zone
 		/if (!${SpawnCount[pc ${ChatSender}]}) {
 			/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Zone].Length}) {
@@ -337,7 +332,7 @@ SUB event_buffRequestRelay(line, ChatSender, eventParams)
 		} else {
 			
 			| If user is not valid, check Allow Buff Requests
-			/call IniToVar "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
+			/call iniToVarV "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
 			
 			/if (${Bool[${Macro.Return}]}) {
 				/goto :allowAccess
@@ -359,8 +354,7 @@ SUB event_buffRequestRelay(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== event_buffRequestRelay -|
 /RETURN
 
-
-
+|----------------------------|
 #event portRelay "<#*#> Port to #1#"
 SUB event_portRelay(line, destination)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- EVENT_portRelay ==>
@@ -372,12 +366,10 @@ SUB event_portRelay(line, destination)
       /g Port ${destination}
     }
 	}
-
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_portRelay -|
 /RETURN
 
-
-
+|----------------------------|
 #EVENT makeSpellList "[MQ2] Make Spell List"
 #EVENT makeSpellList "<#*#> Make Spell Lists"
 SUB EVENT_makeSpellList
@@ -419,8 +411,7 @@ SUB EVENT_makeSpellList
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_makeSpellList -|
 /RETURN
 
-
-
+|----------------------------|
 #EVENT import_SpellAliases "[MQ2] Import Spell Aliases"
 #EVENT import_SpellAliases "<#*#> Import Spell Aliases"
 SUB EVENT_import_SpellAliases
@@ -453,8 +444,7 @@ SUB EVENT_import_SpellAliases
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_import_SpellAliases -|
 /RETURN
 
-
-
+|----------------------------|
 #EVENT createSpellAlias "[#1#] Set Spell Alias #2# #3#"
 #EVENT createSpellAlias "<#1#> Set Spell Alias #2# #3#"
 SUB EVENT_createSpellAlias(line, ChatSender, newAlias, spellName)
@@ -466,19 +456,18 @@ SUB EVENT_createSpellAlias(line, ChatSender, newAlias, spellName)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_createSpellAlias -|
 /RETURN
 
-
-
 |--------------------------------|
 |- Setup BegForBuff variables.	-|
 |--------------------------------|
 SUB begForBuffs_Setup
-/call IniToVar "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool outer
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- setup_BegForBuffs ==>
 	|Add SpellAlias File Path.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Spell Aliases File" "e3 Macro Inis\Spell Aliases.ini" 1
 	|Import SpellAliases_Ini.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) {
 		/echo ERROR: Could not find designated file path for [Spell Aliases], please review [${MacroData_Ini}] and restart.
+    /beep
 		/endmacro
 	} else {
 		/declare SpellAliases_Ini string outer ${Ini[${MacroData_Ini},File Paths,Spell Aliases File]}
@@ -487,8 +476,7 @@ SUB begForBuffs_Setup
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== setup_BegForBuffs -|
 /RETURN
 
-
-
+|----------------------------|
 Sub begForBuffs_Background_Events
 	/doevents createSpellAlias
 	/doevents import_SpellAliases
@@ -497,8 +485,7 @@ Sub begForBuffs_Background_Events
 	/doevents Chat
 /return
 
-
-
+|----------------------------|
 SUB begForBuffs_MacroSettings
 	/call WriteToIni "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" On
@@ -516,19 +503,14 @@ SUB begForBuffs_MacroSettings
 	|/call WriteToIni "${Character_Ini},Buffs,Restricted Spells"
 /RETURN
 
-
-
+|----------------------------|
 SUB begForBuffs_CharacterSettings
 /RETURN
-
-
-
+|----------------------------|
 Sub begForBuffs_Aliases
 	/noparse /squelch /alias /giveme /tell ${Target.CleanName}
 	/noparse /squelch /alias /addalias /echo Set Spell Alias
 /return
-
-
 
 |----------------------------|
 |- Build SpellAliases_Ini.	-|
@@ -537,9 +519,9 @@ Sub begForBuffs_Aliases
 SUB MakeSpellAliases_Ini
 
 	/echo Creating spell aliases file...
-	
 	| Beastlord Aliases.
 	/call WriteToIni "${SpellAliases_Ini},Beastlord,Beastlord Spells"
+  /call WriteToIni "${SpellAliases_Ini},Beastlord,SA" "Spiritual Ascendance"
 	/call WriteToIni "${SpellAliases_Ini},Beastlord,SD" "Spiritual Dominion"
 	/call WriteToIni "${SpellAliases_Ini},Beastlord,SV" "Spiritual Vigor"
 	

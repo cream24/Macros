@@ -8,13 +8,12 @@ SUB check_Canni
 	  |only canni if im not in ooc regen
 		/if (${Me.CombatState.NotEqual[RESTING]}) {
 			/declare s int local
-	    |add special check for spiritual channeling
 			/for s 1 to ${canniSpells2D.Size[1]}
 			  /if (${canniSpells2D[${s},${iCastName}].NotEqual[Spiritual Channeling]} || (${canniSpells2D[${s},${iCastName}].Equal[Spiritual Channeling]} && ${Me.CombatState.Equal[COMBAT]})) {
           /call check_Ready "canniSpells2D" ${s}
-          /if (${Macro.Return}) {
+          /if (${c_Ready}) {
             /call check_Mana "canniSpells2D" ${s}
-            /if (${Macro.Return}) {
+            /if (${c_Mana}) {
             	/if (!${canniSpells2D[${s},${iCastName}].Equal[Cannibalization]} || ${Me.CurrentHPs} > 2000) {
 								/if (${canniSpells2D[${s},${iMinHP}]} <= ${Me.PctHPs}) {
               		/call e3_Cast ${Me.ID} "canniSpells2D" ${s}
@@ -32,8 +31,8 @@ SUB check_Canni
 |----------------------------------------------------------------------------|
 Sub SHM_Setup
 /if (${Debug}) /echo |- SHM_Setup ==>
-	/call IniToVar "${Character_Ini},Shaman,Auto-Canni (On/Off)" AutoCanni bool outer
-	/call #IniToArray "${Character_Ini},Shaman,Canni#" canniSpells
+	/call iniToVarV "${Character_Ini},Shaman,Auto-Canni (On/Off)" AutoCanni bool outer
+	/call IniToArrayV "${Character_Ini},Shaman,Canni#" canniSpells
   /if (${canniSpells.Size}) /call BuildSpellArray "canniSpells"	"canniSpells2D"
 /if (${Debug}) /echo <== SHM_Setup -|
 /return
@@ -72,12 +71,12 @@ sub Event_AE_AA(string line)
 	/if (${Me.Class.ShortName.Equal[SHM]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Ancestral Aid]}) {
      /bc MGB Ancestral Aid inc...
-     /casting "Mass Group Buff|alt" "-maxtries|3"
+     /casting "Mass Group Buff|alt" -maxtries|3
      /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
      /delay 5
-     /casting "Ancestral Aid|alt" "-maxtries|3"
+     /casting "Ancestral Aid|alt" -maxtries|3
      /delay 5 !${Me.AltAbilityReady[Ancestral Aid]}
-     /casting "Ancestral Aid|alt" "-maxtries|3"
+     /casting "Ancestral Aid|alt" -maxtries|3
      /rs MGB Ancestral Aid inc...
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...

@@ -3,7 +3,7 @@
 |- Written by Killians of PEQ												-|
 |----------------------------------------------------------------------------|
 Sub RNG_Setup
-  /call IniToVar "${Character_Ini},${Me.Class},TargetAE Ranged (On/Off)" swapTgtAeRanged bool outer
+  /call iniToVarV "${Character_Ini},${Me.Class},TargetAE Ranged (On/Off)" swapTgtAeRanged bool outer
   /if (${swapTgtAeRanged} && !${Ini[${Character_Ini},Swap Items,Ranged].Length}) {
     /bc TargetAE Ranged (On/Off) = On,  but I have no "Ranged=<item>" in [Swap Item]
     /beep
@@ -34,11 +34,11 @@ sub Event_AE_AOH(string line)
   /if (${Me.Class.ShortName.Equal[RNG]}) {
    /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Me.AltAbilityReady[Auspice of the Hunter]}) {
      /bc MGB Auspice of the Hunter inc...
-     /casting "Mass Group Buff|alt" "-maxtries|3"
+     /casting "Mass Group Buff|alt" -maxtries|3
      /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
      /delay 5
      /delay 5 !${Me.AltAbilityReady[Auspice of the Hunter]}
-     /casting "Auspice of the Hunter|alt" "-maxtries|3"
+     /casting "Auspice of the Hunter|alt" -maxtries|3
      /rs MGB Auspice of the Hunter inc...
    } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
       /bc Mass Group Buff is not available...

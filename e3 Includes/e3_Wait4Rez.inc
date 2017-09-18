@@ -44,19 +44,15 @@ SUB EVENT_dead
 #EVENT waitNow "<#1#> Wait4Rez"
 SUB EVENT_waitNow(line, ChatSender)
 /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_WaitNow ==>
-	| -Verify the event
-	/call verifyEvent "${ChatSender}" "${line}"
-	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |--------Included Bot-----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
-		/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
-		/if (${use_Wait4Rez}) {
-      /consent ${ChatSender}
-			|If I'm not already waiting, wait for a rez.
-			/if (!${Waiting4Rez}) {
-				/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
-				/call Wait4Rez
-			}
+	/call checkEventArgs "${ChatSender}" "${line}" "U"
+	/if (!${c_eventArg}) /return
+	/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
+	/if (${use_Wait4Rez}) {
+		/consent ${ChatSender}
+		|If I'm not already waiting, wait for a rez.
+		/if (!${Waiting4Rez}) {
+			/if (!${Defined[Waiting4Rez]}) /declare Waiting4Rez bool outer TRUE
+			/call Wait4Rez
 		}
 	}
 /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_WaitNow -|
@@ -70,16 +66,12 @@ SUB EVENT_waitNow(line, ChatSender)
 #EVENT lootNow "#1# tells you, 'Loot Now#*#"
 SUB EVENT_lootNow(line, ChatSender)
 /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_lootNow ==>
-	| -Verify the event
-	/call verifyEvent "${ChatSender}" "${line}"
-	/if (${Defined[ChatSender]}) /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|    |-----------Valid User----------|    |--------Included Bot-----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]}) {
-		/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
-		/if (${use_Wait4Rez}) {
-			/echo Looting....
-			/call Wait4Rez LOOT_NOW
-		}
+	/call checkEventArgs "${ChatSender}" "${line}" "U"
+	/if (!${c_eventArg}) /return
+	/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
+	/if (${use_Wait4Rez}) {
+		/echo Looting....
+		/call Wait4Rez LOOT_NOW
 	}
 /if (${Debug} || ${Debug_Wait4Rez}) /echo <== Event_lootNow -|	
 /RETURN
@@ -155,10 +147,10 @@ SUB Wait4Rez(functionCall)
 |- Declares variables and settings used in Wait4Rez functions.	-|
 |----------------------------------------------------------------|
 SUB Wait4Rez_Setup
-	/call INItoVar "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool outer
-	/call INItoVar "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" use_Wait4Rez bool outer
-	/call INItoVar "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" Wait4RezAlert int outer
-	/call INItoVar "${genSettings_Ini},Wait4Rez,Request Buffs After Rez (On/Off)" buffAfterRez bool outer
+	/call iniToVarV "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool outer
+	/call iniToVarV "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" use_Wait4Rez bool outer
+	/call iniToVarV "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" Wait4RezAlert int outer
+	/call iniToVarV "${genSettings_Ini},Wait4Rez,Request Buffs After Rez (On/Off)" buffAfterRez bool outer
 /RETURN
 
 SUB Wait4Rez_MacroSettings

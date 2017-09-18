@@ -25,11 +25,8 @@
 #EVENT invFull "#*#Your inventory appears full! How can you buy more?#*#" 
 SUB EVENT_AutoBuy(line, ChatSender, merchantID, eventParams)
 /if (${Debug}) /echo |- EVENT_AutoBuy [${eventParams}] ==>
-	| Verify the event
-	/call verifyEvent "${ChatSender}" "${line}"
-	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-	|   |-----------Valid User----------|    |--------Included Bot-----------|    |-----------In Zone-------------|    |------------In Range------------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]} && ${Bool[${Macro.Return.Arg[3,_]}]} && ${Bool[${Macro.Return.Arg[4,_]}]} && ${Bool[${Macro.Return.Arg[5,_]}]}) {
+	/call checkEventArgs "${ChatSender}" "${line}" "UZR" "eventParams"
+	/if (!${c_eventArg}) /return
 		/declare itemToBuy string local
 		/declare numToBuy int local
 		/declare lastItemCount int local
@@ -38,7 +35,9 @@ SUB EVENT_AutoBuy(line, ChatSender, merchantID, eventParams)
 		/declare listPosition int local
 		/declare i int local 1
 		| Record starting location.
-		/varset startingLoc string local ${Me.Loc.Replace[ ,]}	
+		/varset startingLoc string local ${Me.Loc.Replace[ ,]}
+    /varset noMoney FALSE
+    /varset invFull FALSE
 		| Open trade with the nearest merchant and waits for merchant list to populate
 		/call openMerchant ${merchantID}
 		
@@ -65,7 +64,7 @@ SUB EVENT_AutoBuy(line, ChatSender, merchantID, eventParams)
 						/if (${Debug}) /echo Item is not stackable. Attempting to buy...
 						:buying
 						| Prevents loop from repeating if out of money or inventory space.
-						/if (${Macro.Return.Equal[noMoney]} || ${Macro.Return.Equal[invFull]} || ${Bool[${Cursor}]}) {
+						/if (${noMoney} || ${invFull} || ${Bool[${Cursor}]}) {
 							/docommand ${ChatToggle} I am out of money, my inventory is full, or I have an item on my cursor! Exiting.
 							/goto :closeOut
 						}
@@ -81,7 +80,7 @@ SUB EVENT_AutoBuy(line, ChatSender, merchantID, eventParams)
 						/varset numToBuyRemaining ${numToBuy}				
 						:stackBuyLoop
 						| Prevents loop from repeating if out of money or inventory space.
-						/if (${Macro.Return.Equal[noMoney]} || ${Macro.Return.Equal[invFull]} || ${Bool[${Cursor}]}) {
+						/if (${noMoney} || ${invFull} || ${Bool[${Cursor}]}) {
 							/docommand ${ChatToggle} I am out of money, my inventory is full, or I have an item on my cursor! Exiting.
 							/goto :closeOut
 						}
@@ -102,9 +101,10 @@ SUB EVENT_AutoBuy(line, ChatSender, merchantID, eventParams)
 							/doevents
 							/goto :stackBuyLoop
 						} else {
-							/doevents
+							/doevents EVENT_noMoney
+							/doevents EVENT_invFull
 							| Prevents loop from repeating if out of money or inventory space.
-							/if (${Macro.Return.Equal[noMoney]} || ${Macro.Return.Equal[invFull]} || ${Bool[${Cursor}]}) /goto :closeOut
+							/if (${noMoney} || ${invFull} || ${Bool[${Cursor}]}) /goto :closeOut
 							/if (${Debug}) /echo Item is stackable and amount is less than or equal to stacksize. Attempting to buy...
 							/if (${Debug}) /echo Buying ${itemToBuy} (x${numToBuyRemaining})
 							/buyitem ${numToBuyRemaining}
@@ -125,19 +125,22 @@ SUB EVENT_AutoBuy(line, ChatSender, merchantID, eventParams)
 		/squelch /moveto loc ${startingLoc.Arg[1,,]} ${startingLoc.Arg[2,,]}
 		| Flush duplicate events
 		/doevents flush
-}		
 /if (${Debug}) /echo <== EVENT_buyitem -|
 /return
 
 Sub EVENT_noMoney
-/bc I do not have enough money for this purchase!
-/return noMoney
+  /bc I do not have enough money for this purchase!
+  /varset noMoney TRUE
+/return
 
 Sub EVENT_invFull
-/bc My inventory is full!
-/return invFull
+  /bc My inventory is full!
+  /varset invFull TRUE
+/return
 
 SUB buy_Setup
+  /declare noMoney bool outer FALSE
+  /declare invFull bool outer FALSE
 /RETURN
 
 SUB Buy_MacroSettings

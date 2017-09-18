@@ -9,9 +9,9 @@ SUB check_Harvest
       /declare s int local
       /for s 1 to ${harvestSpells2D.Size[1]}
         /call check_Ready "harvestSpells2D" ${s}
-        /if (${Macro.Return}) {
+        /if (${c_Ready}) {
           /call check_Mana "harvestSpells2D" ${s}
-          /if (${Macro.Return}) {
+          /if (${c_Mana}) {
             /call e3_Cast ${Me.ID} "harvestSpells2D" ${s}
           }
         }
@@ -22,9 +22,9 @@ SUB check_Harvest
 
 Sub WIZ_Setup
 /if (${Debug}) /echo |- WIZ_Setup ==>
-	/call INItoVar "${Character_Ini},Wizard,Evac Spell" Evac_Spell string outer
-	/call INItoVar "${Character_Ini},Wizard,Auto-Harvest (On/Off)" autoHarvest bool outer
-	/call #IniToArray "${Character_Ini},Wizard,Harvest#" harvestSpells
+	/call iniToVarV "${Character_Ini},Wizard,Evac Spell" Evac_Spell string outer
+	/call iniToVarV "${Character_Ini},Wizard,Auto-Harvest (On/Off)" autoHarvest bool outer
+	/call IniToArrayV "${Character_Ini},Wizard,Harvest#" harvestSpells
   /if (${harvestSpells.Size}) /call BuildSpellArray "harvestSpells"	"harvestSpells2D"
 
 /if (${Debug}) /echo <== WIZ_Setup -|

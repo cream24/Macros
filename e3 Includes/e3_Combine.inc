@@ -151,7 +151,7 @@ Sub Event_success(line, newItem)
 		/varcalc total ${total} + 1
 		/varset combineReturn COMBINE_SUCCESS
 		/delay 10 ${Cursor.ID}
-		/if (${Verbosity}) /echo AutoCombine: Attempt [${total}] successful, created [${newItem}].
+		/echo AutoCombine: Attempt [${total}] successful, created [${newItem}].
 	}
 /if (${Debug}) /echo <== Event_success -|
 /return
@@ -163,7 +163,7 @@ Sub Event_failure
 		/varcalc fails ${fails} + 1
 		/varcalc total ${total} + 1
 		/varset combineReturn COMBINE_FAILED
-		/if (${Verbosity}) /echo AutoCombine: Attempt [${total}] failed.
+		/echo AutoCombine: Attempt [${total}] failed.
 	}
 /if (${Debug}) /echo <== Event_failure -|
 /return
