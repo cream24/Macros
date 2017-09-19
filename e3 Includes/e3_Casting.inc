@@ -372,23 +372,23 @@ Sub check_GCD
 |- Check if the Target is in Zone and in Range  -|
 |------------------------------------------------|
 Sub check_Distance(int targetID, int myRange)
-	/varset c_Dist FALSE
+	/declare c_Dist bool FALSE
 	/if (${Bool[${Spawn[id ${targetID}].Type.NotEqual[Corpse]}]}) {
 	  /if (${Spawn[id ${targetID}].Distance3D} <= ${myRange}) /varset c_Dist TRUE
   }
 /RETURN ${c_Dist}
 
 |------------------------------------------------|
-|- Check various Mana-related metrics		    -|
+|- Check various Mana-related metrics		        -|
 |------------------------------------------------|
 Sub check_Mana(ArrayName, int ArrayIndex)
-	/varset c_Mana FALSE
+	/declare hasMana bool local FALSE
 	/if (${Me.CurrentMana} >= ${${ArrayName}[${ArrayIndex},${iMana}]}) {
 		/if (${Me.PctMana} >= ${${ArrayName}[${ArrayIndex},${iMinMana}]}) {
-			/if (${Me.PctMana} <= ${${ArrayName}[${ArrayIndex},${iMaxMana}]}) /varset c_Mana TRUE
+			/if (${Me.PctMana} <= ${${ArrayName}[${ArrayIndex},${iMaxMana}]}) /varset hasMana TRUE
 		}
 	}
-/RETURN ${c_Mana}
+/RETURN ${hasMana}
 
 |------------------------------------------------|
 |- Interrupt a spell when appropriate		    -|
@@ -455,8 +455,6 @@ Sub casting_Setup
 	/declare immuneList				string outer
 
   /declare c_Ready bool outer FALSE
-  /declare c_Mana bool outer FALSE
-  /declare c_Dist bool outer FALSE
   /declare c_SubToRun bool outer FALSE
 
 	/declare DefaultGem int outer 8

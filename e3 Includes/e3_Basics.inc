@@ -851,7 +851,7 @@ SUB check_MedBreak
 		| sit down, if we are not sitting
 		/if (!${Me.Sitting} && !${Me.Casting.ID} && !${Me.Moving}) /sit
 		| end MedBreak when we are full mana, unless hold is engaged
-		/if (${medBreak} && !${medBreak_Hold} && (${Me.PctMana} >= 99 || ${Me.PctMana}==0) && ${Me.PctEndurance}>=99) {
+		/if (${medBreak} && !${medBreak_Hold} && (${Me.PctMana} >= 99 || (${Me.MaxMana} ==0 && ${Me.PctEndurance}>=99))) {
 			/docommand ${ChatToggle} Full Mana/Endurance, ending MedBreak.
 			/if (${Me.Sitting}) /stand
 			/varset medBreak FALSE

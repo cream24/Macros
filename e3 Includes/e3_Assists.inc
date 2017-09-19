@@ -402,11 +402,8 @@ SUB check_Nukes
 
     /call check_Ready "Nukes2D" ${castIndex}
     /if (${c_Ready}) {
-      /call check_Mana "Nukes2D" ${castIndex}
-      /if (${c_Mana}) {
-        /call check_Distance ${AssistTarget} ${Nukes2D[${s},${iMyRange}]}
-        /if (${c_Dist}) {
-          |/squelch /face fast id ${AssistTarget}
+      /if (${check_Mana["Nukes2D",${castIndex}]}) {
+        /if (${check_Distance[${AssistTarget},${Nukes2D[${s},${iMyRange}]}]}) {
           /call e3_Cast ${AssistTarget} "Nukes2D" "${castIndex}"
         }
       }
@@ -459,23 +456,23 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
   /declare spellTarg int local
   /declare spellTimer string local
   /declare spellRecast int local 0
-  /declare i int local
+  /declare s int local
 
-	/for i 1 to ${${ArrayName}.Size[1]}
+	/for s 1 to ${${ArrayName}.Size[1]}
 	  |/echo on ${${ArrayName}[${i},${iSpellName}]} ${i} of ${${ArrayName}.Size[1]} ct
 	  |this check lets you use OOW debuff BP in debuff section
-	  /if (${${ArrayName}[${i},${iSpellType}].Find[Beneficial]}) {
+	  /if (${${ArrayName}[${s},${iSpellType}].Find[Beneficial]}) {
 	    /varset spellTarg ${Me.ID}
 	    /goto :attemptCast
     } else {
       /varset spellTarg ${spellTarget}
     }
-		/varset spellTimer spellTimer_${spellTarg}_${ArrayName}_${i}
-		/varset resistCount resist__${spellTarg}_${ArrayName}_${i}
+		/varset spellTimer spellTimer_${spellTarg}_${ArrayName}_${s}
+		/varset resistCount resist__${spellTarg}_${ArrayName}_${s}
     |/echo stdef ${Defined[${spellTimer}]} st ${spellTarg}  tgt ${Target.ID}
 		/if (${Defined[${spellTimer}]}) {
 		  /if (${${spellTimer}}) {
-        /if (${Debug} || ${Debug_Assists}) /echo |- cast_longTermSpells - [${ArrayName}] -|	Waiting to recast ${${ArrayName}[${i},${iCastName}]}.
+        /if (${Debug} || ${Debug_Assists}) /echo |- cast_longTermSpells - [${ArrayName}] -|	Waiting to recast ${${ArrayName}[${s},${iCastName}]}.
       }
     } else {
       |check if the target is already debuffed, and if the duration is longer than the recast time
@@ -484,66 +481,66 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
         /delay 5 ${Target.BuffsPopulated}
       }
       /if (${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]}) {
-        /if (${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
-          /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000 - ${longTermRecastTime}
+        /if (${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
+          /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000 - ${longTermRecastTime}
           /call createTimer ${spellTimer} ${spellRecast}s
-          /echo \ag ${Target.CleanName} already debuffed ${${ArrayName}[${i},${iSpellName}]} ${spellRecast}
+          /echo \ag ${Target.CleanName} already debuffed ${${ArrayName}[${s},${iSpellName}]} ${spellRecast}
           /goto :skipCast
         }
       }
       :attemptCast
-      /call check_Ready "${ArrayName}" ${i}
+      /call check_Ready "${ArrayName}" ${s}
       /if (${c_Ready}) {
-        /if (${check_Mana[${ArrayName} ${i}]}) {
-          /if (${check_Distance[${spellTarg} ${${ArrayName}[${i},${iMyRange}]}]}) {
-            /call e3_Cast ${spellTarg} "${ArrayName}" "${i}"
+        /if (${check_Mana[${ArrayName} ${s}]}) {
+          /if (${check_Distance[${spellTarg},${${ArrayName}[${s},${iMyRange}]}]}) {
+            /call e3_Cast ${spellTarg} "${ArrayName}" "${s}"
           } else {
-            /if (${Debug} || ${Debug_Assists}) /echo ${spellTarg} out of range for ${${ArrayName}[${i},${iMyRange}]} ${${ArrayName}[${i},${iCastName}]}
+            /if (${Debug} || ${Debug_Assists}) /echo ${spellTarg} out of range for ${${ArrayName}[${s},${iMyRange}]} ${${ArrayName}[${s},${iCastName}]}
             /goto :skipCast
           }
         } else {
-          /if (${Debug} || ${Debug_Assists}) /echo lack mana for ${${ArrayName}[${i},${iCastName}]}
+          /if (${Debug} || ${Debug_Assists}) /echo lack mana for ${${ArrayName}[${s},${iCastName}]}
           /goto :skipCast
         }
       } else {
-        /if (${Debug} || ${Debug_Assists}) /echo ${${ArrayName}[${i},${iCastName}]} not ready
+        /if (${Debug} || ${Debug_Assists}) /echo ${${ArrayName}[${s},${iCastName}]} not ready
         /goto :skipCast
       }
       |/if (${Debug} || ${Debug_Assists}) /echo castretun ${castReturn} res ${Cast.Result}
       |/if (${Debug} || ${Debug_Assists}) /echo maxtries ${${ArrayName}[${i},${iMaxTries}]} rescount ${resistCount} ${${resistCount}}
       |/if (${Debug} || ${Debug_Assists}) /echo castname ${${ArrayName}[${i},${iCastName}]} stored ${Cast.Stored.Name} return ${castReturn}
       | If the spell was resisted.
-      /if (${Cast.Stored.Name.Equal[${${ArrayName}[${i},${iSpellName}]}]} && ${castReturn.Equal[CAST_RESIST]}) {
+      /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_RESIST]}) {
         /if (!${Defined[${resistCount}]}) {
           /declare ${resistCount} int outer 1
         } else {
           /varcalc ${resistCount} ${${resistCount}}+1
-          /if (${${resistCount}} >= ${${ArrayName}[${i},${iMaxTries}]}) {
+          /if (${${resistCount}} >= ${${ArrayName}[${s},${iMaxTries}]}) {
             /deletevar ${resistCount}
             /call createTimer "${spellTimer}" "1m"
           }
         }
 
       | If the spell did not take hold.
-      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${i},${iSpellName}]}]} && ${castReturn.Equal[CAST_TAKEHOLD]}) {
+      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_TAKEHOLD]}) {
         /if (${Defined[${resistCount}]}) {
           /deletevar ${resistCount}
         }
         /call createTimer "${spellTimer}" "3m"
         | If the target was immune.
-      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${i},${iSpellName}]}]} && ${castReturn.Equal[CAST_IMMUNE]}) {
+      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_IMMUNE]}) {
         /if (${Defined[${resistCount}]}) {
           /deletevar ${resistCount}
         }
         /call createTimer "${spellTimer}" "30m"
       | If the cast was successful.
-      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${i},${iSpellName}]}]} && ${castReturn.Equal[CAST_SUCCESS]}) {
+      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_SUCCESS]}) {
         /if (${Defined[${resistCount}]}) {
           /deletevar ${resistCount}
         }
         |if i dont have spell awarenes use default buff duration
-        /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]}/1000
-        /if (${spellRecast}==0) /varcalc spellRecast ${${ArrayName}[${i},${iDuration}]}*6
+        /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000
+        /if (${spellRecast}==0) /varcalc spellRecast ${${ArrayName}[${s},${iDuration}]}*6
         |/echo ${Target.Name}  ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]} ${spellRecast}
         |duration over 90 seconds is considered long term
         /if (${spellRecast}>90) {
@@ -557,7 +554,7 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
       }
     }
   :skipCast
-  /if (!${ActionTaken}) /next i
+  /if (!${ActionTaken}) /next s
 /if (${Debug} || ${Debug_Assists}) /echo <== cast_longTermSpells - [${ArrayName}] -|
 /RETURN
 
@@ -810,18 +807,17 @@ SUB check_AE
     /docommand ${ChatToggle} Ending AE: No mobs in radius ${AE_Radius}
     /if (${revertRngToMelee}) /call swapToRangedSet FALSE
   }
-  /declare i int local
+  /declare s int local
 	/if (${use_PBAE} && ${Defined[PBAE_Spells2D]}) {
-    /for i 1 to ${PBAE_Spells2D.Size[1]}
-      /call check_Ready "PBAE_Spells2D" ${i}
+    /for s 1 to ${PBAE_Spells2D.Size[1]}
+      /call check_Ready "PBAE_Spells2D" ${s}
       /if (${c_Ready}) {
-        /call check_Mana "PBAE_Spells2D" ${i}
-        /if (${c_Mana}) {
+        /if (${check_Mana["PBAE_Spells2D",${s}]}) {
           /squelch /face fast id ${AssistTarget}
-          /call e3_Cast ${aeTarget} "PBAE_Spells2D" "${i}"
+          /call e3_Cast ${aeTarget} "PBAE_Spells2D" "${s}"
         }
       }
-    /if (!${ActionTaken}) /next i
+    /if (!${ActionTaken}) /next s
 	}
   /if (${use_TargetAE} && ${Defined[TargetAE_Spells2D]}) {
     |if i have an assist target, use that as ae target, else use aeTarget
@@ -831,20 +827,17 @@ SUB check_AE
     } else {
       /varset useBestTarget ${aeTarget}
     }
-    /for i 1 to ${TargetAE_Spells2D.Size[1]}
-      /call check_Ready "TargetAE_Spells2D" ${i}
+    /for s 1 to ${TargetAE_Spells2D.Size[1]}
+      /call check_Ready "TargetAE_Spells2D" ${s}
       /if (${c_Ready}) {
-        /call check_Mana "TargetAE_Spells2D" ${i}
-        /if (${c_Mana}) {
-          /call check_Distance ${useBestTarget} ${TargetAE_Spells2D[${i},${iMyRange}]}
-          |/echo tgt ${useBestTarget} ${TargetAE_Spells2D[${i},${iMyRange}]} ${TargetAE_Spells2D[${i},${iCastName}]}
-          /if (${c_Dist}) {
+        /if (${check_Mana["TargetAE_Spells2D",${s}]}) {
+          /if (${check_Distance[${useBestTarget},${TargetAE_Spells2D[${s},${iMyRange}]}]}) {
             /squelch /face fast id ${useBestTarget}
-            /call e3_Cast ${useBestTarget} "TargetAE_Spells2D" "${i}"
+            /call e3_Cast ${useBestTarget} "TargetAE_Spells2D" "${s}"
           }
         }
       }
-    /if (!${ActionTaken}) /next i
+    /if (!${ActionTaken}) /next s
   }
 /if (${Debug} || ${Debug_Assists}) /echo <== check_AE -|
 /RETURN
@@ -886,8 +879,7 @@ SUB event_SwarmPets(line, ChatSender, int swarmTarget)
 			/for i 1 to ${swarmPets2D.Size[1]}
         /call check_Ready "swarmPets2D" ${i}
         /if (${c_Ready}) {
-          /call check_Distance ${swarmTarget} ${swarmPets2D[1,${iMyRange}]}
-          /if (${c_Dist}) {
+          /if (${check_Distance[${swarmTarget},${swarmPets2D[1,${iMyRange}]}]}) {
 				    /call e3_Cast ${swarmTarget} "swarmPets2D" "${i}"
           }
         }
@@ -937,8 +929,7 @@ SUB useBurns(ArrayName)
 	/for i 1 to ${${ArrayName}.Size[1]}
     /call check_Ready "${ArrayName}" ${i}
     /if (${c_Ready}) {
-      /call check_Distance ${AssistTarget} ${${ArrayName}[${i},${iMyRange}]}
-      /if (${c_Ready}) {
+      /if (${check_Distance[${AssistTarget},${${ArrayName}[${i},${iMyRange}]}]}) {
         /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) /goto :skipCurrent
         /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]}) /goto :skipCurrent
         /call e3_Cast ${AssistTarget} "${ArrayName}" "${i}"
@@ -961,11 +952,9 @@ SUB check_lifeTap
     /for s 1 to ${lifeTaps2D.Size[1]}
     /call check_Ready "lifeTaps2D" ${s}
     /if (${c_Ready}) {
-      /call check_Mana "lifeTaps2D" ${s}
-      /if (${c_Mana}) {
+      /if (${check_Mana["lifeTaps2D",${s}]}) {
         /if (${Me.PctHPs} <= ${lifeTaps2D[${s},${iHealPct}]}) {
-          /call check_Distance ${AssistTarget} ${lifeTaps2D[${s},${iMyRange}]}
-          /if (${c_Dist}) {
+          /if (${check_Distance[${AssistTarget},${lifeTaps2D[${s},${iMyRange}]}]}) {
             /call e3_Cast ${AssistTarget} "lifeTaps2D" ${s}
           }
         }

@@ -148,10 +148,8 @@ Sub check_bard_charm
       /for s 1 to ${charmArray2D.Size[1]}
       /call check_Ready "charmArray2D" ${s}
       /if (${c_Ready}) {
-        /call check_Mana "charmArray2D" ${s}
-        /if (${c_Mana}) {
-          /call check_Distance ${charmTarget} ${charmArray2D[${s},${iMyRange}]}
-          /if (${c_Dist}) {
+        /if (${check_Mana["charmArray2D",${s}]}) {
+          /if (${check_Distance[${charmTarget} ${charmArray2D[${s},${iMyRange}]}]}) {
             /docommand ${ChatToggle} << Charming ${charmTarget} ${Spawn[id ${charmTarget}].CleanName} with ${charmArray2D[${s},${iCastName}]} >>
             /call e3_Cast ${charmTarget} "charmArray2D" "${s}"
             /if (${Bool[${Me.Pet.ID}]}) {
@@ -215,17 +213,16 @@ sub check_bard_mez
       /delay 1s ${Target.BuffsPopulated}
       /if (${Select[${AssistTarget},${mezTarg}]}==0 && (!${Bool[${Target.Mezzed}]} || ${Target.Mezzed.Duration.TotalSeconds} < 5)) {
         /for s 1 to ${mezArray2D.Size[1]}
-            /call check_Distance ${mezTarg} ${mezArray2D[${s},${iMyRange}]}
-            /if (${c_Dist}) {
-              /if (${mezArray2D[${s},${iCastType}].Equal[Spell]} && !${Bool[${Me.Gem[${mezArray2D[${s},${iCastName}]}]}]}) /call memorize_spell "${mezArray2D[${s},${iCastName}]}" ${mezArray2D[${s},${iSpellGem}]}
+          /if (${check_Distance[${mezTarg},${mezArray2D[${s},${iMyRange}]}]}) {
+            /if (${mezArray2D[${s},${iCastType}].Equal[Spell]} && !${Bool[${Me.Gem[${mezArray2D[${s},${iCastName}]}]}]}) /call memorize_spell "${mezArray2D[${s},${iCastName}]}" ${mezArray2D[${s},${iSpellGem}]}
               /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
-                /if (${Twist.Twisting}) /call pauseTwist
-                |:retryMez
-                /twist once ${mezArray2D[${s},${iSpellGem}]}
-                /delay 3s !${Me.Casting.ID}
-                /delay 1s ${Target.BuffsPopulated}
+              /if (${Twist.Twisting}) /call pauseTwist
+              |:retryMez
+              /twist once ${mezArray2D[${s},${iSpellGem}]}
+              /delay 3s !${Me.Casting.ID}
+              /delay 1s ${Target.BuffsPopulated}
 
-                /if (${returnTwist}) /call unpauseTwist
+              /if (${returnTwist}) /call unpauseTwist
             }
         /if (!${ActionTaken}) /next s
       }

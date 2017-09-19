@@ -246,8 +246,7 @@ SUB check_CoH
           /call check_Ready "cohSpells2D" ${s}
             /if (${c_Ready}) {
               /if (${Spawn[pc =${cohTargets[${t}]}].Distance} >= ${coh_dist}) {
-                /call check_Mana "cohSpells2D" ${s}
-                /if (${c_Mana}) {
+                /if (${check_Mana["cohSpells2D",${s}]}) {
                   /docommand ${ChatToggle} << Auto CoH casting on ${cohTargets[${t}]} >>
                   /g << Auto CoH casting on ${cohTargets[${t}]} >>
                   /call e3_cast ${Spawn[pc =${cohTargets[${t}]}].ID} "cohSpells2D" ${s}

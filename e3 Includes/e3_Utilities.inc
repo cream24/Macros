@@ -884,9 +884,6 @@ SUB check_macroTimers
 	/declare i int local
 	/declare SpentTimerCounter int local
 	/declare SpentTimerList string local
-	|/declare startTimerCnt int local ${timerArray.Size}
-  |/declare endTimerCnt int local 0
-	| Check each entry of the timer array, count spent timers.	
 	/for i 1 to ${timerArray.Size}
 		/if (!${${timerArray[${i}]}}) {
 			/varcalc SpentTimerCounter ${SpentTimerCounter} + 1
@@ -904,10 +901,6 @@ SUB check_macroTimers
 	} else {
     /call RemoveArrayElements "timerArray" ${SpentTimerList}"
 	}
-	|/if (${Defined[timerArray]}) {
-	|  /varset endTimerCnt ${timerArray.Size}
-  |}
-  |/echo TimerArray start: ${startTimerCnt} end: ${endTimerCnt}
 /if (${Debug}) /echo <== check_macroTimers -|
 /RETURN
 
@@ -1078,31 +1071,22 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
 
   |/echo ${eventLine.Right[1].Equal[']} ${eventLine} ${eventLine.Left[-1]}
   /if (${eventLine.Right[1].Equal[']}) /varset eventLine ${eventLine.Left[-1]}
-  |/echo as ${c_argueString}
   /if (${eventLine.Find[/only|]}) {
     /varset includeBot FALSE
     /call argueString only| "${eventLine}"
-    |/if (${check_selectedBots["${c_argueString}" ${ChatSender}]}) /varset includeBot TRUE
-    /call check_selectedBots "${c_argueString}" "${ChatSender}"
-    /if (${Macro.Return}) /varset includeBot TRUE
+    /if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot TRUE
   }
   /if (${eventLine.Find[/exclude|]}) {
     /call argueString exclude| "${eventLine}"
-    |/if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot FALSE
-    /call check_selectedBots "${c_argueString}" "${ChatSender}"
-    /if (${Macro.Return}) /varset includeBot FALSE
+    /if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot FALSE
   }
   /if (${eventLine.Find[/not|]}) {
     /call argueString not| "${eventLine}"
-    |/if (${check_selectedBots[${c_argueString} ${ChatSender}]}) /varset includeBot FALSE
-    /call check_selectedBots "${c_argueString}" "${ChatSender}"
-    /if (${Macro.Return}) /varset includeBot FALSE
+    /if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot FALSE
   }
   /if (${eventLine.Find[/include|]}) {
     /call argueString include| "${eventLine}"
-    |/if (${check_selectedBots[${c_argueString} ${ChatSender}]}) /varset includeBot TRUE
-    /call check_selectedBots "${c_argueString}" "${ChatSender}"
-    /if (${Macro.Return}) /varset includeBot TRUE
+    /if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot TRUE
   }
   |/echo ${userValidated} && ${includeBot} && ${inRange} && ${inZone}
   /if (${userValidated} && ${includeBot} && ${inRange} && ${inZone}) /varset c_eventArg TRUE
@@ -1123,21 +1107,16 @@ SUB verifyEvent(ChatSender, eventLine)
 	/declare includeBot bool local TRUE
 	/declare inZone bool local FALSE
 	/declare inRange bool local FALSE
-
 	| -Reset ChatSender.
 	/if (${ChatSender.Left[1].Compare[ ]}<0) /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
 	/if (${ChatSender.Equal[You]}) /varset ChatSender ${Me.CleanName}
 	/if (${ChatSender.Equal[MQ2]}) /varset ChatSender ${Me.CleanName}
-	
 	| -Validate ChatSender.
 	/if (${NetBots[${ChatSender}].ID}) /varset userValidated TRUE
-	
 	| -Check inZone
 	/if (${SpawnCount[pc =${ChatSender}]}) /varset inZone TRUE
-	
 	| -Check inRange
 	/if (${SpawnCount[pc =${ChatSender} radius ${MaxResponseDist}]}) /varset inRange TRUE
-
 	|/echo v${userValidated} z${inZone} o ${eventLine.Find[/only|]}
 	/if (${eventLine.Find[/only|]}) {
 		/varset includeBot FALSE
@@ -1160,7 +1139,6 @@ SUB verifyEvent(ChatSender, eventLine)
 		/call check_selectedBots "${c_argueString}" "${ChatSender}"
 		/if (${c_checkSelectedBots}) /varset includeBot TRUE
 	}
-	
 /if (${Debug}) {
 	/echo |- verifyEvent -| ChatSender=${ChatSender} || includeBot=${includeBot} || inZone=${inZone} || inRange=${inRange}
 	/echo <== verifyEvent -|

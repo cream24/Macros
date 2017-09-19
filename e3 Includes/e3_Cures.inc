@@ -38,10 +38,8 @@ Sub check_Cures
         /if (${NetBots[${curePlayer}].Buff.Find[${Spell[${cureTargets2D[${t},${iCheckFor}]}].ID} ]}) {
           /call check_Ready "cureTargets2D" ${t}
           /if (${c_Ready}) {
-            /call check_Distance ${NetBots[${curePlayer}].ID} ${cureTargets2D[${t},${iMyRange}]}
-            /if (${c_Dist}) {
-              /call check_Mana "cureTargets2D" ${t}
-              /if (${c_Mana}) {
+            /if (${check_Distance[${NetBots[${curePlayer}].ID},${cureTargets2D[${t},${iMyRange}]}]}) {
+              /if (${check_Mana["cureTargets2D",${t}]}) {
                 /call e3_Cast ${NetBots[${curePlayer}].ID} "cureTargets2D" ${t}
               } else /if (${Debug} || ${Debug_Cures}) /echo ${cureTargets2D[${t},${iCastName}]} failed mana check
             } else /if (${Debug} || ${Debug_Cures}) /echo ${cureTargets2D[${t},${iCastName}]} is too far away
@@ -60,10 +58,8 @@ Sub check_Cures
           /if (${NetBots[${Group.Member[${g}]}].Buff.Find[${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID} ]}) {
             /call check_Ready "cureAllTargets2D" ${t}
             /if (${c_Ready}) {
-              /call check_Distance ${NetBots[${NetBots.Client[${n}]}].ID} ${cureAllTargets2D[${t},${iMyRange}]}
-              /if (${c_Dist}) {
-                /call check_Mana "cureAllTargets2D" ${t}
-                /if (${c_Mana}) {
+              /if (${check_Distance[${NetBots[${NetBots.Client[${n}]}].ID},${cureAllTargets2D[${t},${iMyRange}]}]}) {
+                /if (${check_Mana["cureAllTargets2D",${t}]}) {
                   /call e3_Cast ${NetBots[${Group.Member[${g}]}].ID} "cureAllTargets2D" ${t}
                 } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} failed mana check
               } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} is too far away
@@ -87,10 +83,8 @@ Sub check_Cures
           /if (${NetBots[${NetBots.Client[${n}]}].Buff.Find[${Spell[${cureAllTargets2D[${t},${iCheckFor}]}].ID} ]}) {
             /call check_Ready "cureAllTargets2D" ${t}
             /if (${c_Ready}) {
-              /call check_Distance ${NetBots[${NetBots.Client[${n}]}].ID} ${cureAllTargets2D[${t},${iMyRange}]}
-              /if (${c_Dist}) {
-                /call check_Mana "cureAllTargets2D" ${t}
-                /if (${c_Mana}) {
+               /if (${check_Distance[${NetBots[${NetBots.Client[${n}]}].ID},${cureAllTargets2D[${t},${iMyRange}]}]}) {
+                /if (${check_Mana["cureAllTargets2D",${t}]}) {
                   /call e3_Cast ${NetBots[${NetBots.Client[${n}]}].ID} "cureAllTargets2D" ${t}
                 } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} failed mana check
               } else /if (${Debug} || ${Debug_Cures}) /echo ${cureAllTargets2D[${t},${iCastName}]} is too far away

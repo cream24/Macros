@@ -58,20 +58,12 @@ SUB buffBots(ArrayName)
   |------- Self ------|
   /if (${Select[${ArrayName},SelfBuffs2D,InstantBuffs2D]}) {
     /if (!${Bool[${Me.Buff[${buffSpellName}]}]} || (${Bool[${Me.Buff[${buffSpellName}]}]} && ${Me.Buff[${buffSpellName}].Duration.TotalSeconds} <= ${buffRecastTime})) {
-      |/echo ${ArrayName} ${s} b ${buffSpellName} cn ${buffCheckForName}  ${Bool[${Me.Song[${buffSpellName}]}]} ${Bool[${Me.Song[${buffCheckForName}]}]}
       /if (!${Bool[${Me.Song[${buffSpellName}]}]} && !${Bool[${Me.Song[${buffCheckForName}]}]}) {
-        |/echo ${buffSpellName} stack ${Spell[${buffSpellName}].Stacks} newstack ${Spell[${buffSpellName}].NewStacks}
         /if (${Spell[${buffSpellName}].Stacks} && ${Spell[${buffSpellName}].NewStacks} && !${Bool[${Me.Buff[${buffCheckForName}]}]}) {
           /call check_Ready "${ArrayName}" ${s}
           /if (${c_Ready}) {
-            /call check_Mana "${ArrayName}" ${s}
-            /if (${c_Mana}) {
-              |/if (${buffSpellName.Equal[Pyromancy]}) {
-                |/bc havebuff ${buffSpellName} ${Me.Buff[${buffSpellName}]} checkfor ${buffCheckForName} ${Me.Buff[${buffCheckForName}]}
-              |  /alt act 514
-              |} else {
-                /call e3_Cast ${buffTargetID} "${ArrayName}" ${s}
-              |}
+            /if (${check_Mana["${ArrayName}",${s}]}) {
+              /call e3_Cast ${buffTargetID} "${ArrayName}" ${s}
             }
           } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${buffSpellName} is not ready for ${buffTarget}
         } else /if (${Debug} || ${Debug_BuffCheck}) /echo buff does not stack, or checkfor buff exists
@@ -84,10 +76,8 @@ SUB buffBots(ArrayName)
         /if (!${${ArrayName}[${s},${iTargetType}].Equal[Single in Group]} || ${Bool[${Group.Member[${buffTarget}]}]}) {
           /call check_Ready "${ArrayName}" ${s}
           /if (${c_Ready}) {
-            /call check_Distance ${buffTargetID} ${${ArrayName}[${s},${iMyRange}]}
-            /if (${c_Dist}) {
-              /call check_Mana "${ArrayName}" ${s}
-              /if (${c_Mana}) {
+            /if (${check_Distance[${buffTargetID},${${ArrayName}[${s},${iMyRange}]}]}) {
+              /if (${check_Mana["${ArrayName}",${s}]}) {
                 /call e3_Cast ${buffTargetID} "${ArrayName}" ${s}
                 /delay 3 ${Target.BuffsPopulated}
                 /if (${castReturn.Equal[CAST_SUCCESS]} && !${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffSpellID} ]}]}) {
@@ -121,8 +111,7 @@ SUB meleeCombatBuffs(ArrayName, int s)
     /if (!${Bool[${NetBots[${${ArrayName}[${s},${iCastTarget}]}].ShortBuff.Find[${${ArrayName}[${s},${iCastID}]} ]}]}) {
       | if the target is me, ensure my group leader does not have the buff (cleaving anger + cry havoc)
       /if (!${Bool[${Select[${buffTargetID},${NetBots[${Me}].ID}]}]} || (${Bool[${Select[${buffTargetID},${NetBots[${Me}].ID}]}]} && !${Bool[${NetBots[${Group.Leader}].ShortBuff.Find[${${ArrayName}[${s},${iCastID}]} ]}]})) {
-        /call check_Distance ${buffTargetID} ${${ArrayName}[${s},${iMyRange}]}
-        /if (${c_Dist}) {
+        /if (${check_Distance[${buffTargetID},${${ArrayName}[${s},${iMyRange}]}]}) {
           /if (${Me.PctEndurance} >= ${${ArrayName}[${s},${iMinEnd}]} && ${Spell[${${ArrayName}[${s},${iCastName}]}].EnduranceCost} <= ${Me.Endurance}) {
               /call check_Ready "${ArrayName}" ${s}
               /if (${c_Ready}) {
@@ -145,24 +134,23 @@ SUB meleeCombatBuffs(ArrayName, int s)
 SUB buffProcs
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- buffProcs ==>
   /if (!${ActionTaken}) {
-    /declare t int local
+    /declare s int local
     /declare g int local
 
-    /for t 1 to ${ProcBuffs2D.Size[1]}
+    /for s 1 to ${ProcBuffs2D.Size[1]}
       /for g 1 to ${Math.Calc[${Group.GroupSize}-1]}
         /if (${Group.Member[${g}].ID}) {
           /if (${procBuffClass.Find[${Group.Member[${g}].Class.ShortName}]}) {
-            /if (!${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${t},${iSpellID}]} ]} && !${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${t},${iCheckFor}]} ]}) {
-              /call check_Ready "ProcBuffs2D" ${t}
+            /if (!${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${s},${iSpellID}]} ]} && !${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${s},${iCheckFor}]} ]}) {
+              /call check_Ready "ProcBuffs2D" ${s}
               /if (${c_Ready}) {
-                /call check_Distance ${Group.Member[${g}].ID} ${ProcBuffs2D[${t},${iMyRange}]}
-                /if (${c_Dist}) {
-                  /call check_Mana "ProcBuffs2D" ${t}
-                  /if (${c_Mana}) {
-                    /call e3_Cast ${Group.Member[${g}].ID} "ProcBuffs2D" ${t}
-                  } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${ProcBuffs2D[${t},${iCastName}]} failed mana check
-                } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${ProcBuffs2D[${t},${iCastName}]} is too far away
-              } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${ProcBuffs2D[${t},${iCastName}]} is not ready for ${Group.Member[${g}]}
+                /call check_Distance
+                /if (${check_Distance[${Group.Member[${g}].ID},${ProcBuffs2D[${s},${iMyRange}]}]}) {
+                  /if (${check_Mana["ProcBuffs2D",${s}]}) {
+                    /call e3_Cast ${Group.Member[${g}].ID} "ProcBuffs2D" ${s}
+                  } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${ProcBuffs2D[${s},${iCastName}]} failed mana check
+                } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${ProcBuffs2D[${s},${iCastName}]} is too far away
+              } else /if (${Debug} || ${Debug_BuffCheck}) /echo ${ProcBuffs2D[${s},${iCastName}]} is not ready for ${Group.Member[${g}]}
             }
           }
         }
@@ -174,7 +162,7 @@ SUB buffProcs
       /doevents BackOff
       /doevents Assist
       /if (!${ActionTaken}) /next g
-    /if (!${ActionTaken})  /next t
+    /if (!${ActionTaken})  /next s
   }
 /if (${Debug} || ${Debug_BuffCheck}) /echo <==  buffProcs -|
 /return
@@ -196,8 +184,7 @@ SUB checkAuras
     } else {
       /call check_Ready "auraSpells2D" 1
       /if (${c_Ready}) {
-        /call check_Mana "auraSpells2D" 1
-        /if (${c_Mana}) {
+        /if (${check_Mana["auraSpells2D",1]}) {
             /call e3_Cast ${Me.ID} "auraSpells2D" "1"
         }
       }
@@ -239,10 +226,8 @@ SUB event_castGroupBuffs(line, ChatSender)
   :verifyCast
   /if (${s} <= ${GroupBuffs2D.Size[1]}) {
     /if (${Debug} || ${Debug_BuffCheck}) /echo ${s} ${GroupBuffs2D[${s},${iCastName}]} ${GroupBuffs2D.Size[1]}
-    /call check_Distance ${buffTargetID} ${GroupBuffs2D[${s},${iMyRange}]}
-    /if (${c_Dist}) {
-      /call check_Mana "GroupBuffs2D" ${s}
-      /if (${c_Mana}) {
+    /if (${check_Distance[${buffTargetID},${GroupBuffs2D[${s},${iMyRange}]}]}) {
+      /if (${check_Mana["GroupBuffs2D",${s}]}) {
         /if (${buffAttempts} <= ${GroupBuffs2D[${s},${iMaxTries}]}) {
           /call e3_Cast ${buffTargetID} "GroupBuffs2D" "${s}"
           /if (${castReturn.Equal[CAST_SUCCESS]}) /varcalc s ${s}+1

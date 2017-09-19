@@ -86,10 +86,9 @@ Sub check_rune
       /if (${Bool[${NetBots[${runeTargets[${t}]}].InZone}]} && !${Bool[${NetBots[${runeTargets[${t}]}].Buff.Find[${runeArray2D[${s},${iCastID}]} ]}]}) {
         /call check_Ready "runeArray2D" ${s}
         /if (${c_Ready}) {
-          /call check_Distance ${NetBots[${runeTargets[${t}]}].ID} ${runeArray2D[${s},${iMyRange}]}
-          /if (${c_Dist}) {
-            /call check_Mana "runeArray2D" ${s}
-            /if (${c_Mana}) {
+          /call check_Distance
+          /if (${check_Distance[${NetBots[${runeTargets[${t}]}].ID},${runeArray2D[${s},${iMyRange}]}]}) {
+            /if (${check_Mana["runeArray2D",${s}]}) {
               /call e3_Cast ${NetBots[${runeTargets[${t}]}].ID} "runeArray2D" ${s}
             }
           }
@@ -173,10 +172,8 @@ Sub check_charm
       /for s 1 to ${charmArray2D.Size[1]}
       /call check_Ready "charmArray2D" ${s}
       /if (${c_Ready}) {
-        /call check_Mana "charmArray2D" ${s}
-        /if (${c_Mana}) {
-          /call check_Distance ${charmTarget} ${charmArray2D[${s},${iMyRange}]}
-          /if (${c_Dist}) {
+        /if (${check_Mana["charmArray2D",${s}]}) {
+          /if (${check_Distance[${charmTarget},${charmArray2D[${s},${iMyRange}]}]}) {
             /docommand ${ChatToggle} << Charming ${charmTarget} ${Spawn[id ${charmTarget}].CleanName} with ${charmArray2D[${s},${iCastName}]} >>
             /call e3_Cast ${charmTarget} "charmArray2D" "${s}"
             /if (${Bool[${Me.Pet.ID}]}) {
@@ -242,10 +239,8 @@ sub check_mez
         /for s 1 to ${mezArray2D.Size[1]}
           /call check_Ready "mezArray2D" ${s}
           /if (${c_Ready}) {
-            /call check_Mana "mezArray2D" ${s}
-            /if (${c_Mana}) {
-              /call check_Distance ${mezTarg} ${mezArray2D[${s},${iMyRange}]}
-              /if (${c_Dist}) {
+            /if (${check_Mana["mezArray2D",${s}]}) {
+              /if (${check_Distance[${mezTarg},${mezArray2D[${s},${iMyRange}]}]}) {
                 /docommand ${ChatToggle} << Mezzing ${mezTarg} with ${mezArray2D[${s},${iCastName}]} >>
                 /call e3_Cast ${mezTarg} "mezArray2D" "${s}"
               }

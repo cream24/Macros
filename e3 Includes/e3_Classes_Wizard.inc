@@ -10,8 +10,7 @@ SUB check_Harvest
       /for s 1 to ${harvestSpells2D.Size[1]}
         /call check_Ready "harvestSpells2D" ${s}
         /if (${c_Ready}) {
-          /call check_Mana "harvestSpells2D" ${s}
-          /if (${c_Mana}) {
+          /if (${check_Mana["harvestSpells2D",${s}]}) {
             /call e3_Cast ${Me.ID} "harvestSpells2D" ${s}
           }
         }

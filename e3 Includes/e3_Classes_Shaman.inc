@@ -12,8 +12,7 @@ SUB check_Canni
 			  /if (${canniSpells2D[${s},${iCastName}].NotEqual[Spiritual Channeling]} || (${canniSpells2D[${s},${iCastName}].Equal[Spiritual Channeling]} && ${Me.CombatState.Equal[COMBAT]})) {
           /call check_Ready "canniSpells2D" ${s}
           /if (${c_Ready}) {
-            /call check_Mana "canniSpells2D" ${s}
-            /if (${c_Mana}) {
+            /if (${check_Mana["canniSpells2D",${s}]}) {
             	/if (!${canniSpells2D[${s},${iCastName}].Equal[Cannibalization]} || ${Me.CurrentHPs} > 2000) {
 								/if (${canniSpells2D[${s},${iMinHP}]} <= ${Me.PctHPs}) {
               		/call e3_Cast ${Me.ID} "canniSpells2D" ${s}

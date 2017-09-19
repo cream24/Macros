@@ -15,12 +15,10 @@ SUB check_Lich
     } else {
       /if (!${Bool[${Me.Buff[${lichSpell2D[1,${iSpellName}]}]}]} && !${Bool[${Me.Buff[${lichSpell2D[1,${iCheckFor}]}]}]}) {
         /if (${Spell[${lichSpell2D[1,${iSpellName}]}].Stacks} && ${Spell[${lichSpell2D[1,${iSpellName}]}].NewStacks}) {
-          /call check_Mana "lichSpell2D" 1
-          /if (${c_Mana}) {
+          /if (${check_Mana["lichSpell2D",1]}) {
             /call check_Ready "lichSpell2D" 1
             /if (${c_Ready}) {
-          |/if (${check_Mana[lichSpell2D 1]}) {
-            |/if (${check_Ready[lichSpell2D 1]}) {
+            |/if (${check_Ready["lichSpell2D",1]}) {
               /if (${lichSpell2D[1,${iMinHP}]} <= ${Me.PctHPs} && ${Me.CurrentHPs} > 100) {
                 /call e3_Cast ${Me.ID} "lichSpell2D" 1
               }
@@ -44,8 +42,7 @@ SUB check_manaDump
     /for s 1 to ${manaDump_Spells2D.Size[1]}
       /call check_Ready "manaDump_Spells2D" ${s}
       /if (${c_Ready}) {
-      	/call check_Mana "manaDump_Spells2D" ${s}
-				/if (${c_Mana}) {
+        /if (${check_Mana["manaDump_Spells2D",${s}]}) {
       		/varset manaDumpSpellIndex ${s}
 				}
 			}
@@ -53,8 +50,7 @@ SUB check_manaDump
 
     /if (${manaDumpSpellIndex} > 0 ) {
       /for i 1 to ${whoto_manaDump.Size}
-        /call check_Distance ${NetBots[${whoto_manaDump[${i}].Arg[1,/]}].ID} ${manaDump_Spells2D[${manaDumpSpellIndex},${iMyRange}]}
-        /if (${c_Dist}) {
+        /if (${check_Distance[${NetBots[${whoto_manaDump[${i}].Arg[1,/]}].ID},${manaDump_Spells2D[${manaDumpSpellIndex},${iMyRange}]}]}) {
         	/if (${NetBots[${whoto_manaDump[${i}].Arg[1,/]}].PctMana} <= ${whoto_manaDump[${i}].Arg[2,/]}) {
           	/call e3_Cast ${NetBots[${whoto_manaDump[${i}].Arg[1,/]}].ID} "manaDump_Spells2D" ${manaDumpSpellIndex}
           }

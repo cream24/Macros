@@ -76,8 +76,7 @@ sub Event_wordHeal(line, ChatSender)
   /delay 5s !${Me.Casting.ID}
   /call check_Ready "wordHeal2D" 1
   /if (${c_Ready}) {
-    /call check_Mana "wordHeal2D" 1
-    /if (${c_Mana}) {
+    /if (${check_Mana["wordHeal2D",1]}) {
       /bc [+g+] Casting ${wordHeal2D[1,${iCastName}]}
       /call e3_Cast ${Me.ID} "wordHeal2D" 1
     }
@@ -100,8 +99,7 @@ sub Event_Rez(string line, string ChatSender)
     /if (${canRez}==1) {
       :checkReady
       /call check_Ready "rezArray2D" 1
-      /call check_Mana "rezArray2D" 1
-      /if ((!${c_Ready} || !${c_Mana}) && ${Me.CombatState.NotEqual[COMBAT]}) {
+      /if ((!${c_Ready} || !${check_Mana["rezArray2D",1]}) && ${Me.CombatState.NotEqual[COMBAT]}) {
         /if (!${Me.Sitting}) /sit on
         /delay 1s
         /goto :checkReady
@@ -172,8 +170,7 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
 
           :checkReady
           /call check_Ready "rezArray2D" 1
-          /call check_Mana "rezArray2D" 1
-          /if ((!${c_Ready} || !${c_Mana}) && ${Me.CombatState.NotEqual[COMBAT]}) {
+          /if ((!${c_Ready} || !${check_Mana["rezArray2D",1]}) && ${Me.CombatState.NotEqual[COMBAT]}) {
             /if (!${Me.Sitting}) /sit on
             /delay 1s
             /goto :checkReady

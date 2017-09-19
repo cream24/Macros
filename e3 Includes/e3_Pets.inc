@@ -28,8 +28,7 @@ SUB summonPet
   }
   /call check_Ready "petSpell2D" 1
   /if (${c_Ready}) {
-    /call check_Mana "petSpell2D" 1
-    /if (${c_Mana}) {
+    /if (${check_Mana["petSpell2D",${s}]}) {
 	    /call e3_Cast ${Me.ID} "petSpell2D" 1
     }
   }
@@ -90,8 +89,7 @@ SUB check_petHeal
           /call check_Ready "petHeal2D" ${s}
           /if (${c_Ready}) {
             /if (${Me.Pet.Distance} < ${petHeal2D[${s},${iMyRange}]}) {
-              /call check_Mana "petHeal2D" ${s}
-              /if (${c_Mana}) {
+              /if (${check_Mana["petHeal2D",${s}]}) {
                 /call e3_Cast ${Me.Pet.ID} "petHeal2D" ${s}
               }
             }
@@ -115,8 +113,7 @@ SUB buffPet
     /call check_Ready "petBuffs2D" ${s}
     /if (${c_Ready}) {
       /if (${Me.Pet.Distance} < ${petBuffs2D[${s},${iMyRange}]}) {
-        /call check_Mana "petBuffs2D" ${s}
-        /if (${c_Mana}) {
+        /if (${check_Mana["petBuffs2D",${s}]}) {
           /if (${petBuffs2D[${s},${iSpellName}].NotEqual[Growl of the Panther]} || !${Bool[${Me.Song[Growl of the Panther]}]}) {
             /call e3_Cast ${Me.Pet.ID} "petBuffs2D" ${s}
             /delay 5 ${Target.BuffsPopulated}
