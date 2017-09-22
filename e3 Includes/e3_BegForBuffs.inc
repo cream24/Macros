@@ -49,15 +49,6 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 			| Check the ini for an alias
 			/if (${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Length}) {
 			
-				| Disable follow before porting.
-				/if (${ChatText.Find[Port]}) {
-					/if (${Stick.Active}) /squelch /stick off
-					/if (${NetAdvPath.Status}==1) /squelch /netfollow off
-					/varset FollowTarget NULL
-					/varset Following FALSE
-					/delay 30 !${Stick.Active} && ${NetAdvPath.Status}==0
-				}
-
 				| Reset variables using data from SpellAliases_Ini
 				/varset ChatText ${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Replace[;,:]}
 				/if (${Debug} || ${Debug_BegForBuffs}) /echo |- Event_Chat -| :Retry_Alias

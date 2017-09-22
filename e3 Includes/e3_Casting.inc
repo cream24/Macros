@@ -37,7 +37,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	/declare pendingType	string local
   /declare oldItem			string local
 	/declare i						int local
-  |/varset Debug_Casting FALSE
+  |/varset Debug_Casting TRUE
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 | Checks to abort casting due to previous failures
   |if im invis and iCastInvis=0 (default except for heals)
@@ -55,9 +55,8 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   |- Check if spell has a NOHOLD timer
   /if (${Defined[nht${targetID}-${pendingCastID}]}) {
     /if (${Bool[${nht${targetID}-${pendingCastID}}]}) {
-      /if (${Debug} || ${Debug_Casting}) /bc [${pendingCast}] Did not take hold last time I cast it on ${targetID}.  Waiting [${nht${targetID}-${pendingCastID}}] until I try again.
       /varset castReturn CAST_TAKEHOLD
-      /echo SkipCast-NoHold ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+      /if (${Debug} || ${Debug_Casting}) /echo SkipCast-NoHold ${pendingCast} on ${Spawn[id ${targetID}].Name} Waiting [${nht${targetID}-${pendingCastID}}]
       /goto :skipCast
     } else {
       /echo Deleting nht${targetID}-${pendingCastID} ${nht${targetID}-${pendingCastID}}
@@ -66,16 +65,14 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   }
 	|- Check the Immune List
 	/if (${Select[${pendingCastID}_${castTargetName},${immuneList}]}) {
-		/if (${Debug} || ${Debug_Casting}) /bc ${Target.CleanName} is immune to ${pendingCastID}, skipping cast
 		/varset castReturn CAST_IMMUNE
-		/echo SkipCast-Immune ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+    /if (${Debug} || ${Debug_Casting}) /echo SkipCast-Immune ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 		/goto :skipCast 		
 	}
 	|- Check for spells listed in the failureList: reset on zone
 	/if (${Select[${${ArrayName}[${ArrayIndex},${iCastName}]},${failureList}]}) {
-		/if (${Debug} || ${Debug_Casting}) /echo [${pendingCast}] Is listed in the failureList in this zone.
 		/varset castReturn FAILURELIST
-		/echo SkipCast-Failure ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+    /if (${Debug} || ${Debug_Casting}) /echo SkipCast-Failure ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
 		/goto :skipCast 
 	}
 	|- Reagent Check *|
@@ -114,19 +111,22 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		/goto :skipCast
 	}
 	/if (${Window[SpellBookWnd].Open}) {
-			/if (${Debug} || ${Debug_Casting}) /bc skipping [${pendingCast}] , my spellbook is open
-			/goto :skipCast
+    /if (${Debug} || ${Debug_Casting}) /bc skipping [${pendingCast}] , my spellbook is open
+    /goto :skipCast
 	}
 	/if (${Corpse.Open}) {
 		/if (${Debug} || ${Debug_Casting}) /bc skipping [${pendingCast}] , i have a corpse open and closeCorpse=${closeCorpse}
 		/goto :skipCast
 	}
+
   /if (!${${ArrayName}[${ArrayIndex},${iSpellType}].Find[Beneficial]}) {
-    /if (!${Spawn[id ${targetID}].LineOfSight}) {
-      /if (${Debug} || ${Debug_Casting}) /echo I cannot see [${Spawn[id ${targetID}].CleanName}]
-      /varset castReturn CAST_CANNOTSEE
-      /echo SkipCast-LoS ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
-      /goto :skipCast
+    /if (!${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Self]}) {
+      /if (!${Spawn[id ${targetID}].LineOfSight}) {
+        /if (${Debug} || ${Debug_Casting}) /echo I cannot see [${Spawn[id ${targetID}].CleanName}]
+        /varset castReturn CAST_CANNOTSEE
+        /echo SkipCast-LoS ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+        /goto :skipCast
+      }
     }
   }
 
@@ -143,7 +143,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	|Use Disc
 	/if (${${ArrayName}[${ArrayIndex},${iCastType}].Equal[Disc]}) {
 		/if (${Me.ActiveDisc.ID} && ${${ArrayName}[${ArrayIndex},${iDuration}]}) {
-			/if (${Debug} || ${Debug_Casting}) /echo |- QuickBurn -| Waiting on disc [${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text}]
+			/if (${Debug} || ${Debug_Casting}) /echo Skipping ${ArrayName}[${ArrayIndex},${iCastName}, Waiting on disc [${Window[CombatAbilityWnd].Child[CAW_CombatEffectLabel].Text}]
 			/varset castReturn ACTIVEDISC
 			/goto :skipCast
 		} else {
@@ -192,7 +192,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 				/varset pendingType ${DefaultGem}
 			}
 		}
-    |/echo pendingCastID ${pendingCastID} pendingType ${pendingType}" "-targetid|${targetID}"
+    |/echo AT pendingCastID ${pendingCastID} pendingType ${pendingType}" "-targetid|${targetID}"
 		/varset ActionTaken TRUE
     /if (${${ArrayName}[${ArrayIndex},${iTargetType}].Equal[Self]}) {
 		  /casting "${pendingCastID}|${pendingType}"
@@ -203,7 +203,6 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 		/if (${Cast.Status.Find[M]}) /delay 3s !${Cast.Status.Find[M]}
 		|- Set expected cast end time in 1/10ths of a second
 		/varcalc castEndTime ${Me.Casting.MyCastTime}/100
-    |/echo incastchecks ${Time}
 :cast_still_pending
 |- check for reasons to cancel casting
 		/if (${Cast.Status.Find[C]}) {
@@ -254,7 +253,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
           }
 				}
 				|-Target is out of range
-				/if (${targetID} != ${Me.ID}) {
+				/if (${targetID} != ${Me.ID} && !${Select[${${ArrayName}[${ArrayIndex},${iTargetType}]},PB AE,Self]}) {
 				  /if (${Target.Distance} > ${${ArrayName}[${ArrayIndex},${iMyRange}]}) {
             /if (${Debug} || ${Debug_Casting}) /echo target range called interrupt
             /call interrupt
@@ -336,7 +335,7 @@ Sub check_Ready(ArrayName, int ArrayIndex)
   } else /if (${${ArrayName}[${ArrayIndex},${iCastType}].Equal[Ability]}) {
     /if (${Me.AbilityReady[${${ArrayName}[${ArrayIndex},${iCastName}]}]}) /varset c_Ready TRUE
   }
-  /if (${Debug} || ${Debug_Casting}) /echo |- check_Ready <=
+  /if (${Debug} || ${Debug_Casting}) /echo |- check_Ready <= ${c_Ready}
 /RETURN ${c_Ready}
 
 Sub memorize_spell(spellName,gemNum)
@@ -344,9 +343,11 @@ Sub memorize_spell(spellName,gemNum)
   /memorize "${spellName}" ${gemNum}
 	/delay 3s ${Bool[${Me.Gem[${spellName}]}]}
 	|only wait for beneficial spells
-	/if (${Spell[${spellName}].Beneficial}) {
-    /declare waitForReady timer local ${If[${Me.CombatState.Equal[COMBAT]},32,${Math.Calc[32+${Spell[${spellName}].RecastTime}/100]}]}
+	/if (${Spell[${spellName}].Beneficial} || ${Spell[${spellName}].TargetType.Equal[Self]}) {
+    /declare waitForReady timer local ${If[${Me.CombatState.Equal[COMBAT]},40,${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}]}
+    |/echo wfr ${waitForReady} rc ${Spell[${spellName}].RecastTime} math ${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}
     :checkTimer
+      |/echo chectimer ${waitForReady} ${Me.SpellReady[${spellName}]}
       /if (${waitForReady}) {
       /doevents Follow
       /doevents Stop
@@ -372,9 +373,9 @@ Sub check_GCD
 |- Check if the Target is in Zone and in Range  -|
 |------------------------------------------------|
 Sub check_Distance(int targetID, int myRange)
-	/declare c_Dist bool FALSE
+	/declare c_Dist bool local FALSE
 	/if (${Bool[${Spawn[id ${targetID}].Type.NotEqual[Corpse]}]}) {
-	  /if (${Spawn[id ${targetID}].Distance3D} <= ${myRange}) /varset c_Dist TRUE
+	  /if (${Spawn[id ${targetID}].Distance} <= ${myRange}) /varset c_Dist TRUE
   }
 /RETURN ${c_Dist}
 

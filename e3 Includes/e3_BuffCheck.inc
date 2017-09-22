@@ -106,7 +106,7 @@ SUB buffBots(ArrayName)
 SUB meleeCombatBuffs(ArrayName, int s)
 |/echo mcb ${s} ${NetBots[${${ArrayName}[${s},${iCastTarget}]}].Name} ${${ArrayName}[${s},${iCastName}]}
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- meleeCombatBuffs ${ArrayName} ${s} ==>
-  /if (${Me.CombatState.Equal[COMBAT]}) {
+  /if (${Me.CombatState.Equal[COMBAT]}||${Me.Combat}) {
     /declare buffTargetID	int local ${NetBots[${${ArrayName}[${s},${iCastTarget}]}].ID}
     /if (!${Bool[${NetBots[${${ArrayName}[${s},${iCastTarget}]}].ShortBuff.Find[${${ArrayName}[${s},${iCastID}]} ]}]}) {
       | if the target is me, ensure my group leader does not have the buff (cleaving anger + cry havoc)

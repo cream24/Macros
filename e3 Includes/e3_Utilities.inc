@@ -369,10 +369,13 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     } else {
       |default to item - no way to validate an item thats on my corpse
       /if (!${FindItem[=${tmp_castname}].ID}) {
+        |/echo tcn ${tmp_castname} f ${tmp_castname.Find[Molten Orb]}
         /if (!${Bool[${Me.Inventory[Chest]}]} && !${Me.Platinum}) {
           /varset reloadOnLoot TRUE
           /varset missingSpellItem ${tmp_castname}
           /call RemoveArrayElement "${ArrayName}" "${ArrayName}[${i}]"
+        } else /if (${tmp_castname.Find[Molten Orb]} && ${Bool[${Me.Book[Summon: Molten Orb]}]}) {
+          |/echo This is ok, mage handling
         } else {
           /varset reloadOnLoot TRUE
           /varset missingSpellItem ${tmp_castname}
@@ -885,10 +888,10 @@ SUB check_macroTimers
 	/declare SpentTimerCounter int local
 	/declare SpentTimerList string local
 	/for i 1 to ${timerArray.Size}
-		/if (!${${timerArray[${i}]}}) {
-			/varcalc SpentTimerCounter ${SpentTimerCounter} + 1
-			/if (${Defined[${timerArray[${i}]}]}) {
-				/if (${Debug}) /echo Deleting timer: ${timerArray[${i}]}
+    /if (${Defined[${timerArray[${i}]}]}) {
+		  /if (!${${timerArray[${i}]}}) {
+        /if (${Debug}) /echo Deleting timer: ${timerArray[${i}]}
+			  /varcalc SpentTimerCounter ${SpentTimerCounter} + 1
 				/deletevar ${timerArray[${i}]}
 				/varset SpentTimerList ${SpentTimerList}${i},
 			}
@@ -931,7 +934,7 @@ SUB ClearCursor
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sub SwapItem(itemName,slotName)
-  /if (!${Defined[${itemName}]} || !${Defined[${slotName}]}) /return
+  /if (!${Defined[itemName]} || !${Defined[slotName]}) /return
   /if (${Cursor.ID}) /call ClearCursor
 	|if the item is in a bag rather than top level inventory slot, open the bag prior to exchange
 	/if (${Me.Inventory[${FindItem[=${itemName}].ItemSlot}].Container}) {
@@ -941,15 +944,20 @@ Sub SwapItem(itemName,slotName)
 	}
   /delay 1
   |/bc exchanging "${itemName}" ${slotName}
-  /exchange "${itemName}" ${slotName}
-	/delay 5s ${Me.Inventory[${slotName}].Name.Equal[${itemName}]}
-  /delay 1
+  /if (${slotName.Equal[Cursor]}) {
+		/itemnotify "${itemName}" leftmouseup
+		/delay 1s ${Cursor.Name.Equal[${itemName}]}
+  } else {
+		/exchange "${itemName}" "${slotName}"
+		|/echo attempted exchange
+		/delay 5s ${Me.Inventory[${slotName}].Name.Equal[${itemName}]}
+    /delay 1s !${Cursor.ID}
+    /if (${Cursor.ID}) /call ClearCursor
+  }
   /if (${Defined[packSlot]}) {
     /if (${Window[Pack${packSlot}].Open}) /itemnotify Pack${packSlot} rightmouseup
     /delay 2s !${Window[Pack${packSlot}].Open}
   }
-	/delay 1s !${Cursor.ID}
-	/if (${Cursor.ID}) /call ClearCursor
 /return
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -974,11 +982,11 @@ Sub PlaceInFirstFreeSlot
 
 |-------------------------------------------------------------|
 |- Use MQ2MoveUtils /moveto function, to move to destination.	||
-SUB MoveToLoc(yLoc,xLoc,timeToWait)
-|  /echo MoveToLoc ${yLoc} ${xLoc} ${timeToWait}
-  /declare arrivalDist int local 10
-  /if (!${Defined[timeToWait]}) /declare timeToWait 30
+SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)
+  /if (!${Bool[${arrivalDist}]}) /varset arrivalDist 10
+  /if (!${Bool[${timeToWait}]}) /varset timeToWait 30
   /declare moveTimer timer local ${timeToWait}
+  |/echo MoveToLoc ${yLoc},${xLoc},${timeToWait},${arrivalDist}
 
   /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) /return
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt

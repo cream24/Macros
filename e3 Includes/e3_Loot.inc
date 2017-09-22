@@ -52,15 +52,15 @@ SUB loot_Area
   /declare NumCorpses int local ${SpawnCount[npc corpse zradius 50 radius ${seek_Radius} "_"]}
   /declare CorpsesLeft int local ${NumCorpses}
   /if (${Debug} || ${Debug_Loot}) /echo NumCorpses: ${NumCorpses}
-
   |build list of nearby corpses
+  |/doevents flush YourKill
+
   /for i 1 to ${NumCorpses}
     /varset ClosestCorpse ${NearestSpawn[${i},npc corpse zradius 50 radius ${seek_Radius} "_"].ID}
     /varset CorpseList ${CorpseList}${ClosestCorpse}|
   /next i
   /if (${Debug} || ${Debug_Loot}) /echo CorpseList: ${CorpseList}
 
-  |/doevents flush YourKill
   /for i 1 to ${NumCorpses}
     /if (${Debug} || ${Debug_Loot}) /echo Corpse ${i} of ${NumCorpses}, ${CorpsesLeft} left
     |iterate list of corpses
@@ -98,15 +98,13 @@ SUB loot_Area
     /varset CorpseList ${CorpseList.Replace[${ClosestCorpse}|,]}
     /varcalc CorpsesLeft ${CorpsesLeft}-1
     |exits loop if autoloot was turned off
-    /doevents lootRelay
+    |/doevents lootRelay
   /if (${Auto_Loot}) /next i
 
   /if (${Following}) {
     /call AquireFollow
   } else {
-    /moveto loc ${startY} ${startX}
-    /delay 2s ${MoveTo.Stopped} && !${Me.Moving}
-    /moveto off
+    /call MoveToLoc ${startY} ${startX}
   }
   /if (${Debug} || ${Debug_Loot}) /echo <== loot_Area -|
 /return
@@ -117,9 +115,8 @@ SUB lootCorpse
   /declare i int local
   /varset canLootCorpse TRUE
   /loot
-  /delay 1s ${Window[LootWnd].Open}
+  /delay 5 ${Window[LootWnd].Open}
   /doevents NotYourKill
-  /delay 2
   /delay 1s ${Corpse.Items} || !${canLootCorpse}
   /if (!${canLootCorpse}) {
     /if (${Debug} || ${Debug_Loot}) /echo Not your kill
@@ -168,6 +165,7 @@ SUB lootCorpse
         }
         /echo [Loot]: Looting [${Corpse.Item[${i}].Name}]
         /call loot_Handle ${i} keep
+        /delay 2
       }
       :skipItem
     }

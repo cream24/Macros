@@ -71,6 +71,7 @@ sub check_celestialRegen
 |----------------------------------------------------------------------------|
 #event wordHeal "<#1#> WordHeal"
 sub Event_wordHeal(line, ChatSender)
+  /if (!${Me.Class.ShortName.Equal[CLR]}) /return
   /call checkEventArgs "${ChatSender}" "${line}" "UZR"
   /if (!${c_eventArg}) /return
   /delay 5s !${Me.Casting.ID}

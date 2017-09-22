@@ -61,32 +61,31 @@ SUB check_Gems
 |--------------------------------------------------------------------------------------------|
 SUB check_Follow
 /if (${Debug} || ${Debug_Background}) /echo |- check_Follow ==>
-	/if (${FollowTarget.Equal[${Me.CleanName}]}) {
-		/if (!${spamTimer}) {
-			/declare i int local 1
-			:NextFollower
-			/if (!${Defined[SpamTimer_${Followers.Arg[${i},,]}]}) /declare SpamTimer_${Followers.Arg[${i},,]} timer outer 0
-        /if (!${SpamTimer_${Followers.Arg[${i},,]}}) {
-          /if (!${Spawn[pc ${Followers.Arg[${i},,]} radius ${LeashLength}].ID}) {
-            /popup ${Followers.Arg[${i},,]} has fallen behind.
-            /varset SpamTimer_${Followers.Arg[${i},,]} 10s
-            /varset spamTimer 2s
+	/if (${FollowTarget.NotEqual[${Me}]}) {
+	  /if (${SpawnCount[=${FollowTarget}]}) {
+      /declare followTgtDistance float local ${Spawn[=${FollowTarget}].Distance}
+      /declare followTgtLoS bool local ${Spawn[=${FollowTarget}].LineOfSight}
+      /if (${followTgtDistance} <= ${LeashLength}) {
+        /if (!${NetAdvPath.Status} && !${Stick.Active}) {
+          /if (${followTgtDistance}< 40 && ${medBreak}) {
+            /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
+          } else {
+            /call AquireFollow
           }
         }
-			/varcalc i ${i} + 1
-			/if (${Followers.Arg[${i},,].Length}) /goto :NextFollower
-		}
-	} else {
-		/if (${SpawnCount[pc ${FollowTarget}]} && ${Spawn[pc ${FollowTarget}].Distance} < ${LeashLength} && ${Spawn[pc ${FollowTarget}].LineOfSight}) {
-			/if (${NetAdvPath.Status}==0 && !${Stick.Active}) {
-			  /if (${Spawn[pc ${FollowTarget}].Distance}< 40 && ${medBreak}) {
-          /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
-        } else {
-          /call AquireFollow
+        /if (${Me.FeetWet}) /squelch /face fast ${FollowTarget}
+        |FollowCheckTimer
+      } else /if (${followTgtDistance} > ${LeashLength}) {
+        /if (!${FollowCheckTimer}) {
+          /if (!${NetAdvPath.Status} && !${Stick.Active}) {
+            /bct ${FollowTarget} //popup ${Me} stopped moving! Dist:${followTgtDistance},LoS:${followTgtLoS}
+          } else {
+            /bct ${FollowTarget} //popup ${Me} is falling behind. Dist:${followTgtDistance},LoS:${followTgtLoS}
+          }
+          /varset FollowCheckTimer 40+${Math.Rand[${NetBots.Counts}]}
         }
-			}
-			/if (${Me.FeetWet}) /squelch /face fast ${FollowTarget}
-		}
+      }
+	  }
 	}
 /if (${Debug} || ${Debug_Background}) /echo <== check_Follow -|
 /RETURN

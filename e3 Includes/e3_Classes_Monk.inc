@@ -8,6 +8,7 @@ Sub MNK_Setup
 /return
 
 Sub MNK_Background_Events
+||**
   /if (${Bool[${Me.ActiveDisc}]} && ${Me.ActiveDisc.Name.Equal[Speed Focus Discipline]}) {
     /if (!${speedFocusSwapTimer}) {
       /varset speedFocusSwapped true
@@ -18,6 +19,7 @@ Sub MNK_Background_Events
     /swap main
     /varset speedFocusSwapped false
   }
+|-**|
 /return
 
 SUB MNK_MacroSettings

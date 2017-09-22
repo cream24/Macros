@@ -10,7 +10,7 @@ SUB check_Pets
 	/if (!${ActionTaken} && !${suspend_Pets} && !${activeTimer} && !${rebuffTimer} && !${Me.Invis}) {
     /if (${Me.Pet.ID} && ${Defined[petHeal2D]}) /call check_petHeal
     /if (!${Me.Pet.ID} && !${ActionTaken} && ${Defined[petSpell2D]} && ${SpawnCount[pc ${Me}]} && (${petSummonCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call summonPet
-    /if (${BuffCheck} && ${Me.Pet.ID} && ${Defined[petBuffs2D.Size]} && !${medBreak} && (${petBuffCombat} || ${Me.CombatState.NotEqual[COMBAT]}))	/call buffPet
+    /if (${BuffCheck} && ${Me.Pet.ID} && ${Defined[petBuffs2D]} && !${medBreak} && (${petBuffCombat} || ${Me.CombatState.NotEqual[COMBAT]}))	/call buffPet
     /if (${BuffCheck} && ${Me.Pet.ID} && ${petAutoShrink} && !${combatTimer}) /call check_AutoShrink
 	}
 /if (${Debug} || ${Debug_Pets}) /echo <== check_Pets -|
@@ -28,7 +28,7 @@ SUB summonPet
   }
   /call check_Ready "petSpell2D" 1
   /if (${c_Ready}) {
-    /if (${check_Mana["petSpell2D",${s}]}) {
+    /if (${check_Mana["petSpell2D",1]}) {
 	    /call e3_Cast ${Me.ID} "petSpell2D" 1
     }
   }
@@ -44,10 +44,11 @@ SUB summonPet
 |- Automatically shrinks pets to min size	-|
 SUB check_AutoShrink
 /if (${Debug} || ${Debug_Pets}) /echo |- check_AutoShrink ==>
+  /if (!${Defined[petShrink2D]}) /return
 	/if (${Me.Pet.ID} && ${Me.Pet.Height}>1 && ${Me.Pet.Distance}) {
     /declare s int local
     /for s 1 to ${petShrink2D.Size[1]}
-      /if (${check_Ready[petShrink2D ${s}]} && ${check_Mana[petShrink2D ${s}]} && ${Me.Pet.Distance} < ${petShrink2D[${s},${iMyRange}]}) {
+      /if (${check_Ready[petShrink2D,${s}]} && ${check_Mana[petShrink2D,${s}]} && ${Me.Pet.Distance} < ${petShrink2D[${s},${iMyRange}]}) {
         /call e3_Cast ${Me.Pet.ID} "petShrink2D" ${s}
       }
     /if (!${ActionTaken}) /next s
@@ -82,6 +83,7 @@ SUB check_petHeal
         /varset petMended TRUE
       }
 		}
+    /if (!${Defined[petHeal2D]}) /return
 		/if (!${petMended}) {
       /declare s int local
       /for s 1 to ${petHeal2D.Size[1]}
@@ -105,22 +107,23 @@ SUB check_petHeal
 |- Rebuff pet.															                            -|
 SUB buffPet
 /if (${Debug} || ${Debug_Pets}) /echo |- buffPet ==>
+  /if (!${Defined[petBuffs2D]}) /return
 	/declare s int local
 	/for s 1 to ${petBuffs2D.Size[1]}
 	|/echo ${petBuffs2D[${s},${iCastName}]} stack ${petBuffs2D[${s},${iSpellName}]} ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} has !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}
 	|removing ${Spell[${petBuffs2D[${s},${iSpellName}]}].StacksPet} for now as balikor's mark reports non-stacking
-  /if (!${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iCheckFor}]}]}]} && !${nht${petBuffs2D[${s},${iCastID}]}}) {
+  /if (!${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iCheckFor}]}]}]} && !${Defined[nht${petBuffs2D[${s},${iCastID}]}]}) {
     /call check_Ready "petBuffs2D" ${s}
     /if (${c_Ready}) {
       /if (${Me.Pet.Distance} < ${petBuffs2D[${s},${iMyRange}]}) {
         /if (${check_Mana["petBuffs2D",${s}]}) {
           /if (${petBuffs2D[${s},${iSpellName}].NotEqual[Growl of the Panther]} || !${Bool[${Me.Song[Growl of the Panther]}]}) {
             /call e3_Cast ${Me.Pet.ID} "petBuffs2D" ${s}
-            /delay 5 ${Target.BuffsPopulated}
-            /if (${castReturn.Equal[CAST_SUCCESS]} && ${Me.Pet.ID} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}) {
-              /call CreateTimer "nht${petBuffs2D[${s},${iCastID}]}" "${noHoldDelay}"
-              /if (${Debug} || ${Debug_Pets}) /bc [+y+] ${Time} ${petBuffs2D[${s},${iSpellName}]} not on Pet, creating NHT - ${nht${petBuffs2D[${s},${iCastID}]}}
-            }
+            |/delay 5 ${Target.BuffsPopulated}
+            |/if (${castReturn.Equal[CAST_SUCCESS]} && ${Me.Pet.ID} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}) {
+            |  /call CreateTimer "nht${petBuffs2D[${s},${iCastID}]}" "${noHoldDelay}"
+            |  /if (${Debug} || ${Debug_Pets}) /bc [+y+] ${Time} ${petBuffs2D[${s},${iSpellName}]} not on Pet, creating NHT
+            |}
           }
         }
       }
@@ -185,14 +188,6 @@ Sub pet_Setup
     /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Buff Combat (On/Off)" petBuffCombat bool outer
 	}
 
-  /if (${FindItemCount[=Gemstone of Dark Flame]}) {
-    /call BuildArray petShrink "Gemstone of Dark Flame"
-  } else /if (${FindItemCount[=Symbol of Ancient Summoning]}) {
-    /call BuildArray petShrink "Symbol of Ancient Summoning"
-  } else /if (${Me.Book[Tiny Companion]}) {
-    /call BuildArray petShrink "Tiny Companion"
-  }
-
 	/call pet_spellArrays
 /if (${Debug} || ${Debug_Pets}) /echo <== pet_Setup -|
 /return
@@ -205,12 +200,22 @@ SUB pet_spellArrays
   /call IniToArrayV "${Character_Ini},Pets,Pet Heal#" petHeal
 
   /if (${Defined[petSpell]}) /call BuildSpellArray "petSpell"	"petSpell2D"
+
   /if (${Defined[petBuffs]}) {
     /varset BuffCheck TRUE
     /call BuildSpellArray "petBuffs" "petBuffs2D"
   }
   /if (${Defined[petHeal]})   /call BuildSpellArray "petHeal"	"petHeal2D"
+
+  /if (${FindItemCount[=Gemstone of Dark Flame]}) {
+    /call BuildArray petShrink "Gemstone of Dark Flame"
+  } else /if (${FindItemCount[=Symbol of Ancient Summoning]}) {
+    /call BuildArray petShrink "Symbol of Ancient Summoning"
+  } else /if (${Me.Book[Tiny Companion]}) {
+    /call BuildArray petShrink "Tiny Companion"
+  }
   /if (${Defined[petShrink]}) /call BuildSpellArray "petShrink"	"petShrink2D"
+
 /RETURN
 
 |------------------------------------------------------------------------|

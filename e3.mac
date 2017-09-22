@@ -32,6 +32,9 @@ SUB Main(modeSelect)
 		/call check_Active
 		/call check_Idle
     /call check_autoTribute
+    /if (${currentZone} != ${Zone.ID})  /call check_Zone
+    /if (${Following} && !${Assisting}) /call check_Follow
+
 		/if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 99) /call check_lifeSupport
     |workaround for item cast array
     /if (${reloadOnLoot}) /call reloadSpellArrays
@@ -53,8 +56,6 @@ SUB Main(modeSelect)
         }
       }
       /if (${medBreak}) /call check_MedBreak
-      /if (${currentZone} != ${Zone.ID})  /call check_Zone
-      /if (${Following} && !${Assisting}) /call check_Follow
 		}
 
   /if (${MoveUtils.GM}) {

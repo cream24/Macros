@@ -104,7 +104,6 @@ sub cast_RadiantCure
     /varset notifyOtherCuring TRUE
     /return
   }
-  |/g RadiantCure inc...
   /bc RadiantCure inc...
   /squelch /bcg //CastingRadiantCure ${Me.Name} Y
   /call e3_Cast ${Me.ID} "rCure2D" 1

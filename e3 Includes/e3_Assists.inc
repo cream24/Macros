@@ -242,7 +242,7 @@ SUB CombatAbilities
   }
   /if (${Defined[smartTaunt]}) {
     /if (${smartTaunt} && ${Me.AbilityReady[Taunt]}) {
-      /if (!${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
+      /if (${Bool[${Me.TargetOfTarget}]} && !${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
         /bc Taunting ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget.Name} has aggro
         /doability Taunt
       }
@@ -491,7 +491,7 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
       :attemptCast
       /call check_Ready "${ArrayName}" ${s}
       /if (${c_Ready}) {
-        /if (${check_Mana[${ArrayName} ${s}]}) {
+        /if (${check_Mana[${ArrayName},${s}]}) {
           /if (${check_Distance[${spellTarg},${${ArrayName}[${s},${iMyRange}]}]}) {
             /call e3_Cast ${spellTarg} "${ArrayName}" "${s}"
           } else {
@@ -815,6 +815,11 @@ SUB check_AE
         /if (${check_Mana["PBAE_Spells2D",${s}]}) {
           /squelch /face fast id ${AssistTarget}
           /call e3_Cast ${aeTarget} "PBAE_Spells2D" "${s}"
+          /if (${Cast.Stored.Name.Equal[${PBAE_Spells2D[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_SUCCESS]}) {
+            /if (${PBAE_Spells2D[${s},${iSpellName}].Equal[Idol of Malos]}) {
+              /call CreateTimer "nht${aeTarget}-${PBAE_Spells2D[${s},${iCastID}]}" "1400"
+            }
+          }
         }
       }
     /if (!${ActionTaken}) /next s
@@ -924,16 +929,22 @@ SUB event_Burns(line, ChatSender, burnType)
 |- Casts spells, abilities, and burns through disciplines on a given targetID.	-|
 |--------------------------------------------------------------------------------|
 SUB useBurns(ArrayName)
-/if (${Debug} || ${Debug_Assists}) /echo |- useBurns Target=${burnTarget}- Array=${ArrayName} ==>
+/if (${Debug} || ${Debug_Assists}) /echo |- useBurns Array=${ArrayName} ==>
 	/declare i int local
 	/for i 1 to ${${ArrayName}.Size[1]}
+
     /call check_Ready "${ArrayName}" ${i}
+    |/echo ${i} ${${ArrayName}[${i},${iCastName}]} tgt ${AssistTarget} rng ${${ArrayName}[${i},${iMyRange}]}
+    |/echo ${i} rdy ${c_Ready} dist ${check_Distance[${AssistTarget},${${ArrayName}[${i},${iMyRange}]}]}
     /if (${c_Ready}) {
       /if (${check_Distance[${AssistTarget},${${ArrayName}[${i},${iMyRange}]}]}) {
         /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) /goto :skipCurrent
         /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]}) /goto :skipCurrent
         /call e3_Cast ${AssistTarget} "${ArrayName}" "${i}"
-        /g useBurns ${Time} : [${ArrayName}]-${${ArrayName}[${i},${iCastName}]}
+        /delay 2
+        |/varset ActionTaken TRUE
+        /call check_Ready "${ArrayName}" ${i}
+        /if (!${c_Ready}) /g Used:[${ArrayName}]-${${ArrayName}[${i},${iCastName}]}
       }
     } else {
       /if (${Debug} || ${Debug_Assists}) /echo NotReady: ${i} ${${ArrayName}[${i},${iCastName}]}
@@ -993,11 +1004,13 @@ SUB event_SpellSet(line, ChatSender, spellArray)
       /varset spellsToUse ${spellArray}
       /varset use_Nukes TRUE
       /echo \ag Nukes set to [${spellsToUse}] - ${Nukes2D.Size[1]} spells
-      /for i 1 to ${Nukes2D.Size[1]}
-        /if (!${Bool[${Me.Gem[${Nukes2D[${i},${iCastName}]}]}]}) {
-          /call memorize_spell "${Nukes2D[${i},${iCastName}]}" ${Nukes2D[${i},${iSpellGem}]}
-        }
-      /next i
+      /if (!${Following}) {
+        /for i 1 to ${Nukes2D.Size[1]}
+          /if (!${Bool[${Me.Gem[${Nukes2D[${i},${iCastName}]}]}]}) {
+            /call memorize_spell "${Nukes2D[${i},${iCastName}]}" ${Nukes2D[${i},${iSpellGem}]}
+          }
+        /next i
+      }
     }
     |dots on assist
     /if (${Ini[${Character_Ini},DoTs on Assist].Length}) {
@@ -1008,11 +1021,13 @@ SUB event_SpellSet(line, ChatSender, spellArray)
         /if (${Defined[Assist_DoTs]}) /call BuildSpellArray "Assist_DoTs" "Assist_DoTs2D"
         /varset spellsToUse ${spellArray}
         /echo \ag Dots on Assist set to [${spellsToUse}] - ${Assist_DoTs2D.Size[1]} spells
-        /for i 1 to ${Assist_DoTs2D.Size[1]}
-          /if (!${Bool[${Me.Gem[${Assist_DoTs2D[${i},${iCastName}]}]}]}) {
-            /call memorize_spell "${Assist_DoTs2D[${i},${iCastName}]}" ${Assist_DoTs2D[${i},${iSpellGem}]}
-          }
-        /next i
+        /if (!${Following}) {
+          /for i 1 to ${Assist_DoTs2D.Size[1]}
+            /if (!${Bool[${Me.Gem[${Assist_DoTs2D[${i},${iCastName}]}]}]}) {
+              /call memorize_spell "${Assist_DoTs2D[${i},${iCastName}]}" ${Assist_DoTs2D[${i},${iSpellGem}]}
+            }
+          /next i
+        }
       }
     }
     |dots on command
@@ -1025,11 +1040,13 @@ SUB event_SpellSet(line, ChatSender, spellArray)
           /call BuildSpellArray "Command_DoTs" "Command_DoTs2D"
           /varset spellsToUse ${spellArray}
           /echo \ag Dots on Command set to [${spellsToUse}] - ${Command_DoTs2D.Size[1]} spells
-          /for i 1 to ${Command_DoTs.Size[1]}
-            /if (!${Bool[${Me.Gem[${Command_DoTs[${i},${iCastName}]}]}]}) {
-              /call memorize_spell "${Command_DoTs[${i},${iCastName}]}" ${Command_DoTs[${i},${iSpellGem}]}
-            }
-          /next i
+          /if (!${Following}) {
+            /for i 1 to ${Command_DoTs.Size[1]}
+              /if (!${Bool[${Me.Gem[${Command_DoTs[${i},${iCastName}]}]}]}) {
+                /call memorize_spell "${Command_DoTs[${i},${iCastName}]}" ${Command_DoTs[${i},${iSpellGem}]}
+              }
+            /next i
+          }
         }
       }
     }
@@ -1207,6 +1224,7 @@ Sub assist_Setup
   /if (${FindItemCount[=Whispering Tunic of Shadows]})                        /varset AnguishChest Whispering Tunic of Shadows
   /if (${AnguishChest.Length}) /call BuildArray EPICBurns "${AnguishChest}"
 
+  |/echo ---------Assist calling spellarrays ----------
   /call assist_SpellArrays
 
   /if (${Debug} || ${Debug_Assists}) /echo <== assist_Setup -|
@@ -1215,21 +1233,28 @@ Sub assist_Setup
 |------------------------------------------------------------------------------------------------
 |------------------------------------------------------------------------------------------------
 SUB assist_SpellArrays
-  /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#" MyAbilities
-  /call IniToArrayV "${Character_Ini},Nukes,${spellsToUse}#"       MyNukes
-  /call IniToArrayV "${Character_Ini},DoTs on Assist,${spellsToUse}#" Assist_DoTs
-  /call IniToArrayV "${Character_Ini},DoTs on Command,${spellsToUse}#" Command_DoTs
-  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Assist#"  Assist_Debuffs
-  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Command#" Command_Debuffs
-  /call IniToArrayV "${Character_Ini},TargetAE,TargetAE#"         TargetAE_Spells
-  /call IniToArrayV "${Character_Ini},PBAE,PBAE#"                 PBAE_Spells
-  /call IniToArrayV "${Character_Ini},Burn,Quick Burn#"           QUICKBurns
-  /call IniToArrayV "${Character_Ini},Burn,Long Burn#"            LONGBurns
-  /call IniToArrayV "${Character_Ini},Burn,Full Burn#"            FULLBurns
+  /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#"         MyAbilities
+  /call IniToArrayV "${Character_Ini},Nukes,${spellsToUse}#"            MyNukes
+  /call IniToArrayV "${Character_Ini},DoTs on Assist,${spellsToUse}#"   Assist_DoTs
+  /call IniToArrayV "${Character_Ini},DoTs on Command,${spellsToUse}#"  Command_DoTs
+  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Assist#"        Assist_Debuffs
+  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Command#"       Command_Debuffs
+  /call IniToArrayV "${Character_Ini},TargetAE,TargetAE#"               TargetAE_Spells
+  /call IniToArrayV "${Character_Ini},PBAE,PBAE#"                       PBAE_Spells
+  /call IniToArrayV "${Character_Ini},Burn,Quick Burn#"                 QUICKBurns
+  /call IniToArrayV "${Character_Ini},Burn,Long Burn#"                  LONGBurns
+  /call IniToArrayV "${Character_Ini},Burn,Full Burn#"                  FULLBurns
 
   /if (${Me.Class.ShortName.Equal[MAG]}) {
+    /declare summonMoltenOrb bool outer FALSE
     /if (${Bool[${Me.AltAbility[Servant of Ro]}]})        /call BuildArray "swarmPets" "Servant of Ro"
     /if (${Bool[${Me.AltAbility[Host of the Elements]}]}) /call BuildArray "swarmPets" "Host of the Elements"
+    /if (${Defined[MyNukes]}) {
+      /declare i int local
+      /for i 1 to ${MyNukes.Size}
+        /if (${MyNukes[${i}].Find[Molten Orb]}) /varset summonMoltenOrb TRUE
+      /next i
+    }
   } else /if (${Me.Class.ShortName.Equal[NEC]}) {
     /if (${Bool[${Me.AltAbility[Swarm of Decay]}]}) /call BuildArray "swarmPets" "Swarm of Decay"
     /if (${Bool[${Me.AltAbility[Wake the Dead]}]})  /call BuildArray "swarmPets" "Wake the Dead"

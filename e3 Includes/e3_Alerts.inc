@@ -88,7 +88,7 @@ SUB alerts_Background_Events
 
 #event angmask "#*#You feel a gaze of deadly power focusing on you#*#"
 Sub event_angmask
-  /rs ~~~Mask on Me~~~
+  /rs ~~~Mask on Me~~~ Ready: ${Me.ItemReady[Mirrored Mask]}
   /if (!${Bool[${FindItem[=Mirrored Mask]}]}) {
     /bc [+r+] I dont have a Mirrored Mask
     /return
@@ -98,6 +98,7 @@ Sub event_angmask
     /declare OMM_Mask string local ${Me.Inventory[face].Name}
     /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${OMM_Mask}/face" 1
     /delay 3
+    /echo calling swapitem
     /call SwapItem "Mirrored Mask" "face"
     /delay 5 ${Me.Inventory[face].Name.Equal[Mirrored Mask]}
     /call SwapItem "Mirrored Mask" "face"
@@ -114,9 +115,9 @@ Sub event_angmask
     /casting "Mirrored Mask" -maxtries|3
     /delay 1s
     /if (!${Bool[${Me.Song[Reflective Skin]}]} && ${numtries} < 8) /goto :retry
-    |/if (${OMM_Mask.Length}) /call SwapItem "${OMM_Mask}" "face"
   }
-  /rs ~~~Mask on Me~~~ ${Bool[${Me.Song[Reflective Skin]}]}
+  |/if (${OMM_Mask.Length}) /call SwapItem "${OMM_Mask}" "face"
+  /rs ~~~Mask on Me~~~ Ready: ${Me.ItemReady[Mirrored Mask]}
 /return
 
 
