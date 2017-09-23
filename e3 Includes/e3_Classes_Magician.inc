@@ -1,8 +1,6 @@
-|-----------------------------------------------------------|
-| Hand out items to Pets                                    |
-| Distribute Pet Weapons hands to all pets in 100 radius    |
-| Pet Weapons hands to just the single requestor            |
-|-----------------------------------------------------------|
+|----------------------------------------------------------------------------|
+| Magician Functions
+|----------------------------------------------------------------------------|
 #event petWeapons "#1# tells you, 'Pet Weapon#*#'"
 #event petWeapons "#1# tells you, 'Distribute Pet Weapon#*#'"
 #event petWeapons "<#1#> Pet Weapon#*#"
@@ -59,8 +57,7 @@ sub event_petWeapons(line, ChatSender)
   |/varset Debug_MAG FALSE
 /if (${Debug} || ${Debug_MAG}) /echo <== event_petWeapons -|
 /return
-
-|--------------------------------------------------
+|----------------------------------------------------------------------------|
 SUB give_PetsWeapons(autoWeap)
   /declare p int local
   /declare w int local
@@ -126,10 +123,8 @@ SUB give_PetsWeapons(autoWeap)
     }
   /next p
 /return
-
 |----------------------------------------------------------------------------|
 SUB check_SummonItems
-|/varset Debug_MAG TRUE
 /if (${Debug} || ${Debug_MAG}) /echo |- check_SummonItems ==>
   /if (${summonMoltenOrb}) {
     /if (!${Me.Moving} && !${combatTimer} && !${activeTimer} && !${rebuffTimer}) {
@@ -164,27 +159,22 @@ SUB check_SummonItems
             /if (${petName.Equal[${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Auto-Pet Weapons-${masterName}]}]}) {
 						  /if (${Debug} || ${Debug_MAG}) /echo check_SummonItems: I have already given weapons to ${petName}
 					  } else {
-					    /echo in call ${NearestSpawn[${p},pcpet].Master} ${NearestSpawn[${p},pcpet].CleanName}
               /call BuildArray petIDArray ${NearestSpawn[${p},pcpet].ID}
 					  }
 				  }
 		    }
 		  /next p
 		  /if (${Defined[petIDArray]}) {
-        /echo petIDArray ${petIDArray.Size}
         /call give_PetsWeapons TRUE
       }
 	  }
 	}
 /if (${Debug} || ${Debug_MAG}) /echo <== check_SummonItems -|
-|/varset Debug_MAG FALSE
 /RETURN
-
 |----------------------------------------------------------------------------|
 #event auto_coh "#1# tells you, 'autocoh #2#'"
 SUB event_auto_coh(line, ChatSender, toggleCoH)
   /declare i int local
-  |/echo ${ChatSender} ${toggleCoH} ${Defined[${cohTargets}]}  ${cohTargets.Size}
   /if (${toggleCoH.Equal[on]}) {
     /if (${Bool[${Group.Member[${ChatSender}]}]}) {
       /if (${Defined[cohTargets]}) {
@@ -205,7 +195,6 @@ SUB event_auto_coh(line, ChatSender, toggleCoH)
     /docommand ${ChatToggle} Auto CoH Disabled on ${ChatSender}
   }
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB check_CoH
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_checkCoH ==>
@@ -231,7 +220,6 @@ SUB check_CoH
   }
   /if (${Debug} || ${Debug_MAG}) /echo <== MAG_checkCoH -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB MAG_Setup
 /declare Debug_MAG bool outer FALSE
@@ -251,7 +239,6 @@ SUB MAG_Setup
   /call BuildSpellArray "moltenOrb" "moltenOrb2D"
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_Setup -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB MAG_MacroSettings
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_MacroSettings ==>
@@ -265,7 +252,6 @@ SUB MAG_MacroSettings
 	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#8" "check_SummonItems" 1
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_MacroSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB MAG_CharacterSettings
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_CharacterSettings ==>
@@ -273,7 +259,6 @@ SUB MAG_CharacterSettings
 	/call WriteToIni "${Character_Ini},Magician,Summoned Pet Item"
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_CharacterSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB MAG_Aliases
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_Aliases ==>
@@ -281,7 +266,6 @@ SUB MAG_Aliases
 	/squelch /alias /PetWeapons /bc Distribute Pet Weapons
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_Aliases -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB MAG_Background_Events
 |**

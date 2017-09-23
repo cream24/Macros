@@ -1,6 +1,5 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Shaman.inc v3.0 ( originally designed to work with e3.mac ) 	-|
-|- Written by Killians of PEQ												                        -|
+| Shaman Functions
 |----------------------------------------------------------------------------|
 SUB check_Canni
 /if (${Debug}) /echo |- autoCanni ==>
@@ -26,7 +25,6 @@ SUB check_Canni
 	}
 /if (${Debug}) /echo <== autoCanni -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 Sub SHM_Setup
 /if (${Debug}) /echo |- SHM_Setup ==>
@@ -35,7 +33,6 @@ Sub SHM_Setup
   /if (${canniSpells.Size}) /call BuildSpellArray "canniSpells"	"canniSpells2D"
 /if (${Debug}) /echo <== SHM_Setup -|
 /return
-
 |----------------------------------------------------------------------------|
 SUB SHM_MacroSettings
 /if (${Debug}) /echo |- SHM_MacroSettings ==>
@@ -51,7 +48,6 @@ SUB SHM_MacroSettings
 	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#10" "check_Canni" 1
 /if (${Debug}) /echo <== SHM_MacroSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB SHM_CharacterSettings
 /if (${Debug}) /echo |- SHM_CharacterSettings ==>
@@ -59,11 +55,9 @@ SUB SHM_CharacterSettings
 	/call WriteToIni "${Character_Ini},Shaman,Canni"
 /if (${Debug}) /echo <== SHM_CharacterSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 Sub SHM_Aliases
 /return
-
 |----------------------------------------------------------------------------|
 #event AE_AA "#*# tells you, 'AEAA'"
 sub Event_AE_AA(string line)
@@ -82,7 +76,6 @@ sub Event_AE_AA(string line)
    } else /bc Ancestral Aid is not available...
 	}
 /return
-
 |----------------------------------------------------------------------------|
 Sub SHM_Background_Events
 	/doevents AE_AA

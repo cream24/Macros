@@ -1,11 +1,10 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Druid.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ												-|
+| Druid Functions
 |----------------------------------------------------------------------------|
 Sub DRU_Setup
 	/call iniToVarV "${Character_Ini},Druid,Evac Spell" Evac_Spell string outer
 /return
-
+|----------------------------------------------------------------------------|
 SUB DRU_MacroSettings
 /if (${Debug}) /echo |- DRU_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},DRU Functions,DRU Function#1" "check_healChain" 1
@@ -18,14 +17,14 @@ SUB DRU_MacroSettings
 	/call WriteToIni "${advSettings_Ini},DRU Functions,DRU Function#8" "check_AE" 1
 	/call WriteToIni "${advSettings_Ini},DRU Functions,DRU Function#9" "check_Nukes" 1
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB DRU_CharacterSettings
 	/call WriteToIni "${Character_Ini},Druid,Evac Spell"
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub DRU_Aliases
 /return
-
+|----------------------------------------------------------------------------|
 #event AE_SOW "#*# tells you, 'AESOW'"
 sub Event_AE_SOW(string line)
 	/if (${Me.Class.ShortName.Equal[DRU]}) {
@@ -43,7 +42,7 @@ sub Event_AE_SOW(string line)
 	 } else /bc Spirit of the Wood is not available...
 	}
 /return
-
+|----------------------------------------------------------------------------|
 Sub DRU_Background_Events
 	/doevents AE_SOW
 /return

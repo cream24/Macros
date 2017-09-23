@@ -61,8 +61,7 @@ SUB check_AutoShrink
 #event shrinkPets "<#1#> Shrink Pets"
 SUB event_shrinkPets(line, ChatSender)
 /if (${Debug} || ${Debug_Pets}) /echo |- event_shrinkPets ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
   /call check_AutoShrink
 /if (${Debug} || ${Debug_Pets}) /echo <== event_shrinkPets -|	
 /RETURN
@@ -139,8 +138,7 @@ SUB buffPet
 #event suspendMinion "<#1#> Suspend Pets#*#"
 SUB event_suspendMinion(live, ChatSender)
   /if (${Debug} || ${Debug_Pets}) /echo |- EVENT_suspendMinion ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
   /if (${Me.Pet.ID}) {
     /docommand ${ChatToggle} Suspending my pet...
     /if (${Me.AltAbilityReady[Suspended Minion]}) {
@@ -160,7 +158,7 @@ SUB event_suspendMinion(live, ChatSender)
 #event returnMinion "<#1#> return Pets#*#"
 SUB event_returnMinion(line, ChatSender)
   /if (${Debug} || ${Debug_Pets}) /echo |- EVENT_returnMinion ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
   /if (!${c_eventArg}) /return
     /if (${suspend_Pets}) {
       /docommand ${ChatToggle} Returning my pet...

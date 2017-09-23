@@ -1,9 +1,6 @@
-|--------------------------------------------------------------------------------|
-|- e3_Classes_Enchanter.inc v3.0 ( originally designed to work with e3.mac )	  -|
-|- Written by Killians of PEQ													                          -|
-|--------------------------------------------------------------------------------|
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
+| Enchanter Functions
+|----------------------------------------------------------------------------|
 #event toggleRune "<#1#> AutoRune #2#"
 #event toggleRune "#1# tells you, 'AutoRune #2#'"
 sub event_toggleRune(line, ChatSender, runeToggle)
@@ -20,8 +17,7 @@ sub event_toggleRune(line, ChatSender, runeToggle)
     /if (${Debug}) /echo <== toggleRune -|
   }
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 #event add_RuneTarget "<#1#> Rune On #2#"
 #event add_RuneTarget "#1# tells you, 'Rune On #2#'"
 sub event_add_RuneTarget(line, ChatSender, RuneTarget)
@@ -48,8 +44,7 @@ sub event_add_RuneTarget(line, ChatSender, RuneTarget)
   }
 /if (${Debug}) /echo <== add_RuneTarget -|
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 #event remove_RuneTarget "<#1#> Rune Off #2#"
 #event remove_RuneTarget "#1# tells you, 'Rune off #2#'"
 sub event_remove_RuneTarget(line, ChatSender, RuneTarget)
@@ -72,8 +67,7 @@ sub event_remove_RuneTarget(line, ChatSender, RuneTarget)
   }
 /if (${Debug}) /echo <== remove_RuneTarget -|
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 Sub check_rune
 /if (${Debug} || ${Debug_Ench}) /echo |- check_rune ==>
 /if (${autoRune}) {
@@ -99,8 +93,7 @@ Sub check_rune
 }
 /if (${Debug}) /echo <== check_rune -|
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 #event charmOn "<#1#> Charm on #2#"
 #event charmOn "#1# tells you, 'Charm on #2#'"
 sub event_charmOn(line, ChatSender, targetID)
@@ -117,8 +110,7 @@ sub event_charmOn(line, ChatSender, targetID)
     /if (${Debug}) /echo <== charmOn -|
   }
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 #event charmOff "<#1#> Charm Off"
 #event charmOff "#1# tells you, 'Charm Off'"
 sub event_charmOff(line, ChatSender)
@@ -132,8 +124,7 @@ sub event_charmOff(line, ChatSender)
     /if (${Debug}) /echo <== charmOff -|
   }
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 #event toggleMez "<#1#> Mez #2#"
 #event toggleMez "#1# tells you, 'Mez #2#'"
 sub event_toggleMez(line, ChatSender, mezToggle)
@@ -149,8 +140,7 @@ sub event_toggleMez(line, ChatSender, mezToggle)
     /if (${Debug}) /echo <== remove_RuneTarget -|
   }
 /return
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 Sub check_charm
 /if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
 /if (${Defined[charmArray2D]}) {
@@ -220,9 +210,7 @@ Sub check_charm
 }
 /if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
 /return
-
-
-|--------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 | Mez mobs in ae radius that are not assist target
 sub check_mez
 /if (${Debug} || ${Debug_Ench}) /echo |- check_Mez ==>
@@ -252,8 +240,7 @@ sub check_mez
   }
 /if (${Debug}) /echo <== check_Mez -|
 /return
-
-|---------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 Sub ENC_Setup
   /declare Debug_Ench bool outer FALSE
   /declare autoRune bool outer FALSE
@@ -267,19 +254,16 @@ Sub ENC_Setup
   /call IniToArrayV "${Character_Ini},Enchanter,RuneSpell#"   runeArray
   /call IniToArrayV "${Character_Ini},Enchanter,Mez#"         mezArray
   /call IniToArrayV "${Character_Ini},Enchanter,Charm#"       charmArray
-
   /if (${Bool[${mezArray.Size}]}) {
     /call BuildSpellArray "mezArray"	"mezArray2D"
   } else {
     /if (${Defined[autoMez]}) /varset autoMez FALSE
   }
-
   /if (${Bool[${runeArray.Size}]}) {
     /call BuildSpellArray "runeArray"	"runeArray2D"
   } else {
     /if (${Defined[autoRune]}) /varset autoRune FALSE
   }
-
   /declare charmTarget int outer
   /if (${Bool[${charmArray.Size}]}) {
     /call BuildSpellArray "charmArray"	"charmArray2D"
@@ -289,9 +273,8 @@ Sub ENC_Setup
   } else {
     /declare doCharm bool outer FALSE
   }
-
 /return
-
+|----------------------------------------------------------------------------|
 Sub ENC_Background_Events
 	/doevents charmTarget
 	/doevents toggleMez
@@ -300,11 +283,9 @@ Sub ENC_Background_Events
 	/doevents toggleRune
 	/doevents add_RuneTarget
 	/doevents remove_RuneTarget
-
 	/if (${Assisting} && ${Bool[${gatherManaPCT}]} && ${Me.PctMana} < ${gatherManaPCT} && ${Me.AltAbilityReady[Gather Mana]} && ${Me.CombatState.Equal[COMBAT]}) /casting "Gather Mana" -maxtries|3
-
 /return
-
+|----------------------------------------------------------------------------|
 SUB ENC_MacroSettings
 	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#1" "check_Charm" 1
 	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#2" "check_Mez" 1
@@ -317,8 +298,7 @@ SUB ENC_MacroSettings
 	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#9" "check_Nukes" 1
 	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#10" "check_Pets" 1
 /RETURN
-
-
+|----------------------------------------------------------------------------|
 SUB ENC_CharacterSettings
 	/call WriteToIni "${Character_Ini},Enchanter,AutoRune (On/Off)" Off
 	/call WriteToIni "${Character_Ini},Enchanter,AutoMez (On/Off)" Off
@@ -328,8 +308,7 @@ SUB ENC_CharacterSettings
 	/call WriteToIni "${Character_Ini},Enchanter,Charm"
   /call WriteToIni "${Character_Ini},Enchanter,GatherMana Pct" 10
 /RETURN
-
-
+|----------------------------------------------------------------------------|
 Sub ENC_Aliases
 	/squelch /alias /runeon /bc AutoRune on
 	/squelch /alias /runeoff /bc AutoRune off

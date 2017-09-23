@@ -168,7 +168,8 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 			|- Stop following for spell/item/aa with a cast time > 0 MyCastTime, unless im a bard
 		/if (${${ArrayName}[${ArrayIndex},${iMyCastTime}]} >0 && ${Me.Class.ShortName.NotEqual[BRD]}) {
 			/if (${Stick.Status.Equal[on]}) /squelch /stick pause
-			/if (${NetAdvPath.Following} && !${NetAdvPath.Paused} && ${Following}) /squelch /netfollow pause
+			/if (${NetAdvPath.Following} && ${Following}) /squelch /netfollow off
+			/if (${MoveTo.Moving}) /moveto off
 			/delay 3 !${Me.Moving}
 		}
 		|- Equip an item that must be equipped to cast and is not currently equipped.  must use base inventory slots 24 through 31
@@ -342,9 +343,9 @@ Sub memorize_spell(spellName,gemNum)
   /if (${Debug} || ${Debug_Casting}) /echo |- memorize_spell =>
   /memorize "${spellName}" ${gemNum}
 	/delay 3s ${Bool[${Me.Gem[${spellName}]}]}
-	|only wait for beneficial spells
+	|only wait for beneficial,self spells
 	/if (${Spell[${spellName}].Beneficial} || ${Spell[${spellName}].TargetType.Equal[Self]}) {
-    /declare waitForReady timer local ${If[${Me.CombatState.Equal[COMBAT]},40,${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}]}
+    /declare waitForReady timer local ${If[${Me.CombatState.Equal[COMBAT]},35,${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}]}
     |/echo wfr ${waitForReady} rc ${Spell[${spellName}].RecastTime} math ${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}
     :checkTimer
       |/echo chectimer ${waitForReady} ${Me.SpellReady[${spellName}]}
@@ -406,8 +407,7 @@ Sub interrupt
 #EVENT vetAA "#1# tells the group, 'VetAA #2#'"
 #EVENT vetAA "#1# tell your party, 'VetAA #2#'"
 SUB EVENT_vetAA(line, ChatSender,vetAAtoUse)
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ" "${vetAAtoUse}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${vetAAtoUse}]}) /return
   /varset vetAAtoUse ${c_eventArgData}
 
   /declare i int local

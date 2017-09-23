@@ -1,10 +1,8 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Beastlord.inc v3.0 ( originally designed to work with e3.mac )-|
-|- Written by Killians of PEQ												-|
+| Beastlord Functions
 |----------------------------------------------------------------------------|
 Sub BST_Setup
 /return
-
 |----------------------------------------------------------------------------|
 SUB BST_MacroSettings
 /if (${Debug}) /echo |- BST_MacroSettings ==>
@@ -18,7 +16,6 @@ SUB BST_MacroSettings
   /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#8" "check_DoTs" 1
 /if (${Debug}) /echo <== BST_MacroSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 #event AE_POS "#*# tells you, 'AEPOS'"
 sub Event_AE_POS(string line)
@@ -37,14 +34,13 @@ sub Event_AE_POS(string line)
    } else /bc Paragon of Spirit is not available...
   }
 /return
-
 |----------------------------------------------------------------------------|
 Sub BST_Background_Events
   /doevents AE_POS
 /return
-
+|----------------------------------------------------------------------------|
 SUB BST_CharacterSettings
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub BST_Aliases
 /return

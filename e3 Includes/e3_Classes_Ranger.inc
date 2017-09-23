@@ -1,6 +1,5 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Ranger.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ												-|
+| Ranger Functions
 |----------------------------------------------------------------------------|
 Sub RNG_Setup
   /call iniToVarV "${Character_Ini},${Me.Class},TargetAE Ranged (On/Off)" swapTgtAeRanged bool outer
@@ -9,7 +8,7 @@ Sub RNG_Setup
     /beep
   }
 /return
-
+|----------------------------------------------------------------------------|
 SUB RNG_MacroSettings
 /if (${Debug}) /echo |- RNG_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#1" "check_Burns" 1
@@ -20,15 +19,15 @@ SUB RNG_MacroSettings
 	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#6" "check_Nukes" 1
 	/call WriteToIni "${advSettings_Ini},RNG Functions,RNG Function#7" "check_Buffs" 1
 /if (${Debug}) /echo <== RNG_MacroSettings -|
-/RETURN
-
+/return
+|----------------------------------------------------------------------------|
 SUB RNG_CharacterSettings
   /call WriteToIni "${Character_Ini},${Me.Class},TargetAE Ranged (On/Off)" Off
-/RETURN
-
+/return
+|----------------------------------------------------------------------------|
 Sub RNG_Aliases
 /return
-
+|----------------------------------------------------------------------------|
 #event AE_AOH "#*# tells you, 'AEAOH'"
 sub Event_AE_AOH(string line)
   /if (${Me.Class.ShortName.Equal[RNG]}) {
@@ -45,7 +44,7 @@ sub Event_AE_AOH(string line)
    } else /bc Auspice of the Hunter is not available...
   }
 /return
-
+|----------------------------------------------------------------------------|
 Sub RNG_Background_Events
   /doevents AE_AOH
 /return

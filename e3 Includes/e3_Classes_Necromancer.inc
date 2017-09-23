@@ -1,8 +1,6 @@
-|--------------------------------------------------------------------------------|
-|- e3_Classes_Necromancer.inc v4.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ													-|
-|--------------------------------------------------------------------------------|
-
+|----------------------------------------------------------------------------|
+| Necromancer Functions
+|----------------------------------------------------------------------------|
 SUB check_Lich
   /if (${Debug}) /echo |- check_castLich ==>
   |/echo in checklich  ${lichSpell2D[1,${iMinHP}]}, ${Me.PctHPs} ${Me.Buff[${lichSpell2D[1,${iSpellName}]}]}
@@ -29,8 +27,8 @@ SUB check_Lich
     }
   }
   /if (${Debug}) /echo <== check_castLich -|
-/RETURN
-
+/return
+|----------------------------------------------------------------------------|
 SUB check_manaDump
 /if (${Debug}) /echo |- check_manaDump ==>
 	/if (${manaDump} && !${medBreak}) {
@@ -59,8 +57,8 @@ SUB check_manaDump
     }
   }
 /if (${Debug}) /echo <== check_manaDump -|
-/RETURN
-
+/return
+|----------------------------------------------------------------------------|
 Sub NEC_Setup
 /if (${Debug}) /echo |- NEC_Setup ==>
 	/call IniToArrayV "${Character_Ini},${Me.Class},Lich Spell" lichSpell string outer
@@ -75,7 +73,7 @@ Sub NEC_Setup
 
 /if (${Debug}) /echo <== NEC_Setup -|
 /return
-
+|----------------------------------------------------------------------------|
 SUB NEC_MacroSettings
 /if (${Debug}) /echo |- NEC_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#1" "check_Burns" 1
@@ -88,8 +86,8 @@ SUB NEC_MacroSettings
 	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#8" "check_Buffs" 1
 	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#9" "check_Pets" 1
 /if (${Debug}) /echo <== NEC_MacroSettings -|
-/RETURN
-
+/return
+|----------------------------------------------------------------------------|
 SUB NEC_CharacterSettings
 /if (${Debug}) /echo |- NEC_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},${Me.Class},Lich Spell"
@@ -99,13 +97,13 @@ SUB NEC_CharacterSettings
 	/call WriteToIni "${Character_Ini},${Me.Class},Who to Mana Dump"
 	/call WriteToIni "${Character_Ini},${Me.Class},Mana Dump"
 /if (${Debug}) /echo <== NEC_CharacterSettings -|
-/RETURN
-
+/return
+|----------------------------------------------------------------------------|
 Sub NEC_Aliases
 /if (${Debug}) /echo |- NEC_Aliases ==>
 	/noparse /squelch /alias /manadump /bc Mana dump
 /if (${Debug}) /echo <== NEC_Aliases -|
 /return
-
+|----------------------------------------------------------------------------|
 Sub NEC_Background_Events
 /return

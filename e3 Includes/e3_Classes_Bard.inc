@@ -1,7 +1,6 @@
-|------------------------------------------------------------------------|
-|- e3_Classes_Bard.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ											                      -|
-|------------------------------------------------------------------------|
+|----------------------------------------------------------------------------|
+| Bard Functions
+|----------------------------------------------------------------------------|
 #event saveMelody "<#1#> Save Melody #2# #3#"
 #event saveMelody "[MQ2] Save Melody #2# #3#"
 SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
@@ -36,7 +35,6 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 	}
 /if (${Debug}) /echo <== EVENT_saveMelody -|
 /return
-
 |------------------------------------------------------------------------|
 #EVENT startMelody "<#1#> Melody #2#"
 #EVENT startMelody "[#1#] Melody #2#"
@@ -44,69 +42,64 @@ SUB EVENT_saveMelody(line, ChatSender, melodyName, songsToSave)
 SUB EVENT_startMelody(line, ChatSender, melodyName)
 /if (${Debug}) /echo |- EVENT_startMelody ==>
   /if (${Me.Class.ShortName.Equal[BRD]}) {
-    /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${melodyName}"
-    /if (!${c_eventArg}) /return
-      /declare memGem int local
-      /varset melodyName ${c_eventArgData}
-
-			| If I don't have the melodyName listed in my ini.
-      /call IniToArrayV "${Character_Ini},${melodyName} Melody,Song#" melodyArray
-			/if (!${Defined[melodyArray]}) {
-				| If Stop, end, or pause were used, stop the melody.
-				/if (${Select[${melodyName},Stop,End,Pause]}) {
-					/varset playingMelody FALSE
-					/varset songSet
-					/docommand ${ChatToggle} Ending melody.
-					/twist end
-				} else {
-					/docommand ${ChatToggle} [${melodyName}] is not a known melody.
-				}
-			} else {
-				/declare songList string local
-				/declare spellName string local
-				/declare i int local
-				| For 1 to 7 (maximum melody size to include selos, 6 songs played actively with some droppage)
-				/for i 1 to ${melodyArray.Size}
-				|/echo ${i} ${melodyArray[${i}]}
-				/if (${melodyArray[${i}].Length} && ${melodyArray[${i}].NotEqual[PLACEHOLDER]}) {
-					/varset spellName ${melodyArray[${i}].Arg[1,/]}
-					| Check that the song is in my book
-					/if (!${Me.Book[${spellName}]}) {	
-						/echo I don't have [${spellName}] in my spellbook, playing the melody without it.
-					} else {
-						| If the song is not memmed, use mq2Cast to mem
-						/if (!${Me.Gem[${spellName}]}) {
-							/call argueString gem| "${melodyArray[${i}]}"
-              /if (${Bool[${c_argueString}]}) {
-                /varset memGem ${c_argueString}
-              } else {
-                /varset memGem ${DefaultGem}
-              }
-							/memorize "${spellName}" "${memGem}"
-              /if (${Cast.Status.Find[M]}) /delay 3s !${Cast.Status.Find[M]}
-						}
-						| Update songList with the corresponding gem#
-						/varset songList ${songList} ${Me.Gem[${spellName}]}
-					}
-					/next i
-				}
-				| If I have a songList, start singing the melody
-				/if (${Bool[${songList}]}) {
-					| Twist the newly built songList.
-					/varset playingMelody TRUE
-					/varset returnTwist FALSE
-					/varset songSet ${songList}
-					/docommand ${ChatToggle} Playing [${melodyName}].
-					/twist ${songSet}
-				}
-			}
-		}
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,${melodyName}]}) /return
+    /declare memGem int local
+    /varset melodyName ${c_eventArgData}
+    | If I don't have the melodyName listed in my ini.
+    /call IniToArrayV "${Character_Ini},${melodyName} Melody,Song#" melodyArray
+    /if (!${Defined[melodyArray]}) {
+      | If Stop, end, or pause were used, stop the melody.
+      /if (${Select[${melodyName},Stop,End,Pause]}) {
+        /varset playingMelody FALSE
+        /varset songSet
+        /docommand ${ChatToggle} Ending melody.
+        /twist end
+      } else {
+        /docommand ${ChatToggle} [${melodyName}] is not a known melody.
+      }
+    } else {
+      /declare songList string local
+      /declare spellName string local
+      /declare i int local
+      | For 1 to 7 (maximum melody size to include selos, 6 songs played actively with some droppage)
+      /for i 1 to ${melodyArray.Size}
+      |/echo ${i} ${melodyArray[${i}]}
+      /if (${melodyArray[${i}].Length} && ${melodyArray[${i}].NotEqual[PLACEHOLDER]}) {
+        /varset spellName ${melodyArray[${i}].Arg[1,/]}
+        | Check that the song is in my book
+        /if (!${Me.Book[${spellName}]}) {
+          /echo I don't have [${spellName}] in my spellbook, playing the melody without it.
+        } else {
+          | If the song is not memmed, use mq2Cast to mem
+          /if (!${Me.Gem[${spellName}]}) {
+            /call argueString gem| "${melodyArray[${i}]}"
+            /if (${Bool[${c_argueString}]}) {
+              /varset memGem ${c_argueString}
+            } else {
+              /varset memGem ${DefaultGem}
+            }
+            /memorize "${spellName}" "${memGem}"
+            /if (${Cast.Status.Find[M]}) /delay 3s !${Cast.Status.Find[M]}
+          }
+          | Update songList with the corresponding gem#
+          /varset songList ${songList} ${Me.Gem[${spellName}]}
+        }
+        /next i
+      }
+      | If I have a songList, start singing the melody
+      /if (${Bool[${songList}]}) {
+        | Twist the newly built songList.
+        /varset playingMelody TRUE
+        /varset returnTwist FALSE
+        /varset songSet ${songList}
+        /docommand ${ChatToggle} Playing [${melodyName}].
+        /twist ${songSet}
+      }
+    }
+  }
 /if (${Debug}) /echo <== EVENT_startMelody -|
 /return
-
-|------------------------------------|
-|- Pauses MQ2Twist while casting.	-|
-|------------------------------------|
+|--------------------------------------------------------------|
 SUB pauseTwist
 /if (${Debug} || ${Debug_Casting}) /echo |- pauseTwist ==>
 	/varset	returnTwist TRUE
@@ -114,18 +107,13 @@ SUB pauseTwist
 	/delay 20 !${Me.Casting.ID}
 /if (${Debug} || ${Debug_Casting}) /echo <== pauseTwist -|
 /return
-
-|------------------------------------|
-|- Unpauses MQ2Twist after casting.	-|
-|------------------------------------|
+|--------------------------------------------------------------|
 SUB unpauseTwist
 	/delay 2 !${Me.Casting.ID}
 	/varset 	returnTwist FALSE
 	/squelch 	/twist ${songSet}
 	/delay 2 ${Me.Casting.ID}
 /return
-
-
 |--------------------------------------------------------------|
 Sub check_bard_charm
 /if (${Debug} || ${Debug_Ench}) /echo |- check_Charm ==>
@@ -196,7 +184,6 @@ Sub check_bard_charm
 }
 /if (${Debug} || ${Debug_Ench}) /echo <== check_Charm -|
 /return
-
 |--------------------------------------------------------------|
 | Mez mobs in ae radius that are not assist target
 sub check_bard_mez
@@ -230,12 +217,7 @@ sub check_bard_mez
   }
   /if (${Debug}) /echo <== check_Mez -|
 /return
-|------------------------------------------------|
-|- Loads melody from ini and configures for use	-|
-|------------------------------------------------|
-|-- to do, load from ini once + reload command
-|-- automem songs in slots not used by other songs in melody
-
+|--------------------------------------------------------------|
 Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
 	/call iniToVarV "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
@@ -263,8 +245,7 @@ Sub BRD_Setup
   }
 /if (${Debug}) /echo <== BRD_Setup -|
 /return
-
-|------------------------------------|
+|--------------------------------------------------------------|
 Sub BRD_Background_Events
   /if (${returnTwist} && !${Bool[${Me.Casting}]} && !${Twist.Twisting} && !${resumeTwistDelay}) /call unpauseTwist
 	/doevents saveMelody
@@ -274,20 +255,20 @@ Sub BRD_Background_Events
   /doevents charmOn
   /doevents charmOff
 /return
-
+|--------------------------------------------------------------|
 SUB BRD_MacroSettings
 	| Adv Settings
 	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#1" "check_Burns" 1
 	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#2" "check_Buffs" 1
 /RETURN
-
+|--------------------------------------------------------------|
 SUB BRD_CharacterSettings
 	/call WriteToIni "${Character_Ini},Bard,Auto-Melody"
   /call WriteToIni "${Character_Ini},Bard,AutoMez (On/Off)" Off
   /call WriteToIni "${Character_Ini},Bard,Mez"
   /call WriteToIni "${Character_Ini},Bard,Charm"
 /RETURN
-
+|--------------------------------------------------------------|
 Sub BRD_Aliases
 	/squelch /alias /SaveMelody /echo Save Melody
 	/squelch /alias /PlayMelody /bc Melody

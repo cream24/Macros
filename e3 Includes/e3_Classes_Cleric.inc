@@ -1,18 +1,10 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Cleric.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ												-|
+| Cleric Functions
 |----------------------------------------------------------------------------|
-|- Contains Cleric specific functions related to,							-|
-|-		Setup and Ini entry information										-|
-|-		MainLoop, and AssistLoop hooks										-|
-|-		Over-all functionality / flow										-|
-|----------------------------------------------------------------------------|
-
 SUB check_Yaulp
 /if (${Debug}) /echo |- check_clrYaulp ==>
 	/if (${AutoYaulp} && !${medBreak})  {
 		/declare castName string local ${yaulpSpell.Arg[1,/]}
-		| Auto-yaulp spell
 		/if (!${Bool[${Me.Buff[${castName}]}]} && ${Me.PctMana} < 95 && ${Spell[${castName}].NewStacks}) {
 			/if (${Target.ID}) /declare tempTarget int local ${Target.ID}
 			/casting "${castName}" -invis
@@ -20,7 +12,6 @@ SUB check_Yaulp
 	}
 /if (${Debug}) /echo <== check_clrYaulp -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 sub check_DivineArb
 /if (${Debug}) /echo |- check_DivineArb ==>
@@ -44,7 +35,6 @@ sub check_DivineArb
 	}
 /if (${Debug}) /echo <== check_DivineArb -|
 /return
-
 |----------------------------------------------------------------------------|
 sub check_celestialRegen
 /if (${Debug}) /echo |- check_celestialRegen ==>
@@ -67,13 +57,11 @@ sub check_celestialRegen
 	}
 /if (${Debug}) /echo <== check_celestialRegen -|
 /return
-
 |----------------------------------------------------------------------------|
 #event wordHeal "<#1#> WordHeal"
 sub Event_wordHeal(line, ChatSender)
   /if (!${Me.Class.ShortName.Equal[CLR]}) /return
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
   /delay 5s !${Me.Casting.ID}
   /call check_Ready "wordHeal2D" 1
   /if (${c_Ready}) {
@@ -114,8 +102,6 @@ sub Event_Rez(string line, string ChatSender)
 		/tell ${ChatSender} I don't see any of your corpses in ${Zone}.
 	}
 /return
-
-
 |----------------------------------------------------------------------------|
 #EVENT AE_Rez "[MQ2] AE Rez"
 #EVENT AE_Rez "#1# tells you, 'AERez'"
@@ -168,7 +154,6 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
               /goto :skipRez
             }
           }
-
           :checkReady
           /call check_Ready "rezArray2D" 1
           /if ((!${c_Ready} || !${check_Mana["rezArray2D",1]}) && ${Me.CombatState.NotEqual[COMBAT]}) {
@@ -176,7 +161,6 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
             /delay 1s
             /goto :checkReady
           }
-
           |/gu oRezList ${otherRezList}
           /if (${corpseList.Find[${corpseID},]}) {
             /echo I have already rezzed ${playerName}-${corpseID}
@@ -201,7 +185,6 @@ SUB EVENT_AE_Rez(string line, string ChatSender)
  }
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_AE_Rez -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 #bind otherRezzing /RezzingCorpseID
 SUB Bind_otherRezzing(whoIsRezzing,corpse_id)
@@ -210,7 +193,6 @@ SUB Bind_otherRezzing(whoIsRezzing,corpse_id)
     /varset otherRezList ${otherRezList}${corpse_id},
   }
 /return
-
 |----------------------------------------------------------------------------|
 #event CorpseExpired "This corpse #1# be resurrected."
 Sub Event_CorpseExpired(line, corpseExpired)
@@ -221,7 +203,6 @@ Sub Event_CorpseExpired(line, corpseExpired)
     /varset canRez 1
   }
 /return
-
 |----------------------------------------------------------------------------|
 Sub check_CorpseRezzable
   /declare conTimer timer local 5s
@@ -237,7 +218,6 @@ Sub check_CorpseRezzable
     /goto :waitForExpired
   }
 /RETURN
-
 |----------------------------------------------------------------------------|
 Sub BuildCorpseList
   /declare c int local
@@ -253,7 +233,6 @@ Sub BuildCorpseList
       /varcalc CorpseListSize ${CorpseListSize}+1
       /varset CorpseList[${CorpseListSize}] ${cID}
   /next c
-
   |add clr
   /for c 1 to ${CorpseListSize}
     /if (${Spawn[id ${CorpseList[${c}]}].Class.ShortName.Equal[CLR]}) {
@@ -261,7 +240,6 @@ Sub BuildCorpseList
       /varcalc p ${p}+1
     }
   /next c
-
   |add war/dru/shm
   /for c 1 to ${CorpseListSize}
   /if (${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName},DRU,SHM,WAR]}) {
@@ -269,7 +247,6 @@ Sub BuildCorpseList
     /varcalc p ${p}+1
   }
   /next c
-
   |add bst,enc,pal,rng,shd
   /for c 1 to ${CorpseListSize}
   /if (${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName},PAL,SHD,RNG,BST,ENC,MAG,WIZ,NEC]}) {
@@ -277,7 +254,6 @@ Sub BuildCorpseList
     /varcalc p ${p}+1
   }
   /next c
-
   |add the rest
   /for c 1 to ${CorpseListSize}
   /if (${Select[${Spawn[id ${CorpseList[${c}]}].Class.ShortName},ROG,MNK,BER,BRD]}) {
@@ -285,12 +261,10 @@ Sub BuildCorpseList
     /varcalc p ${p}+1
   }
   /next c
-
 |  /for c 1 to ${CorpseListSize}
 |    /echo c ${c}:  cl-${CorpseList[${c}]}-${Spawn[id ${CorpseList[${c}]}].Name} clp ${CorpseListPriority[${c}]}-${Spawn[id ${CorpseListPriority[${c}]}].Name}
 |  /next c
 /return
-
 |----------------------------------------------------------------------------|
 Sub defineRezSpell
   /declare rezSpell string local
@@ -326,13 +300,9 @@ Sub defineRezSpell
     /bc I do not have a resurrection spell available
   }
 /RETURN
-
 |----------------------------------------------------------------------------|
 Sub CLR_Setup
 /if (${Debug}) /echo |- CLR_Setup ==>
-  | 0 unknown/event not finished
-  | 1 can rez
-  | 2 cannot rez
   /declare canRez int outer 0
   /declare CorpseListSize int outer 0
   /declare otherRezList string outer
@@ -347,21 +317,16 @@ Sub CLR_Setup
 			/varset AutoYaulp FALSE
 		}
 	}
-
   /if (${Bool[${Me.Book[Word Of Vivification]}]}) {
     /call BuildArray wordHeal "Word Of Vivification"
     /call BuildSpellArray "wordHeal" "wordHeal2D"
   }
-
   /if (${Bool[${FindItem[Aegis of Superior Divinity].InvSlot}]}) /call BuildArray dArbArray "Aegis of Superior Divinity"
   /if (${Bool[${FindItem[Harmony of the Soul].InvSlot}]}) /call BuildArray dArbArray "Harmony of the Soul"
   /if (${Bool[${Me.AltAbility[Divine Arbitration]}]}) /call BuildArray dArbArray "Divine Arbitration"
-  /if (${dArbArray.Size}>0) /call BuildSpellArray "dArbArray" "dArbArray2D"
-
-
+  /if (${Defined[dArbArray]}) /call BuildSpellArray "dArbArray" "dArbArray2D"
 /if (${Debug}) /echo <== CLR_Setup -|
 /return
-
 |----------------------------------------------------------------------------|
 SUB CLR_MacroSettings
 /if (${Debug}) /echo |- CLR_MacroSettings ==>
@@ -377,7 +342,6 @@ SUB CLR_MacroSettings
 	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#10" "check_Nukes" 1
 /if (${Debug}) /echo <== CLR_MacroSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 SUB CLR_CharacterSettings
 /if (${Debug}) /echo |- CLR_CharacterSettings ==>
@@ -387,7 +351,6 @@ SUB CLR_CharacterSettings
 	/call WriteToIni "${Character_Ini},Cleric,Yaulp Spell"
 /if (${Debug}) /echo <== CLR_CharacterSettings -|
 /RETURN
-
 |----------------------------------------------------------------------------|
 Sub CLR_Aliases
 /if (${Debug}) /echo |- CLR_Aliases ==>
@@ -395,7 +358,6 @@ Sub CLR_Aliases
 	/squelch /alias /AERez /echo AE Rez
 /if (${Debug}) /echo <== CLR_Aliases -|
 /return
-
 |----------------------------------------------------------------------------|
 #event AE_CR "#*# tells you, 'AECR'"
 sub Event_AE_CR(string line)
@@ -414,7 +376,7 @@ sub Event_AE_CR(string line)
    } else /bc Celestial Regeneration is not available...
 }
 /return
-
+|----------------------------------------------------------------------------|
 Sub CLR_Background_Events
   /doevents AE_CR
   /doevents AE_Rez

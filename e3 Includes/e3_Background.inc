@@ -82,7 +82,7 @@ SUB check_Follow
           } else {
             /bct ${FollowTarget} //popup ${Me} is falling behind. Dist:${followTgtDistance},LoS:${followTgtLoS}
           }
-          /varset FollowCheckTimer 40+${Math.Rand[${NetBots.Counts}]}
+          /varset FollowCheckTimer 60+${Math.Rand[${NetBots.Counts}]}
         }
       }
 	  }
@@ -140,9 +140,6 @@ SUB check_Active
   |/if (${Me.Combat}) {
   |  /if (!${Target.ID} || ${Target.Type.Equal[corpse]} && !${Assisting} || (${Spawn[${Target.ID}].Type.Equal[PC]} && !${TogglePvP})) /attack off
   |}
-
-  |only checked when casting now via e3_casting
-	|/if (${Me.Class.ShortName.NotEqual[BRD]} && ${Me.Casting.ID}) /varset activeTimer 2s
 
   |prevent guys from getting stuck trying to buff while moving
 	/if (${Me.Moving}) {
@@ -320,8 +317,7 @@ SUB toggleTribute
 #EVENT manualTributeSet "<#1#> Tribute #2#"
 SUB EVENT_manualTributeSet(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_manualTributeSet ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${eventParams}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${eventParams}]}) /return
 
   /declare tributeToggle string local ${c_eventArgData.Arg[1,|]}
   /declare tributeTimerSetting timer local ${c_eventArgData.Arg[2,|]}

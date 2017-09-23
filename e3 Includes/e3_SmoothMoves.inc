@@ -292,13 +292,11 @@ SUB event_list_Routes
 #event stop_Route "<#1#> Stop route"
 SUB event_stop_Route(line, ChatSender)
 /if (${Debug} || ${Debug_SmoothMoves}) /echo |- event_stop_Route ==>
-	/call checkEventArgs "${ChatSender}" "${line}" "U"
-	/if (!${c_eventArg}) /return
-		| If I'm running a route, stop.
-		/if (${Defined[route_From_Ini]}) {
-			/echo Stopping...
-			/declare stop_Route bool outer TRUE
-		}
+  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
+  /if (${Defined[route_From_Ini]}) {
+    /echo Stopping...
+    /declare stop_Route bool outer TRUE
+  }
 /if (${Debug} || ${Debug_SmoothMoves}) /echo <== event_stop_Route -|
 /RETURN
 
@@ -313,122 +311,121 @@ SUB event_stop_Route(line, ChatSender)
 #event run_Route "<#1#> Run Route #2# |-|#*#"
 SUB event_run_Route(line, ChatSender, route_Name)
 /if (${Debug} || ${Debug_SmoothMoves}) /echo |- run_Route ==>
-	/call checkEventArgs "${ChatSender}" "${line}" "U" "${route_Name}"
-	/if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,${route_Name}]}) /return
 		| If the ChatSender is in zone, or, if the command was issued through /echo.
-		/if (${SpawnCount[pc ${c_eventArgChatSender}]}) {
-			| Declare route variables.
-			/declare i int local
-			/declare currentDist float local
-			/declare startZone int local
-			/declare closest_Point_wLOS int local
-			/declare total_WPs int local
-			/declare dist_Calc float local
-			/declare route_From_Ini string outer
-			/declare startpointFound bool local
-			| Reset route_Name, removing additional params
-			/varset route_Name ${c_eventArgData}
-			|/if (${route_Name.Find[ /]}) /varset route_Name ${route_Name.Arg[1, /]}
-			| If route was specified by number, find the route associated with it.
-			/if (${Int[${route_Name}]}) {
-				/if (${Ini[${SmoothMoves_Ini},${Zone.ShortName}].Replace[||,].Arg[${route_Name},|].Length}) {
-					/varset route_Name ${Ini[${SmoothMoves_Ini},${Zone.ShortName}].Replace[||,].Arg[${route_Name},|]}
-				} else {
-				
-					| Else, if there was no route associated with this number.
-					/if (!${no_Echo}) /echo [${route_Name}] not a known route, use '/echo List routes' to review available routes in ${Zone}.
-				}
-			}
-			:reload_FromZone
-			/if (${Debug} || ${Debug_SmoothMoves}) /echo |- event_record_Route -| :reload_FromZone
-			/if (!${Ini[${SmoothMoves_Ini},${Zone.ShortName},${route_Name}].Length}) {
-				/if (!${no_Echo}) /echo [${route_Name}] not a known route. Use '/echo List routes' to review available routes in ${Zone}.
-			} else {
-				| If the route was found in the Routes_Ini.
-				/echo Recalling route [${route_Name}]...
-				/varset route_From_Ini ${Ini[${SmoothMoves_Ini},${Zone.ShortName},${route_Name}]}
-				| Turn off stick.
-				/if (${Stick.Active}) /squelch /stick off
-				/if (${NetAdvPath.Status}==1) /squelch /netfollow off
-				| Set route variables.
-				/varset i 1
-				/varset startZone ${Zone.ID}
-				/varset closest_Point_wLOS -1
-				/varset dist_Calc 99999
-				/varset startpointFound FALSE
-				| Loop through the route, to find the closest waypoint to start on.
-				:check_next_Waypoint
-				/if (${Debug} || ${Debug_SmoothMoves}) /echo |- event_record_Route -| :check_next_Waypoint
-				/if (${route_From_Ini.Arg[${i},|].Length}) {
-					/if (${Debug} || ${Debug_SmoothMoves}) /echo Checking WP:[${i} - ${route_From_Ini.Arg[${i},|]}] :: LoS:[${LineOfSight[${Me.Y},${Me.X}:${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]},${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}]}] :: Special Function:[${Bool[${route_From_Ini.Arg[${i},|].Find[**]}]}]
-					| Check line of sight, and distance of the waypoint.
-					/if (${LineOfSight[${Me.Y},${Me.X}:${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]},${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}]}) {
-						/if (!${startpointFound}) /varset startpointFound TRUE
-						/varset currentDist ${Math.Distance[${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]},${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}]}
-						/if (${Debug} || ${Debug_SmoothMoves}) /echo Distance = ${currentDist}
-						| If this waypoint is closer than the closest known waypoint, set the new distance.
-						/if (${currentDist}<${dist_Calc}) {
-							/varset dist_Calc ${currentDist}
-							/varset closest_Point_wLOS ${i}
-						}
-					}
-					/varcalc i ${i} + 1
-					/goto :check_next_Waypoint
-				}
-				| Varcalc total_WPs to (i - 1) to sync /for loop.
-				/varcalc total_WPs ${i} - 1
-				| Check for a starting point.
-				/if (!${startpointFound}) {
-					/docommand ${ChatToggle} I could not find a starting point for [${route_Name}].
-				} else {
-					| For the closest waypoint to the end of the route.
-					/for i ${closest_Point_wLOS} to ${total_WPs}
-						| If this element is a waypoint, go to it.
-						/if (!${route_From_Ini.Arg[${i},|].Find[**]}) {
-							/call next_WP ${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]} ${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}
-						| If this element is a specialized function, call the corresponding SUB.
-						} else {
-						|														Special functions														|
-							| Click Zone.
-							/if (${route_From_Ini.Arg[${i},|].Find[clickZone]}) {
-								/echo Attempting to click zone...
-								/call click_Zone ${route_From_Ini.Arg[${i},|].Arg[1,_]} ${startZone}
-							| Run Through Zone.
-							} else /if (${route_From_Ini.Arg[${i},|].Find[runThruZone]}) {
-								/echo Attempting to run through zone...
-								/call Run_Thru_Zone ${route_From_Ini.Arg[${i},|].Arg[1,_]} ${route_From_Ini.Arg[${i},|].Arg[3,_]} ${route_From_Ini.Arg[${i},|].Arg[4,_]} ${startZone}
-							| Click Door.
-							} else /if (${route_From_Ini.Arg[${i},|].Find[clickDoor]}) {
-								/echo Attempting to click door...
-								/call click_Door ${route_From_Ini.Arg[${i},|].Arg[1,_]} ${route_From_Ini.Arg[${i},|].Arg[3,_]} ${route_From_Ini.Arg[${i},|].Arg[4,_]}
-							| Bark at NPC.
-							}
-							/if (${route_From_Ini.Arg[${i},|].Find[barkAtMob]}) {
-								/echo Barking at [${Spawn[npc ${If[${route_From_Ini.Arg[${i},|].Arg[3,_].Find[-]},${route_From_Ini.Arg[${i},|].Arg[3,_].Replace[-,_]},${route_From_Ini.Arg[${i},|].Arg[3,_]}]}].CleanName}]...
-								/call barkAtNPC "${route_From_Ini.Arg[${i},|]}" ${startZone}
-							}
-						|													End of special functions													|
-						}
-					/call Movement_Events
-					| If a stop was called, end this fuction.
-					/if (${stop_Route}) {
-						/deletevar stop_Route
-						/goto :command_Stop
-					}
-					| If I have zoned before the route was finished, check to see if I should continue the route.
-					/if (${Zone.ID} != ${startZone}) {
-						/if (!${Defined[no_Echo]}) /declare no_Echo bool local TRUE
-						/goto :reload_FromZone
-					}
-					| Go to next element of the route.
-					/next i
-					| Announce to user.
-					|/docommand ${ChatToggle} I have arrived at my destination.
-				}
-			}
-		}
-		:command_Stop
-		/if (${Defined[route_From_Ini]}) /deletevar route_From_Ini
+  /if (${SpawnCount[pc ${c_eventArgChatSender}]}) {
+    | Declare route variables.
+    /declare i int local
+    /declare currentDist float local
+    /declare startZone int local
+    /declare closest_Point_wLOS int local
+    /declare total_WPs int local
+    /declare dist_Calc float local
+    /declare route_From_Ini string outer
+    /declare startpointFound bool local
+    | Reset route_Name, removing additional params
+    /varset route_Name ${c_eventArgData}
+    |/if (${route_Name.Find[ /]}) /varset route_Name ${route_Name.Arg[1, /]}
+    | If route was specified by number, find the route associated with it.
+    /if (${Int[${route_Name}]}) {
+      /if (${Ini[${SmoothMoves_Ini},${Zone.ShortName}].Replace[||,].Arg[${route_Name},|].Length}) {
+        /varset route_Name ${Ini[${SmoothMoves_Ini},${Zone.ShortName}].Replace[||,].Arg[${route_Name},|]}
+      } else {
+
+        | Else, if there was no route associated with this number.
+        /if (!${no_Echo}) /echo [${route_Name}] not a known route, use '/echo List routes' to review available routes in ${Zone}.
+      }
+    }
+    :reload_FromZone
+    /if (${Debug} || ${Debug_SmoothMoves}) /echo |- event_record_Route -| :reload_FromZone
+    /if (!${Ini[${SmoothMoves_Ini},${Zone.ShortName},${route_Name}].Length}) {
+      /if (!${no_Echo}) /echo [${route_Name}] not a known route. Use '/echo List routes' to review available routes in ${Zone}.
+    } else {
+      | If the route was found in the Routes_Ini.
+      /echo Recalling route [${route_Name}]...
+      /varset route_From_Ini ${Ini[${SmoothMoves_Ini},${Zone.ShortName},${route_Name}]}
+      | Turn off stick.
+      /if (${Stick.Active}) /squelch /stick off
+      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+      | Set route variables.
+      /varset i 1
+      /varset startZone ${Zone.ID}
+      /varset closest_Point_wLOS -1
+      /varset dist_Calc 99999
+      /varset startpointFound FALSE
+      | Loop through the route, to find the closest waypoint to start on.
+      :check_next_Waypoint
+      /if (${Debug} || ${Debug_SmoothMoves}) /echo |- event_record_Route -| :check_next_Waypoint
+      /if (${route_From_Ini.Arg[${i},|].Length}) {
+        /if (${Debug} || ${Debug_SmoothMoves}) /echo Checking WP:[${i} - ${route_From_Ini.Arg[${i},|]}] :: LoS:[${LineOfSight[${Me.Y},${Me.X}:${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]},${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}]}] :: Special Function:[${Bool[${route_From_Ini.Arg[${i},|].Find[**]}]}]
+        | Check line of sight, and distance of the waypoint.
+        /if (${LineOfSight[${Me.Y},${Me.X}:${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]},${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}]}) {
+          /if (!${startpointFound}) /varset startpointFound TRUE
+          /varset currentDist ${Math.Distance[${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]},${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}]}
+          /if (${Debug} || ${Debug_SmoothMoves}) /echo Distance = ${currentDist}
+          | If this waypoint is closer than the closest known waypoint, set the new distance.
+          /if (${currentDist}<${dist_Calc}) {
+            /varset dist_Calc ${currentDist}
+            /varset closest_Point_wLOS ${i}
+          }
+        }
+        /varcalc i ${i} + 1
+        /goto :check_next_Waypoint
+      }
+      | Varcalc total_WPs to (i - 1) to sync /for loop.
+      /varcalc total_WPs ${i} - 1
+      | Check for a starting point.
+      /if (!${startpointFound}) {
+        /docommand ${ChatToggle} I could not find a starting point for [${route_Name}].
+      } else {
+        | For the closest waypoint to the end of the route.
+        /for i ${closest_Point_wLOS} to ${total_WPs}
+          | If this element is a waypoint, go to it.
+          /if (!${route_From_Ini.Arg[${i},|].Find[**]}) {
+            /call next_WP ${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[1,,]} ${route_From_Ini.Arg[${i},|].Arg[1,_].Arg[2,,]}
+          | If this element is a specialized function, call the corresponding SUB.
+          } else {
+          |														Special functions														|
+            | Click Zone.
+            /if (${route_From_Ini.Arg[${i},|].Find[clickZone]}) {
+              /echo Attempting to click zone...
+              /call click_Zone ${route_From_Ini.Arg[${i},|].Arg[1,_]} ${startZone}
+            | Run Through Zone.
+            } else /if (${route_From_Ini.Arg[${i},|].Find[runThruZone]}) {
+              /echo Attempting to run through zone...
+              /call Run_Thru_Zone ${route_From_Ini.Arg[${i},|].Arg[1,_]} ${route_From_Ini.Arg[${i},|].Arg[3,_]} ${route_From_Ini.Arg[${i},|].Arg[4,_]} ${startZone}
+            | Click Door.
+            } else /if (${route_From_Ini.Arg[${i},|].Find[clickDoor]}) {
+              /echo Attempting to click door...
+              /call click_Door ${route_From_Ini.Arg[${i},|].Arg[1,_]} ${route_From_Ini.Arg[${i},|].Arg[3,_]} ${route_From_Ini.Arg[${i},|].Arg[4,_]}
+            | Bark at NPC.
+            }
+            /if (${route_From_Ini.Arg[${i},|].Find[barkAtMob]}) {
+              /echo Barking at [${Spawn[npc ${If[${route_From_Ini.Arg[${i},|].Arg[3,_].Find[-]},${route_From_Ini.Arg[${i},|].Arg[3,_].Replace[-,_]},${route_From_Ini.Arg[${i},|].Arg[3,_]}]}].CleanName}]...
+              /call barkAtNPC "${route_From_Ini.Arg[${i},|]}" ${startZone}
+            }
+          |													End of special functions													|
+          }
+        /call Movement_Events
+        | If a stop was called, end this fuction.
+        /if (${stop_Route}) {
+          /deletevar stop_Route
+          /goto :command_Stop
+        }
+        | If I have zoned before the route was finished, check to see if I should continue the route.
+        /if (${Zone.ID} != ${startZone}) {
+          /if (!${Defined[no_Echo]}) /declare no_Echo bool local TRUE
+          /goto :reload_FromZone
+        }
+        | Go to next element of the route.
+        /next i
+        | Announce to user.
+        |/docommand ${ChatToggle} I have arrived at my destination.
+      }
+    }
+  }
+  :command_Stop
+  /if (${Defined[route_From_Ini]}) /deletevar route_From_Ini
 /if (${Debug} || ${Debug_SmoothMoves}) /echo <== run_Route -|
 /RETURN
 

@@ -1,6 +1,5 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Paladin.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ												-|
+| Paladin Functions
 |----------------------------------------------------------------------------|
 Sub PAL_Setup
 /if (${Debug}) /echo |- PAL_Setup ==>
@@ -8,7 +7,7 @@ Sub PAL_Setup
 	/call iniToVarV "${Character_Ini},Paladin,Yaulp Spell" yaulpSpell string outer
 /if (${Debug}) /echo <== PAL_Setup -|
 /return
-
+|----------------------------------------------------------------------------|
 SUB PAL_MacroSettings
 /if (${Debug}) /echo |- PAL_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},PAL Functions,PAL Function#1" "check_Tanking" 1
@@ -21,7 +20,7 @@ SUB PAL_MacroSettings
 
 /if (${Debug}) /echo <== PAL_MacroSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB PAL_CharacterSettings
 /if (${Debug}) /echo |- PAL_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},Paladin,Auto-Yaulp (On/Off)" Off
@@ -29,9 +28,9 @@ SUB PAL_CharacterSettings
 
 /if (${Debug}) /echo <== PAL_CharacterSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub PAL_Aliases
 /return
-
+|----------------------------------------------------------------------------|
 Sub PAL_Background_Events
 /return

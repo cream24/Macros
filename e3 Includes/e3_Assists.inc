@@ -6,96 +6,93 @@
 #event Assist "<#1#> Assist on #2#"
 SUB event_Assist(line, ChatSender, int MobID)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_Assist ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${MobID}"
-  /if (!${c_eventArg}) /return
-    /varset MobID ${c_eventArgData}
-    | Check that you're not assisting on a corpse, pet or pc
-    /if (!${Bool[${Spawn[id ${MobID}].Type.NotEqual[Corpse]}]} || !${Select[${Spawn[id ${MobID}].Type},${AcceptableTargetTypes}]}) {
-      /if (${TogglePvP}) /goto :assistAnyway
-      /if (${Debug} || ${Debug_Assists}) /echo [${Spawn[id ${MobID}].CleanName}] is not an acceptable TargetType
-    } else {
-      :assistAnyway
-      /if (${Me.Feigning}) {
-        |/if (${Select[${Me.Class.ShortName},NEC,SHD,MNK]}) {
-        /if (${Select[${Me.Class.ShortName},NEC,SHD]}) {
-          /return
-        } else {
-          /stand
-        }
-      }
-      | Check target distance.
-      /if (${Spawn[${MobID}].Distance3D} > ${MaxAssistDistance}) {
-        /docommand ${ChatToggle} ${Spawn[${MobID}].CleanName} is too far away.
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${MobID}]}) /return
+  /varset MobID ${c_eventArgData}
+  | Check that you're not assisting on a corpse, pet or pc
+  /if (!${Bool[${Spawn[id ${MobID}].Type.NotEqual[Corpse]}]} || !${Select[${Spawn[id ${MobID}].Type},${AcceptableTargetTypes}]}) {
+    /if (${TogglePvP}) /goto :assistAnyway
+    /if (${Debug} || ${Debug_Assists}) /echo [${Spawn[id ${MobID}].CleanName}] is not an acceptable TargetType
+  } else {
+    :assistAnyway
+    /if (${Me.Feigning}) {
+      |/if (${Select[${Me.Class.ShortName},NEC,SHD,MNK]}) {
+      /if (${Select[${Me.Class.ShortName},NEC,SHD]}) {
+        /return
       } else {
-        | Wait to catch up to group, before engage.
-        |/echo ${Following}   ${Spawn[${FollowTarget}].Distance}   ${LeashLength}   ${Me.Moving}
-        /if (${Following} && ${Spawn[${FollowTarget}].Distance3D} > ${LeashLength} && ${Me.Moving}) {
-        |/echo distloop
-          /declare Assist_Moving_Timer timer local 100
-          :movetoAssist_Loop
-          /call Background_Events
-          /if (${Spawn[=${FollowTarget}].Distance} > ${LeashLength} && ${Assist_Moving_Timer}) /goto :movetoAssist_Loop
-        }
-        | Disengage follow.
-        /if (${Stick.Active}) /squelch /stick off
-        /if (${NetAdvPath.Status}==1) /squelch /netfollow off
-        | Set Assist Variables.
-        /varset Assisting TRUE
-        /varset AssistTarget ${MobID}
-        /varset AllowControl FALSE
-        /varset isEnraged FALSE
-        | If I am the assist caller, or I am feigning, don't allow macro control.
-        /if (${ChatSender.NotEqual[${Me.CleanName}]}) {
-          /varset AllowControl TRUE
-          |/docommand ${ChatToggle} Attacking - ${AssistTarget} - ${Spawn[${AssistTarget}].CleanName}
-          /if (${Target.ID} != ${AssistTarget} && (!${Bool[${Me.Casting}]} || ${Me.Class.ShortName.Equal[BRD]}) && (${AssistType.Equal[melee]} || ${AssistType.Equal[ranged]})) /call TrueTarget ${AssistTarget}
-          /if (${Me.Pet.ID}) {
-            /if (${Debug} || ${Debug_Assists}) /echo Pet Check: Sending pet in
-            /pet attack ${AssistTarget}
-          }
-          /if (${AssistType.Equal[melee]}) {
-            /if (${Debug} || ${Debug_Assists}) /echo melee on
-            /if (${Int[${AssistDistanceSetting}]}) {
-              /varset AssistStickDistance ${AssistDistanceSetting}
-            } else {
-              /if (${AssistDistanceSetting.Equal[MaxMelee]} || ${AssistDistanceSetting.Equal[auto]}) /varset AssistStickDistance ${Math.Calc[${Spawn[${Target.ID}].MaxRangeTo}*.75].Int}
-            }
-            | Check MaxRangeTo, make sure it is not out of bounds.
-            /if (${AssistStickDistance} > 25) /varset AssistStickDistance 25
-            /call StickToAssistTarget
-            /if (${Defined[strikeDisc]}) {
-              /call check_rogStrike
-            } else {
-              /attack on
-            }
-          } else /if (${AssistType.Equal[ranged]}) {
-            /if (${Debug} || ${Debug_Assists}) /echo autofire on
-            /squelch /face fast id ${AssistTarget}
-            /if (!${Me.AutoFire}) /autofire on
-            /if (${Target.Distance} < 35 || ${Target.Distance} > ${RangedStickDistance}) /squelch /stick hold moveback ${RangedStickDistance}
-          }
-        /if (${Debug} || ${Debug_Assists}) /echo Assist=${Assisting} || AssistTarget=${AssistTarget} || AllowControl=${AllowControl}
-        }
+        /stand
       }
     }
+    | Check target distance.
+    /if (${Spawn[${MobID}].Distance3D} > ${MaxAssistDistance}) {
+      /docommand ${ChatToggle} ${Spawn[${MobID}].CleanName} is too far away.
+    } else {
+      | Wait to catch up to group, before engage.
+      |/echo ${Following}   ${Spawn[${FollowTarget}].Distance}   ${LeashLength}   ${Me.Moving}
+      /if (${Following} && ${Spawn[${FollowTarget}].Distance3D} > ${LeashLength} && ${Me.Moving}) {
+      |/echo distloop
+        /declare Assist_Moving_Timer timer local 100
+        :movetoAssist_Loop
+        /call Background_Events
+        /if (${Spawn[=${FollowTarget}].Distance} > ${LeashLength} && ${Assist_Moving_Timer}) /goto :movetoAssist_Loop
+      }
+      | Disengage follow.
+      /if (${Stick.Active}) /squelch /stick off
+      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+      | Set Assist Variables.
+      /varset Assisting TRUE
+      /varset AssistTarget ${MobID}
+      /varset AllowControl FALSE
+      /varset isEnraged FALSE
+      | If I am the assist caller, or I am feigning, don't allow macro control.
+      /if (${ChatSender.NotEqual[${Me.CleanName}]}) {
+        /varset AllowControl TRUE
+        |/docommand ${ChatToggle} Attacking - ${AssistTarget} - ${Spawn[${AssistTarget}].CleanName}
+        /if (${Target.ID} != ${AssistTarget} && (!${Bool[${Me.Casting}]} || ${Me.Class.ShortName.Equal[BRD]}) && (${AssistType.Equal[melee]} || ${AssistType.Equal[ranged]})) /call TrueTarget ${AssistTarget}
+        /if (${Me.Pet.ID}) {
+          /if (${Debug} || ${Debug_Assists}) /echo Pet Check: Sending pet in
+          /pet attack ${AssistTarget}
+        }
+        /if (${AssistType.Equal[melee]}) {
+          /if (${Debug} || ${Debug_Assists}) /echo melee on
+          /if (${Int[${AssistDistanceSetting}]}) {
+            /varset AssistStickDistance ${AssistDistanceSetting}
+          } else {
+            /if (${AssistDistanceSetting.Equal[MaxMelee]} || ${AssistDistanceSetting.Equal[auto]}) /varset AssistStickDistance ${Math.Calc[${Spawn[${Target.ID}].MaxRangeTo}*.75].Int}
+          }
+          | Check MaxRangeTo, make sure it is not out of bounds.
+          /if (${AssistStickDistance} > 25) /varset AssistStickDistance 25
+          /call StickToAssistTarget
+          /if (${Defined[strikeDisc]}) {
+            /call check_rogStrike
+          } else {
+            /attack on
+          }
+        } else /if (${AssistType.Equal[ranged]}) {
+          /if (${Debug} || ${Debug_Assists}) /echo autofire on
+          /squelch /face fast id ${AssistTarget}
+          /if (!${Me.AutoFire}) /autofire on
+          /if (${Target.Distance} < 35 || ${Target.Distance} > ${RangedStickDistance}) /squelch /stick hold moveback ${RangedStickDistance}
+        }
+      /if (${Debug} || ${Debug_Assists}) /echo Assist=${Assisting} || AssistTarget=${AssistTarget} || AllowControl=${AllowControl}
+      }
+    }
+  }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_Assist -|
 /RETURN
 
 |--------------------------------------------------------------------|
-|- Backs off an AssistTarget, and labels them as a 'PauseTarget'.	-|
-|- You must manually call engage to re-engage a PauseTarget.		-|
-|--------------------------------------------------------------------|
-|- Use, '/backoff', or, 'Back off' in /tell, /group, or /bc.		-|
+|- Backs off an AssistTarget, and labels them as a 'PauseTarget'.	  -|
+|- You must manually call engage to re-engage a PauseTarget.		    -|
+|- Use, '/backoff', or, 'Back off' in /tell, /group, or /bc.		    -|
 |--------------------------------------------------------------------|
 #event BackOff "<#1#> Back Off"
 SUB Event_BackOff(line, ChatSender)
-  /if (${Debug} || ${Debug_Assists}) /echo |- Event_BackOff ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR"
-  /if (!${c_eventArg}) /return
-|/if (${Assisting} && ${AllowControl}) /docommand ${ChatToggle} Backing off.
+/if (${Debug} || ${Debug_Assists}) /echo |- Event_BackOff ==>
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
+  /if (${Assisting} && ${AllowControl}) /docommand ${ChatToggle} Backing off.
   /varset PauseTarget ${Target.ID}
   /call AssistOff
-  /if (${Debug} || ${Debug_Assists}) /echo <== Event_BackOff -|
+/if (${Debug} || ${Debug_Assists}) /echo <== Event_BackOff -|
 /RETURN
 
 |----------------------------------------------------------------|
@@ -566,10 +563,8 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
 #EVENT DebuffsOn "<#1#> Debuffs on #2#"
 #EVENT DebuffsOn "#1# tells you, 'Debuffs on #2#'"
 SUB Event_DebuffsOn(line, ChatSender, MobID)
-|/varset Debug_Assists TRUE
 /if (${Debug} || ${Debug_Assists}) /echo |- event_DebuffsOn ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${MobID}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${MobID}]}) /return
     /varset MobID ${c_eventArgData}
 		/if (${Defined[Command_Debuffs2D]}) {
 			| Check if the target is a corpse
@@ -599,7 +594,6 @@ SUB Event_DebuffsOn(line, ChatSender, MobID)
 		}
 	:Skip
 /if (${Debug} || ${Debug_Assists}) /echo <== event_DebuffsOn -|
-|/varset Debug_Assists FALSE
 /RETURN
 
 |------------------------------------------------|
@@ -610,20 +604,16 @@ SUB Event_DebuffsOn(line, ChatSender, MobID)
 SUB event_DebuffsOff(line, ChatSender, MobID)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_DebuffsOff ==>
 	/if (${Defined[Debuff_Targets]}) {
-	  /if (${Defined[MobID]}) {
-      /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${MobID}"
+	  /if (!${Defined[MobID]}) /declare MobID int
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,${MobID}]}) /return
+    /if (${Bool[${c_eventArgData}]}) {
+      /docommand ${ChatToggle} Ending Debuffs on ${Spawn[id ${c_eventArgData}].CleanName}.
+      /call RemoveArrayElement Debuff_Targets ${c_eventArgData}_${Zone.ID}
     } else {
-      /call checkEventArgs "${ChatSender}" "${line}" "UZ"
+      /docommand ${ChatToggle} Ending Debuffs on all targets.
+      /deletevar Debuff_Targets
     }
-    /if (!${c_eventArg}) /return
-			/if (${Bool[${c_eventArgData}]}) {
-				/docommand ${ChatToggle} Ending Debuffs on ${Spawn[id ${c_eventArgData}].CleanName}.
-				/call RemoveArrayElement Debuff_Targets ${c_eventArgData}_${Zone.ID}
-			} else {
-				/docommand ${ChatToggle} Ending Debuffs on all targets.
-				/deletevar Debuff_Targets
-			}
-		}
+  }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_DebuffsOff -|
 /RETURN
 
@@ -666,8 +656,7 @@ SUB Debuffs_OnCommand
 SUB Event_DoTsOn(line, ChatSender, MobID)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_DoTsOn ==>
   /if (${Defined[Command_DoTs2D]}) {
-    /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${MobID}"
-    /if (!${c_eventArg}) /return
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,${MobID}]}) /return
       /varset MobID ${c_eventArgData}
       /if (${Spawn[id ${MobID}].Type.Equal[Corpse]} || !${Select[${Spawn[id ${MobID}].Type},${AcceptableTargetTypes}]}) {
         /echo Unacceptable Target ${Spawn[id ${MobID}].Type}
@@ -702,19 +691,15 @@ SUB Event_DoTsOn(line, ChatSender, MobID)
 SUB event_DoTsOff(line, ChatSender, MobID)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_DoTsOff ==>
 	/if (${Defined[DoT_Targets]}) {
-	  /if (${Defined[MobID]}) {
-      /call checkEventArgs "${ChatSender}" "${line}" "UZ" "${MobID}"
-    } else {
-      /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-    }
-    /if (!${c_eventArg}) /return
-    /if (${Bool[${c_eventArgData}]}) {
-      /docommand ${ChatToggle} Ending DoTs on ${Spawn[id ${c_eventArgData}].CleanName}.
-      /call RemoveArrayElement DoT_Targets ${c_eventArgData}_${Zone.ID}
-    } else {
-      /docommand ${ChatToggle} Ending DoTs on all targets.
-      /deletevar DoT_Targets
-    }
+	/if (!${Defined[MobID]}) /declare MobID int local
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${MobID}]}) /return
+  /if (${Bool[${c_eventArgData}]}) {
+    /docommand ${ChatToggle} Ending DoTs on ${Spawn[id ${c_eventArgData}].CleanName}.
+    /call RemoveArrayElement DoT_Targets ${c_eventArgData}_${Zone.ID}
+  } else {
+    /docommand ${ChatToggle} Ending DoTs on all targets.
+    /deletevar DoT_Targets
+  }
   }
 /if (${Debug} || ${Debug_Assists}) /echo <== event_DoTsOff -|
 /RETURN
@@ -759,8 +744,7 @@ SUB Event_AEs(line, ChatSender, aeType, aeToggle)
   /if (${aeType.Equal[PB]} && !${Defined[PBAE_Spells2D]})          /return
   /if (${aeType.Equal[All]} && (!${Defined[PBAE_Spells2D]} && !${Defined[TargetAE_Spells2D]})) /return
 
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${aeToggle}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${aeToggle}]}) /return
   /varset aeToggle ${c_eventArgData}
 
   /if (${aeToggle.Equal[on]}) {
@@ -875,9 +859,8 @@ SUB swapToRangedSet(bool toggleRanged)
 #event SwarmPets "<#1#> Swarm Pets on #2#"
 SUB event_SwarmPets(line, ChatSender, int swarmTarget)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_SwarmPets ==>
-  /if (${Defined[swarmPets2D]} > 0) {
-    /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${swarmTarget}"
-    /if (!${c_eventArg}) /return
+  /if (${Defined[swarmPets2D]}) {
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,${swarmTarget}]}) /return
     /varset swarmTarget ${c_eventArgData}
 		/if (${SpawnCount[id ${swarmTarget}]} && ${Spawn[${swarmTarget}].Type.NotEqual[Corpse]} && ${Select[${Spawn[${swarmTarget}].Type},${AcceptableTargetTypes}]}) {
 			/declare i int local
@@ -911,8 +894,7 @@ SUB check_Burns
 #EVENT Burns "#1# tell your party, '#2# Burn'"
 SUB event_Burns(line, ChatSender, burnType)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_Burns ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${burnType}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${burnType}]}) /return
   /varset burnType ${c_eventArgData.Upper}
   /if (!${Assisting}) {
     /echo You must be attacking something to ${burnType} burn.
@@ -984,8 +966,7 @@ SUB check_lifeTap
 #EVENT SpellSet "#1# tell your party, 'SpellSet #2#'"
 SUB event_SpellSet(line, ChatSender, spellArray)
 /if (${Debug} || ${Debug_Assists})  /echo |- event_SpellSet ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${spellArray}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${spellArray}]}) /return
   /varset spellArray ${c_eventArgData}
   /declare i int local
   /if (${Select[${Me.Class.ShortName},BST,CLR,DRU,ENC,MAG,PAL,NEC,RNG,SHD,SHM,WIZ]}) {
@@ -1116,10 +1097,8 @@ SUB event_SpellSet(line, ChatSender, spellArray)
 |--------------------------------------------------------------------------------|
 #event CombatMode "<#1#> CombatMode #2#"
 sub event_CombatMode(line, ChatSender, combatMode)
-  /call checkEventArgs "${ChatSender}" "${line}" "UZR" "${combatMode}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${combatMode}]}) /return
   /varset combatMode ${c_eventArgData}
-  
   /if (${combatMode.Equal[melee]}) {
     /varset AssistType Melee
     /delay 2

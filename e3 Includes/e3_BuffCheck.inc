@@ -194,7 +194,6 @@ SUB checkAuras
 /RETURN
 |--------------------------------------------------------|
 |- Casts GroupBuffs array on the specified buffTargetID.-|
-|--------------------------------------------------------|
 |- @param line: '<Name> Buff me'.						            -|
 |- @param ChatSender: The buff requestor.				        -|
 |--------------------------------------------------------|
@@ -202,22 +201,21 @@ SUB checkAuras
 SUB event_castGroupBuffs(line, ChatSender)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- event_castGroupBuffs ==>
   /if (!${Defined[GroupBuffs2D]}) /return
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-  /if (!${c_eventArg}) /return
-  /declare buffTargetID int local
-  | -------------------Find buffTargetID------------------- |
-  /if (${Int[${line.Arg[3, ]}]}) {
-    /varset buffTargetID ${line.Arg[3, ]}
-  } else /if (${line.Find[Buff me]}) {
-    /varset buffTargetID ${Spawn[pc =${ChatSender}].ID}
-  } else /if (${line.Find[Buff pet]} || ${line.Find[Buff my pet]}) {
-    /varset buffTargetID ${Spawn[pet =${Spawn[pc ${ChatSender}].Pet}].ID}
-  } else  /if (${SpawnCount[pc =${line.Arg[3, ]}]}) {
-    /varset buffTargetID ${Spawn[pc =${line.Arg[3, ]}].ID}
-  } else /if (${line.Find['s pet]}) {
-    /varset buffTargetID ${Spawn[pet =${Spawn[pc ${line.Arg[3, ].Arg[1,']}].Pet}].ID}
-  } else /if (${line.Find[s pet]}) {
-    /varset buffTargetID ${Spawn[pet =${Spawn[pc ${line.Arg[3, ].Left[${Math.Calc[${line.Arg[3, ].Length} - 1].Int}]}].Pet}].ID}
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
+  | -------------------Find buffTarget------------------- |
+  /declare buffTarget string local ${line.Right[-${Math.Calc[${line.Find[buff]}+4]}].Left[-1]}
+  /if (${Int[${buffTarget}]}) {
+    /varset buffTarget ${Spawn[id ${buffTarget}].ID}
+  } else /if (${buffTarget.Equal[me]}) {
+    /varset buffTarget ${Spawn[pc =${ChatSender}].ID}
+  } else /if (${buffTarget.Find['s pet]}) {
+    /varset buffTarget ${Spawn[pc =${buffTarget.Left[-6]}].Pet.ID}
+  } else /if (${buffTarget.Find[s pet]}) {
+    /varset buffTarget ${Spawn[pc =${buffTarget.Left[-5]}].Pet.ID}
+  } else /if (${buffTarget.Equal[pet]} || ${buffTarget.Equal[my pet]}) {
+    /varset buffTarget ${Spawn[pc =${ChatSender}].Pet.ID}
+  } else /if (${SpawnCount[=${buffTarget}]}) {
+    /varset buffTarget ${Spawn[=${buffTarget}].ID}
   }
 
   /declare s int local 1
@@ -229,7 +227,7 @@ SUB event_castGroupBuffs(line, ChatSender)
     /if (${check_Distance[${buffTargetID},${GroupBuffs2D[${s},${iMyRange}]}]}) {
       /if (${check_Mana["GroupBuffs2D",${s}]}) {
         /if (${buffAttempts} <= ${GroupBuffs2D[${s},${iMaxTries}]}) {
-          /call e3_Cast ${buffTargetID} "GroupBuffs2D" "${s}"
+          /call e3_Cast ${buffTarget} "GroupBuffs2D" "${s}"
           /if (${castReturn.Equal[CAST_SUCCESS]}) /varcalc s ${s}+1
           /goto :verifyCast
         } else /if (${Debug} || ${Debug_BuffCheck}) /echo failed buffattempts
@@ -257,8 +255,7 @@ SUB event_BuffAll
 #EVENT toggleBuffs "#1# tells you, 'Toggle Buffs #2#'"
 SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ" "${buffSetting}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${buffSetting}]}) /return
   /varset buffSetting ${c_eventArgData}
 	/if (${buffSetting.Equal[on]}) {
 		/varset buffSetting TRUE
@@ -277,8 +274,7 @@ SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
 #EVENT toggleCombatBuffs "#1# tells you, 'Toggle Combat Buffs #2#'"
 SUB EVENT_toggleCombatBuffs(line, ChatSender, buffSetting)
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ" "${buffSetting}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${buffSetting}]}) /return
   /varset buffSetting ${c_eventArgData}
   /if (${buffSetting.Equal[on]}) {
 		/varset buffSetting TRUE

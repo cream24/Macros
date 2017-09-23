@@ -44,8 +44,7 @@ SUB EVENT_dead
 #EVENT waitNow "<#1#> Wait4Rez"
 SUB EVENT_waitNow(line, ChatSender)
 /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_WaitNow ==>
-	/call checkEventArgs "${ChatSender}" "${line}" "U"
-	/if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
 	/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
 	/if (${use_Wait4Rez}) {
 		/consent ${ChatSender}
@@ -66,8 +65,7 @@ SUB EVENT_waitNow(line, ChatSender)
 #EVENT lootNow "#1# tells you, 'Loot Now#*#"
 SUB EVENT_lootNow(line, ChatSender)
 /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Event_lootNow ==>
-	/call checkEventArgs "${ChatSender}" "${line}" "U"
-	/if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
 	/if (!${Defined[use_Wait4Rez]}) /call Wait4Rez_Setup
 	/if (${use_Wait4Rez}) {
 		/echo Looting....

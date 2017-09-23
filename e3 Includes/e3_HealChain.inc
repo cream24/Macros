@@ -11,9 +11,7 @@ SUB EVENT_build_HealChain(line, ChatSender)
 	/if (!${Raid.Members}) {
 		/if (${ChatSender.Equal[${Me.CleanName}]}) /echo You need to be in a raid to form a heal chain.
 	} else {
-		/call checkEventArgs "${ChatSender}" "${line}" "UZR"
-		|/gu "${ChatSender}" "${line}" "UZR" ${c_eventArg} ${c_eventArgData} ${c_eventArgChatSender}
-    /if (!${c_eventArg}) /return
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
     /varset ChatSender ${c_eventArgChatSender}
     /if (${ChatSender.Equal[${Me.CleanName}]}) {
       | Unload an existing chain
@@ -105,8 +103,7 @@ SUB EVENT_unload_HealChain(line, ChatSender)
 SUB EVENT_add_ChainMember(line, ChatSender)
 /if (${Debug} || ${Debug_HealChain}) /echo |- EVENT_add_ChainMember ==>
 	/if (${Defined[Chain_Moderator]}) {
-    /call checkEventArgs "${ChatSender}" "${line}" "URZ"
-    /if (!${c_eventArg}) /return
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
     | If the ChatSender is already part of the HealChain
     /if (${Select[${ChatSender},${Chain_MemberList}]}) {
       /rs [${ChatSender}] is already part of the heal chain.

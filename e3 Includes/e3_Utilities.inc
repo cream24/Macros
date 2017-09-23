@@ -1,51 +1,4 @@
-|------------------------------------------------------------------------------|
-|- Validates Ini entries from supplied Ini keys, and creates outer variables.	-|
-|- @param Ini_Key: The ini file, section, and entry to create a variable from.-|
-|- @param VarToMake: The name of the variable you want to declare.						-|
-|- @param VarType: The type of variable to be declared.												-|
-SUB IniToVar(Ini_Key, VarToMake, VarType)
-/if (${Debug}) /echo |- IniToVar [${Ini_Key}] ==>
-	| Check for the specified ini key.
-	/if (!${Ini[${Ini_Key}].Length}) {
-		/if (${Debug}) /echo [${Ini_Key}] not found.
-	} else {
-	
-		| Validate bool.
-		/if (${VarType.Equal[bool]}) {
-			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/if (!${Defined[new_VarName]}) /declare new_VarName string outer
-			/declare ${VarToMake} bool outer ${If[${Select[${Ini[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
-			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
-		| Validate int.
-		} else /if (${VarType.Equal[Int]}) {
-			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/declare ${VarToMake} int outer ${Ini[${Ini_Key}]}
-			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
-		| Validate float.
-		} else /if (${VarType.Equal[Float]}) {
-			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/declare ${VarToMake} float outer ${Ini[${Ini_Key}]}
-			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
-		| Create string or timer.
-		} else {
-			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
-			/declare ${VarToMake} ${VarType} outer ${Ini[${Ini_Key}]}
-			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
-		}
-	}
-/if (${Debug}) /echo <== IniToVar -|
-/RETURN ${${VarToMake}}
-
-Sub IniToVarV_Deprecated(Ini_Key, VarToMake, VarType)
-  /if (${IniExt[${Ini_Key}].Length}) {
-    /if (${VarType.Equal[bool]}) {
-      /declare ${VarToMake} bool outer ${If[${Select[${IniExt[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
-    } else {
-      /declare ${VarToMake} ${VarType} outer ${IniExt[${Ini_Key}]}
-    }
-  }
-/return ${${VarToMake}}
-
+|----------------------------------------------------
 Sub IniToVarV(Ini_Key, VarToMake, VarType)
   /if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
   /if (${VarType.Equal[bool]}) {
@@ -58,54 +11,6 @@ Sub IniToVarV(Ini_Key, VarToMake, VarType)
     }
   }
 /return
-|-----------------------
-|- Counts ini entries and creates a corresponding array
-|-----------------------
-|- @param Ini_Key: The ini file, section, and entry to create an array from
-|- @param ArrayName: The name of the array you want to declare
-|- @param ArrayScope: The scope of the array to be declared
-|-----------------------
-|- Syntax: /call IniToArray IniKey ArrayName VariableScope
-|-	Ex: /call IniToArray "Settings.ini,General Settings,Debug Mode" Debug outer
-|-		/call iniToVarV Bot_Killians.ini,Buffs,SelfBuffs MySelfBuffs local
-|-----------------------
-SUB IniToArray(Ini_Key, ArrayName)
-/if (${Debug}) /echo |- IniToArray [${Ini_Key}] ==>
-	| Check for the specified ini key.
-	/if (!${Ini[${Ini_Key}1].Length}) {
-		/if (${Debug}) /echo [${Ini_Key}] not found.
-	} else {
-	
-		| Count ini entries
-		/declare i int local 1
-		/declare count int local
-
-		:CountingLoop
-		/if (${Ini[${Ini_Key}${i}].Length}) {
-			/varset count ${i}
-			/varcalc i ${i} + 1
-			/goto :CountingLoop
-		}
-		
-		| Declare the array and copy ini entries
-		/if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
-		/declare ${ArrayName}[${count}] string outer
-		
-		/for i 1 to ${${ArrayName}.Size}
-			/varset ${ArrayName}[${i}] ${Ini[${Ini_Key}${i}]}
-		/next i
-	}
-
-/if (${Debug}) {
-	/if (${${ArrayName}.Size}) {
-		/echo Declared: ${ArrayName}[${${ArrayName}.Size}]
-		/for i 1 to ${${ArrayName}.Size}
-			/echo ${ArrayName}[${i}] - ${${ArrayName}[${i}]}
-		/next i
-	}
-	/echo <== IniToArray -|
-}
-/RETURN ${ArrayName}
 
 |-----------------------
 Sub IniToArrayV(IniKey, ArrayName)
@@ -113,34 +18,30 @@ Sub IniToArrayV(IniKey, ArrayName)
   /declare j int local 1
   /declare array_size int local 0
   /declare ArrayScope string local outer
-  /if (${Bool[${Plugin[MQ2IniExt]}]}) {
-    /if (${IniKey.Right[1].Equal[#]} && ${IniExt[${IniKey}1].Length}) {
-      /call IniToArrayV_Deprecated "${IniKey}" "${ArrayName}"
-      /return
+  /if (${IniKey.Right[1].Equal[#]} && ${IniExt[${IniKey}1].Length}) {
+    /call IniToArrayV_Deprecated "${IniKey}" "${ArrayName}"
+    /return
+  }
+  /if (${IniKey.Right[1].Equal[#]}) /varset IniKey ${IniKey.Left[-1]}
+  |/echo IniKey = ${IniKey} count = ${IniExt[${IniKey}].Count}
+  /if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
+  /if (${IniExt[${IniKey}].Index[1].Length}) {
+    /for i 1 to ${IniExt[${IniKey}].Count}
+    /if (${IniExt[${IniKey}].Index[${i}].Length}) {
+      /varcalc array_size ${array_size}+1
     }
-    /if (${IniKey.Right[1].Equal[#]}) /varset IniKey ${IniKey.Left[-1]}
-    |/echo IniKey = ${IniKey} count = ${IniExt[${IniKey}].Count}
-    /if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
-    /if (${IniExt[${IniKey}].Index[1].Length}) {
+    /next i
+    |/declare ${ArrayName}[${IniExt[${IniKey}].Count}] string ${ArrayScope}
+    /declare ${ArrayName}[${array_size}] string outer
+    /if (${IniExt[${IniKey}].Count}) {
       /for i 1 to ${IniExt[${IniKey}].Count}
+      |/echo ${ArrayName}[${i}] ${IniExt[${IniKey}].Index[${i}]} Length: ${IniExt[${IniKey}].Index[${i}].Length}
       /if (${IniExt[${IniKey}].Index[${i}].Length}) {
-        /varcalc array_size ${array_size}+1
+        /varset ${ArrayName}[${j}] ${IniExt[${IniKey}].Index[${i}]}
+        /varcalc j ${j}+1
       }
       /next i
-      |/declare ${ArrayName}[${IniExt[${IniKey}].Count}] string ${ArrayScope}
-      /declare ${ArrayName}[${array_size}] string outer
-      /if (${IniExt[${IniKey}].Count}) {
-        /for i 1 to ${IniExt[${IniKey}].Count}
-        |/echo ${ArrayName}[${i}] ${IniExt[${IniKey}].Index[${i}]} Length: ${IniExt[${IniKey}].Index[${i}].Length}
-        /if (${IniExt[${IniKey}].Index[${i}].Length}) {
-          /varset ${ArrayName}[${j}] ${IniExt[${IniKey}].Index[${i}]}
-          /varcalc j ${j}+1
-        }
-        /next i
-      }
     }
-  } else {
-    /call IniToArrayV_Deprecated "${IniKey}" "${ArrayName}"
   }
 /return
 
@@ -148,7 +49,6 @@ Sub IniToArrayV_Deprecated(IniKey, ArrayName)
   /declare i int local 1
 |/declare IniKey ${File},${Section},${Key}
   /declare ArrayScope string local outer
-
   /if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
   /if (${Ini[${IniKey}1].Length}) {
     /declare count int local 0
@@ -203,18 +103,13 @@ SUB WriteToIni(Ini_Key, WhatToWrite, bool OverWrite)
 			/ini "${Ini_Key.Arg[1,,]}" "${Ini_Key.Arg[2,,]}" "${Ini_Key.Arg[3,,]}"
 		}
 	}
-
 /if (${Debug}) /echo <== WriteToIni -|
 /RETURN
 
 |--------------------------------------------------------|
 |- Creates new arrays, or stacks onto existing arrays.	-|
-|--------------------------------------------------------|
-|- Syntax: /call BuildArray ArrayName Data				-|
-|-  Ex: /call BuildArray DebuffTargets ${Target.ID}		-|
-|--------------------------------------------------------|
-|- @param ArrayName: Name of the array to build.		-|
-|- @param Data: Data you wish to add to the array.		-|
+|- Syntax: /call BuildArray ArrayName Data				      -|
+|-  Ex: /call BuildArray DebuffTargets ${Target.ID}		  -|
 |--------------------------------------------------------|
 SUB BuildArray(ArrayName, Data)
 /if (${Debug}) /echo |- BuildArray Adding [${ArrayName}-${Data}] ==>
@@ -224,23 +119,19 @@ SUB BuildArray(ArrayName, Data)
 		/varset ${ArrayName}[1] ${Data}
 	| Else, if the array is already defined.
 	} else {
-	
 		| Create a copy of the existing array.
 		/declare ${ArrayName}Copy[${${ArrayName}.Size}] string local
 		/declare i int local
 		/for i 1 to ${${ArrayName}.Size}
 			/varset ${ArrayName}Copy[${i}] ${${ArrayName}[${i}]}
 		/next i
-		
 		| Delete the existing array.
 		/deletevar ${ArrayName}
-		
 		| Build a resized array.
 		/declare ${ArrayName}[${Math.Calc[${${ArrayName}Copy.Size}+1].Int}] string outer
 		/for i 1 to ${${ArrayName}.Size}
 			/varset ${ArrayName}[${i}] ${${ArrayName}Copy[${i}]}
 		/next i
-	
 		| Insert new data into the array
 		/varset ${ArrayName}[${${ArrayName}.Size}] ${Data}
 	}
@@ -369,7 +260,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     } else {
       |default to item - no way to validate an item thats on my corpse
       /if (!${FindItem[=${tmp_castname}].ID}) {
-        |/echo tcn ${tmp_castname} f ${tmp_castname.Find[Molten Orb]}
+
         /if (!${Bool[${Me.Inventory[Chest]}]} && !${Me.Platinum}) {
           /varset reloadOnLoot TRUE
           /varset missingSpellItem ${tmp_castname}
@@ -720,32 +611,22 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
       /varset	${NewArrayName}[${i},${iMinSick}] 0
     }
     /if (${printAll}) /echo Zone ${${NewArrayName}[${i},${iMinSick}]}
-
-
     |default casting while invis to 0 which impies no casting while invis
     /varset	${NewArrayName}[${i},${iCastInvis}] 0
-
 		/if (${printAll}) /echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		/next i	
-	
+		/next i
 	|/deletevar ${ArrayName}
-	
 /RETURN	${NewArrayName}
 
-|----------------------------------------------------|
-|- Removes elements from an existing array.			-|
-|----------------------------------------------------|
-|- @param ArrayName: Name of the array to search.	-|
-|- @param Data: Data you wish to remove.			-|
-|----------------------------------------------------|
+|------------------------------------------------|
+|- Removes elements from a 2D array.			      -|
 SUB RemoveSpellArrayElement(ArrayName, ArrayIndex)
 /if (${Debug}) 	/g |- RemoveSpellArrayElement ==> Removing [${ArrayIndex}] from [${ArrayName}] ${Time}
 	/declare o int local
 	/declare n int local 1
 	/declare p int local
 	/declare tempArraySize int local
-	
-		| only do this if the array has more than one entry to prevent blocking
+	| only do this if the array has more than one entry to prevent blocking
 	| copy to temp array, excluding the removed index
 	| delete original array
 	| create original array name, copy contents from tempArray, delete temp array
@@ -762,7 +643,6 @@ SUB RemoveSpellArrayElement(ArrayName, ArrayIndex)
 				/varcalc n ${n} + 1
 			}
 		/next o
-
 		| Delete the existing array.
 		/deletevar ${ArrayName}
 		/declare ${ArrayName}[${tempArraySize},${SpellProp.Size}] string outer
@@ -773,13 +653,10 @@ SUB RemoveSpellArrayElement(ArrayName, ArrayIndex)
       | /echo ${ArrayName}[${n},${p}] ${${ArrayName}[${n},${p}]} ${SpellProp[${p}]}
 			/next p
 		/next n
-	
 		/deletevar tempArray
 	}	else {
 	  /deletevar ${ArrayName}
 	}
-	|/echo ${ArrayName} ${${ArrayName}.Size[1]}
-	|/mqpause
 /if (${Debug}) /g <== RemoveSpellArrayElement -| ${Time}
 /RETURN
 
@@ -930,7 +807,6 @@ SUB ClearCursor
   }
 /if (${Debug}) /echo <== ClearCursor -|
 /RETURN
-
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sub SwapItem(itemName,slotName)
@@ -1108,51 +984,6 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
   }
   |/echo cs ${ChatSender} ad ${ArgData} find ${ArgData.Find[/]} erd ${c_eventArgData}
 /RETURN ${c_eventArg}
-|--------------------------------------------------------------------------|
-SUB verifyEvent(ChatSender, eventLine)
-/if (${Debug}) /echo |- verifyEvent ==>
-	/declare userValidated bool local FALSE
-	/declare includeBot bool local TRUE
-	/declare inZone bool local FALSE
-	/declare inRange bool local FALSE
-	| -Reset ChatSender.
-	/if (${ChatSender.Left[1].Compare[ ]}<0) /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
-	/if (${ChatSender.Equal[You]}) /varset ChatSender ${Me.CleanName}
-	/if (${ChatSender.Equal[MQ2]}) /varset ChatSender ${Me.CleanName}
-	| -Validate ChatSender.
-	/if (${NetBots[${ChatSender}].ID}) /varset userValidated TRUE
-	| -Check inZone
-	/if (${SpawnCount[pc =${ChatSender}]}) /varset inZone TRUE
-	| -Check inRange
-	/if (${SpawnCount[pc =${ChatSender} radius ${MaxResponseDist}]}) /varset inRange TRUE
-	|/echo v${userValidated} z${inZone} o ${eventLine.Find[/only|]}
-	/if (${eventLine.Find[/only|]}) {
-		/varset includeBot FALSE
-		/call argueString only| "${eventLine}"
-		/call check_selectedBots "${c_argueString}" "${ChatSender}"
-		/if (${c_checkSelectedBots}) /varset includeBot TRUE
-	}
-	/if (${eventLine.Find[/exclude|]}) {
-		/call argueString exclude| "${eventLine}"
-		/call check_selectedBots "${c_argueString}" "${ChatSender}"
-		/if (${c_checkSelectedBots}) /varset includeBot FALSE
-	}
-	/if (${eventLine.Find[/not|]}) {
-		/call argueString not| "${eventLine}"
-		/call check_selectedBots "${c_argueString}" "${ChatSender}"
-		/if (${c_checkSelectedBots}) /varset includeBot FALSE
-	}
-	/if (${eventLine.Find[/include|]}) {
-		/call argueString include| "${eventLine}"
-		/call check_selectedBots "${c_argueString}" "${ChatSender}"
-		/if (${c_checkSelectedBots}) /varset includeBot TRUE
-	}
-/if (${Debug}) {
-	/echo |- verifyEvent -| ChatSender=${ChatSender} || includeBot=${includeBot} || inZone=${inZone} || inRange=${inRange}
-	/echo <== verifyEvent -|
-}
-/RETURN ${ChatSender}_${userValidated}_${includeBot}_${inZone}_${inRange}
-
 
 |----------------------------------------------------------------------------|
 #EVENT macroHelp "[MQ2] Help"

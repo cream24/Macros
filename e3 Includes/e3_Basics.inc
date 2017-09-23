@@ -19,19 +19,14 @@
 SUB EVENT_Follow(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Follow ==>
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${eventParams}]}) /return
-|  /call checkEventArgs "" "${line}" "UZ" "${eventParams}"
-|  /if (!${c_eventArg}) /return
-
   /declare SpawnToFollow string local ${c_eventArgData}
   /if (!${NetBots[${SpawnToFollow}].InZone} || ${SpawnToFollow.Equal[me]} || ${SpawnToFollow.Equal[on]}) /varset SpawnToFollow ${c_eventArgChatSender}
   | -Turn Following on and set the FollowTarget
-  /varset Following TRUE
   /varset FollowTarget ${Spawn[pc =${SpawnToFollow}].CleanName}
   | -If I am the follow target
   /if (${FollowTarget.Equal[${Me}]}) {
     /if (${Stick.Active}) /squelch /stick off
     /if (${NetAdvPath.Status}) /squelch /netfollow off
-
   } else {
     | -Check Range
     /if (${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist}) {
@@ -43,8 +38,9 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
       } else {
         | -Stop assisting so we don't try to stick to the AssistTarget.
         /if (${Assisting} || ${Me.Combat}) /call AssistOff
-        /varset rebuffTimer 25
-        /call AquireFollow
+          /varset Following TRUE
+          /varset rebuffTimer 25
+          /call AquireFollow
       }
     }
   }
@@ -64,7 +60,6 @@ SUB AquireFollow
 				/if (${NetAdvPath.Status}==1) /squelch /netfollow off
 
 				/declare followTargetID int local
-
 				/if (${SpawnCount[pc =${FollowTarget}]}) {
 					/varset followTargetID ${Spawn[pc =${FollowTarget}].ID}
 				} else /if (${SpawnCount[npc ${FollowTarget}]}) {
@@ -75,17 +70,12 @@ SUB AquireFollow
 				/if (${Bool[${Me.Casting.ID}]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 				 | If the FollowTarget is a NetBot, and you're using NetAdvPath
 				/if (${NetBots[${FollowTarget}].ID} && ${NetAdvPath}) {
-				 | If the FollowTarget is a NetBot, engage MQ2NetAdvPath.
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
-            |/echo NB LOS AquireFollow calling truetarget
 						/call TrueTarget ${followTargetID}
 						/squelch /netfollow on
-					} else /if (${NetAdvPath.Status}==2) {
-						/squelch /netfollow unpause
 					}
 				} else {
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
-            |/echo stick LOS AquireFollow calling truetarget
 						/call TrueTarget ${followTargetID}
 						/squelch /stick hold 20 uw
 					}
@@ -111,6 +101,7 @@ SUB Bind_StopFollowing(yLoc,xLoc)
   }
 /return
 
+|----------------------------------------------------------------------------|
 #EVENT Stop	"<#1#> Stop"
 #EVENT Stop "#1# tells the group, 'Stop'"
 #EVENT Stop "#1# you tell your party, 'Stop'"
@@ -129,7 +120,7 @@ SUB EVENT_Stop(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Stop -|
 /RETURN STOP
 
-|--------------------------------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 #EVENT MoveHere "<#1#> Move to #2#"
 #EVENT MoveHere "#1# tells you, 'Move to #2#'"
 #EVENT MoveHere "#1# tells the group, 'Move to #2#'"
@@ -151,19 +142,16 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_MoveHere -|
 /RETURN
 
-|--------------------------------------------------------------------------------------------------------|
-|- Commands bots to bark a message at a target.															-|
-|- Targets can be designated by name, or ID, using -ID| or -Name|
-|--------------------------------------------------------------------------------------------------------|
-|- @param line: '<Name> Bark at MobName BarkMsg'														-|
-|- @param msgTarget: The NPC you wish to bark at.														-|
-|- @param barkIt: What to bark at the NPC.																-|
-|- @param ChatSender: The command sender that requested bark.											-|
-|- @param selectedBots: Bots specified to bark at npc.													-|
-|--------------------------------------------------------------------------------------------------------|
-|- Targets must be within the MaxResponseDist (default 250units).										-|
-|- Use, '/bark MESSAGE', or, the command 'Bark at NAME MESSAGE' can be given in /bc, /g, or /tell.		-|
-|--------------------------------------------------------------------------------------------------------|
+|--------------------------------------------------------------------------------------|
+|- Commands bots to bark a message at a target.															          -|
+|- Targets can be designated by name, or ID, using -ID| or -Name|                     -|
+|- @param line: '<Name> Bark at MobName BarkMsg'														          -|
+|- @param msgTarget: The NPC you wish to bark at.														          -|
+|- @param barkIt: What to bark at the NPC.																            -|
+|- @param ChatSender: The command sender that requested bark.								          -|
+|- @param selectedBots: Bots specified to bark at npc.											          -|
+|- Use, '/bark MESSAGE', or 'Bark at NAME MESSAGE' can be given in /bc, /g, or /tell. -|
+|--------------------------------------------------------------------------------------|
 #EVENT bark "<#1#> Bark at #2# #3#"
 #EVENT bark "#1# tells the group, 'Bark at #2# #3#'"
 #EVENT bark "#1# tell your party, 'Bark at #2# #3#'"
@@ -191,8 +179,8 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   /declare retryTimer timer local 15s
   /declare startingLoc string local
 
-  /if (${Spawn[id ${msgTarget}].Distance3D}>150) {
-    /echo Bark Failed - ${Spawn[id ${msgTarget}].CleanName} is > 150 distance
+  /if (${Spawn[id ${msgTarget}].Distance}>${MaxResponseDist}) {
+    /echo Bark Failed - ${Spawn[id ${msgTarget}].CleanName} is > ${MaxResponseDist} distance
     /return
   }
 
@@ -231,7 +219,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 
   /doevents barkReturn
   | -Check to see if the bark was successful.
-  /if (${Zone.ID} == ${currentZone} && ${Math.Distance[${startingLoc}]} < 10 && !${barkReturned}) {
+  /if (${Zone.ID} == ${currentZone} && ${Math.Distance[${startingLoc}]} < 8 && !${barkReturned}) {
     /if (${retryTimer}) {
       /goto :retry_Bark
     } else {
@@ -249,12 +237,10 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 #EVENT barkReturn "${barkTarget} #1#"
 SUB EVENT_barkReturn(line, returnBark)
 	/varset barkReturned TRUE
-	|/echo returnBark ${returnBark}
 /RETURN
 
 |----------------------------------------------------------------------------|
 |- Moves to a given location, and clicks the nearest object.				        -|
-|- @param ChatSender: The command sender.									                  -|
 |----------------------------------------------------------------------------|
 #EVENT clickIt "<#1#> Click It#2#"
 #EVENT clickIt "#1# tells the group, 'Click It#2#'"
@@ -289,16 +275,16 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
   /if (${debug_clickit}) /echo closest ${closestDoorID} ${closestDoorDist}
   /if (!${Bool[${closestDoorID}]}) {
     /squelch /doortarget
-    /if (${DoorTarget.Distance} < 150) {
+    /if (${DoorTarget.Distance} < ${MaxResponseDist}) {
       /varset closestDoorID ${Switch.ID}
       /if (${debug_clickit}) /echo no door in file, picked closest door ${Switch.ID}
     } else {
-      /echo \ay Aborting ClickIt: I could not find an acceptable door < 150 3D units
+      /echo \ay Aborting ClickIt: I could not find an acceptable door < ${MaxResponseDist} units
       /return
     }
   }
   /squelch /doortarget id ${closestDoorID}
-  /if (${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50
+  /if (${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
   /if (${DoorTarget.Distance} > 20) {
     /echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 5s
     /moveto off
@@ -325,12 +311,12 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
   }
 /RETURN
 
-|----------------------------------------------------------------------------|
-|- Moves to a given location, and clicks the nearest object.				-|
-|----------------------------------------------------------------------------|
-|- @param ChatSender: The command sender.									-|
+|--------------------------------------------------------------------------|
+|- Moves to a given location, and clicks the nearest object.				      -|
+|- This is only here to support a situation wheres doors.txt lacks a door -|
+|- @param ChatSender: The command sender.									                -|
 |- @param locToStart: Where to stand when attempting to click the object.	-|
-|----------------------------------------------------------------------------|
+|--------------------------------------------------------------------------|
 #EVENT oldclickIt "<#1#> OldClickIt #2#"
 #EVENT oldclickIt "#1# tells the group, 'OldClickIt #2#'"
 #EVENT oldclickIt "#1# tell your party, 'OldClickIt #2#'"
@@ -398,9 +384,8 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
 
 |----------------------------------------------------------------------------|
 |- Points faces bots to your current heading, and runs through a zone line.	-|
-|----------------------------------------------------------------------------|
-|- @param ChatSender: The command sender.									-|
-|- @param locToStart: Where to stand when trying to click the door.			-|
+|- @param ChatSender: The command sender.									                  -|
+|- @param locToStart: Where to stand when trying to click the door.			    -|
 |- @param snapHeading: The direction to face when trying to click the door.	-|
 |----------------------------------------------------------------------------|
 #EVENT runThruZone "<#1#> Run through zone#2#"
@@ -449,8 +434,6 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_runThruZone -|
 /RETURN
 
-|----------------------------------------|
-|- Drops invis on connected NetBots.	-|
 |----------------------------------------|
 #EVENT dropInvis "<#1#> Drop Invis#*#"
 SUB EVENT_dropInvis(line, ChatSender)
@@ -514,10 +497,10 @@ SUB EVENT_LoadSpells(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_LoadSpells -|
 /RETURN
 
-|------------------------------------------------------------|
-|- Checks for specified buffs and debuffs on NetBots.		    -|
-|- Use, /bc Check buff Name.	                              -|
-|------------------------------------------------------------|
+|--------------------------------------------------------|
+|- Checks for specified buffs and debuffs on NetBots.		-|
+|- Use, /bc Check buff Name.	                          -|
+|--------------------------------------------------------|
 #EVENT CheckBuffs "<#1#> Check buff #2#"
 SUB EVENT_CheckBuffs(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_CheckBuffs ==>
@@ -530,7 +513,8 @@ SUB EVENT_CheckBuffs(line, ChatSender, eventParams)
 
 |--------------------------------------------------------|
 |- Searches inventory, and banks, for indicated items.	-|
-|- Use, /bc Find 'Name', or, /echo Find 'Name'.			    -|
+|- Use, /bc Find 'Name', /echo Find 'Name'.			        -|
+|- Accepts item links as 'Name'                         -|
 |--------------------------------------------------------|
 #EVENT FindItems "<#1#> Find Item #2#"
 SUB EVENT_FindItems(line, ChatSender, ItemToFind)
@@ -543,7 +527,6 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
   } else {
     /varset ItemToFind ${c_eventArgData}
   }
-
   /declare i int local
   /declare e int local
   /declare itemName string local
@@ -588,9 +571,11 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
 /RETURN
 
-|--------------------------------------------------------|
-|- Use, /bc Find 'Name', or, /echo Find 'Name'.			-|
-|--------------------------------------------------------|
+|------------------------------------------------------------------|
+|- Reports which character lacks a specified item                 -|
+|- 'Name' must be the full itemname, accepts item links as 'Name' -|
+|- Use, /bc FindMissingItem 'Name', /echo FindMissingItem 'Name'	-|
+|------------------------------------------------------------------|
 #EVENT FindMissingItem "<#1#> Find Missing Item #2#"
 SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_FindItems ==>
@@ -611,9 +596,8 @@ SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
 /RETURN
 
 |------------------------------------------------------------|
-|- Checks for bots who are out of range, or out of zone.	-|
-|------------------------------------------------------------|
-|- Use, /count, or, /bc Count bots							-|
+|- Checks for bots who are out of range, or out of zone.	  -|
+|- Use, /count, or, /bc Count bots							            -|
 |------------------------------------------------------------|
 #EVENT CountBots "[#*#] Head Count"
 SUB EVENT_CountBots
@@ -676,12 +660,13 @@ SUB EVENT_CountBots
 /RETURN
 
 |----------------------------------------------------|
-|- Preforms item swaps, listed in Character_Inis.	-|
+|- Preforms item swaps, listed in Character_Inis.	  -|
 |----------------------------------------------------|
 #EVENT Swap_Items "<#*#> Swap #1#"
 #EVENT Swap_Items "[MQ2] Swap #1#"
 SUB EVENT_Swap_Items(line, IniEntry)
 /if (${Debug} || ${Debug_Basics}) /echo |- Event Swap_Items ==>
+  /if (!${checkEventArgs[${ChatSender},${line},U,${IniEntry}]}) /return
 	| If I don't have a matching Ini entry.
 	/if (!${Ini[${Character_Ini},Swap Items,${IniEntry}].Length}) {
 		/echo \ay << Swap_Items: I have no listing for [${IniEntry}]. >>
@@ -817,8 +802,7 @@ SUB check_MedBreak
 #EVENT set_AAXP "[#1#] Set AA XP #2#"
 SUB EVENT_set_AAXP(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- set_AAXP ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "U" "${eventParams}"
-  /if (${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,${eventParams}]}) /return
   /varset eventParams ${Int[${c_eventArgData}]}
   /echo Setting AA XP [${eventParams}%].
   /alternateadv ON ${eventParams}
@@ -842,12 +826,7 @@ SUB EVENT_fixCorpses
 #event Consent "#1# tells you, 'Consent #2#'"
 #event Consent "<#1#> Consent #2#"
 SUB Event_Consent(line, ChatSender, ConsentTarget)
-/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Consent ==>
-  /if (${ConsentTarget.NotEqual[${Me.CleanName}]}) {
-    |/docommand ${ChatToggle} Consenting ${ConsentTarget}
-    /consent ${ConsentTarget}
-  }
-/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Consent -|
+  /if (${ConsentTarget.NotEqual[${Me.CleanName}]}) /consent ${ConsentTarget}
 /RETURN
 
 |--------------------------------------------------------------------------------|
@@ -861,7 +840,7 @@ SUB event_gatherCorpses
 			/call TrueTarget ${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].ID}
 			/delay 2
 			/corpse
-			/delay 10 ${Target.Distance} < 20
+			/delay 1s ${Target.Distance} < 20
 		}
 	/next i
 	/squelch /target clear
@@ -874,8 +853,7 @@ SUB event_gatherCorpses
 #EVENT ClickYes	"<#1#> Click #2#"
 SUB EVENT_ClickYes(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_ClickYes ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "U" "${eventParams}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,${eventParams}]}) /return
   /declare buttonToClick string local ${If[${eventParams.Find[yes]},Yes,No]}
   /declare miscTimer timer local 100
   :clickButton
@@ -901,8 +879,7 @@ SUB EVENT_ClickYes(line, ChatSender, eventParams)
 #EVENT gate "#1# tells the group, 'Gate'"
 SUB EVENT_gate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Gate ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
   /if (!${Me.Book[gate]}) {
     /if (${FindItem[Philter of Major Translocation].ID}) {
       /docommand ${ChatToggle} Preparing to gate...
@@ -935,23 +912,21 @@ SUB EVENT_gate(line, ChatSender)
 SUB EVENT_Evacuate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Evacuate ==>
   /if (${Select[${Me.Class.ShortName},DRU,WIZ]}) {
-    /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-    /if (${c_eventArg}) {
-      /if (${Me.AltAbilityReady[Exodus]}) {
-        /delay 3
-        /docommand ${ChatToggle} Evacuating!
-        /call interrupt
-        /delay 3s !${Me.Casting.ID}
-        /casting "Exodus" alt
-      } else /if (${Me.Book[${Evac_Spell.Arg[1,/]}]}) {
-        /docommand ${ChatToggle} Evacuating!
-        /call interrupt
-        /delay 3s !${Me.Casting.ID}
-        /casting "${Evac_Spell.Arg[1,/]}" -maxtries|2
-        /delay 3s !${Me.Casting.ID}
-      } else {
-        /docommand ${ChatToggle} I am not able to Evac at this time.
-      }
+    /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
+    /if (${Me.AltAbilityReady[Exodus]}) {
+      /delay 3
+      /docommand ${ChatToggle} Evacuating!
+      /call interrupt
+      /delay 3s !${Me.Casting.ID}
+      /casting "Exodus" alt
+    } else /if (${Me.Book[${Evac_Spell.Arg[1,/]}]}) {
+      /docommand ${ChatToggle} Evacuating!
+      /call interrupt
+      /delay 3s !${Me.Casting.ID}
+      /casting "${Evac_Spell.Arg[1,/]}" -maxtries|2
+      /delay 3s !${Me.Casting.ID}
+    } else {
+      /docommand ${ChatToggle} I am not able to Evac at this time.
     }
   }
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Evacuate -|
@@ -974,8 +949,7 @@ SUB EVENT_RaidAccept
 #EVENT Invite "#1# invites you to join a group."
 SUB EVENT_Invite(line, ChatSender)
 /if (${Debug}) /echo |- EVENT_Invite ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "U"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) {
     /call interrupt
     /delay 5s !${Me.Casting.ID}
@@ -1004,9 +978,7 @@ SUB EVENT_Invite(line, ChatSender)
 #EVENT saveGroup "<#1#> Save Group #2#"
 SUB EVENT_saveGroup(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_saveGroup ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "U" "${eventParams}"
-  /if (!${c_eventArg}) /return
-
+  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
   /if (!${Select[${Group.Leader},${Me}]}) {
     /if (${Debug}) /echo I am not a group leader, skipping.
   } else {
@@ -1017,19 +989,16 @@ SUB EVENT_saveGroup(line, ChatSender, eventParams)
     /declare uniqueID int local
     /declare i int local
     /declare e int local
-
     | Set a random ID to associate with out group name.
     /for i 1 to ${NetBots.Counts}
       /if (${NetBots.Client[${i}].Equal[${Me.CleanName}]}) {
         /varset uniqueID ${i}
       }
     /next i
-
     | Check to see if existing entries need to be overwritten.
     /if (${Ini[${Group_Ini}].Find[${groupName}]}) {
       /echo Overwriting existing saved group(s)...
       /varset i 1
-
       :next_groupName
       /if (${Ini[${Group_Ini}].Arg[${i},|].Length}) {
         /if (${Ini[${Group_Ini}].Arg[${i},|].Arg[2,_].Equal[${groupName}]}) {
@@ -1103,8 +1072,7 @@ SUB EVENT_listGroups
 #EVENT groupUp "<#1#> Group #2#"
 SUB EVENT_groupUp(line, ChatSender, createGroup)
 /if (${Debug}) /echo |- EVENT_groupUp ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "U" "${createGroup}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
   /if (${c_eventArgChatSender.Equal[${Me.Name}]}) {
     /squelch /bca //raiddisband
     /squelch /bca //disband
@@ -1158,8 +1126,7 @@ SUB EVENT_groupUp(line, ChatSender, createGroup)
 #EVENT exp_group "#1# tells the group, 'ExpGroup #2#'"
 #EVENT exp_group "#1# tell your party, 'ExpGroup #2#'"
 SUB EVENT_exp_group(line, ChatSender, expToggle)
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ" "${expToggle}"
-  /if (!${c_eventArg}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${expToggle}]}) /return
 
   /if (${Select[${c_eventArgData},On,Yes,True,1]} > 0) {
     /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#" MyAbilities
@@ -1222,23 +1189,17 @@ SUB EVENT_exp_group(line, ChatSender, expToggle)
 #EVENT reportMana "<#1#> Report mana#*#"
 SUB EVENT_reportMana(line,ChatSender)
 /if (${Me.Class.CanCast}) {
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-  /if (${c_eventArg}) {
-			/if (${Me.PctMana}<100) /docommand ${ChatToggle} ${Me.PctMana}m
-	}
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
+  /if (${Me.PctMana}<100) /docommand ${ChatToggle} ${Me.PctMana}m
 }
 /RETURN
 
 |---------------------------|
 #EVENT campDesktop "<#1#> CampDesktop"
 SUB campDesktop(line,ChatSender)
-	/if (${Debug} || ${Debug_Basics}) /echo |- campDesktop ==>
-  /call checkEventArgs "${ChatSender}" "${line}" "UZ"
-	/if (${c_eventArg}) {
-		/camp desktop
-		/endmacro
-	}
-	/if (${Debug} || ${Debug_Basics}) /echo <== campDesktop -|
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${expToggle}]}) /return
+  /camp desktop
+  /endmacro
 /RETURN
 
 Sub basics_Setup

@@ -1,10 +1,9 @@
-|--------------------------------------------|
-|- e3.mac	v6.2				                      -|
-|- Originally written by Killians of PEQ.	  -|
-|- Enhanced and maintained by Creamo of PEQ.-|
-|--------------------------------------------|
-
-|default turbo, class specific turbo is loaded in e3_setup call
+|---------------------------------------------------|
+|- e3.mac	v7.0				                             -|
+|- Originally written by Killians of PEQ.	         -|
+|- Enhanced and maintained by Creamo of PEQ.       -|
+|- Thanks to Vysra for IDE,additional plugins,code -|
+|---------------------------------------------------|
 #warning
 #turbo 100
 #chat group
@@ -12,8 +11,8 @@
 #include e3 Includes\e3_Setup.inc
 
 SUB Main(modeSelect)
-  /declare Debug bool outer false
   /declare macroVersion string outer 6.2
+  /declare Debug bool outer false
   /declare IniMode string outer Ini
   /if (${Bool[${Plugin[MQ2IniExt]}]}) {
     /varset IniMode IniExt
@@ -42,7 +41,7 @@ SUB Main(modeSelect)
 		/call Background_Events
 		| If I'm not active, call mainFunctions
 		/if (!${activeTimer}) {
-      |These are functions in the e3_setup/Advanced.ini class sections... CLR Function#1=check_DivineArb
+      |These are functions in the e3_setup/Advanced.ini class sections... ex CLR Function#1=check_DivineArb
 			/for i 1 to ${mainLoop_Array.Size}
 				/if (${Bool[${mainLoop_Array[${i}]}]}) /call ${mainLoop_Array[${i}]}
 			/if (!${ActionTaken}) /next i
@@ -72,8 +71,7 @@ SUB Main(modeSelect)
 |----------------------------------------------------------------------------------------------------------------|
 |- Background events and functions that are checked even while casting or otherwise considered active.		   		-|
 |- This function is checked constantly, included events and functions should have minimal character interaction.-|
-|----------------------------------------------------------------------------------------------------------------|
-| These are functions in the e3_setup Included Setups section
+|- These are functions in the e3_setup Included Setups section
 SUB Background_Events
 	/declare i int local
 	/for i 1 to ${macroSetups.Size}
@@ -81,8 +79,9 @@ SUB Background_Events
   /next i
 /RETURN
 
-|- if e3 is started while you have not equipped, item casting will break as the item cant be found on your corpse
-|- this hook from e3.mac reloads spell arrays after the player is equipped (a level 50 with a chest = assume equipped)
+|----------------------------------------------------------------------------------------------------------------|
+|- this handles removing and readding of items from spell arrays, ie when you die
+|- criteria to reload = wearing a chest and having >=1 platinum
 SUB reloadSpellArrays
   /if (${Bool[${FindItem[=${missingSpellItem}].ID}]}) {
     /varset reloadOnLoot FALSE

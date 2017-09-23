@@ -1,6 +1,5 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Wizard.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ												-|
+| Wizard Functions
 |----------------------------------------------------------------------------|
 SUB check_Harvest
 	/if (${autoHarvest}) {
@@ -18,7 +17,7 @@ SUB check_Harvest
     }
 	}
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub WIZ_Setup
 /if (${Debug}) /echo |- WIZ_Setup ==>
 	/call iniToVarV "${Character_Ini},Wizard,Evac Spell" Evac_Spell string outer
@@ -28,7 +27,7 @@ Sub WIZ_Setup
 
 /if (${Debug}) /echo <== WIZ_Setup -|
 /return
-
+|----------------------------------------------------------------------------|
 SUB WIZ_MacroSettings
 /if (${Debug}) /echo |- WIZ_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#1" "check_Burns" 1
@@ -38,7 +37,7 @@ SUB WIZ_MacroSettings
 	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#5" "check_Harvest" 1
 /if (${Debug}) /echo <== WIZ_MacroSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB WIZ_CharacterSettings
 /if (${Debug}) /echo |- WIZ_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},Wizard,Evac Spell"
@@ -46,10 +45,10 @@ SUB WIZ_CharacterSettings
 	/call WriteToIni "${Character_Ini},Wizard,Harvest"
 /if (${Debug}) /echo <== WIZ_CharacterSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub WIZ_Aliases
 /return
-
+|----------------------------------------------------------------------------|
 Sub WIZ_Background_Events
 	/if (${Me.Pet.ID} && ${Me.Pet.Race.Name.NotEqual[Gnomework]} && ${MacroQuest.Server.Equal[PEQTGC]}) /pet get lost
 /return

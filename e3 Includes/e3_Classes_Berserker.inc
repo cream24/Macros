@@ -1,12 +1,15 @@
+|----------------------------------------------------------------------------|
+| Berserker Functions
+|----------------------------------------------------------------------------|
 SUB BER_Setup
   /call IniToArrayV "${Character_Ini},${Me.Class},Axe Ability#" axeAbility
   /if (${axeAbility.Size}) /call BuildSpellArray "axeAbility"	"axeAbility2D"
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB BER_Background_Events
   /if (!${Cursor.ID} && ${Me.CombatState.NotEqual[COMBAT]} && !${combatTimer} && !${ActionTaken} && !${activeTimer} && ${axeAbility2D.Size[1]}) /call CheckAxes
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB CheckAxes
   /declare i int local
   /for i 1 to ${axeAbility2D.Size[1]}
@@ -23,17 +26,17 @@ SUB CheckAxes
     }
   /if (!${ActionTaken}) /next i
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB BER_MacroSettings
 /if (${Debug}) /echo |- BER_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},BER Functions,BER Function#1" "check_Burns" 1
 	/call WriteToIni "${advSettings_Ini},BER Functions,BER Function#2" "check_Buffs" 1
 /if (${Debug}) /echo <== BER_MacroSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB BER_CharacterSettings
 	/call WriteToIni "${Character_Ini},${Me.Class},Axe Ability" "Axe of the Destroyer/Reagent|Balanced Axe Components/CheckFor|20"
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub BER_Aliases
 /RETURN
