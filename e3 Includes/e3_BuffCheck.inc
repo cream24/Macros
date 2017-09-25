@@ -203,7 +203,7 @@ SUB event_castGroupBuffs(line, ChatSender)
   /if (!${Defined[GroupBuffs2D]}) /return
   /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
   | -------------------Find buffTarget------------------- |
-  /declare buffTarget string local ${line.Right[-${Math.Calc[${line.Find[buff]}+4]}].Left[-1]}
+  /declare buffTarget string local ${line.Right[-${Math.Calc[${line.Find[buff]}+4]}]}
   /if (${Int[${buffTarget}]}) {
     /varset buffTarget ${Spawn[id ${buffTarget}].ID}
   } else /if (${buffTarget.Equal[me]}) {
@@ -224,7 +224,7 @@ SUB event_castGroupBuffs(line, ChatSender)
   :verifyCast
   /if (${s} <= ${GroupBuffs2D.Size[1]}) {
     /if (${Debug} || ${Debug_BuffCheck}) /echo ${s} ${GroupBuffs2D[${s},${iCastName}]} ${GroupBuffs2D.Size[1]}
-    /if (${check_Distance[${buffTargetID},${GroupBuffs2D[${s},${iMyRange}]}]}) {
+    /if (${check_Distance[${buffTarget},${GroupBuffs2D[${s},${iMyRange}]}]}) {
       /if (${check_Mana["GroupBuffs2D",${s}]}) {
         /if (${buffAttempts} <= ${GroupBuffs2D[${s},${iMaxTries}]}) {
           /call e3_Cast ${buffTarget} "GroupBuffs2D" "${s}"
@@ -234,7 +234,7 @@ SUB event_castGroupBuffs(line, ChatSender)
       } else /if (${Debug} || ${Debug_BuffCheck}) /echo failed mana
     } else /if (${Debug} || ${Debug_BuffCheck}) /echo failed dist
   }
-  /if (${GroupBuffs2D.Size[1]}) /docommand ${ChatToggle} Done buffing ${Spawn[id ${buffTargetID}].CleanName}.
+  /if (${GroupBuffs2D.Size[1]}) /docommand ${ChatToggle} Done buffing ${Spawn[id ${buffTarget}].CleanName}.
 /if (${Debug} || ${Debug_BuffCheck}) /echo <== castGroupBuffs -|
 /RETURN
 

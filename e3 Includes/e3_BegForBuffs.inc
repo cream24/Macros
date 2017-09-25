@@ -28,6 +28,8 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
   |/gu ${ChatChannel},${ChatSender},${ChatText},${whatToCast}
   | If I found something to cast.
   /if (${Bool[${whatToCast}]}) {
+    /if (${Defined[begBuffArray]}) /deletevar begBuffArray
+    /if (${Defined[begBuffArray2D]}) /deletevar begBuffArray2D
     /declare begBuffArray[1] string outer ${whatToCast}
     /call BuildSpellArray "begBuffArray" "begBuffArray2D"
     /call checkEventArgs ${ChatSender} "" "" ${whatToCast}
@@ -67,7 +69,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
       /return
     }
     | Dont cast these
-    /if (${ChatText.Find[Gate]} || ${ChatText.Find[Evacuate]} || ${ChatText.Find[portal]} || ${ChatText.Find[Relocation]} || ${ChatText.Find[Succor]} || ${ChatText.Find[Circle of]} || ${ChatText.Find[Ring of]} || ${ChatText.Find[Wind of]}) {
+    /if (!${NetBots[${ChatSender}].ID} && (${ChatText.Find[Gate]} || ${ChatText.Find[Evacuate]} || ${ChatText.Find[portal]} || ${ChatText.Find[Relocation]} || ${ChatText.Find[Succor]} || ${ChatText.Find[Circle of]} || ${ChatText.Find[Ring of]} || ${ChatText.Find[Wind of]})) {
       /if (${ChatChannel.Equal[TELL]}) {
         /tell ${ChatSender} Do not request ${whatToCast} via beg for buffs chat
       } else {
@@ -122,7 +124,10 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
       /g ${whatToCast} inc...
     }
     /call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
-    /if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) /goto :retryCast
+    /if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
+      /goto :retryCast
+      /bc retrying cast ${castReturn}, ${whatToCast}
+    }
   }
 /RETURN
 

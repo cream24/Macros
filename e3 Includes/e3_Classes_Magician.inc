@@ -32,15 +32,17 @@ sub event_petWeapons(line, ChatSender)
     /declare p int local
     |if distribute, give to everyone, else just give to the single chatsender
     /for p 1 to ${SpawnCount[pcpet radius 100]}
-      |/echo ${p} ${NearestSpawn[${p},pcpet]} ${NearestSpawn[${p},pcpet].Name} ${NearestSpawn[${p},pcpet].Master} ${c_eventArgChatSender}
-      |/echo los ${NearestSpawn[${p},pcpet].LineOfSight} d ${Bool[${line.Find[Distribute]}]}
-      /if (${NearestSpawn[${p},pcpet].LineOfSight}) {
-        /if (!${singlePet}) {
-          /call BuildArray petIDArray ${NearestSpawn[${p},pcpet].ID}
-          |/echo all added ${NearestSpawn[${p},pcpet].Name}-${NearestSpawn[${p},pcpet].Master} ${petIDArray.Size}
-        } else /if (${NearestSpawn[${p},pcpet].Master.CleanName.Equal[${c_eventArgChatSender}]}) {
-          /call BuildArray petIDArray ${NearestSpawn[${p},pcpet].ID}
-          |/echo you added ${NearestSpawn[${p},pcpet].Name}-${NearestSpawn[${p},pcpet].Master} ${petIDArray.Size}
+      /if (!${NearestSpawn[${p},pcpet].Name.Find[familiar]}) {
+        |/echo ${p} ${NearestSpawn[${p},pcpet]} ${NearestSpawn[${p},pcpet].Name} ${NearestSpawn[${p},pcpet].Master} ${c_eventArgChatSender}
+        |/echo los ${NearestSpawn[${p},pcpet].LineOfSight} d ${Bool[${line.Find[Distribute]}]}
+        /if (${NearestSpawn[${p},pcpet].LineOfSight}) {
+          /if (!${singlePet}) {
+            /call BuildArray petIDArray ${NearestSpawn[${p},pcpet].ID}
+            |/echo all added ${NearestSpawn[${p},pcpet].Name}-${NearestSpawn[${p},pcpet].Master} ${petIDArray.Size}
+          } else /if (${NearestSpawn[${p},pcpet].Master.CleanName.Equal[${c_eventArgChatSender}]}) {
+            /call BuildArray petIDArray ${NearestSpawn[${p},pcpet].ID}
+            |/echo you added ${NearestSpawn[${p},pcpet].Name}-${NearestSpawn[${p},pcpet].Master} ${petIDArray.Size}
+          }
         }
       }
     /next p
@@ -126,6 +128,7 @@ SUB give_PetsWeapons(autoWeap)
 |----------------------------------------------------------------------------|
 SUB check_SummonItems
 /if (${Debug} || ${Debug_MAG}) /echo |- check_SummonItems ==>
+/if (!${Me.CombatState.Equal[COMBAT]}) {
   /if (${summonMoltenOrb}) {
     /if (!${Me.Moving} && !${combatTimer} && !${activeTimer} && !${rebuffTimer}) {
         /if (!${FindItemCount[=Molten Orb]}) {
@@ -153,7 +156,7 @@ SUB check_SummonItems
         /varset masterName ${NearestSpawn[${p},pcpet].Master}
         /varset petName ${NearestSpawn[${p},pcpet].CleanName}
         /varset petID ${NearestSpawn[${p},pcpet].ID}
-        /if (!${Bool[${petName}]} || !${Bool[${masterName}]}) /return
+        /if (!${Bool[${petName}]} || !${Bool[${masterName}]} || ${petName.Find[familiar]}) /return
         /if (${NetBots[${masterName}].ID}) {
           /if (${Spawn[id ${petID}].LineOfSight}) {
             /if (${petName.Equal[${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Auto-Pet Weapons-${masterName}]}]}) {
@@ -169,6 +172,7 @@ SUB check_SummonItems
       }
 	  }
 	}
+}
 /if (${Debug} || ${Debug_MAG}) /echo <== check_SummonItems -|
 /RETURN
 |----------------------------------------------------------------------------|

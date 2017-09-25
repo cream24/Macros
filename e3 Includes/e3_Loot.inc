@@ -83,13 +83,10 @@ SUB loot_Area
       /if (${Debug} || ${Debug_Loot}) /echo Cant Target ${ClosestCorpse}
       /goto :skipCorpse
     }
-    /if (${Target.Distance}>12 && ${Target.DistanceZ} < 20) {
-      /if (${Debug} || ${Debug_Loot}) /echo Moving to ${Target.ID} dist d ${Target.Distance} z ${Target.DistanceZ}
-      /moveto ID ${Target.ID}
-      /delay 2s ${MoveTo.Stopped} && !${Me.Moving}
-      /moveto off
+    /if (${Target.Distance}>12 && ${Target.DistanceZ} < 80) {
+      /call MoveToLoc ${Target.Y} ${Target.X} 12 20
     }
-    /if (${Target.Distance}<=12 && ${Target.DistanceZ} < 15) {
+    /if (${Target.Distance}<=12 && ${Target.DistanceZ} < 30) {
       /call lootCorpse
     } else {
       /echo Corpse ${ClosestCorpse} is > 12 distance, skipping
@@ -109,15 +106,15 @@ SUB loot_Area
   /if (${Debug} || ${Debug_Loot}) /echo <== loot_Area -|
 /return
 
-
+|-------------------------------------------------------------------------------------------------
 SUB lootCorpse
-  /if (${Debug} || ${Debug_Loot}) /echo Looting ${Target.ID}-${Target.Name}
   /declare i int local
   /varset canLootCorpse TRUE
   /loot
   /delay 5 ${Window[LootWnd].Open}
   /doevents NotYourKill
   /delay 1s ${Corpse.Items} || !${canLootCorpse}
+  /if (${Debug} || ${Debug_Loot}) /echo Looting ${Target.ID}-Items:${Corpse.Items}
   /if (!${canLootCorpse}) {
     /if (${Debug} || ${Debug_Loot}) /echo Not your kill
     /goto :skipLoot
@@ -165,7 +162,7 @@ SUB lootCorpse
         }
         /echo [Loot]: Looting [${Corpse.Item[${i}].Name}]
         /call loot_Handle ${i} keep
-        /delay 2
+        /delay 1
       }
       :skipItem
     }
@@ -187,7 +184,7 @@ SUB lootCorpse
 
 |--------------------------------------------------------------------------|
 SUB get_lootSetting(invSlot, itemSlot)
-/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot} ==>
+|/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot} ==>
 	/declare itemName string local
 	/declare itemValue string local
 	/declare iniEntryVariables string local
@@ -235,7 +232,7 @@ SUB get_lootSetting(invSlot, itemSlot)
 	}
 	/varset lootSetting ${Ini[${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}]}
 
-	/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting -| ${itemName},${lootSetting}
+	/if (${Debug} || ${Debug_Loot}) /echo [get_lootSetting] ${itemName},${lootSetting},invSlot:${invSlot},${itemSlot}
 /RETURN
 
 |--------------------------------------------------------------------|

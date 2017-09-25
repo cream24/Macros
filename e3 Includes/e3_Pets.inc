@@ -118,11 +118,11 @@ SUB buffPet
         /if (${check_Mana["petBuffs2D",${s}]}) {
           /if (${petBuffs2D[${s},${iSpellName}].NotEqual[Growl of the Panther]} || !${Bool[${Me.Song[Growl of the Panther]}]}) {
             /call e3_Cast ${Me.Pet.ID} "petBuffs2D" ${s}
-            |/delay 5 ${Target.BuffsPopulated}
-            |/if (${castReturn.Equal[CAST_SUCCESS]} && ${Me.Pet.ID} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}) {
-            |  /call CreateTimer "nht${petBuffs2D[${s},${iCastID}]}" "${noHoldDelay}"
-            |  /if (${Debug} || ${Debug_Pets}) /bc [+y+] ${Time} ${petBuffs2D[${s},${iSpellName}]} not on Pet, creating NHT
-            |}
+            /delay 5 ${Target.BuffsPopulated}
+            /if (${castReturn.Equal[CAST_SUCCESS]} && !${Bool[${Me.PetBuff[${petBuffs2D[${s},${iSpellName}]}]}]}) {
+              /call CreateTimer "nht${petBuffs2D[${s},${iCastID}]}" "${noHoldDelay}"
+              /if (${Debug} || ${Debug_Pets}) /bc [+y+] ${Time} ${petBuffs2D[${s},${iSpellName}]} not on Pet, creating NHT
+            }
           }
         }
       }

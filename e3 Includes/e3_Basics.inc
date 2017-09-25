@@ -666,7 +666,6 @@ SUB EVENT_CountBots
 #EVENT Swap_Items "[MQ2] Swap #1#"
 SUB EVENT_Swap_Items(line, IniEntry)
 /if (${Debug} || ${Debug_Basics}) /echo |- Event Swap_Items ==>
-  /if (!${checkEventArgs[${ChatSender},${line},U,${IniEntry}]}) /return
 	| If I don't have a matching Ini entry.
 	/if (!${Ini[${Character_Ini},Swap Items,${IniEntry}].Length}) {
 		/echo \ay << Swap_Items: I have no listing for [${IniEntry}]. >>
@@ -1072,7 +1071,7 @@ SUB EVENT_listGroups
 #EVENT groupUp "<#1#> Group #2#"
 SUB EVENT_groupUp(line, ChatSender, createGroup)
 /if (${Debug}) /echo |- EVENT_groupUp ==>
-  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,${createGroup}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me.Name}]}) {
     /squelch /bca //raiddisband
     /squelch /bca //disband

@@ -89,7 +89,7 @@ SUB event_Assist(line, ChatSender, int MobID)
 SUB Event_BackOff(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- Event_BackOff ==>
   /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
-  /if (${Assisting} && ${AllowControl}) /docommand ${ChatToggle} Backing off.
+  /if (${c_eventArgChatSender.Equal[${Me}]}) /docommand ${ChatToggle} Backing off.
   /varset PauseTarget ${Target.ID}
   /call AssistOff
 /if (${Debug} || ${Debug_Assists}) /echo <== Event_BackOff -|
@@ -103,7 +103,7 @@ SUB AssistOff
   /if (${Me.Casting.ID} && !${Spell[${Me.Casting}].SpellType.Find[beneficial]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
   /if (${Me.Combat})    /attack off
   /if (${Me.AutoFire})  /autofire off
-  /if (${Me.Pet.ID})    /pet back off
+  /if (${Me.Pet.ID}) /squelch /pet back off
   /delay 5 !${Me.Combat} && !${Me.AutoFire}
 
 	/varset Assisting FALSE
@@ -120,7 +120,6 @@ SUB AssistOff
 	/if (${use_EPICBurns})           /varset use_EPICBurns FALSE
 
   /if (${Defined[${resistCount}]}) /deletevar ${resistCount}
-	|/varset use_TargetAE FALSE /varset use_PBAE FALSE
 	/if (${Following}) /call AquireFollow
 
 /if (${Debug} || ${Debug_Assists}) /echo |- AssistOff -| <== [${Assisting}] || AssistTarget: [${AssistTarget}]
@@ -342,73 +341,98 @@ SUB check_Nukes
 	  /declare castIndex int local
 	  /declare s int local
     /declare m int local
+    /declare assistToT int local
 
    /for s 1 to ${Nukes2D.Size[1]}
     /varset castIndex ${s}
     /if (${Debug} || ${Debug_Assists}) /echo ${s} ${castIndex} ${Nukes2D[${castIndex},${iCastName}]}
 
-    | skip casting if a delay is defined and active
-    /if (${Defined[castDelay${Nukes2D[${castIndex},${iCastID}]}]}) {
-      /if (${castDelay${Nukes2D[${castIndex},${iCastID}]}}) {
-        /if (${Debug} || ${Debug_Assists}) /echo skipping nukes, /delay from previous cast
-        /return
+    |allows use of druid/mage DS, etc, in nukes based on spellset. casts on assistTargets target
+    /if (${Nukes2D[${castIndex},${iSpellType}].Find[Beneficial]}) {
+      /if (${Target.ID} != ${AssistTarget}) /call TrueTarget ${AssistTarget}
+      /if (${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}) {
+        /if (${Spawn[pc ${Me.TargetOfTarget}].ID}) {
+          /varset assistToT ${Me.TargetOfTarget.ID}
+          /call check_Ready "Nukes2D" ${castIndex}
+          /if (${c_Ready}) {
+            /if (${check_Mana["Nukes2D",${castIndex}]}) {
+              /if (${check_Distance[${assistToT},${Nukes2D[${s},${iMyRange}]}]}) {
+                /call e3_Cast ${assistToT} "Nukes2D" "${castIndex}"
+              }
+            }
+          }
+        }
       }
-    }
-    |if im burning and /noburn is set, skip the spell
-    |if noburn and rotate is defined, then skip this spell and set lastSuccessfulCast to this spell, so the next spell can be used
-    /if ((${use_QUICKBurns} || ${use_LONGBurns} || ${use_FULLBurns}) && ${Nukes2D[${castIndex},${iNoBurn}]}) {
-      /if (${Nukes2D[${castIndex},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
-        /if (${Debug} || ${Debug_Assists}) /echo setting lastSuccessfulCast to ${lastSuccessfulCast} because noburn and rotate defined
-        /varset lastSuccessfulCast ${Nukes2D[${castIndex},${iCastName}]}
-      } else {
-        /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
+    } else {
+      | skip casting if a delay is defined and active
+      /if (${Defined[castDelay${Nukes2D[${castIndex},${iCastID}]}]}) {
+        /if (${castDelay${Nukes2D[${castIndex},${iCastID}]}}) {
+          /if (${Debug} || ${Debug_Assists}) /echo skipping nukes, /delay from previous cast
+          /return
+        }
+      }
+      |if im burning and /noburn is set, skip the spell
+      |if noburn and rotate is defined, then skip this spell and set lastSuccessfulCast to this spell, so the next spell can be used
+      /if ((${use_QUICKBurns} || ${use_LONGBurns} || ${use_FULLBurns}) && ${Nukes2D[${castIndex},${iNoBurn}]}) {
+        /if (${Nukes2D[${castIndex},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
+          /if (${Debug} || ${Debug_Assists}) /echo setting lastSuccessfulCast to ${lastSuccessfulCast} because noburn and rotate defined
+          /varset lastSuccessfulCast ${Nukes2D[${castIndex},${iCastName}]}
+        } else {
+          /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i am burning and /NoBurn is set
+          /goto :skipCast
+        }
+      }
+      | if /rotate is defined, and the current array index was the last successful cast, skip to next index
+      /if (${Nukes2D[${castIndex},${iCastName}].Equal[${lastSuccessfulCast}]} && ${Nukes2D[${castIndex},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
+        /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]} /rotate is defined
         /goto :skipCast
       }
-    }
-    | if /rotate is defined, and the current array index was the last successful cast, skip to next index
-    /if (${Nukes2D[${castIndex},${iCastName}].Equal[${lastSuccessfulCast}]} && ${Nukes2D[${castIndex},${iRotate}]} && ${Nukes2D.Size[1]} > 1) {
-      /if (${Debug} || ${Debug_Assists}) /echo skipping cast of ${Nukes2D[${castIndex},${iCastName}]} /rotate is defined
-      /goto :skipCast
-    }
-    | if i have Gift Of Mana find a spell with /GoM
-    /if (${Bool[${Me.Song[Gift of Mana].ID}]}) {
-      /for m 1 to ${Nukes2D.Size[1]}
-        /if (${Nukes2D[${m},${iGiftOfMana}]}) {
-          /varset castIndex ${m}
-          /varset lastSuccessfulCast 0
-        }
-      /next m
-    }
-    |if i have aggro and /noaggro is set, skip the spell
-    /if (${Nukes2D[${castIndex},${iNoAggro}]} && ${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have aggro and /noaggro is set
-      /goto :skipCast
-    }
-    |only cast if my aggro is greater than PctAggro and the target is a Named
-    /if (${Nukes2D[${castIndex},${iPctAggro}]} > 0 && (${Me.PctAggro} < ${Nukes2D[${castIndex},${iPctAggro}]} || !${Target.Named})) {
-      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, my aggro ${Me.PctAggro} is < PctAggro ${Nukes2D[${castIndex},${iPctAggro}]}
-      /if (${Debug} || ${Debug_Assists}) /echo ${Nukes2D[${castIndex},${iPctAggro}]} ${Me.PctAggro} < ${Nukes2D[${castIndex},${iPctAggro}]} !${Target.Named}
-      /goto :skipCast
-    }
-
-    | if i have spell damage reduction recourse and the mob has more than 25% health or i have < 10% mana, skip cast.  cast anyway if i have GoM to avoid losing it
-    /if ((${Me.Buff[Weave of Weakness].ID} || ${Me.Buff[Flames of Weakness].ID}) && (${Target.PctHPs} > 25 || ${Me.PctMana} < 10) && !${Bool[${Me.Song[Gift of Mana].ID}]} && !(${use_QUICKBurns} || ${use_LONGBurns} || ${use_FULLBurns})) {
-      /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have spell damage reduction
-      /goto :skipCast
-    }
-
-    /call check_Ready "Nukes2D" ${castIndex}
-    /if (${c_Ready}) {
-      /if (${check_Mana["Nukes2D",${castIndex}]}) {
-        /if (${check_Distance[${AssistTarget},${Nukes2D[${s},${iMyRange}]}]}) {
-          /call e3_Cast ${AssistTarget} "Nukes2D" "${castIndex}"
+      | if i have Gift Of Mana find a spell with /GoM
+      /if (${Bool[${Me.Song[Gift of Mana].ID}]}) {
+        /for m 1 to ${Nukes2D.Size[1]}
+          /if (${Nukes2D[${m},${iGiftOfMana}]}) {
+            /varset castIndex ${m}
+            /varset lastSuccessfulCast 0
+          }
+        /next m
+      }
+      |if i have aggro and /noaggro is set, skip the spell
+      /if (${Nukes2D[${castIndex},${iNoAggro}]}) {
+        /if (${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]}) {
+          /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have aggro and /noaggro is set
+          /goto :skipCast
         }
       }
-    }
-    |if the nuke was succesful, see if there is a delay defined and create a timer which locks out all nukes for the duration
-    /if (${Bool[${Nukes2D[${castIndex},${iDelay}]}]} && ${Select[${castReturn},CAST_SUCCESS]}) {
-      /if (${Debug} || ${Debug_Assists}) /echo delaying ${Nukes2D[${castIndex},${iCastName}]} for ${Nukes2D[${castIndex},${iDelay}]}
-      /call CreateTimer "castDelay${Nukes2D[${castIndex},${iCastID}]}" "${Nukes2D[${castIndex},${iDelay}]}"
+      |only cast if my aggro is greater than PctAggro and the target is a Named
+      /if (${Nukes2D[${castIndex},${iPctAggro}]} > 0) {
+        /if (${Me.PctAggro} < ${Nukes2D[${castIndex},${iPctAggro}]} || !${Target.Named}) {
+          /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, my aggro ${Me.PctAggro} is < PctAggro ${Nukes2D[${castIndex},${iPctAggro}]}
+          /if (${Debug} || ${Debug_Assists}) /echo ${Nukes2D[${castIndex},${iPctAggro}]} ${Me.PctAggro} < ${Nukes2D[${castIndex},${iPctAggro}]} !${Target.Named}
+          /goto :skipCast
+        }
+      }
+
+      | if i have spell damage reduction recourse and the mob has more than 25% health or i have < 10% mana, skip cast.  cast anyway if i have GoM to avoid losing it
+      /if (${Me.Buff[Weave of Weakness].ID} || ${Me.Buff[Flames of Weakness].ID}) {
+        /if ((${Target.PctHPs} > 25 || ${Me.PctMana} < 10) && !${Bool[${Me.Song[Gift of Mana].ID}]} && !${use_QUICKBurns} && !${use_LONGBurns} && !${use_FULLBurns}) {
+          /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, i have spell damage reduction
+          /goto :skipCast
+        }
+      }
+
+      /call check_Ready "Nukes2D" ${castIndex}
+      /if (${c_Ready}) {
+        /if (${check_Mana["Nukes2D",${castIndex}]}) {
+          /if (${check_Distance[${AssistTarget},${Nukes2D[${s},${iMyRange}]}]}) {
+            /call e3_Cast ${AssistTarget} "Nukes2D" "${castIndex}"
+          }
+        }
+      }
+      |if the nuke was succesful, see if there is a delay defined and create a timer which locks out all nukes for the duration
+      /if (${Bool[${Nukes2D[${castIndex},${iDelay}]}]} && ${Select[${castReturn},CAST_SUCCESS]}) {
+        /if (${Debug} || ${Debug_Assists}) /echo delaying ${Nukes2D[${castIndex},${iCastName}]} for ${Nukes2D[${castIndex},${iDelay}]}
+        /call CreateTimer "castDelay${Nukes2D[${castIndex},${iCastID}]}" "${Nukes2D[${castIndex},${iDelay}]}"
+      }
     }
 	:skipCast
     /if (!${ActionTaken}) /next s
@@ -903,6 +927,7 @@ SUB event_Burns(line, ChatSender, burnType)
   /if (!${Defined[${burnType}Burns2D]}) {
     /return
   } else {
+    /if (${c_eventArgChatSender.Equal[${Me}]}) /bc [+g+] ${burnType} burns enabled
     /varset use_${burnType}Burns TRUE
   }
 /return

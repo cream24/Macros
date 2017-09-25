@@ -376,7 +376,7 @@ Sub check_GCD
 Sub check_Distance(int targetID, int myRange)
 	/declare c_Dist bool local FALSE
 	/if (${Bool[${Spawn[id ${targetID}].Type.NotEqual[Corpse]}]}) {
-	  /if (${Spawn[id ${targetID}].Distance} <= ${myRange}) /varset c_Dist TRUE
+	  /if (${myRange}==0 || ${Spawn[id ${targetID}].Distance} <= ${myRange}) /varset c_Dist TRUE
   }
 /RETURN ${c_Dist}
 

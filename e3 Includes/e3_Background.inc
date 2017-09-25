@@ -355,7 +355,7 @@ Sub background_Setup
 	/declare spamTimer timer outer
 	/declare activeTimer timer outer
 	/declare combatTimer timer outer
-	/declare combatDelay int outer 5s
+	/declare combatDelay int outer 3s
 	/declare cursorTimer timer outer
 	/declare Old_cursorID int outer 0
 	/declare rebuffTimer timer outer

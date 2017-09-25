@@ -309,8 +309,7 @@ SUB check_Plugins
 	/if (${Bool[${EQBC}]}) {
 		/if (!${EQBC.Connected}) {
 			/bccmd connect
-			/delay 100 ${EQBC.Connected}
-			/delay 5
+			/delay 5s ${EQBC.Connected}
 			/if (!${EQBC.Connected}) /echo ***WARNING*** Could not connect to EQBCS! Please open EQBCS and try again.  Macro functionality may be limited...
 		}
 	|Check MQ2NetBots.
