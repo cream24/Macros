@@ -6,12 +6,10 @@
 |---------------------------------------------------|
 #warning
 #turbo 100
-#chat group
-#chat tell
 #include e3 Includes\e3_Setup.inc
 
 SUB Main(modeSelect)
-  /declare macroVersion string outer 6.2
+  /declare macroVersion string outer 7.0
   /declare Debug bool outer false
   /declare IniMode string outer Ini
   /if (${Bool[${Plugin[MQ2IniExt]}]}) {

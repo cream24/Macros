@@ -40,7 +40,7 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
         /if (${Assisting} || ${Me.Combat}) /call AssistOff
           /varset Following TRUE
           /varset rebuffTimer 25
-          /call AquireFollow
+          /call AcquireFollow
       }
     }
   }
@@ -52,8 +52,8 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
 |----------------------------------------------------------------------------------------------------|
 |- Uses NetAdvPath if the follow target is one of your bots, or MoveUtils, if its someone elses.	-|		
 |----------------------------------------------------------------------------------------------------|
-SUB AquireFollow
-/if (${Debug} || ${Debug_Basics}) /echo |- AquireFollow ==>
+SUB AcquireFollow
+/if (${Debug} || ${Debug_Basics}) /echo |- AcquireFollow ==>
 		/if (${SpawnCount[=${FollowTarget} radius ${MaxResponseDist}]}) {
 			/if (${FollowTarget.NotEqual[${Me.CleanName}]}) {
 				/if (${Stick.Active}) /squelch /stick off
@@ -83,7 +83,7 @@ SUB AquireFollow
 				/varset FollowCheckTimer 20+${Math.Calc[${Math.Rand[${NetBots.Counts}]}/2]}
 			}
 		}
-/if (${Debug} || ${Debug_Basics}) /echo <== AquireFollow -|
+/if (${Debug} || ${Debug_Basics}) /echo <== AcquireFollow -|
 /RETURN
 
 |----------------------------------------------------------------------------|
@@ -697,17 +697,14 @@ SUB EVENT_Swap_Items(line, IniEntry)
 			/if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].Type.Left[2].Equal[2H]} && ${Bool[${InvSlot[Offhand].Item}]}) {
 			  /unequip Offhand
 			  /delay 2
-			  /call PlaceInFirstFreeSlot
       }
       /if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].ItemSlot}==14) {
         /unequip Offhand
         /delay 2
-        /call PlaceInFirstFreeSlot
       }
       /if (${slotToSwap.Equal[Offhand]} && ${FindItem[${itemToSwap}].ItemSlot}==13) {
         /unequip Mainhand
         /delay 2
-        /call PlaceInFirstFreeSlot
       }
 			| Swap in item.
       |/if (${Debug} || ${Debug_Basics})
@@ -1297,7 +1294,7 @@ Sub basics_Background_Events
 /return
 
 SUB basics_MacroSettings
-/if (${Debug} || ${Debug_Basics}) /echo |- basics_MacroSettings ==>
+/if (${Debug}) /echo |- basics_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Basics (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},General,Max Response Distance" 500
 	/call WriteToIni "${genSettings_Ini},General,Leash Length" 250
@@ -1309,16 +1306,14 @@ SUB basics_MacroSettings
 	/call WriteToIni "${genSettings_Ini},ExpGroup,KS_WeaponSet" Main
 	/call WriteToIni "${genSettings_Ini},ExpGroup,KS_SpellSet" Exp
 
-/if (${Debug} || ${Debug_Basics}) /echo <== basics_MacroSettings -|
+/if (${Debug}) /echo <== basics_MacroSettings -|
 /RETURN
 
 SUB basics_CharacterSettings
-/if (${Debug} || ${Debug_Basics}) /echo |- basics_CharacterSettings ==>
-/if (${Debug} || ${Debug_Basics}) /echo <== basics_CharacterSettings -|
 /RETURN
 
 Sub basics_Aliases
-/if (${Debug} || ${Debug_Basics}) /echo |- basics_Aliases ==>
+/if (${Debug}) /echo |- basics_Aliases ==>
 	/noparse /squelch /alias /followon /bc Follow ${Me.CleanName}
 	/noparse /squelch /alias /followme /bc Follow ${Me.CleanName}
 	/noparse /squelch /alias /followit /bc Follow ${Target.CleanName}
@@ -1372,5 +1367,5 @@ Sub basics_Aliases
 	/squelch /alias /ResetCorpses /bc Fix Corpses
 	/squelch /alias /gathercorpses /echo Gather Corpses
 	/squelch /alias /mana /bc Report Mana
-/if (${Debug} || ${Debug_Basics}) /echo <== basics_Aliases -|
+/if (${Debug}) /echo <== basics_Aliases -|
 /return

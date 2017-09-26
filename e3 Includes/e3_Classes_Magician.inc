@@ -245,7 +245,7 @@ SUB MAG_Setup
 /RETURN
 |----------------------------------------------------------------------------|
 SUB MAG_MacroSettings
-/if (${Debug} || ${Debug_MAG}) /echo |- MAG_MacroSettings ==>
+/if (${Debug}) /echo |- MAG_MacroSettings ==>
   /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#1" "check_CoH" 1
 	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#2" "check_Buffs" 1
   /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#3" "check_Burns" 1
@@ -254,21 +254,21 @@ SUB MAG_MacroSettings
 	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#6" "check_Ae" 1
 	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#7" "check_Nukes" 1
 	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#8" "check_SummonItems" 1
-/if (${Debug} || ${Debug_MAG}) /echo <== MAG_MacroSettings -|
+/if (${Debug}) /echo <== MAG_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|
 SUB MAG_CharacterSettings
-/if (${Debug} || ${Debug_MAG}) /echo |- MAG_CharacterSettings ==>
+/if (${Debug}) /echo |- MAG_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},Magician,Auto-Pet Weapons (On/Off)"
 	/call WriteToIni "${Character_Ini},Magician,Summoned Pet Item"
-/if (${Debug} || ${Debug_MAG}) /echo <== MAG_CharacterSettings -|
+/if (${Debug}) /echo <== MAG_CharacterSettings -|
 /RETURN
 |----------------------------------------------------------------------------|
 SUB MAG_Aliases
-/if (${Debug} || ${Debug_MAG}) /echo |- MAG_Aliases ==>
+/if (${Debug}) /echo |- MAG_Aliases ==>
 	/squelch /alias /dpw /bc Distribute Pet Weapons
 	/squelch /alias /PetWeapons /bc Distribute Pet Weapons
-/if (${Debug} || ${Debug_MAG}) /echo <== MAG_Aliases -|
+/if (${Debug}) /echo <== MAG_Aliases -|
 /RETURN
 |----------------------------------------------------------------------------|
 SUB MAG_Background_Events

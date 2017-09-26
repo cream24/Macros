@@ -394,7 +394,7 @@ SUB buffCheck_CharacterSettings
 /RETURN
 
 Sub buffCheck_Aliases
-/if (${Debug} || ${Debug_BuffCheck}) /echo |- buffCheck_Aliases ==>
+/if (${Debug}) /echo |- buffCheck_Aliases ==>
 	/squelch /alias /Buff /bc Buff me
 	/squelch /alias /BuffMe /bc Buff me
 	/squelch /alias /Buffs /bc Buff me
@@ -404,7 +404,7 @@ Sub buffCheck_Aliases
 	/squelch /alias /BuffGroups /bc Buff All
 	/noparse /squelch /alias /BuffPet /bc Buff ${Spawn[pet ${Spawn[id ${Target.ID}].Pet}].ID}
 	/squelch /alias /BuffCheck /bc Toggle Buffs
-/if (${Debug} || ${Debug_BuffCheck}) /echo <== buffCheck_Aliases -|
+/if (${Debug}) /echo <== buffCheck_Aliases -|
 /return
 
 Sub buffCheck_Background_Events

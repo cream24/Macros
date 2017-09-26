@@ -551,30 +551,22 @@ Sub sell_Background_Events
 
 
 SUB sell_MacroSettings
-/if (${Debug} || ${Debug_Sell}) /echo |- _MacroSettings ==>
-
+/if (${Debug}) /echo |- _MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Sell (On/Off)" Off
-	
 	/call WriteToIni "${genSettings_Ini},Sell,Destroy Unsold Items(On/Off)" Off
-
-/if (${Debug} || ${Debug_Sell}) /echo <== _MacroSettings -|
+/if (${Debug}) /echo <== _MacroSettings -|
 /RETURN
 
 
 
 SUB sell_CharacterSettings
-/if (${Debug} || ${Debug_Sell}) /echo |- _CharacterSettings ==>
-
-/if (${Debug} || ${Debug_Sell}) /echo <== _CharacterSettings -|
 /RETURN
 
 
 
 Sub sell_Aliases
-/if (${Debug} || ${Debug_Sell}) /echo |- _Aliases ==>
-
+/if (${Debug}) /echo |- _Aliases ==>
 	/squelch /alias /syncInventory /bc Sync Inventory
 	/squelch /alias /autosell /echo Auto Sell
-
-/if (${Debug} || ${Debug_Sell}) /echo <== _Aliases -|
+/if (${Debug}) /echo <== _Aliases -|
 /return

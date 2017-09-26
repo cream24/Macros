@@ -36,7 +36,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     /varset ChatSender ${c_eventArgChatSender}
 
     /if (!${NetBots[${ChatSender}].ID}) {
-      /if (!${allow_BuffRequests}) {
+      /if (!${allow_BuffRequests} && !${Select[${ChatSender},${allowedPC}]}) {
         /if (${ChatChannel.Equal[TELL]}) /tell ${ChatSender} Sorry, I'm not buffing right now.
         /return
       }
@@ -261,7 +261,7 @@ SUB EVENT_import_SpellAliases
 		/next i
 		/echo New spell aliases have been imported.
 	}
-/if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_import_SpellAliases -|
+/if (${Debug}) /echo <== EVENT_import_SpellAliases -|
 /RETURN
 
 |------------------------------------------------------------------------|
@@ -281,8 +281,10 @@ SUB begForBuffs_Setup
   /call iniToVarV "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool outer
   /if (${Debug} || ${Debug_BegForBuffs}) /echo |- setup_BegForBuffs ==>
   /call iniToVarV "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool outer
-  /call iniToVarV "${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC" restrictedPC string outer
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])" restrictedPC string outer
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])" allowedPC string outer
   /if (!${Defined[restrictedPC]}) /declare restrictedPC string outer
+  /if (!${Defined[allowedPC]}) /declare allowedPC string outer
 	|Add SpellAlias File Path.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Spell Aliases File" "e3 Macro Inis\Spell Aliases.ini" 1
 	|Import SpellAliases_Ini.
@@ -311,6 +313,7 @@ SUB begForBuffs_MacroSettings
 	/call WriteToIni "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" On
 	/call WriteToIni "${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])"
+  /call WriteToIni "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])"
 /RETURN
 
 |------------------------------------------------------------------------|

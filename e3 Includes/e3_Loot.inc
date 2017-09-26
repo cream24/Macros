@@ -99,7 +99,7 @@ SUB loot_Area
   /if (${Auto_Loot}) /next i
 
   /if (${Following}) {
-    /call AquireFollow
+    /call AcquireFollow
   } else {
     /call MoveToLoc ${startY} ${startX}
   }
@@ -353,13 +353,12 @@ SUB loot_Setup
 
 |--------------------------------------------------------------------|
 SUB loot_MacroSettings
-/if (${Debug} || ${Debug_Loot}) /echo |- _MacroSettings ==>
+/if (${Debug}) /echo |- _MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Loot (On/Off)" Off
-	/call WriteToIni "${genSettings_Ini},Loot,Auto-Loot Mode (Auto/Manual)" Auto
 	/call WriteToIni "${genSettings_Ini},Loot,Loot Link Channel" say
 	/call WriteToIni "${genSettings_Ini},Loot,Corpse Seek Radius" 125
   /call WriteToIni "${genSettings_Ini},Loot,Loot in Combat" TRUE
-/if (${Debug} || ${Debug_Loot}) /echo <== _MacroSettings -|
+/if (${Debug}) /echo <== _MacroSettings -|
 /RETURN
 
 |--------------------------------------------------------------------|

@@ -10,9 +10,7 @@ SUB check_Zone
 	/varset idleTimer ${idleInterval}m
   /if (${Assisting}) /call AssistOff
   /if (${use_TargetAE} || ${use_PBAE}) /call Event_AEs "NULL" "${Me.CleanName}" "All" "Off"
-	/if (${Defined[Default_SpellSet]}) {
-    /if (${Me.Class.CanCast}) /call check_Gems
-  }
+	/if (${Me.Class.CanCast} && ${Defined[Default_SpellSet]}) /call check_Gems
 	/if (${Defined[failureList]}) /varset failureList
 
 	/if (${Me.Pet.ID}) {
@@ -70,7 +68,7 @@ SUB check_Follow
           /if (${followTgtDistance}< 40 && ${medBreak}) {
             /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
           } else {
-            /call AquireFollow
+            /call AcquireFollow
           }
         }
         /if (${Me.FeetWet}) /squelch /face fast ${FollowTarget}
@@ -136,10 +134,6 @@ SUB check_Active
 			/varset Old_cursorID 0
 		}
 	}
-| Check AutoAttack
-  |/if (${Me.Combat}) {
-  |  /if (!${Target.ID} || ${Target.Type.Equal[corpse]} && !${Assisting} || (${Spawn[${Target.ID}].Type.Equal[PC]} && !${TogglePvP})) /attack off
-  |}
 
   |prevent guys from getting stuck trying to buff while moving
 	/if (${Me.Moving}) {
@@ -422,7 +416,6 @@ Sub background_Setup
 
 |----------------------------------------------------------------------------------------------------|
 SUB background_MacroSettings
-/if (${Debug} || ${Debug_Background}) /echo |- background_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Background (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Background,Auto-Destroy List"
 	/call WriteToIni "${genSettings_Ini},Background,Idle Time Out (Min)" 10

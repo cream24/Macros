@@ -836,26 +836,6 @@ Sub SwapItem(itemName,slotName)
   }
 /return
 
-|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Sub PlaceInFirstFreeSlot
-  /declare p int local
-  /declare i int local
-  /for p 1 to 8
-		/if (${Bool[${Me.Inventory[pack${p}].Container}]}) {
-			/for i 1 to ${Me.Inventory[pack${p}].Container}
-				/if (!${Bool[${Me.Inventory[pack${p}].Item[${i}]}]}) {
-					|/ech pack ${p} slot ${i}
-					/if (!${Window[pack${p}].Open}) /itemnotify pack${p} rightmouseup
-					/delay 2
-					/itemnotify in pack${p} ${i} leftmouseup
-					/delay 3
-					/return
-				}
-			/next i
-		}
-  /next p
-/return
-
 |-------------------------------------------------------------|
 |- Use MQ2MoveUtils /moveto function, to move to destination.	||
 SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)

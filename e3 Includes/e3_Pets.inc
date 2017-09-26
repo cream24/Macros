@@ -223,7 +223,7 @@ SUB pet_MacroSettings
 
 |------------------------------------------------------------------------|
 SUB pet_CharacterSettings
-/if (${Debug} || ${Debug_Pets}) /echo |- pet_CharacterSettings ==>
+/if (${Debug}) /echo |- pet_CharacterSettings ==>
 	/if (${Select[${Me.Class.ShortName},BST,ENC,MAG,NEC,SHD,SHM]}) {	
 		/call WriteToIni "${Character_Ini},Pets,Pet Spell"
     /call WriteToIni "${Character_Ini},Pets,Pet Heal"
@@ -234,7 +234,7 @@ SUB pet_CharacterSettings
     /call WriteToIni "${Character_Ini},Pets,Pet Summon Combat (On/Off)" Off
     /call WriteToIni "${Character_Ini},Pets,Pet Buff Combat (On/Off)" Off
 	}
-/if (${Debug} || ${Debug_Pets}) /echo <== pet_CharacterSettings -|
+/if (${Debug}) /echo <== pet_CharacterSettings -|
 /RETURN
 
 |------------------------------------------------------------------------|

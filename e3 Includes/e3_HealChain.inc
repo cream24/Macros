@@ -502,9 +502,9 @@ SUB healChain_CharacterSettings
 /RETURN
 
 Sub healChain_Aliases
-/if (${Debug} || ${Debug_HealChain}) /echo |- healChain_Aliases ==>
+/if (${Debug}) /echo |- healChain_Aliases ==>
 	/squelch /alias /BuildChain /bc Build Heal Chain
 	/noparse /squelch /alias /TankList /rs Set Tank List
 	/noparse /squelch /alias /ChainTiming /rs Set Chain Timing
-/if (${Debug} || ${Debug_HealChain}) /echo <== healChain_Aliases -|
+/if (${Debug}) /echo <== healChain_Aliases -|
 /return

@@ -663,11 +663,9 @@ SUB heal_MacroSettings
 /RETURN
 
 SUB heal_CharacterSettings
-/if (${Debug} || ${Debug_Heals}) /echo |- heal_CharacterSettings ==>
-
+/if (${Debug}) /echo |- heal_CharacterSettings ==>
 	| LifeSupport entries.
 	/call WriteToIni "${Character_Ini},Life Support,Life Support"
-
 	| If I'm a healer, add e3_Macro_Heals.inc entries.
 	/if (${Select[${Me.Class.ShortName},CLR,DRU,SHM,BST,PAL,RNG]}) {
 		/call WriteToIni "${Character_Ini},Heals,Tank"
@@ -683,8 +681,7 @@ SUB heal_CharacterSettings
     /call WriteToIni "${Character_Ini},Heals,Who to Heal" "Tanks/ImportantBots/All/Pets"
     /if (${Select[${Me.Class.ShortName},CLR,DRU,PAL,SHM]}) /call WriteToIni "${Character_Ini},Heals,Who to HoT"
 	}
-
-/if (${Debug} || ${Debug_Heals}) /echo <== heal_CharacterSettings -|
+/if (${Debug}) /echo <== heal_CharacterSettings -|
 /RETURN
 
 Sub heal_Background_Events

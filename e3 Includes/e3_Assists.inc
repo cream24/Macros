@@ -120,7 +120,7 @@ SUB AssistOff
 	/if (${use_EPICBurns})           /varset use_EPICBurns FALSE
 
   /if (${Defined[${resistCount}]}) /deletevar ${resistCount}
-	/if (${Following}) /call AquireFollow
+	/if (${Following}) /call AcquireFollow
 
 /if (${Debug} || ${Debug_Assists}) /echo |- AssistOff -| <== [${Assisting}] || AssistTarget: [${AssistTarget}]
 /RETURN
@@ -1290,7 +1290,7 @@ SUB assist_SpellArrays
 
 |--------------------------------------------------------------------------------|
 SUB assist_MacroSettings
-/if (${Debug} || ${Debug_Assists}) /echo |- assist_MacroSettings ==>
+/if (${Debug}) /echo |- assist_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Assists (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Assists,Auto-Assist (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Assists,Max Engage Distance" 250
@@ -1298,12 +1298,11 @@ SUB assist_MacroSettings
 	/call WriteToIni "${genSettings_Ini},Assists,Acceptable Target Types" NPC,Pet
   /call WriteToIni "${genSettings_Ini},Assists,Long Term Debuff Recast(s)" 30
   /call WriteToIni "${genSettings_Ini},Assists,Short Term Debuff Recast(s)" 5
-/if (${Debug} || ${Debug_Assists}) /echo <== assist_MacroSettings -|
+/if (${Debug}) /echo <== assist_MacroSettings -|
 /RETURN
 |--------------------------------------------------------------------------------|
 SUB assist_CharacterSettings
-/if (${Debug} || ${Debug_Assists}) /echo |- assist_CharacterSettings ==>
-
+/if (${Debug}) /echo |- assist_CharacterSettings ==>
 	| Add Assist_Stick entries.
 	/call WriteToIni "${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)" ${If[${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]},Melee,Off]}
   | Default Tanks to Front
@@ -1383,12 +1382,12 @@ SUB assist_CharacterSettings
     /call WriteToIni "${Character_Ini},Burn,Long Burn"
 		/call WriteToIni "${Character_Ini},Burn,Full Burn"
 	}
-/if (${Debug} || ${Debug_Assists}) /echo <== assist_CharacterSettings -|
+/if (${Debug}) /echo <== assist_CharacterSettings -|
 /RETURN
 
 |--------------------------------------------------------------------------------|
 Sub assist_Aliases
-/if (${Debug} || ${Debug_Assists}) /echo |- assist_Aliases ==>
+/if (${Debug}) /echo |- assist_Aliases ==>
 	/noparse /squelch /alias /AssistOn /bc Assist on ${Target.ID}
 	/noparse /squelch /alias /AssistMe /bc Assist on ${Target.ID}
 	/squelch /alias /BackOff /bc Back off
@@ -1429,7 +1428,7 @@ Sub assist_Aliases
   /squelch /alias /Throne /bc VetAA Throne of Heroes
   /squelch /alias /Jester /bc VetAA Chaotic Jester
 
-/if (${Debug} || ${Debug_Assists}) /echo <== assist_Aliases -|
+/if (${Debug}) /echo <== assist_Aliases -|
 /return
 
 |--------------------------------------------------------------------------------|

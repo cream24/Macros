@@ -310,7 +310,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 
 :skipCast
 	/if (${oldItem.Length}) /call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
-	/if (${Following} && !${Assisting}) /call AquireFollow
+	/if (${Following} && !${Assisting}) /call AcquireFollow
   /if (${Me.Class.ShortName.Equal[BRD]}) /varset resumeTwistDelay 5
   |/if (${returnTwist})	/call unpauseTwist
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}
@@ -425,11 +425,11 @@ SUB EVENT_vetAA(line, ChatSender,vetAAtoUse)
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 SUB casting_MacroSettings
-/if (${Debug} || ${Debug_Casting}) /echo |- casting_MacroSettings ==>
+/if (${Debug}) /echo |- casting_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Casting (On/Off)"  Off
 	/call WriteToIni "${genSettings_Ini},Casting,Default Spell Set" Default
 	/call WriteToIni "${genSettings_Ini},Casting,Default Spell Gem" ${If[${Me.AltAbility[Mnemonic Retention]},9,8]}
-/if (${Debug} || ${Debug_Casting}) /echo <== casting_MacroSettings -|
+/if (${Debug}) /echo <== casting_MacroSettings -|
 /RETURN
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
