@@ -86,10 +86,10 @@ SUB loot_Area
     /if (${Target.Distance}>12 && ${Target.DistanceZ} < 80) {
       /call MoveToLoc ${Target.Y} ${Target.X} 12 20
     }
-    /if (${Target.Distance}<=12 && ${Target.DistanceZ} < 30) {
+    /if (${Target.Distance}<=15 &&  ${Target.DistanceZ} < 30) {
       /call lootCorpse
     } else {
-      /echo Corpse ${ClosestCorpse} is > 12 distance, skipping
+      /echo Corpse ${ClosestCorpse} is > ${Target.Distance}|${Target.DistanceZ} distance, skipping
     }
     :skipCorpse
     /varset CorpseList ${CorpseList.Replace[${ClosestCorpse}|,]}

@@ -250,18 +250,16 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
-  |load array of doors from doors.ini:  doorid, x, y, z, name
-  /call IniToArrayV "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
-  /if (!${Defined[doorList]}) {
-    /echo I have no doorList for this zone
-    /return
-  } else  /if (${debug_clickit}) /echo Doors in zone ${doorList.Size}
-
   /declare i int local
   /declare closestDoorID int local 0
   /declare closestDoorDist float local 0
-  |find the closest door to me
-  /if (${doorList.Size}) {
+  |load array of doors from doors.ini:  doorid, x, y, z, name
+  /call IniToArrayV "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
+  /if (!${Defined[doorList]}) {
+    /if (${Me.CleanName.Equal[Creamo]}) /bc I have no doorList for this zone
+  } else {
+    /if (${debug_clickit}) /echo Doors in zone ${doorList.Size}
+    |find the closest door to me
     /for i 1 to ${doorList.Size}
       /if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
       /squelch /doortarget id ${doorList[${i}].Arg[1,,]}
@@ -529,45 +527,72 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
   }
   /declare i int local
   /declare e int local
-  /declare itemName string local
+  /declare a int local
+  /declare totalItems int local 0
 
-  /if (${FindItemCount[${ItemToFind}]} || ${FindItemBankCount[${ItemToFind}]} || ${Cursor.Name.Equal[${ItemToFind}]}) {
-    /docommand ${ChatToggle} >> Found (${Math.Calc[${FindItemCount[${ItemToFind}]} + ${FindItemBankCount[${ItemToFind}]}].Int}) examples of [${ItemToFind}] ..  <<
-    | -Check cursor.
-    /if (${Cursor.Name.Equal[${ItemToFind}]})  /timed ${reportDelay} /docommand ${ChatToggle} >>> Found [${Cursor.Name}] -> [Cursor]. <<<
-    | -Check Inventory.
-    /if (${FindItemCount[${ItemToFind}]}) {
-      | -Search Equippped Items.
-      /for i 1 to 22
-        /varset itemName ${InvSlot[${i}].Item}
-        /if (${itemName.Find[${ItemToFind}]}) /timed ${reportDelay} /docommand ${ChatToggle} [${InvSlot[${i}].Item}] -> (${InvSlot[${i}].Name})
-      /next i
-      | -Search packslots.
-      /for i 1 to 8
-        /varset itemName ${Me.Inventory[pack${i}]}
-        /if (${itemName.Find[${ItemToFind}]}) /timed ${reportDelay} /docommand ${ChatToggle} [${Me.Inventory[pack${i}]}] -> (InvSlot${i})
-        /if (${Me.Inventory[pack${i}].Container}) {
-          /for e 1 to ${Me.Inventory[pack${i}].Container}
-            /varset itemName ${Me.Inventory[pack${i}].Item[${e}]}
-            /if (${itemName.Find[${ItemToFind}]}) /timed ${reportDelay} /docommand ${ChatToggle} [${Me.Inventory[pack${i}].Item[${e}]}] -> (${Me.Inventory[pack${i}]} -> InvSlot${i} -> PackSlot${e})
-          /next e
-        }
-      /next i
-    }
-    | -Search bank packslots.
-    /if (${FindItemBankCount[${ItemToFind}]}) {
-      /for i 1 to 26
-        /varset itemName ${Me.Bank[${i}]}
-        /if (${itemName.Find[${ItemToFind}]}) /timed ${reportDelay}  /docommand ${ChatToggle} [${Me.Bank[${i}]}] -> (BankSlot${i})
-        /if (${Me.Bank[${i}].Container}) {
-          /for e 1 to ${Me.Bank[${i}].Container}
-            /varset itemName ${Me.Bank[${i}].Item[${e}]}
-            /if (${itemName.Find[${ItemToFind}]}) /timed ${reportDelay} /docommand ${ChatToggle} [${Me.Bank[${i}].Item[${e}]}] -> (${Me.Bank[${i}]}] -> BankSlot${i} -> PackSlot${e})
-          /next e
-        }
-      /next i
-    }
+  |/if (${FindItemCount[${ItemToFind}]} || ${FindItemBankCount[${ItemToFind}]} || ${Cursor.Name.Equal[${ItemToFind}]}) {
+    |/docommand ${ChatToggle} >> Found (${Math.Calc[${FindItemCount[${ItemToFind}]} + ${FindItemBankCount[${ItemToFind}]}].Int}) : [${ItemToFind}] <<
+  | -Check cursor.
+  /if (${Cursor.Name.Equal[${ItemToFind}]}) {
+    /varcalc totalItems ${totalItems}+1
+    /docommand /timed ${reportDelay} ${ChatToggle} >>> Found [${Cursor.Name}]->[Cursor] <<<
   }
+  /if (${FindItemCount[${ItemToFind}]}) {
+    | -Search Equippped Items.
+    /for i 1 to 22
+      /if (${InvSlot[${i}].Item.Name.Find[${ItemToFind}]}) {
+        /varcalc totalItems ${totalItems}+1
+        /docommand /timed ${reportDelay} ${ChatToggle} [${InvSlot[${i}].Item}]->(${InvSlot[${i}].Name})
+      }
+      /for a 0 to ${InvSlot[${i}].Item.Augs}
+        /if (${InvSlot[${i}].Item.AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+          /varcalc totalItems ${totalItems}+1
+          /docommand /timed ${reportDelay} ${ChatToggle} [${InvSlot[${i}].Item.AugSlot[${a}]}]->[${InvSlot[${i}].Item}]->(${InvSlot[${i}].Name})
+        }
+      /next a
+    /next i
+    | -Search packslots.
+    /for i 1 to 8
+      /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Inventory[pack${i}]}]->(InvSlot${i})
+      /if (${Me.Inventory[pack${i}].Container}) {
+        /for e 1 to ${Me.Inventory[pack${i}].Container}
+          /if (${Me.Inventory[pack${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
+            /varcalc totalItems ${totalItems}+1
+            /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Inventory[pack${i}].Item[${e}]}]->(${Me.Inventory[pack${i}]}->InvSlot${i}->PackSlot${e})
+          }
+          /for a 0 to ${Me.Inventory[pack${i}].Item[${e}].Augs}
+            /if (${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+              /varcalc totalItems ${totalItems}+1
+              /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}]->[${Me.Inventory[pack${i}].Item[${e}]}]->(${Me.Inventory[pack${i}]}->InvSlot${i}->PackSlot${e})
+            }
+          /next a
+        /next e
+      }
+    /next i
+  }
+  | -Search bank packslots.
+    /for i 1 to 26
+      /if (${Me.Bank[${i}].Name.Find[${ItemToFind}]}) {
+        /varcalc totalItems ${totalItems}+1
+        /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Bank[${i}]}]->(BankSlot${i})
+      }
+      /if (${Me.Bank[${i}].Container}) {
+        /for e 1 to ${Me.Bank[${i}].Container}
+          /if (${Me.Bank[${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
+            /varcalc totalItems ${totalItems}+1
+            /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Bank[${i}].Item[${e}]}]->(${Me.Bank[${i}]}->BankSlot${i}->PackSlot${e})
+          }
+          /for a 0 to ${Me.Bank[${i}].Item[${e}].Augs}
+            /if (${Me.Bank[${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+              /varcalc totalItems ${totalItems}+1
+              /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Bank[${i}].Item[${e}].AugSlot[${a}]}]->[${Me.Bank[${i}].Item[${e}]}]->(${Me.Bank[${i}]}->BankSlot${i}->PackSlot${e})
+            }
+          /next a
+        /next e
+      }
+    /next i
+  /docommand ${ChatToggle} >> Found (${totalItems}) : [${ItemToFind}] <<
+
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
 /RETURN
 
@@ -578,7 +603,6 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
 |------------------------------------------------------------------|
 #EVENT FindMissingItem "<#1#> Find Missing Item #2#"
 SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
-/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_FindItems ==>
   /if (!${checkEventArgs[${ChatSender},${line},U,${ItemToFind}]}) /return
   |parse item link
   /if (${c_eventArgData.Find[000]}) {
@@ -586,13 +610,31 @@ SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
   } else {
     /varset ItemToFind ${c_eventArgData}
   }
-  /if (${FindItemCount[=${ItemToFind}]} || ${FindItemBankCount[=${ItemToFind}]} || ${Cursor.Name.Equal[=${ItemToFind}]}) {
-    /if (${Debug} || ${Debug_Basics}) /echo found ${ItemToFind}
-    /return
-  } else {
-    /docommand ${ChatToggle} >> I did not find ${ItemToFind} ... <<
-  }
-/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
+  /declare i int local
+  /declare e int local
+  /declare a int local
+  /declare totalItems int local ${FindItemCount[=${ItemToFind}]}
+  /varcalc totalItems ${totalItems}+${Cursor.Name.Equal[=${ItemToFind}]}
+
+  /for i 1 to 26
+    /if (${Me.Bank[${i}].Name.Equal[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+1
+    }
+    /if (${Me.Bank[${i}].Container}) {
+      /for e 1 to ${Me.Bank[${i}].Container}
+        /if (${Me.Bank[${i}].Item[${e}].Name.Equal[${ItemToFind}]}) {
+          /varcalc totalItems ${totalItems}+1
+        }
+        /for a 0 to ${Me.Bank[${i}].Item[${e}].Augs}
+          /if (${Me.Bank[${i}].Item[${e}].AugSlot[${a}].Name.Equal[${ItemToFind}]}) {
+            /varcalc totalItems ${totalItems}+1
+          }
+        /next a
+      /next e
+    }
+  /next i
+
+  /if (${totalItems}==0) /docommand ${ChatToggle} >> I did not find ${ItemToFind} <<
 /RETURN
 
 |------------------------------------------------------------|

@@ -57,7 +57,7 @@ SUB event_Assist(line, ChatSender, int MobID)
           /if (${Int[${AssistDistanceSetting}]}) {
             /varset AssistStickDistance ${AssistDistanceSetting}
           } else {
-            /if (${AssistDistanceSetting.Equal[MaxMelee]} || ${AssistDistanceSetting.Equal[auto]}) /varset AssistStickDistance ${Math.Calc[${Spawn[${Target.ID}].MaxRangeTo}*.75].Int}
+            /if (${AssistDistanceSetting.Equal[MaxMelee]} || ${AssistDistanceSetting.Equal[auto]}) /varset AssistStickDistance ${Math.Calc[${Spawn[${Target.ID}].MaxRangeTo}*.9].Int}
           }
           | Check MaxRangeTo, make sure it is not out of bounds.
           /if (${AssistStickDistance} > 25) /varset AssistStickDistance 25
@@ -132,31 +132,31 @@ SUB StickToAssistTarget
 /if (${Debug} || ${Debug_Assists}) /echo |- StickToAssistTarget ==> assistPoint ${AssistStickPoint} dist ${AssistStickDistance}
 		/if (${AssistStickPoint.Equal[behind]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick behind [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 15 uw
+			/squelch /stick snaproll uw
 			/delay 20 ${Stick.Behind} && ${Stick.Stopped}
 			/squelch /stick hold moveback behind ${AssistStickDistance} uw
+    } else /if (${AssistStickPoint.Equal[front]}) {
+      /if (${Debug} || ${Debug_Assists}) /echo Attempting to stick front [${AssistStickDistance}].
+      /squelch /stick hold front ${AssistStickDistance} uw
+      /delay 20 ${Stick.Stopped}
 		} else /if (${AssistStickPoint.Equal[behindonce]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick behindonce [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 15 uw
+			/squelch /stick snaproll uw
       /delay 20 ${Stick.Behind} && ${Stick.Stopped}
 			/squelch /stick hold moveback behindonce ${AssistStickDistance} uw
 		} else /if (${AssistStickPoint.Equal[pin]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick pin [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 15 uw
+			/squelch /stick snaproll uw
 			/delay 20 ${Stick.Stopped}
 			/squelch /stick hold moveback pin ${AssistStickDistance} uw
-		} else /if (${AssistStickPoint.Equal[front]}) {
-			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick front [${AssistStickDistance}].
-			/squelch /stick hold front ${AssistStickDistance} uw
-      /delay 20 ${Stick.Stopped}
 		} else /if (${AssistStickPoint.Equal[!front]}) {
 			/if (${Debug} || ${Debug_Assists}) /echo Attempting to stick !front [${AssistStickDistance}].
-			/squelch /stick moveback snaproll 15 uw
+			/squelch /stick snaproll uw
       /delay 20 ${Stick.Behind} && ${Stick.Stopped}
 			/squelch stick hold moveback !front ${AssistStickDistance} uw
 		} else {
 			/if (${Debug} || ${Debug_Assists}) /echo [${AssistStickPoint}] is not a valid stick point.  Defaulting to stick behind.
-			/squelch /stick moveback snaproll 15 uw
+			/squelch /stick snaproll uw
       /delay 20 ${Stick.Behind} && ${Stick.Stopped}
 			/squelch /stick hold moveback behind ${AssistStickDistance} uw
 		}
@@ -202,7 +202,7 @@ SUB check_AssistStatus
         } else {
           | If the mob is not targeting me
           /if (!${Me.Combat}) /attack on
-          /if (!${Stick.Active} || (${Target.Distance} > ${AssistStickDistance})) {
+          /if (!${Stick.Active} || (${Target.Distance} > ${AssistStickDistance}) || (${AssistStickPoint.Find[behind]} && !${Stick.Behind})) {
             /call StickToAssistTarget
             /doevents getCloser
           }
@@ -309,7 +309,7 @@ SUB Event_EnrageOff(line, RageOn)
 SUB EVENT_getCloser
 	/if (${Assisting} && ${AllowControl}) {
     /doevents flush EVENT_getCloser
-		/if (${Spawn[id ${AssistTarget}].Distance} <= ${AssistStickDistance} && ${AssistStickDistance} > 5) /varcalc AssistStickDistance ${AssistStickDistance} - 3
+		/if (${AssistStickDistance} > 5) /varcalc AssistStickDistance ${AssistStickDistance} - 3
 	}
 /if (${Debug} || ${Debug_Assists}) /echo EVENT_getCloser -| AssistStickDistance has been set to [${AssistStickDistance}]
 /RETURN
