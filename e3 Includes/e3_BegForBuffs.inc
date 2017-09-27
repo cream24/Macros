@@ -1,370 +1,200 @@
 |----------------------------------------------------------------------------------------------------|
-|- e3_Macro_BegForBuffs.inc	v2.0 ( originally designed to work with e3.mac )						-|
-|- Written by Killians of PEQ																		-|
-|----------------------------------------------------------------------------------------------------|
 |- Allows chat senders to request buffs by their full name, or alias listed in the BuffAliases_Ini.	-|
+|- @param ChatChannel: The channel a chat command was given through.																-|
+|- @param ChatSender: The PC who sent the chat message.																							-|
+|- @param ChatText: The message that was sent.																											-|
 |----------------------------------------------------------------------------------------------------|
-| Make an event to change buff request toggle
-| Adding restricted spells
-| add a -group function, to cast on all group members
-| Revamp begforbuffs to work off castReturns set in Casting, rather than checking range mana etc before hand. (this could make it easier to add items and abilities to the begforbuffs function.)
-
-
-|------------------------------------------------------------------------|
-|- Request spells by name or alias.										-|
-|------------------------------------------------------------------------|
-|- @param ChatChannel: The channel a chat command was given through.	-|
-|- @param ChatSender: The PC who sent the chat message.					-|
-|- @param ChatText: The message that was sent.							-|
-|------------------------------------------------------------------------|
-| Specify chat channels to monitor.
-|#chat group
-|#chat tell
+#chat group
+#chat tell
 SUB event_Chat(ChatChannel, ChatSender, ChatText)
-/if (${Debug} || ${Debug_BegForBuffs}) /echo |- Event_Chat ==>
-  |/echo ${ChatChannel} ${ChatSender} ${ChatText}
-  /declare newChatSender string local ${ChatSender}
 	| Make sure that ChatText is not an integer, this will cause an unparsable calculation.
-	/if (!${Int[${ChatText}]}) {
-		/declare whatToCast string local
-		/declare spellBeingCast string local
+	/if (${Int[${ChatText}]}) /return
+	/declare whatToCast string local
+	/declare retryCastTimer timer local 30s
+  | If the ChatText is not found in the spellbook, check SpellAliases_Ini.
+  :Retry_Alias
+  /if (${Me.Book[${ChatText}]}) {
+    /varset whatToCast ${Spell[${ChatText}]}
+  } else /if (${FindItemCount[=${ChatText}]}) {
+    /varset whatToCast ${FindItem[=${ChatText}]}
+  } else {
+    | Replace :'s with ;'s to adjust for inis
+    /if (${ChatText.Find[:]}) /varset ChatText ${ChatText.Replace[:,;]}
+    /if (${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Length}) {
+      /varset ChatText ${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Replace[;,:]}
+      /goto :Retry_Alias
+    }
+  }
+  |/gu ${ChatChannel},${ChatSender},${ChatText},${whatToCast}
+  | If I found something to cast.
+  /if (${Bool[${whatToCast}]}) {
+    /if (${Defined[begBuffArray]}) /deletevar begBuffArray
+    /if (${Defined[begBuffArray2D]}) /deletevar begBuffArray2D
+    /declare begBuffArray[1] string outer ${whatToCast}
+    /call BuildSpellArray "begBuffArray" "begBuffArray2D"
+    /call checkEventArgs ${ChatSender} "" "" ${whatToCast}
+    /varset ChatSender ${c_eventArgChatSender}
 
-	  |/echo ChatSender ${ChatSender} ${ChatChannel} ${ChatText}
-		| If the ChatText is not found in the spellbook, check SpellAliases_Ini.
-		:Retry_Alias
-		/if (${Me.Book[${ChatText}]}) {
-			/varset whatToCast ${Spell[${ChatText}]}
-			/varset spellBeingCast ${Spell[${ChatText}]}
-			
-		} else /if (${FindItemCount[=${ChatText}]}) {
-			
-			/varset whatToCast ${FindItem[=${ChatText}]}
-			/varset spellBeingCast ${FindItem[=${ChatText}].Spell}
+    /if (!${NetBots[${ChatSender}].ID}) {
+      /if (!${allow_BuffRequests} && !${Select[${ChatSender},${allowedPC}]}) {
+        /if (${ChatChannel.Equal[TELL]}) /tell ${ChatSender} Sorry, I'm not buffing right now.
+        /return
+      }
+      /if (${Select[${ChatSender},${restrictedPC}]}) {
+        /if (${ChatChannel.Equal[TELL]}) /tell ${ChatSender} I will not buff you.
+        /return
+      }
+    }
+    | Check zone
+    /if (!${SpawnCount[pc ${ChatSender}]}) {
+      /if (${ChatChannel.Equal[TELL]}) /tell ${ChatSender} We're not in the same zone!
+      /return
+    }
+    | Check Beneficial
+    /if (!${Spell[${whatToCast}].SpellType.Find[Beneficial]}) {
+      /if (${ChatChannel.Equal[TELL]}) {
+        /tell ${ChatSender} I cannot cast ${whatToCast} on you, it is not beneficial
+      } else {
+        /g I cannot cast ${whatToCast} on you, it is not beneficial
+      }
+      /return
+    }
+    | Check target type
+    /if (${Spell[${whatToCast}].TargetType.Find[self]}) {
+      /if (${ChatChannel.Equal[TELL]}) {
+        /tell ${ChatSender} I cannot cast ${whatToCast} on you, it is self only
+      } else {
+        /g I cannot cast ${whatToCast} on you, it is self only
+      }
+      /return
+    }
+    | Dont cast these
+    /if (!${NetBots[${ChatSender}].ID} && (${ChatText.Find[Gate]} || ${ChatText.Find[Evacuate]} || ${ChatText.Find[portal]} || ${ChatText.Find[Relocation]} || ${ChatText.Find[Succor]} || ${ChatText.Find[Circle of]} || ${ChatText.Find[Ring of]} || ${ChatText.Find[Wind of]})) {
+      /if (${ChatChannel.Equal[TELL]}) {
+        /tell ${ChatSender} Do not request ${whatToCast} via beg for buffs chat
+      } else {
+        /g Do not request ${whatToCast} via beg for buffs chat
+      }
+      /return
+    }
+    | Check Range
+    /if (!${check_Distance[${Spawn[pc ${ChatSender}].ID},${begBuffArray2D[1,${iMyRange}]}]}) {
+      /if (${ChatChannel.Equal[TELL]}) {
+        /tell ${ChatSender} You're out of range!
+      } else {
+        /g You're out of range!
+      }
+      /return
+    }
+    :retryCast
+    | Check Mana
+    /if (!${check_Mana[begBuffArray2D,1]}) {
+      /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
+        /if (${Me.CombatState.Equal[Active]}) /sit
+        /delay 1s
+        /goto :retryCast
+      } else {
+        /if (${ChatChannel.Equal[TELL]}) {
+          /tell ${ChatSender} I don't have enough mana to cast ${whatToCast}, Try again later.
+        } else {
+          /g I don't have enough mana to cast ${whatToCast}, Try again later.
+        }
+        /return
+      }
+    }
 
-		} else {
-			
-			| Replace :'s with ;'s to adjust for inis
-			/if (${ChatText.Find[:]}) /varset ChatText ${ChatText.Replace[:,;]}
-			
-			| Check the ini for an alias
-			/if (${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Length}) {
-			
-				| Disable follow before porting.
-				/if (${ChatText.Find[Port]}) {
-					/if (${Stick.Active}) /squelch /stick off
-					/if (${NetAdvPath.Status}==1) /squelch /netfollow off
-					/varset FollowTarget NULL
-					/varset Following FALSE
-					/delay 30 !${Stick.Active} && ${NetAdvPath.Status}==0
-				}
-
-				| Reset variables using data from SpellAliases_Ini
-				/varset ChatText ${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Replace[;,:]}
-				/if (${Debug} || ${Debug_BegForBuffs}) /echo |- Event_Chat -| :Retry_Alias
-				/goto :Retry_Alias
-			}
-		}
-		
-		| If I found something to cast.
-		/if (${Bool[${whatToCast}]}) {
-		
-			| Verify the event
-			/call verifyEvent "${newChatSender}" "${ChatText}"
-			/if (${Defined[newChatSender]}) /varset newChatSender ${Macro.Return.Arg[1,_]}
-		
-			| If the ChatSender IS a NetBot
-			/if (${Bool[${Macro.Return.Arg[2,_]}]}) {
-				
-				:allowAccess
-				
-				| Check zone
-				/if (!${SpawnCount[pc ${newChatSender}]}) {
-					/if (${ChatChannel.Equal[TELL]}) {
-						/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Zone].Length}) {
-							/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Zone]}
-						} else {
-							/tell ${newChatSender} We're not in the same zone, fool!
-						}
-					}
-				} else {
-				
-					| Check the request was a beneficial spell
-					/if (${Spell[${ChatText}].SpellType.Left[10].NotEqual[Beneficial]}) {
-						/if (${ChatChannel.Equal[TELL]}) {
-							/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Not Beneficial].Length}) {
-								/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Not Beneficial]}
-							} else {
-								/tell ${newChatSender} You're only allowed to request happy spells, fool!
-							}
-						} else {
-							/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Not Beneficial].Length}) {
-								/g ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Not Beneficial]}
-							} else {
-								/g You're only allowed to request happy spells, fool!
-							}
-						}
-					} else {
-				
-						| Check restricted spells list
-						/if (${Select[${ChatText},${Ini[${Character_Ini},Buffs,Restricted Spells]}]} || ${ChatText.Find[Gate]} || ${ChatText.Find[Gate]} || ${ChatText.Find[Evacuate]} || ${ChatText.Find[portal]} || ${ChatText.Find[Relocation]} || ${ChatText.Find[Succor]} || ${ChatText.Find[Circle of]} || ${ChatText.Find[Ring of]} || ${ChatText.Find[Wind of]}) {
-							/if (${NetBots[${newChatSender}].ID}) {
-								/goto :castRestricted
-							} else {
-								/if (${ChatChannel.Equal[TELL]}) {
-									/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted Spell].Length}) {
-										/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted Spell]}
-									} else {
-										/tell ${newChatSender} You're only allowed to request happy spells, fool!
-									}
-								} else {
-									/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted Spell].Length}) {
-										/g ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted Spell]}
-									} else {
-										/g You're only allowed to request happy spells, fool!
-									}
-								}
-							}
-						} else {
-
-							:castRestricted
-						
-							| Check for self only spells
-							/if (${Spell[${spellBeingCast}].TargetType.Find[self]}) {
-								/if (${ChatChannel.Equal[TELL]}) {
-									/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Self Buff].Length}) {
-										/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Self Buff]}
-									} else {
-										/tell ${newChatSender} That's a self only buff, fool!
-									}
-								} else {
-									/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Self Buff].Length}) {
-										/g ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Self Buff]}
-									} else {
-										/g That's a self only buff, fool!
-									}
-								}
-							} else {
-							
-								| Check range.
-								/if (${Spell[${spellBeingCast}].MyRange} && ${Spawn[pc ${newChatSender}].Distance} > ${Spell[${spellBeingCast}].MyRange}) {
-									/if (${ChatChannel.Equal[TELL]}) {
-										/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Range].Length}) {
-											/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Range]}
-										} else {
-											/tell ${newChatSender} You're out of range, fool!
-										}
-									} else {
-										/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Range].Length}) {
-											/g ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Range]}
-										} else {
-											/g You're out of range, fool!
-										}
-									}
-								} else {
-								
-									| Check mana.
-									/if (${whatToCast.Arg[1,/].Equal[${spellBeingCast}]} && ${Spell[${spellBeingCast}].Mana} > ${Me.CurrentMana}) {
-										/if (${ChatChannel.Equal[TELL]}) {
-											/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Mana].Length}) {
-												/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Mana]}
-											} else {
-												/tell ${newChatSender} I don't have enough mana to cast ${spellBeingCast}, Try again later.
-											}
-										} else {
-											/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Mana].Length}) {
-												/g ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Mana]}
-											} else {
-												/g I don't have enough mana to cast ${spellBeingCast}, Try again later.
-											}
-										}
-									} else {
-
-										| Cast the requested spell, on the ChatSender.
-										/if (${Target.ID}) /declare oldTarget int local ${Target.ID}
-										/if (${ChatChannel.Equal[TELL]}) {
-											/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Casting Buff].Length}) {
-												/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Casting Buff]}
-											} else {
-												/tell ${newChatSender} ${spellBeingCast} inc...
-											}
-										} else {
-											/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Casting Buff].Length}) {
-												/g ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Casting Buff]}
-											} else {
-												/g ${spellBeingCast} inc...
-											}
-										}
-
-                    /if (${Me.Book[${whatToCast}]} && !${Bool[${Me.Gem[${whatToCast}]}]}) /call memorize_spell "${whatToCast}" ${DefaultGem}
-                    |/delay 5s ${Me.SpellReady[${spellName}]}
-                    /delay 20s ${Me.SpellReady[${whatToCast}]} || ${Me.ItemReady[=${whatToCast}]} || ${Me.AbilityReady[${whatToCast}]}
-										/casting "${whatToCast}" ${DefaultGem} "-targetid|${Spawn[pc =${newChatSender}].ID}" -maxtries|3
-										/delay 20s !${Cast.Status.Find[C]}
-									}
-								}		
-							}
-						}
-					}
-				}
-				
-			| If the ChatSender is NOT a NetBot	
-			} else {
-		
-				| Check Restricted PCs
-				/if (${Select[${newChatSender},${Ini[${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])]}]}) {
-					/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC].Length}) {
-						/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC]}
-					} else {
-						/tell ${newChatSender} You are an asshole.  I will not buff you, because you are an asshole.
-					}
-				} else {
-				
-					| Check genSettings_Ini > [Buff Requests] > Allow Buff Requests (On/Off)
-					/call IniToVar "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
-					/if (${Bool[${Macro.Return}]}) {
-						/goto :allowAccess
-					} else {
-						
-						| Check genSettings_Ini > [Buff Requests] > Allowed PCs (When Requests [Off])
-						/if (${Select[${newChatSender},${Ini[${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])]}]} || ${Select[Guild,${Ini[${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])]}]} && ${Spawn[pc ${ChatSender}].Guild.Equal[${Me.Guild}]} || ${Select[Raid,${Ini[${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])]}]} && ${Raid.Member[${ChatSender}].Level}) {
-							/goto :allowAccess
-						} else {
-							/if (${ChatChannel.Equal[TELL]}) {
-								/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Requests Off].Length}) {
-									/tell ${newChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Requests Off]}
-								} else {
-									/tell ${newChatSender} Sorry, I'm not buffing right now.
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-/if (${Debug} || ${Debug_BegForBuffs}) /echo <== Event_Chat -|
+    :wait
+    /call check_Ready "begBuffArray2D" 1
+    /if (!${c_Ready}) {
+      /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
+        /delay 1
+        /goto :retryCast
+      } else {
+        /if (${ChatChannel.Equal[TELL]}) {
+          /tell ${ChatSender} ${whatToCast} is not ready, Try again later.
+        } else {
+          /g ${whatToCast} is not ready, Try again later.
+        }
+        /return
+      }
+    }
+    /if (${ChatChannel.Equal[TELL]}) {
+      /tell ${ChatSender} ${whatToCast} inc...
+    } else {
+      /g ${whatToCast} inc...
+    }
+    /call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
+    /if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
+      /goto :retryCast
+      /bc retrying cast ${castReturn}, ${whatToCast}
+    }
+  }
 /RETURN
-	
-	
 
 |--------------------------------------------------------|
 |- Relays buff requests from /tell and /group to EQBC.	-|
+|- @param line: 'Name tells you, 'Buff me'.'			      -|
+|- @param buffTarget: The target to cast buffs on.		  -|
 |--------------------------------------------------------|
-|- @param line: 'Name tells you, 'Buff me'.'			-|
-|- @param buffTarget: The target to cast buffs on.		-|
-|--------------------------------------------------------|
-#event buffRequestRelay "#1# tells you, 'Buff #*#'"
-#event buffRequestRelay "#1# tells you, 'Buff #*# |-|#2#'"
+#event buffRequestRelay "#1# tells you, 'Buff #*#"
 SUB event_buffRequestRelay(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- event_buffRequestRelay ==>
+  /if (!${NetBots[${ChatSender}].ID}) {
+    /if (!${allow_BuffRequests}) {
+      /tell ${ChatSender} Sorry, I'm not buffing right now.
+      /return
+    }
+    /if (${Select[${ChatSender},${restrictedPC}]}) {
+      /tell ${ChatSender} I will not buff you.
+      /return
+    }
+  }
+  | Check zone
+  /if (!${SpawnCount[pc ${ChatSender}]}) {
+    /tell ${ChatSender} We're not in the same zone!
+    /return
+  }
+  | Check range.
+  /if (${Spawn[pc ${ChatSender}].Distance} > 200) {
+    /tell ${ChatSender} You're out of range!
+    /return
+  }
+  | -------------------Find buffTarget------------------- |
+  /declare buffTarget string local ${line.Right[-${Math.Calc[${line.Find[buff]}+4]}].Left[-1]}
+  /if (${Int[${buffTarget}]}) {
+    /varset buffTarget ${Spawn[id ${buffTarget}].ID}
+  } else /if (${buffTarget.Equal[me]}) {
+    /varset buffTarget ${Spawn[pc =${ChatSender}].ID}
+  } else /if (${buffTarget.Find['s pet]}) {
+    /varset buffTarget ${Spawn[pc =${buffTarget.Left[-6]}].Pet.ID}
+  } else /if (${buffTarget.Find[s pet]}) {
+    /varset buffTarget ${Spawn[pc =${buffTarget.Left[-5]}].Pet.ID}
+  } else /if (${buffTarget.Equal[pet]} || ${buffTarget.Equal[my pet]}) {
+    /varset buffTarget ${Spawn[pc =${ChatSender}].Pet.ID}
+  } else /if (${SpawnCount[=${buffTarget}]}) {
+    /varset buffTarget ${Spawn[=${buffTarget}].ID}
+  }
 
-	| Verify the event
-	/call verifyEvent "${ChatSender}" "${ChatText}"
-	/if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-
-	|    |-----------Valid User----------|
-	/if (${Bool[${Macro.Return.Arg[2,_]}]}) {
-	
-		:allowAccess
-
-		| Check zone
-		/if (!${SpawnCount[pc ${ChatSender}]}) {
-			/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Zone].Length}) {
-				/tell ${ChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Zone]}
-			} else {
-				/tell ${ChatSender} We're not in the same zone, fool!
-			}
-		} else {
-		
-			| Check range.
-			/if (${Spawn[pc ${ChatSender}].Distance} > 200) {
-				/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Range].Length}) {
-					/tell ${ChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Out of Range]}
-				} else {
-					/tell ${ChatSender} You're out of range, fool!
-				}
-			} else {
-		
-				| -------------------Find buffTarget------------------- |
-				/declare buffTarget int local
-				/declare castName string local
-				/declare gemNumber string local gem${DefaultGem}
-				/declare groupList string local
-				
-				/declare i int local
-				/declare x int local
-
-				/if (${Int[${line.Arg[3, ]}]}) {
-					/varset buffTarget ${line.Arg[3, ]}
-				} else /if (${line.Find[Buff me]}) {
-					/varset buffTarget ${Spawn[pc =${ChatSender}].ID}
-				} else /if (${line.Find[Buff pet]} || ${line.Find[Buff my pet]}) {
-					/varset buffTarget ${Spawn[pet ${Spawn[pc =${ChatSender}].Pet}].ID}
-				} else  /if (${SpawnCount[pc ${line.Arg[3, ]}]}) {
-					/varset buffTarget ${Spawn[pc =${line.Arg[3, ]}].ID}
-				} else /if (${line.Find['s pet]}) {
-					/varset buffTarget ${Spawn[pet ${Spawn[pc ${line.Arg[3, ].Arg[1,']}].Pet}].ID}
-				} else /if (${line.Find[s pet]}) {
-					/varset buffTarget ${Spawn[pet ${Spawn[pc ${line.Arg[3, ].Left[${Math.Calc[${line.Arg[3, ].Length} - 1].Int}]}].Pet}].ID}
-				}
-		
-				| -------------------Verify the buffTarget------------------- |
-				/if (${GroupBuffs.Size}) {
-					/tell ${ChatSender} Casting buffs on ${Spawn[id ${buffTarget}].CleanName}...
-					/bc ${If[${Defined[eventParams]},Buff ${buffTarget} -${eventParams},Buff ${buffTarget}]}
-					
-				| If I don't have buffs, but others might.
-				} else /if (!${GroupBuffs.Size} && ${NetBots.Counts}>1) {
-					/tell ${ChatSender} Requesting buffs on ${Spawn[id ${buffTarget}].CleanName}...
-					/bc ${If[${Defined[eventParams]},Buff ${buffTarget} -${eventParams},Buff ${buffTarget}]}
-					
-				| If I'm not a buffer, and no other bots are on.
-				} else /if (!${GroupBuffs.Size} && ${NetBots.Counts}<=1) {
-					/tell ${ChatSender} Sorry, I'm not currently set up to cast any buffs, try again later. (This is an automated response)
-				}
-			}
-		}
-	} else {
-	
-		| Check Restricted PCs
-		/if (${Select[${ChatSender},${Ini[${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])]}]}) {
-			/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC].Length}) {
-				/tell ${ChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC]}
-			} else {
-				/tell ${ChatSender} You are a giant ass.  I will not buff you, because you are an ass.
-			}
-		} else {
-			
-			| If user is not valid, check Allow Buff Requests
-			/call IniToVar "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool local
-			
-			/if (${Bool[${Macro.Return}]}) {
-				/goto :allowAccess
-			} else {
-			
-				/if (${Select[${ChatSender},${Ini[${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])]}]} || ${Select[Guild,${Ini[${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])]}]} && ${Spawn[pc ${ChatSender}].Guild.Equal[${Me.Guild}]} || ${Select[Raid,${Ini[${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])]}]} && ${Raid.Member[${ChatSender}].Level}) {
-					/goto :allowAccess
-				} else {
-					/if (${Ini[${genSettings_Ini},User Defined Responses,Buff Requests Off].Length}) {
-						/tell ${ChatSender} ${Ini[${genSettings_Ini},User Defined Responses,Buff Requests Off]}
-					} else {
-						/tell ${ChatSender} Sorry, I'm not buffing right now.
-					}	
-				}
-			}
-		}
-	}
-
+  /if (${Defined[GroupBuffs2D]} && ${Bool[${buffTarget}]}) {
+    /tell ${ChatSender} Casting buffs on ${Spawn[id ${buffTarget}].CleanName}...
+    /bc Buff ${buffTarget}
+  | If I don't have buffs, but others might.
+  } else /if (!${Defined[GroupBuffs2D]}) {
+    /if (${NetBots.Counts}>1) {
+      /tell ${ChatSender} Requesting buffs on ${Spawn[id ${buffTarget}].CleanName}...
+      /bc Buff ${buffTarget}
+  | If I'm not a buffer, and no other bots are on.
+    } else  {
+      /tell ${ChatSender} Sorry, my ini are not set up to cast group buffs
+    }
+  }
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== event_buffRequestRelay -|
 /RETURN
 
-
-
+|------------------------------------------------------------------------|
 #event portRelay "<#*#> Port to #1#"
 SUB event_portRelay(line, destination)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- EVENT_portRelay ==>
-
 	/if (${Group} && ${Me.CleanName.Equal[${Group.Leader}]}) {
     /if (${Select[${Me.Class.ShortName},WIZ,DRU]}) {
       /call event_Chat "group" "${Me.Name}" "Port ${destination}"
@@ -372,71 +202,54 @@ SUB event_portRelay(line, destination)
       /g Port ${destination}
     }
 	}
-
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_portRelay -|
 /RETURN
 
-
-
+|------------------------------------------------------------------------|
 #EVENT makeSpellList "[MQ2] Make Spell List"
 #EVENT makeSpellList "<#*#> Make Spell Lists"
 SUB EVENT_makeSpellList
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- EVENT_makeSpellList ==>
-
 	/if (${Me.Class.CanCast} && ${Me.Class.ShortName.NotEqual[BRD]}) {
 		/if (${Bool[${Ini[${SpellList_Ini}]}]}) {
 			/echo Creating a list of ${Me.Class} spells...
 		} else {
 			/echo Adding spells to [${SpellList_Ini}] please wait...
 		}
-
 		/call Build_Alphabetized_Ini "${SpellList_Ini}"
-		
 		/declare i int local
 		/declare popupVar string local .
 		/declare spellName string local
 		/declare miscTimer timer local 15
-		
 		/for i 1 to 720
-		
 			/if (!${miscTimer}) {
 				/if (${popupVar.Length} == 6) /varset popupVar . 
 				/popup ${popupVar}
 				/varset popupVar ${popupVar}.
 				/varset miscTimer 5
 			}
-		
 			/if (${Bool[${Me.Book[${i}]}]} && ${Spell[${Me.Book[${i}]}].SpellType.NotEqual[Detrimental]} && ${Spell[${Me.Book[${i}]}].TargetType.NotEqual[Self]} && ${Spell[${Me.Book[${i}]}].TargetType.NotEqual[Pet]}) {
 				/varset spellName ${Me.Book[${i}]}
 				/if (!${Bool[${Ini[${SpellList_Ini},${spellName.Left[1]},${spellName}]}]}) /call WriteToIni "${SpellList_Ini},${spellName.Left[1]},${spellName}"
 			}
-		
 		/next i
-
 		/echo Finished adding spells.  Please edit [${SpellList_Ini}], and then use /importspellaliases to import your changes.
 	}
-
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_makeSpellList -|
 /RETURN
 
-
-
+|------------------------------------------------------------------------|
 #EVENT import_SpellAliases "[MQ2] Import Spell Aliases"
 #EVENT import_SpellAliases "<#*#> Import Spell Aliases"
 SUB EVENT_import_SpellAliases
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- EVENT_import_SpellAliases ==>
-
 	/if (!${Bool[${Ini[${SpellList_Ini}]}]}) {
 		/echo You must create a spell list file using, /MakeSpellList.  After editing the newly created file, use /importspellaliases to import your changes.
 	} else {
-		
 		/declare i int local
 		/declare e int local
-		
 		/for i 1 to 26
-		
 			/if (${Bool[${Ini[${SpellList_Ini},${Ini[${SpellList_Ini}].Arg[${i},|]}]}]}) {
-			
 				/varset e 1
 				:next_Alias
 				/if (${Bool[${Ini[${SpellList_Ini},${Ini[${SpellList_Ini}].Arg[${i},|]}].Arg[${e},|]}]}) {
@@ -446,15 +259,12 @@ SUB EVENT_import_SpellAliases
 				}
 			}
 		/next i
-		
 		/echo New spell aliases have been imported.
 	}
-	
-/if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_import_SpellAliases -|
+/if (${Debug}) /echo <== EVENT_import_SpellAliases -|
 /RETURN
 
-
-
+|------------------------------------------------------------------------|
 #EVENT createSpellAlias "[#1#] Set Spell Alias #2# #3#"
 #EVENT createSpellAlias "<#1#> Set Spell Alias #2# #3#"
 SUB EVENT_createSpellAlias(line, ChatSender, newAlias, spellName)
@@ -466,19 +276,21 @@ SUB EVENT_createSpellAlias(line, ChatSender, newAlias, spellName)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== EVENT_createSpellAlias -|
 /RETURN
 
-
-
-|--------------------------------|
-|- Setup BegForBuff variables.	-|
-|--------------------------------|
+|------------------------------------------------------------------------|
 SUB begForBuffs_Setup
-/call IniToVar "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool outer
-/if (${Debug} || ${Debug_BegForBuffs}) /echo |- setup_BegForBuffs ==>
+  /call iniToVarV "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool outer
+  /if (${Debug} || ${Debug_BegForBuffs}) /echo |- setup_BegForBuffs ==>
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool outer
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])" restrictedPC string outer
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])" allowedPC string outer
+  /if (!${Defined[restrictedPC]}) /declare restrictedPC string outer
+  /if (!${Defined[allowedPC]}) /declare allowedPC string outer
 	|Add SpellAlias File Path.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Spell Aliases File" "e3 Macro Inis\Spell Aliases.ini" 1
 	|Import SpellAliases_Ini.
 	/if (!${Ini[${MacroData_Ini},File Paths,Spell Aliases File].Length}) {
 		/echo ERROR: Could not find designated file path for [Spell Aliases], please review [${MacroData_Ini}] and restart.
+    /beep
 		/endmacro
 	} else {
 		/declare SpellAliases_Ini string outer ${Ini[${MacroData_Ini},File Paths,Spell Aliases File]}
@@ -487,8 +299,7 @@ SUB begForBuffs_Setup
 /if (${Debug} || ${Debug_BegForBuffs}) /echo <== setup_BegForBuffs -|
 /RETURN
 
-
-
+|------------------------------------------------------------------------|
 Sub begForBuffs_Background_Events
 	/doevents createSpellAlias
 	/doevents import_SpellAliases
@@ -497,52 +308,34 @@ Sub begForBuffs_Background_Events
 	/doevents Chat
 /return
 
-
-
+|------------------------------------------------------------------------|
 SUB begForBuffs_MacroSettings
 	/call WriteToIni "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" On
 	/call WriteToIni "${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])"
-	/call WriteToIni "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])" "Guild,Raid"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Out of Zone"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Out of Range"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Out of Mana"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Self Buff"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Not Beneficial"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Restricted Spell"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Casting Buff"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Request-Restricted PC"
-	/call WriteToIni "${genSettings_Ini},User Defined Responses,Buff Requests Off"
-	|/call WriteToIni "${Character_Ini},Buffs,Restricted Spells"
+  /call WriteToIni "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])"
 /RETURN
 
-
-
+|------------------------------------------------------------------------|
 SUB begForBuffs_CharacterSettings
 /RETURN
-
-
-
+|------------------------------------------------------------------------|
 Sub begForBuffs_Aliases
 	/noparse /squelch /alias /giveme /tell ${Target.CleanName}
 	/noparse /squelch /alias /addalias /echo Set Spell Alias
 /return
 
-
-
 |----------------------------|
 |- Build SpellAliases_Ini.	-|
 |----------------------------|
-| Needs to be updated
 SUB MakeSpellAliases_Ini
 
 	/echo Creating spell aliases file...
-	
 	| Beastlord Aliases.
 	/call WriteToIni "${SpellAliases_Ini},Beastlord,Beastlord Spells"
+  /call WriteToIni "${SpellAliases_Ini},Beastlord,SA" "Spiritual Ascendance"
 	/call WriteToIni "${SpellAliases_Ini},Beastlord,SD" "Spiritual Dominion"
 	/call WriteToIni "${SpellAliases_Ini},Beastlord,SV" "Spiritual Vigor"
-	
 	| Clerc Aliases.
 	/call WriteToIni "${SpellAliases_Ini},Cleric,Cleric Spells"
 	/call WriteToIni "${SpellAliases_Ini},Cleric,Kazad" "Kazad's Mark"
@@ -741,5 +534,5 @@ SUB MakeSpellAliases_Ini
 	/call WriteToIni "${SpellAliases_Ini},Wizard,TLWL" "Translocate: Wakening Lands"
 	/call WriteToIni "${SpellAliases_Ini},Wizard,TLGD" "Translocate: Great Divide"
 	/call WriteToIni "${SpellAliases_Ini},Wizard,TLIceclad" "Translocate: Iceclad"
-	
+
 /RETURN

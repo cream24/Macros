@@ -1,81 +1,62 @@
-|--------------------------------|
-|- e3.mac	v6.2				-|
-|- Written by Killians of PEQ.	-|
-|- Rework  by Creamo of PEQ.	-|
-|--------------------------------|
-
-|default turbo, class specific turbo is loaded in e3_setup call
+|---------------------------------------------------|
+|- e3.mac	v7.0				                             -|
+|- Originally written by Killians of PEQ.	         -|
+|- Enhanced and maintained by Creamo of PEQ.       -|
+|- Thanks to Vysra for IDE,additional plugins,code -|
+|---------------------------------------------------|
+#warning
 #turbo 100
-#chat group
-#chat tell
 #include e3 Includes\e3_Setup.inc
 
 SUB Main(modeSelect)
+  /declare macroVersion string outer 7.0
   /declare Debug bool outer false
-	/if (${Debug}) {
-		/echo Enter Main
-		/delay 5
-	}
-  /declare macroVersion string outer 6.2
-  /declare IniMode string outer
-  /call #RequirePlugin MQ2IniExt
-  /if (${Macro.Return}) {
+  /declare IniMode string outer Ini
+  /if (${Bool[${Plugin[MQ2IniExt]}]}) {
     /varset IniMode IniExt
     /iniext clear
-  } else {
-    /varset IniMode Ini
   }
-	/if (${Debug}) {
-		/echo Pre Setup
-		/delay 5
-	}
   /call e3_Setup "${modeSelect}"
 	/if (${Debug}) {
 		/echo Post Setup
 		/delay 5
 	}
   /declare i int local
+
 :MainLoop
 /if (${Debug}) /echo |- MainLoop ==>
-  |190 is loading
-	/if (${Zone.ID}==190) /endmacro
-|	************************************************************************************	|
-| ******************************* Background Functions *******************************	|
-|	************************************************************************************	|
-
-		/if (${ActionTaken})                /varset ActionTaken FALSE
-		/if (${currentZone} != ${Zone.ID})  /call check_Zone
-		/if (${Following} && !${Assisting}) /call check_Follow
+		/varset ActionTaken FALSE
 		/call check_Active
 		/call check_Idle
     /call check_autoTribute
+    /if (${currentZone} != ${Zone.ID})  /call check_Zone
+    /if (${Following} && !${Assisting}) /call check_Follow
 
-		/if (${lifeSupport2D.Size[1]} && ${Me.PctHPs} < 99) /call check_lifeSupport
+		/if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 99) /call check_lifeSupport
     |workaround for item cast array
     /if (${reloadOnLoot}) /call reloadSpellArrays
 
 		/call Background_Events
-
 		| If I'm not active, call mainFunctions
 		/if (!${activeTimer}) {
-      /if (!${Assisting} && (!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[Brd]}) && !${use_TargetAE}) /call completePendingExchange
-
-      |These are functions in the e3_setup/Advanced.ini class sections... CLR Function#1=check_DivineArb
+      |These are functions in the e3_setup/Advanced.ini class sections... ex CLR Function#1=check_DivineArb
 			/for i 1 to ${mainLoop_Array.Size}
 				/if (${Bool[${mainLoop_Array[${i}]}]}) /call ${mainLoop_Array[${i}]}
 			/if (!${ActionTaken}) /next i
 
-			| MedBreak
-			/if (((${Me.PctMana} < ${autoMedPctMana} && ${Me.MaxMana} > 1) || ((${Me.PctEndurance} < ${autoMedPctMana}))) && ${Me.CombatState.NotEqual[COMBAT]} && !${Me.Moving} && !${Following} && !${Me.Casting.ID}) /varset medBreak TRUE
-			/if (${medBreak}) /call check_MedBreak
-			| Maintain macro timers
-			/if (${timerArray.Size}) /call check_macroTimers
-			|prevent breakongm from disabling moveutils
-			|/squelch /stick imsafe
+      /if (${Me.CombatState.NotEqual[COMBAT]}) {
+        /if ((!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[BRD]}) && !${use_TargetAE}) /call completePendingExchange
+        /if (!${Me.Moving} && !${Following} && !${Me.Casting.ID}) {
+          /if ((${Me.PctMana} < ${autoMedPctMana} && ${Me.MaxMana} > 1) || (${Me.PctEndurance} < ${autoMedPctMana})) {
+            /varset medBreak TRUE
+          }
+        }
+      }
+      /if (${medBreak}) /call check_MedBreak
 		}
-|/echo main ${Time}
+
   /if (${MoveUtils.GM}) {
-    /stick imsafe
+    /squelch /stick imsafe
     /echo GM Safe kicked in, issued /stick imsafe.  you may need to reissue /followme or /assiston
   }
 /if (${Debug}) {
@@ -85,45 +66,20 @@ SUB Main(modeSelect)
 /goto :MainLoop	
 /RETURN
 
-|--------------------------------------------------------------------------------------------------------------------|
+|----------------------------------------------------------------------------------------------------------------|
 |- Background events and functions that are checked even while casting or otherwise considered active.		   		-|
-|--------------------------------------------------------------------------------------------------------------------|
-|- This function is checked constantly, included events and functions should have minimal character interaction.	-|
-|--------------------------------------------------------------------------------------------------------------------|
-|    These are functions in the e3_setup Included Setups section
+|- This function is checked constantly, included events and functions should have minimal character interaction.-|
+|- These are functions in the e3_setup Included Setups section
 SUB Background_Events
- | /echo bgs ${Time}
 	/declare i int local
 	/for i 1 to ${macroSetups.Size}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_Background_Events
   /next i
-
-  |/echo doevents s ${Time}
-  |/doevents
-  |/echo doevents e ${Time}
-
-  |alerts - 25 events +
-	|#1" background - 2 events, 2x flush doevents
-	|#2" basics  ~ 30 events
-	|#3" casting - 0 events
-	|#4" begForBuffs - 4 events
-	|#5" buffCheck - 4 events
-	|#6" buy - 0 events
-	|#7" pet - 3 events
-	|#8" heal - 0 events
-	|#9" healChain - 7 events
-	|#10" assist ~ 15 events
-	|#11" class - varies
-	|#12" corpseSummon - 0 events
-	|#13" loot - 0 events
-	|#14" sell - 0 events
-	|#15" smoothMoves - 0 events
-	|#16" Wait4Rez - 0 events
-	|#17" cures - 0 events
 /RETURN
 
-|- if e3 is started while you have not equipped, item casting will break as the item cant be found on your corpse
-|- this hook from e3.mac reloads spell arrays after the player is equipped (a level 50 with a chest = assume equipped)
+|----------------------------------------------------------------------------------------------------------------|
+|- this handles removing and readding of items from spell arrays, ie when you die
+|- criteria to reload = wearing a chest and having >=1 platinum
 SUB reloadSpellArrays
   /if (${Bool[${FindItem[=${missingSpellItem}].ID}]}) {
     /varset reloadOnLoot FALSE

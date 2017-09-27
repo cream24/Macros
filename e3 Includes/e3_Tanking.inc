@@ -123,32 +123,30 @@ SUB peelTank
 
 #event SetTank "<#1#> Set Tank #2# Puller #3#"
 SUB event_SetTank(line, ChatSender, tankName, pullerName)
-  /call verifyEvent "${ChatSender}" "${line}"
-  /if (${Defined[ChatSender]}) /varset ChatSender ${Macro.Return.Arg[1,_]}
-    |puller
-    /if (${pullerName.Equal[Off]}) {
-      /varset currentPuller 0
-    } else /if (${Bool[${NetBots[${pullerName}].InZone}]}) {
-      /varset currentPuller ${pullerName}
-    } else {
-      /varset currentPuller 0
-      /bc [+r+] Invalid Assignment: pullerName ${pullerName} : ${line}
-      /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${pullerName}]}) /return
+  /if (${pullerName.Equal[Off]}) {
+    /varset currentPuller 0
+  } else /if (${Bool[${NetBots[${pullerName}].InZone}]}) {
+    /varset currentPuller ${pullerName}
+  } else {
+    /varset currentPuller 0
+    /bc [+r+] Invalid Assignment: pullerName ${pullerName} : ${line}
+    /return
+  }
+|main tank
+  /if (${tankName.Equal[Off]}) {
+    /varset mainTank 0
+  } else /if (${Bool[${NetBots[${tankName}].InZone}]}) {
+    /varset mainTank ${tankName}
+    /if (${tankName.Equal[${Me}]}) {
+      /varset doTaunt TRUE
+      /bc [+y+] mainTank: ${mainTank} , currentPuller: ${currentPuller}
     }
-  |main tank
-    /if (${tankName.Equal[Off]}) {
-      /varset mainTank 0
-    } else /if (${Bool[${NetBots[${tankName}].InZone}]}) {
-      /varset mainTank ${tankName}
-      /if (${tankName.Equal[${Me}]}) {
-        /varset doTaunt TRUE
-        /bc [+y+] mainTank: ${mainTank} , currentPuller: ${currentPuller}
-      }
-    } else {
-      /varset mainTank 0
-      /bc [+r+] Invalid Assignment: tankName ${tankName} : ${line}
-      /return
-    }
+  } else {
+    /varset mainTank 0
+    /bc [+r+] Invalid Assignment: tankName ${tankName} : ${line}
+    /return
+  }
 /return
 
 

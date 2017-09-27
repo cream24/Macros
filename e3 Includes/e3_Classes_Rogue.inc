@@ -1,10 +1,6 @@
 |----------------------------------------------------------------------------|
-|- e3_Classes_Rogue.inc v3.0 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ												-|
+| Rogue Functions
 |----------------------------------------------------------------------------|
-|--------------------------------------------------------------------------------|
-|- Attempts to arm 'Assassin's Strike' type disciplines before using backstab.	-|
-|--------------------------------------------------------------------------------|
 Sub check_rogStrike
 /if (${Debug}) /echo |- rogueStrike ==>	
 	/if (${Me.Endurance} > ${strikeDiscEndCost} && ${Me.PctEndurance} >= ${strikeDiscMinEnd} && ${Me.CombatAbilityReady[${strikeDisc}]} && ${Me.AbilityReady[Backstab]} && !${Me.ActiveDisc.ID} && ${Me.Invis} && ${Me.Sneaking}) {
@@ -19,12 +15,7 @@ Sub check_rogStrike
 	}
 /if (${Debug}) /echo <== rogueStrike -|
 /return
-
-|------------------------------------------------------------|
-|- AutoHide													-|
-|------------------------------------------------------------|
-|- Automatically engages sneak and hide when not in combat.	-|
-|------------------------------------------------------------|
+|----------------------------------------------------------------------------|
 sub AutoHide
 /if (${Debug}) /echo |- AutoHide ==>
 	| Engage sneak.
@@ -39,12 +30,7 @@ sub AutoHide
 	}
 /if (${Debug}) /echo <== AutoHide -|
 /return
-
-|------------------------------------------------|
-|- AutoEvade									-|
-|------------------------------------------------|
-|- Automatically engages hide while in combat.	-|
-|------------------------------------------------|
+|----------------------------------------------------------------------------|
 sub AutoEvade
 /if (${Debug}) /echo |- AutoEvade ==>
 |only use evade over 80% aggro, and only if im using a disc (burning)
@@ -57,44 +43,39 @@ sub AutoEvade
 	}
 /if (${Debug}) /echo <== AutoEvade -|
 /return
-
-
+|----------------------------------------------------------------------------|
 Sub ROG_Setup
 /if (${Debug}) /echo |- ROG_Setup ==>
-  /declare strikeTimer timer outer
-	/call IniToVar "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
-	/call IniToVar "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
-  /call IniToVar "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int outer
-  /call IniToVar "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
-  /call IniToVar "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
-  /call IniToVar "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
-
-  |/if (!${Defined[poisonPR]}) /declare poisonPR string outer Bite of the Shissar XII
-  |/if (!${Defined[poisonFR]}) /declare poisonPR string outer Solusek's Burn XII
-  |/if (!${Defined[poisonCR]}) /declare poisonPR string outer E`ci's Lament XII
-
+	/call iniToVarV "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
+	/call iniToVarV "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
+  /call iniToVarV "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int outer
+  /call iniToVarV "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
+  /call iniToVarV "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
+  /call iniToVarV "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
 	| Assassin Strikes
-	/call IniToVar "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
-	/declare strikeDisc string outer ${strikeDiscStr.Arg[1,/]}
-	/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}	
-	/declare strikeDiscMinEnd	int outer 0
-
-  /if (${Bool[${strikeDisc}]} && !${AutoHide}) /docommand ${ChatToggle} I cannot use ${strikeDisc} without AutoHide On
-
-  /if (${strikeDiscStr.Find[/MinEnd]}) {
-    /call argueString MinEnd "${strikeDiscStr}"
-    /varset strikeDiscMinEnd ${Macro.Return}
+	/call iniToVarV "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
+	/if (${Defined[strikeDiscStr]}) {
+		/declare strikeDisc string outer ${strikeDiscStr.Arg[1,/]}
+		/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}
+		/declare strikeDiscMinEnd	int outer 0
+		/if (${strikeDiscStr.Find[/MinEnd]}) {
+			/call argueString MinEnd "${strikeDiscStr}"
+			/varset strikeDiscMinEnd ${c_argueString}
+		}
+		/if (${Defined[strikeDisc]} && !${AutoHide}) {
+			/docommand ${ChatToggle} I cannot use ${strikeDisc} without AutoHide On
+		}
 	}
 /if (${Debug}) /echo <== ROG_Setup -|
 /return
-
+|----------------------------------------------------------------------------|
 SUB ROG_MacroSettings
 	/if (${Debug}) /echo |- ROG_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#1" "check_Burns" 1
 	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#2" "check_Buffs" 1
 	/if (${Debug}) /echo <== ROG_MacroSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 SUB ROG_CharacterSettings
 	/if (${Debug}) /echo |- ROG_CharacterSettings ==>
 	/call WriteToIni "${Character_Ini},${Me.Class},Auto-Hide (On/Off)" Off
@@ -106,10 +87,10 @@ SUB ROG_CharacterSettings
 	/call WriteToIni "${Character_Ini},${Me.Class},PoisonCR" "E`ci's Lament XII"
 	/if (${Debug}) /echo <== ROG_CharacterSettings -|
 /RETURN
-
+|----------------------------------------------------------------------------|
 Sub ROG_Aliases
 /return
-
+|----------------------------------------------------------------------------|
 Sub ROG_Background_Events
 	/if (${AutoHide} && !${Me.Invis} && !${Me.Moving} && ${Me.CombatState.NotEqual[COMBAT]}) /call AutoHide
 /return

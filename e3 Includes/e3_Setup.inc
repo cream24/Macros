@@ -1,10 +1,6 @@
 |--------------------------------------------------------------------|
-|- e3_Macro_Setup.inc ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ										-|
+|- Contains setup functions for e3.mac								              -|
 |--------------------------------------------------------------------|
-|- Contains setup functions for e3.mac								-|
-|--------------------------------------------------------------------|
-
 #include e3 Includes\e3_Alerts.inc
 #include e3 Includes\e3_Assists.inc
 #include e3 Includes\e3_Background.inc
@@ -26,7 +22,6 @@
 #include e3 Includes\e3_Utilities.inc
 #include e3 Includes\e3_Wait4Rez.inc
 
-
 #include e3 Includes\e3_Classes_Bard.inc
 #include e3 Includes\e3_Classes_Beastlord.inc
 #include e3 Includes\e3_Classes_Berserker.inc
@@ -44,62 +39,46 @@
 #include e3 Includes\e3_Classes_Warrior.inc
 #include e3 Includes\e3_Classes_Wizard.inc
 
-#include e3 Includes\e3_VetAAs.inc
-#include e3 Includes\vyslib.inc
-#include e3 Includes\vyslib_items.inc
-
-
-
 SUB e3_Setup(modeSelect)
 /if (${Debug}) /echo |- e3_Setup ==>
-
   /declare reloadOnLoot bool outer FALSE
   /declare missingSpellItem string outer
-
 	/if (${modeSelect.Equal[Debug]}) /varset Debug TRUE
-
 	| The file path for e3 Data.ini will still need to be updated in corresponding includes because you must use /noparse to write variables to inis.
 	/declare MacroData_Ini string outer e3 Macro Inis\e3 Data.ini
-	/declare i int local
-
 	/call check_Plugins
-	
 	/echo Loading e3 v${macroVersion}...
-
 	| create a macro data
    /if (!${${IniMode}[${MacroData_Ini}].Length}) {
 		/echo Welcome to e3! preforming first time setup...
 		/call make_macroDataIni
 	}
-
-| Import file paths ======================================================================================================= 
-
+  | Import file paths =======================================================================================================
 	| General Settings
-	|/echo ${IniMode}  ${MacroData_Ini} ${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length} ${${IniMode}[${MacroData_Ini},File Paths,General Settings].Upper}
   /if (!${${IniMode}[${MacroData_Ini},File Paths,General Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [General Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+    /beep
 		/endmacro
 	} else {
       /declare genSettings_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,General Settings]}
 	}
-
 	| Advanced Settings
    /if (!${${IniMode}[${MacroData_Ini},File Paths,Advanced Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [Advanced Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+     /beep
 		/endmacro
 	} else {
 		/declare advSettings_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,Advanced Settings]}
 	}
-	
 	| Bot Settings
 	/if (!${${IniMode}[${MacroData_Ini},File Paths,Bot Settings].Length}) {
 		/echo ERROR: Could not find designated file path for [Bot Settings].  Please review review settings in [${MacroData_Ini} > File Paths].
+    /beep
 		/endmacro
 	} else {
 		/declare Character_Ini string outer ${${IniMode}[${MacroData_Ini},File Paths,Bot Settings]}
 	}
-|${Me.Name.Equal[${NetBots.Client[0]}]} &&
-|Create Ini files ========================================================================================================
+	|Create Ini files ========================================================================================================
 	/if (${Bool[${${IniMode}[${genSettings_Ini}]}]} && !${${IniMode}[${MacroData_Ini},e3 Build,Version].Equal[${macroVersion}]}) {
 	  /echo New version of e3 detected. Hold on to your nuggets!
 	  | Macro Setting Inis
@@ -118,28 +97,25 @@ SUB e3_Setup(modeSelect)
     /call EVENT_make_CharacterSettingsIni
   }
 
-
-| Import ini settings ===================================================================================================== 
-	
+  | Import ini settings =====================================================================================================
 	/if (${Debug}) /echo Importing user settings...
-	
 	| Debug
-	/if (!${modeSelect.Equal[Debug]}) /call IniToVar "${advSettings_Ini},Debug,Debug Mode (On/Off)" Debug bool outer
-	
+	/if (!${modeSelect.Equal[Debug]}) /call iniToVarV "${advSettings_Ini},Debug,Debug Mode (On/Off)" Debug bool outer
 	| Chat Channel
 	/declare ChatToggle string outer /bc
-	/if (${${IniMode}[${Macro_Ini},General,Macro Output Channel].Length}) /call IniToVar "${Macro_Ini},General,Macro Output Channel" ChatToggle string outer
+	/if (${${IniMode}[${genSettings_Ini},General,Macro Output Channel].Length}) /call iniToVarV "${genSettings_Ini},General,Macro Output Channel" ChatToggle string outer
 
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
-	/call #IniToArray "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
+	/call IniToArrayV  "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
 	
-| Setup Includes ========================================================================================================== 
-
+  | Setup Includes ==========================================================================================================
+  /declare i int local
 	/for i 1 to ${macroSetups.Size}
+     |/g ${macroSetups[${i}]} ${Time} Start
 		/if (${macroSetups[${i}].Equal[class]}) /varset macroSetups[${i}] ${Me.Class.ShortName}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_Setup
+     |/g ${macroSetups[${i}]} ${Time} eND
 	/next i
-
   |Set Turbo per class based on configuration
   /if (${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}].Length}) /declare classTurbo int outer ${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}]}
   /squelch /turbo ${classTurbo}
@@ -196,10 +172,7 @@ SUB EVENT_make_MacroSettingsIni
 	/call WriteToIni "${advSettings_Ini},Included Setups,Include#17" buy 1
   /call WriteToIni "${advSettings_Ini},Included Setups,Include#18" alerts 1
   /call WriteToIni "${advSettings_Ini},Included Setups,Include#19" tanking 1
-  /call WriteToIni "${advSettings_Ini},Included Setups,Include#20" vetAA 1
-
 	/delay 15
-
 	/echo Creating turbo settings...
 	/call WriteToIni "${advSettings_Ini},Turbo,BRD" 30 0
 	/call WriteToIni "${advSettings_Ini},Turbo,BST" 80 0
@@ -217,15 +190,11 @@ SUB EVENT_make_MacroSettingsIni
 	/call WriteToIni "${advSettings_Ini},Turbo,SHM" 80 0
 	/call WriteToIni "${advSettings_Ini},Turbo,WAR" 30 0
 	/call WriteToIni "${advSettings_Ini},Turbo,WIZ" 30 0
-
 	/delay 15
-
 	| Import the array of Included Setups
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
-	
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
 	| Call each setup
 	/declare i int local
-	
 	/for i 1 to ${macroSetups.Size}
 		/if (${macroSetups[${i}].Equal[class]}) /varset macroSetups[${i}] ${Me.Class.ShortName}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_MacroSettings
@@ -252,32 +221,23 @@ SUB EVENT_make_MacroSettingsIni
 /if (${Debug}) /echo <== make_MacroSettingsIni -|
 /RETURN
 
-	
-
 |--------------------------------------------------------------------------------|
 |- Generates a general Macro Settings file, to be used by multiple includes.	-|
 |--------------------------------------------------------------------------------|
 #EVENT make_CharacterSettingsIni "[MQ2] Make bot ini"
 SUB EVENT_make_CharacterSettingsIni
 /if (${Debug}) /echo |- make_CharacterSettingsIni ==>
-
 	/echo Creating ${Me.CleanName}'${If[${Me.CleanName.Right[1].Equal[s]},,s]} settings file...
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
-	
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
 	/declare i int local
-	
 	/for i 1 to ${macroSetups.Size}
 		/if (${macroSetups[${i}].Equal[class]}) /varset macroSetups[${i}] ${Me.Class.ShortName}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_CharacterSettings
 		/delay 2
 	/next i
-	
 	/call WriteToIni "${MacroData_Ini},${Me.CleanName}-PEQTGC,Bot_Ini version" "${macroVersion}" 1
-
 /if (${Debug}) /echo <== make_CharacterSettingsIni -|
 /RETURN	
-
-
 
 |------------------------------------------------------------|
 |- Deletes and Recreates aliases associated with e3.mac.	-|
@@ -299,7 +259,7 @@ SUB EVENT_updateAliases
 	/squelch /alias /debugon /varset Debug 1
 	/squelch /alias /debugoff /varset Debug 0
 
-	/call #IniToArray "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
 	
 	/declare i int local
 	
@@ -327,19 +287,15 @@ SUB EVENT_updateAliases
 	/call SHM_Aliases
 	/call WAR_Aliases
 	/call WIZ_Aliases
-
 /if (${Debug}) /echo <== EVENT_updateAliases -|
 /RETURN
-
-
 
 |----------------------------------------------------|
 |- Checks for and enables required macro plugins.	-|
 |----------------------------------------------------|
 SUB check_Plugins
   /if (${Debug}) /echo Checking plugins...
-| REQUIRED PLUGINS ==>
-| -----------------------------------------------------------------------------------------------------------------------------------Check MQ2EQBC.
+  |Check MQ2EQBC.
 	/if (!${Plugin[MQ2EQBC].Name.Length}) {
 		/echo Plugin MQ2EQBC is not loaded, attempting to resolve...
 		/plugin MQ2EQBC
@@ -349,18 +305,14 @@ SUB check_Plugins
 			/echo Starting in Solo Mode...
 		}
 	}
-
-| -------------------------------------------------------------------------------------------Auto-Connect to EQBCS.
+  |Auto-Connect to EQBCS.
 	/if (${Bool[${EQBC}]}) {
 		/if (!${EQBC.Connected}) {
 			/bccmd connect
-			/delay 100 ${EQBC.Connected}
-			/delay 5
+			/delay 5s ${EQBC.Connected}
 			/if (!${EQBC.Connected}) /echo ***WARNING*** Could not connect to EQBCS! Please open EQBCS and try again.  Macro functionality may be limited...
 		}
-
-
-	| --------------------------------------------------------------------------------------------------------------------------------Check MQ2NetBots.
+	|Check MQ2NetBots.
 		/if (!${Plugin[MQ2NetBots].Name.Length}) {
 			/echo Plugin MQ2NetBots is not loaded, attempting to resolve...
 			/plugin MQ2NetBots
@@ -369,13 +321,11 @@ SUB check_Plugins
 				/echo ***WARNING*** Could not load MQ2NetBots! Macro functionality may be limited.
 			}
 		}
-		
-	| -------------------------------------------------------------------------------------------Auto-Connect to NetBots.
+	|Auto-Connect to NetBots.
 		/if (${NetBots}) {
 			/squelch /netbots on grab=on send=on
 		}
-		
-	| -----------------------------------------------------------------------------------------------------------------------------Check MQ2NetAdvPath.
+	|Check MQ2NetAdvPath.
 		/if (!${Plugin[MQ2NetAdvPath].Name.Length}) {
 			/echo Plugin MQ2NetAdvPath is not loaded, attempting to resolve...
 			/plugin MQ2NetAdvPath
@@ -385,8 +335,7 @@ SUB check_Plugins
 			}
 		}
 	}
-	
-| ------------------------------------------------------------------------------------------------------------------------------Check MQ2MoveUtils.
+  |Check MQ2MoveUtils.
 	/if (!${Plugin[MQ2MoveUtils].Name.Length}) {
 		/echo Plugin MQ2MoveUtils is not loaded, attempting to resolve...
 		/plugin MQ2MoveUtils
@@ -400,9 +349,8 @@ SUB check_Plugins
 				/echo Follow restricted to NetBots.
 			}
 		}
-	}	
-
-| -------------------------------------------------------------------------------------------------------------------------------Check MQ2Exchange.
+	}
+  |Check MQ2Exchange.
 	/if (!${Plugin[MQ2Exchange].Name.Length}) {
 		/echo Plugin MQ2Exchange is not loaded, attempting to resolve...
 		/plugin MQ2Exchange
@@ -412,8 +360,7 @@ SUB check_Plugins
 			/echo Item swapping is DISABLED.
 		}
 	}
-
-| ----------------------------------------------------------------------------------------------------------------------------------Check MQ2Twist.
+  |Check MQ2Twist.
 	/if (${Select[${Me.Class.ShortName},BRD]}) {
 		/if (!${Plugin[MQ2Twist].Name.Length}) {
 			/echo Plugin Unable to detect MQ2Twist, attempting to resolve...
@@ -425,13 +372,9 @@ SUB check_Plugins
 			}
 		}	
 	}
-
-| <== REQUIRED PLUGINS
-
-|Check MQ2ItemDisplay.
+  |Check MQ2ItemDisplay.
 	/if (!${Plugin[mq2itemdisplay].Name.Length}) /plugin MQ2ItemDisplay
-
-|Check MQ2ITurbo
+  |Check MQ2ITurbo
   /if (!${Plugin[mq2turbo].Name.Length}) {
     /plugin MQ2Turbo
     /delay 3s ${Plugin[MQ2Turbo].Name.Length}
@@ -440,9 +383,6 @@ SUB check_Plugins
       /echo Using default turbo in e3.mac
     }
   }
-
 |Check MQ2HUD.
-|	/if (!${Plugin[mq2hud].Name.Length}) /plugin MQ2HUD	
-	
-| <== REQUIRED PLUGINS
+|	/if (!${Plugin[mq2hud].Name.Length}) /plugin MQ2HUD
 /RETURN

@@ -6,211 +6,191 @@
 |${MacroQuest.ChatChannel[1]}
 |--------------------------------------------------------------------|
 #event lootRelay "#1# tells you, 'loot #2#'"
-SUB Event_lootRelay(line, ChatSender, lootSetting)
-  /if (${lootSetting.Equal[on]}) {
-    /if (!${Defined[Auto_Loot]}) {
-      /declare Auto_Loot bool outer TRUE
-    } else /if (${Defined[Auto_Loot]}) {
-      /varset Auto_Loot TRUE
-    }
+SUB Event_lootRelay(line, ChatSender, looting)
+  /if (!${Defined[Auto_Loot]}) /declare Auto_Loot bool outer TRUE
+  /if (${Select[${looting},on]}) {
+    /varset Auto_Loot TRUE
     /r Looting Enabled
-    /call Event_YourKill
-  } else /if (${lootSetting.Equal[off]}) {
+    /if (${Me.CombatState.NotEqual[Combat]} || ${combatLooting}) /call loot_Area
+
+  } else /if (${Select[${looting},off]}) {
     /varset Auto_Loot FALSE
     /r Looting Disabled
   }
 /return
 
-|------------------------------------------------------------|
-|- Automatically engage looting functions when a mob dies.	-|
-#event YourKill "You gain experience!!"
-#event YourKill "You gain party experience!!"
-#event YourKill "You gained raid experience!"
-SUB Event_YourKill
-/if (${Debug} || ${Debug_Loot}) /echo |- Event_YourKill ==>
-  /if (${Auto_Loot}) {
-    /if (${Me.CombatState.NotEqual[Combat]} || ${combatLooting}) /call loot_It
-  }
-/if (${Debug} || ${Debug_Loot}) /echo <== Event_YourKill -|
-/RETURN
-
 |----------------------------------------------------------------|
 |- Adds corpses that are not yours to the looted corpse list.	  -|
 #EVENT NotYourKill "Someone is already looting that corpse."
 #EVENT NotYourKill "You may not loot this corpse at this time."
-#EVENT NotYourKill "You must first target a corpse to loot!"
+#EVENT NotYourKill "You are too far away to loot that corpse."
 SUB EVENT_NotYourKill
-/RETURN SKIP_LOOT
+  /varset canLootCorpse FALSE
+/RETURN
 
 |--------------------------------------------------------------------------|
 |- Moves to corpses and begins looting, reads Loot_Ini for loot handles.	-|
-SUB loot_It
-/if (${Debug} || ${Debug_Loot}) /echo |- loot_It ==>
-  /if (${Auto_Loot}) {
-    /squelch /hidecor looted
-    | Declare local variables
-    /declare lootSetting string local
-    /declare lootTotal int local -1
-    /declare lootTotal_Timer timer local
-    /declare i int local
-    /declare c int local
-    /declare looted_Corpses string local
-    /declare corpseID int local
-    /declare startX int ${Me.X}
-    /declare startY int ${Me.Y}
-    |NPC corpses have _'s in the name
-    |/echo ${Bool[${Select[${NearestSpawn[corpse radius 100].ID},${looted_Corpses}]}]}
-  :moreCorpsesToLoot
-    /doevents flush YourKill
-    |/if (${Bool[${looted_Corpses}]} && ${Select[${NearestSpawn[${i},corpse radius ${seek_Radius}].ID},${looted_Corpses}]}) /goto :skip_Loot
-    /if (${Debug} || ${Debug_Loot}) /echo morecorpses  ${SpawnCount[npc corpse radius ${seek_Radius} "_"]}
-    /if (${Twist.Twisting}) /call pauseTwist
-    /for c 1 to ${SpawnCount[npc corpse radius ${seek_Radius} "_"]}
-      /if (${Bool[${NearestSpawn[${c},corpse radius ${seek_Radius} "_"].ID}]} && ${Spawn[id ${NearestSpawn[${c},corpse radius ${seek_Radius} "_"].ID}].LineOfSight} && !${Bool[${Select[${NearestSpawn[${c},corpse radius ${seek_Radius} "_"].ID},${looted_Corpses}]}]}) {
-      |/echo vs1
-      /if (${Corpse.Open}) /notify LootWnd DoneButton leftmouseup
-      /varset corpseID ${NearestSpawn[${c},corpse radius ${seek_Radius} "_"].ID}
-      /if (${Debug} || ${Debug_Loot}) /echo corpse ${corpseID} list ${looted_Corpses}
-      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+SUB loot_Area
+  /if (${Me.Name.Equal[Balron]}) /varset Debug_Loot TRUE
+  /if (${Debug} || ${Debug_Loot}) /echo |- loot_Area ==>
+  /declare startX int ${Me.X}
+  /declare startY int ${Me.Y}
+  /squelch /hidecor looted
+  /if (${Twist.Twisting}) /call pauseTwist
+  /delay 5s !${Me.Casting.ID}
+  /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+  /if (${Stick.Active}) /squelch /stick off
 
-      /delay 1
-      /call TrueTarget ${corpseID}
-      /delay 1
-      /if (${Debug} || ${Debug_Loot}) /echo moving to cor ${corpseID} targ ${Target.ID}
-      /if (${Spawn[id ${corpseID}].Distance} > 10 && ${Spawn[id ${corpseID}].Distance} < ${seek_Radius}) /call MoveTo -SpawnID|${corpseID}
-      | If corpseID is in range, loot it.
-      /delay 3s ${Spawn[id ${corpseID}].Distance} < 15
-      /if (${Spawn[id ${corpseID}].Distance} < 15 && ${Spawn[id ${corpseID}].DistanceZ} < 15) {
-        | If looter is a bard, pause melody.
+  /declare ClosestCorpse        int local
+  /declare ClosestCorpseDist    int local
+  /declare TMPClosestCorpse      int local
+  /declare TMPClosestCorpseDist  int local
+  /declare CorpseList         string local
+  /declare CorpseList_Looted  string local
+  /declare i int local
+  /declare c int local
+  /declare NumCorpses int local ${SpawnCount[npc corpse zradius 50 radius ${seek_Radius} "_"]}
+  /declare CorpsesLeft int local ${NumCorpses}
+  /if (${Debug} || ${Debug_Loot}) /echo NumCorpses: ${NumCorpses}
+  |build list of nearby corpses
+  |/doevents flush YourKill
 
-        /if (${Debug} || ${Debug_Loot}) /echo ${Target.ID}
-        /loot
-        /delay 2
-        | Check to see if the corpse can be looted
-        /doevents NotYourKill
-        /delay 15 ${Window[LootWnd].Open} || ${Bool[${Macro.Return.Equal[SKIP_LOOT]}]}
-        /varset looted_Corpses ${looted_Corpses},${corpseID}
-        /if (${Bool[${Macro.Return.Equal[SKIP_LOOT]}]}) /goto :SKIP_LOOT
+  /for i 1 to ${NumCorpses}
+    /varset ClosestCorpse ${NearestSpawn[${i},npc corpse zradius 50 radius ${seek_Radius} "_"].ID}
+    /varset CorpseList ${CorpseList}${ClosestCorpse}|
+  /next i
+  /if (${Debug} || ${Debug_Loot}) /echo CorpseList: ${CorpseList}
 
-        /if (${Debug} || ${Debug_Loot}) /echo yourkill ${Macro.Return} corpse ${corpseID}
-        /varset lootTotal_Timer 3s
-
-        | Count items on the corpse, loop until no new items are found.
-        :autoxplootlag
-        /if (${lootTotal}!=${Corpse.Items}) {
-          |/echo vs4
-          /varset lootTotal ${Corpse.Items}
-          /delay 5 ${lootTotal}==${Corpse.Items}
-          /if (${lootTotal_Timer}) /goto :autoxplootlag
-        }
-
-        | If there are items to loot
-        /if (${lootTotal}) {
-          /for i 1 to ${lootTotal}
-            | If my inventory is full, and I haven't alerted the user.
-            /if (!${Me.FreeInventory}) {
-              | If I haven't alerted the user
-              /if (!${fullInventory_Alert}) {
-                /beep
-                /declare fullInventory_Alert bool outer TRUE
-                /docommand ${ChatToggle} My inventory is full!  I will continue to link items on corpses, but cannot loot anything else.
-              }
-            } else {
-              | Wait for an item ID in the loot slot, and set iniEntryVariables
-              /delay 1s ${Corpse.Item[${i}].ID}
-              /if (${Debug} || ${Debug_Loot}) /echo itemID ${Corpse.Item[${i}].ID}
-
-              /call get_lootSetting "${i}"
-              |/echo vs5
-              /varset lootSetting ${Macro.Return}
-              | Destroy the item
-              /if (${lootSetting.Find[Destroy]}) {
-                /echo [Auto-Loot]: Destroying [${Corpse.Item[${i}].Name}]
-                /if (${Corpse.Item[i].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
-                /call loot_Handle ${i} destroy
-              | Keep the item
-              } else /if (${lootSetting.Find[Keep]}) {
-                | Check for a max stock
-                /if (${lootSetting.Find[keep|]}) {
-                  /call argueString keep| "${lootSetting}"
-                  /if (${Bool[${Macro.Return}]} && ${Int[${Macro.Return}]} < ${Math.Calc[${FindItemCount[${Corpse.Item[i].Name}]} + 1].Int}) {
-                    /echo [Auto-Loot]: Fully stocked on [${Corpse.Item[i].Name}].
-                    /goto :skip_Item
-                  }
-                }
-                | If the item is lore, make sure I don't have one.  If I do, skip it.
-                /if (${Corpse.Item[${i}].Lore}) {
-    |								/echo [Auto-Loot]: [${Corpse.Item[i].Name}] is lore check the corpse - broken RoF
-                  /if (${FindItemCount[=${Corpse.Item[${i}].Name}]} || ${FindItemBankCount[=${Corpse.Item[${i}].Name}]}) {
-                    /echo [Auto-Loot]: [${Corpse.Item[${i}].Name}] is lore, and I already have one${If[${FindItemBankCount[=${Corpse.Item[${i}].Name}]}, in the bank,]}.
-                    /goto :skip_Item
-                  }
-                }
-                | Check that I have an inventory space large enough for the item
-                /if (${Me.LargestFreeInventory} < ${Corpse.Item[${i}].Size}) {
-                  /echo [Auto-Loot]: I don't have a free inventory space large enough to hold [${Corpse.Item[${i}].Name}].
-                  /goto :skip_Item
-                }
-                | If the item is a container, skip it.
-                /if (${Corpse.Item[${i}].Container}) {
-                  /echo [Auto-Loot]: Skipping [${Corpse.Item[${i}].Name}], item is a container.
-                  /goto :skip_Item
-                }
-                | loot the item
-                /echo [Auto-Loot]: Looting [${Corpse.Item[${i}].Name}]
-                /call loot_Handle ${i} keep
-              }
-              :skip_Item
-              /next i
-            }
-        }
-        | If I've finished looting, and there are still items on the corpse, announce in chat.
-        /if (${Corpse.Items}) {
-          |/echo in finished loot link section
-          /keypress /
-          /delay 1
-          /call Type "${linkChannel} ${Target.ID}-"
-          /delay 1
-          /notify LootWnd BroadcastButton leftmouseup
-          /delay 1
-          /keypress enter chat
-        }
-        :SKIP_LOOT
-
-        /if (${Corpse.Open}) /notify LootWnd DoneButton leftmouseup
-        /delay 2
-      |end of distance check
+  /for i 1 to ${NumCorpses}
+    /if (${Debug} || ${Debug_Loot}) /echo Corpse ${i} of ${NumCorpses}, ${CorpsesLeft} left
+    |iterate list of corpses
+    /if (!${CorpsesLeft}) /return
+    |recalculate the closest corpse from current position
+    /varset ClosestCorpse ${CorpseList.Arg[1,|]}
+    /varset ClosestCorpseDist ${Math.Distance[${Spawn[id ${ClosestCorpse}].Y},${Spawn[id ${ClosestCorpse}].X}]}
+    /for c 1 to ${CorpsesLeft}
+      /varset TMPClosestCorpse ${CorpseList.Arg[${c},|]}
+      /varset TMPClosestCorpseDist ${Math.Distance[${Spawn[id ${TMPClosestCorpse}].Y},${Spawn[id ${TMPClosestCorpse}].X}]}
+      /if (${TMPClosestCorpseDist} < ${ClosestCorpseDist}) {
+        /if (${Debug} || ${Debug_Loot}) /echo [${TMPClosestCorpse}]:${TMPClosestCorpseDist} closer than [${ClosestCorpse}]:${ClosestCorpseDist}
       }
-    |end of if eligible corpse
-    }
-    |check for loot off message to allow an escape from looting
-    /doevents lootRelay
-    /if (${Auto_Loot}) /next c
-    |if more corpses to loot goto
-    /if (${Auto_Loot} && ${Bool[${NearestSpawn[corpse radius ${seek_Radius} "_"].ID}]} && ${Spawn[id ${NearestSpawn[corpse radius ${seek_Radius} "_"].ID}].LineOfSight} && !${Bool[${Select[${NearestSpawn[corpse radius ${seek_Radius} "_"].ID},${looted_Corpses}]}]}) /goto :moreCorpsesToLoot
-    |if no more corpses, Click 'Done' and return to group.
-    |/echo no more corpses, loot done ${looted_Corpses}
-    /if (${Corpse.Open}) /notify LootWnd DoneButton leftmouseup
-    |/if (${returnTwist}) /call unpauseTwist
-    /if (${Following}) {
-      /call AquireFollow
-    } else {
-      /call MoveTo -Loc|${startY},${startX}
-    }
-  }
+    /next c
+    /if (!${Bool[${Spawn[${ClosestCorpse}]}]}) /goto :skipCorpse
 
-/if (${Debug} || ${Debug_Loot}) /echo <== loot_It -|
-/RETURN JUST_LOOTED
+    /if (${Target.ID}!=${ClosestCorpse}) /call TrueTarget ${ClosestCorpse}
+    /delay 2s ${Target.ID}==${ClosestCorpse}
+    /if (!${Target.ID}) {
+      /if (${Debug} || ${Debug_Loot}) /echo Cant Target ${ClosestCorpse}
+      /goto :skipCorpse
+    }
+    /if (${Target.Distance}>12 && ${Target.DistanceZ} < 80) {
+      /call MoveToLoc ${Target.Y} ${Target.X} 12 20
+    }
+    /if (${Target.Distance}<=15 &&  ${Target.DistanceZ} < 30) {
+      /call lootCorpse
+    } else {
+      /echo Corpse ${ClosestCorpse} is > ${Target.Distance}|${Target.DistanceZ} distance, skipping
+    }
+    :skipCorpse
+    /varset CorpseList ${CorpseList.Replace[${ClosestCorpse}|,]}
+    /varcalc CorpsesLeft ${CorpsesLeft}-1
+    |exits loop if autoloot was turned off
+    |/doevents lootRelay
+  /if (${Auto_Loot}) /next i
+
+  /if (${Following}) {
+    /call AcquireFollow
+  } else {
+    /call MoveToLoc ${startY} ${startX}
+  }
+  /if (${Debug} || ${Debug_Loot}) /echo <== loot_Area -|
+/return
+
+|-------------------------------------------------------------------------------------------------
+SUB lootCorpse
+  /declare i int local
+  /varset canLootCorpse TRUE
+  /loot
+  /delay 5 ${Window[LootWnd].Open}
+  /doevents NotYourKill
+  /delay 1s ${Corpse.Items} || !${canLootCorpse}
+  /if (${Debug} || ${Debug_Loot}) /echo Looting ${Target.ID}-Items:${Corpse.Items}
+  /if (!${canLootCorpse}) {
+    /if (${Debug} || ${Debug_Loot}) /echo Not your kill
+    /goto :skipLoot
+  }
+  /if (!${Bool[${Corpse.Items}]}) /goto :skipLoot
+
+  /for i 1 to ${Corpse.Items})
+    /if (!${Me.FreeInventory}) {
+      /if (!${fullInventory_Alert}) {
+        /beep
+        /varset fullInventory_Alert TRUE
+        /docommand ${ChatToggle} My inventory is full!  I will continue to link items on corpses, but cannot loot anything else.
+      }
+    } else {
+      /varset fullInventory_Alert FALSE
+      /delay 1s ${Corpse.Item[${i}].ID}
+      /if (${Debug} || ${Debug_Loot}) /echo itemID ${Corpse.Item[${i}].ID}
+      /call get_lootSetting "${i}" 0
+      | Destroy the item
+      /if (${lootSetting.Find[Destroy]}) {
+        /echo [Loot]: Destroying [${Corpse.Item[${i}].Name}]
+        /if (${Corpse.Item[i].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
+        /call loot_Handle ${i} destroy
+        | Keep the item
+      } else /if (${lootSetting.Find[Keep]}) {
+        | Check for a max stock
+        /if (${lootSetting.Find[keep|]}) {
+          /call argueString keep| "${lootSetting}"
+          /if (${Bool[${c_argueString}]} && ${Int[${c_argueString}]} < ${Math.Calc[${FindItemCount[${Corpse.Item[i].Name}]} + 1].Int}) {
+            /echo [Loot]: Fully stocked on [${Corpse.Item[i].Name}].
+            /goto :skipItem
+          }
+        }
+        | If the item is lore, make sure I don't have one.  If I do, skip it.
+        /if (${Corpse.Item[${i}].Lore}) {
+            /if (${FindItemCount[=${Corpse.Item[${i}].Name}]} || ${FindItemBankCount[=${Corpse.Item[${i}].Name}]}) {
+            /echo [Loot]: [${Corpse.Item[${i}].Name}] is lore, and I already have one${If[${FindItemBankCount[=${Corpse.Item[${i}].Name}]}, in the bank,]}.
+            /goto :skipItem
+          }
+        }
+        | Check that I have an inventory space large enough for the item
+        /if (${Me.LargestFreeInventory} < ${Corpse.Item[${i}].Size}) {
+          /echo [Loot]: I don't have a free inventory space large enough to hold [${Corpse.Item[${i}].Name}].
+          /goto :skipItem
+        }
+        /echo [Loot]: Looting [${Corpse.Item[${i}].Name}]
+        /call loot_Handle ${i} keep
+        /delay 1
+      }
+      :skipItem
+    }
+  /next i
+  |looting done, if items leftover link them
+  /if (${Corpse.Items}) {
+    /keypress /
+    /delay 1
+    /call Type "${linkChannel} ${Target.ID}-"
+    /delay 1
+    /notify LootWnd BroadcastButton leftmouseup
+    /delay 1
+    /keypress enter chat
+  }
+  :skipLoot
+  /if (${Corpse.Open}) /notify LootWnd DoneButton leftmouseup
+  /delay 1s !${Window[LootWnd].Open}
+/return
 
 |--------------------------------------------------------------------------|
 SUB get_lootSetting(invSlot, itemSlot)
-/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${If[${Defined[itemSlot]},itemSlot: ${itemSlot},]}==>
+|/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot} ==>
 	/declare itemName string local
 	/declare itemValue string local
 	/declare iniEntryVariables string local
-	/declare lootSetting string local
+	/varset lootSetting
 	| If the item is not in a bag
-	/if (!${Defined[itemSlot]}) {
+	/if (!${Bool[${itemSlot}]}) {
 		|/echo invSlot variable: ${invSlot} 
 		| Reset itemName if it contains a ':'.  ':'s cause errors when reading from the ini, because they act as a delimiter, just like '='s
 |		/echo ${Corpse.Item[${invSlot}].Name}		
@@ -247,14 +227,13 @@ SUB get_lootSetting(invSlot, itemSlot)
 		/if (!${Ini[${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}].Length}) {
 			/call WriteToIni "${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}" ${If[${Me.Inventory[${invSlot}].Item[${itemSlot}].Container},Container,${If[${Me.Inventory[${invSlot}].Item[${itemSlot}].NoDrop},Skip,Keep${If[${Me.Inventory[${invSlot}].Item[${itemSlot}].Stackable},|${Me.Inventory[${invSlot}].Item[${itemSlot}].StackSize},]}]}]}
 			/docommand ${ChatToggle} Added: [${Me.Inventory[${invSlot}].Item[${itemSlot}].Name}(${Ini[${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}]})] to [${Loot_Ini}].
-			
 			| Add scripts to import old loot settings from ninjaloot.ini, and old e3 loot inis
 		}
 	}
 	/varset lootSetting ${Ini[${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}]}
-	/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting -| lootSetting=${lootSetting}
-/if (${Debug} || ${Debug_Loot}) /echo <== get_lootSetting -|
-/RETURN ${lootSetting}
+
+	/if (${Debug} || ${Debug_Loot}) /echo [get_lootSetting] ${itemName},${lootSetting},invSlot:${invSlot},${itemSlot}
+/RETURN
 
 |--------------------------------------------------------------------|
 |- Loots items mobs you have killed, to destroy or autoinventory.	  -|
@@ -264,9 +243,9 @@ SUB get_lootSetting(invSlot, itemSlot)
 |--------------------------------------------------------------------|
 SUB loot_Handle(int slotNum, handle)
 /if (${Debug} || ${Debug_Loot}) /echo |- loot_Handle ==>
-	/declare lootTimer timer local 50
+	/declare lootTimer timer local 3s
 	:retry_Loot
-	/if (${Debug} || ${Debug_Loot}) /echo |- loot_Handle -| :retry_Loot
+	/if (${Debug} || ${Debug_Loot}) /echo |- loot_Handle -| :retry_Loot slot ${slotNum} ${handle}
 	| Try to loot the specified item from the corpse.
 	/itemnotify loot${slotNum} leftmouseup
 	/delay 5 ${Cursor.ID} || ${Window[ConfirmationDialogBox].Open} || ${Window[QuantityWnd].Open}
@@ -348,33 +327,38 @@ SUB EVENT_updateLootSetting(line, ChatSender, itemName, iniSetting)
 
 |--------------------------------------------------------------------|
 SUB loot_Setup
-/call INItoVar "${advSettings_Ini},Debug,Debug Loot (On/Off)" Debug_Loot bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Loot (On/Off)" Debug_Loot bool outer
 /if (${Debug} || ${Debug_Loot}) /echo |- _Setup ==>
 	/if (!${Ini[${MacroData_Ini},File Paths,Loot Settings File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Loot Settings File" "e3 Macro Inis\Loot Settings.ini" 1
 	/if (!${Ini[${MacroData_Ini},File Paths,Loot Settings File].Length}) {
 		/echo ERROR: Could not find designated file path for [Loot Settings File], please review [e3Data.ini] and restart.
 		/endmacro
+		/beep
 	} else {
 		/declare Loot_Ini string outer ${Ini[${MacroData_Ini},File Paths,Loot Settings File]}
 	}
+
+  /declare fullInventory_Alert bool outer FALSE
+  /declare canLootCorpse bool outer FALSE
+  /declare lootSetting string outer
+
 	/if (!${Ini[${Loot_Ini}].Length}) /call Build_Alphabetized_Ini "${Loot_Ini}"
-	/call IniToVar "${genSettings_Ini},Loot,Loot Link Channel" linkChannel string outer
-	/call IniToVar "${genSettings_Ini},Loot,Corpse Seek Radius" seek_Radius int outer
-  /call IniToVar "${genSettings_Ini},Loot,Loot in Combat" combatLooting bool outer
+	/call iniToVarV "${genSettings_Ini},Loot,Loot Link Channel" linkChannel string outer
+	/call iniToVarV "${genSettings_Ini},Loot,Corpse Seek Radius" seek_Radius int outer
+  /call iniToVarV "${genSettings_Ini},Loot,Loot in Combat" combatLooting bool outer
 	| Import character settings
-	/if (${Bool[${Ini[${Character_Ini},Misc,Auto-Loot (On/Off)]}]}) /call IniToVar "${Character_Ini},Misc,Auto-Loot (On/Off)" Auto_Loot bool outer
+	/if (${Bool[${Ini[${Character_Ini},Misc,Auto-Loot (On/Off)]}]}) /call iniToVarV "${Character_Ini},Misc,Auto-Loot (On/Off)" Auto_Loot bool outer
 /if (${Debug} || ${Debug_Loot}) /echo <== _Setup -|
 /RETURN
 
 |--------------------------------------------------------------------|
 SUB loot_MacroSettings
-/if (${Debug} || ${Debug_Loot}) /echo |- _MacroSettings ==>
+/if (${Debug}) /echo |- _MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Loot (On/Off)" Off
-	/call WriteToIni "${genSettings_Ini},Loot,Auto-Loot Mode (Auto/Manual)" Auto
 	/call WriteToIni "${genSettings_Ini},Loot,Loot Link Channel" say
 	/call WriteToIni "${genSettings_Ini},Loot,Corpse Seek Radius" 125
   /call WriteToIni "${genSettings_Ini},Loot,Loot in Combat" TRUE
-/if (${Debug} || ${Debug_Loot}) /echo <== _MacroSettings -|
+/if (${Debug}) /echo <== _MacroSettings -|
 /RETURN
 
 |--------------------------------------------------------------------|
@@ -389,7 +373,6 @@ Sub loot_Aliases
 |--------------------------------------------------------------------|
 Sub loot_Background_Events
   /doevents lootRelay
-  /doevents YourKill
   /doevents checkLootSetting
   /doevents updateLootSetting
 /return

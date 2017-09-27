@@ -33,5 +33,6 @@ Sub Main(gemNumber)
 /return
 
 Sub Event_OutOfStuff 
-/endmacro 
+/beep
+/endmacro
 /return

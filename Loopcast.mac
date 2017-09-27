@@ -1,7 +1,6 @@
 #event OutOfStuff "You are missing some required components."
 
-Sub Main(gemNumber)
-
+Sub Main(gemNumber, delay)
 	
 	:Loop
 	/if (${Cursor.ID}) /autoinv
@@ -11,8 +10,8 @@ Sub Main(gemNumber)
 		/delay 15s
 		/goto :Loop
 	}
+	/delay ${delay}
 	/if (!${Me.SpellReady[${gemNumber}]}) {
-		/delay 1s
 		/if (${Cursor.ID}) /autoinv
 		/goto :Loop
 	} else {
