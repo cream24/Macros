@@ -951,7 +951,7 @@ SUB useBurns(ArrayName)
         /delay 2
         |/varset ActionTaken TRUE
         /call check_Ready "${ArrayName}" ${i}
-        /if (!${c_Ready}) /g Used:[${ArrayName}]-${${ArrayName}[${i},${iCastName}]}
+        /if (!${c_Ready}) /g ${ArrayName}-${${ArrayName}[${i},${iCastName}]}
       }
     } else {
       /if (${Debug} || ${Debug_Assists}) /echo NotReady: ${i} ${${ArrayName}[${i},${iCastName}]}
