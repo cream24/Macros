@@ -92,7 +92,7 @@ SUB AcquireFollow
 |----------------------------------------------------------------------------|
 #bind StopFollowing /StopFollowing
 SUB Bind_StopFollowing(yLoc,xLoc)
-  /if (${Following}) {
+  /if (${Stick.Active} || ${NetAdvPath.Status}==1 || ${Following}) {
     /if (${Stick.Active}) /squelch /stick off
     /if (${NetAdvPath.Status}==1) /squelch /netfollow off
     /call MoveToLoc ${yLoc} ${xLoc} 20

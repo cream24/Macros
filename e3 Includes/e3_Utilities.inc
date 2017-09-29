@@ -931,8 +931,7 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
 
   /if (${UZR.Find[U]} && !${NetBots[${ChatSender}].ID})     /varset userValidated FALSE
   /if (${UZR.Find[Z]} && !${NetBots[${ChatSender}].InZone}) /varset inZone FALSE
-  /if (${UZR.Find[R]} && !${Spawn[pc =${ChatSender}].Distance3D}>${MaxResponseDist}) /varset inRange FALSE
-
+  /if (${UZR.Find[R]} && (${Spawn[pc =${ChatSender}].Distance}>${LeashLength} || ${Spawn[pc =${ChatSender}].DistanceZ}>150)) /varset inRange FALSE
   |/echo ${eventLine.Right[1].Equal[']} ${eventLine} ${eventLine.Left[-1]}
   /if (${eventLine.Right[1].Equal[']}) /varset eventLine ${eventLine.Left[-1]}
   /if (${eventLine.Find[/only|]}) {
