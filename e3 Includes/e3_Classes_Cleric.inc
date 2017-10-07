@@ -292,6 +292,7 @@ Sub defineRezSpell
     /varset rezSpell Reanimation
   }
   /if (${Bool[${rezSpell}]}) {
+    /if (${Defined[rezArray]}) /deletevar rezArray
     /declare rezArray[1] string outer ${rezSpell}
     /if (${rezArray.Size}) {
       /call BuildSpellArray "rezArray" "rezArray2D"

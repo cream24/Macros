@@ -862,6 +862,7 @@ SUB EVENT_fixCorpses
 |- Consents a PC to drag your corpse.	-|
 |----------------------------------------|
 #event Consent "#1# tells you, 'Consent #2#'"
+#event Consent "#1# tells the raid#*#Consent #2#'"
 #event Consent "<#1#> Consent #2#"
 SUB Event_Consent(line, ChatSender, ConsentTarget)
   /if (${ConsentTarget.NotEqual[${Me.CleanName}]}) /consent ${ConsentTarget}
@@ -871,15 +872,17 @@ SUB Event_Consent(line, ChatSender, ConsentTarget)
 #event gatherCorpses "[MQ2] Gather corpse#*#"
 SUB event_gatherCorpses
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_gatherCorpses ==>
-  /bc Consent ${Me.CleanName}
+  /if (${Raid.Members}) {
+    /rs Consent ${Me.CleanName}
+  } else {
+    /bc Consent ${Me.CleanName}
+  }
 	/declare i int local
-	/for i 1 to ${SpawnCount['s radius 100]}
-		/if (${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].CleanName.Arg[1,']}) {
-			/call TrueTarget ${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].ID}
-			/delay 2
-			/corpse
-			/delay 1s ${Target.Distance} < 20
-		}
+	/for i 1 to ${SpawnCount[pccorpse radius 100]}
+    /call TrueTarget ${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].ID}
+    /delay 2
+    /corpse
+    /delay 1s ${Target.Distance} < 20
 	/next i
 	/squelch /target clear
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_gatherCorpses -|
