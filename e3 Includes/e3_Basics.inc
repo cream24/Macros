@@ -638,6 +638,12 @@ SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
 /RETURN
 
 |------------------------------------------------------------|
+#EVENT FindSlot "<#1#> Find Slot #2#"
+SUB EVENT_FindSlot(line, ChatSender, SlotToFind)
+  /if (!${checkEventArgs[${ChatSender},${line},U,${SlotToFind}]}) /return
+  /say ${LinkDB[${InvSlot[${c_eventArgData}].Item}]}
+/RETURN
+|------------------------------------------------------------|
 |- Checks for bots who are out of range, or out of zone.	  -|
 |- Use, /count, or, /bc Count bots							            -|
 |------------------------------------------------------------|
@@ -1323,6 +1329,7 @@ Sub basics_Background_Events
   /doevents CountBots
   /doevents FindMissingItem
   /doevents FindItems
+  /doevents FindSlot
   /doevents CheckBuffs
   /doevents LoadSpells
   /doevents Exit
@@ -1388,6 +1395,8 @@ Sub basics_Aliases
 	/squelch /alias /DropBuff /bc Drop Buff
 	/squelch /alias /CheckBuff /bc Check Buff
 	/squelch /alias /FindItem /bc Find Item
+  /squelch /alias /FindSlot /bc Find Slot
+  /squelch /alias /fds /bc Find Slot
   /squelch /alias /fdi /bc Find Item
   /squelch /alias /FindMissingItem /bc Find Missing Item
   /squelch /alias /fmi /bc Find Missing Item
