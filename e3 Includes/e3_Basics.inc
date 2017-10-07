@@ -641,7 +641,12 @@ SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
 #EVENT FindSlot "<#1#> Find Slot #2#"
 SUB EVENT_FindSlot(line, ChatSender, SlotToFind)
   /if (!${checkEventArgs[${ChatSender},${line},U,${SlotToFind}]}) /return
-  /say ${LinkDB[${InvSlot[${c_eventArgData}].Item}]}
+  /if (${Select[${c_eventArgData},charm,leftear,head,face,rightear,neck,shoulder,arms,back,leftwrist,rightwrist,ranged,hands,mainhand,offhand,leftfinger,rightfinger,chest,legs,feet,waist,powersource,ammo]}) {
+    /say ${c_eventArgData}: ${LinkDB[${InvSlot[${c_eventArgData}].Item}]}
+  } else {
+    /if (${c_eventArgChatSender.Equal[${Me}]}) {
+      /echo Valid Slots: charm, leftear, head, face, rightear, neck, shoulder, arms, leftwrist, rightwrist, ranged, hands, mainhand, offhand, ammo, back, leftfinger, rightfinger, chest, legs, feet, waist, powersource
+  }
 /RETURN
 |------------------------------------------------------------|
 |- Checks for bots who are out of range, or out of zone.	  -|
