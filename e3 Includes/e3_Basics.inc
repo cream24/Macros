@@ -534,36 +534,39 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
     |/docommand ${ChatToggle} >> Found (${Math.Calc[${FindItemCount[${ItemToFind}]} + ${FindItemBankCount[${ItemToFind}]}].Int}) : [${ItemToFind}] <<
   | -Check cursor.
   /if (${Cursor.Name.Equal[${ItemToFind}]}) {
-    /varcalc totalItems ${totalItems}+1
-    /docommand /timed ${reportDelay} ${ChatToggle} >>> Found [${Cursor.Name}]->[Cursor] <<<
+    /varcalc totalItems ${totalItems}+${Cursor.Stack}
+    /docommand /timed ${reportDelay} ${ChatToggle} >>> Found ${Cursor.Name}(${Cursor.Stack})-> [Cursor] <<<
   }
   /if (${FindItemCount[${ItemToFind}]}) {
     | -Search Equippped Items.
     /for i 1 to 22
       /if (${InvSlot[${i}].Item.Name.Find[${ItemToFind}]}) {
         /varcalc totalItems ${totalItems}+${InvSlot[${i}].Item.Stack}
-        /docommand /timed ${reportDelay} ${ChatToggle} [${InvSlot[${i}].Item}]->(${InvSlot[${i}].Name})
+        /docommand /timed ${reportDelay} ${ChatToggle} ${InvSlot[${i}].Item}(${InvSlot[${i}].Item.Stack})-> [${InvSlot[${i}].Name}]
       }
       /for a 0 to ${InvSlot[${i}].Item.Augs}
         /if (${InvSlot[${i}].Item.AugSlot[${a}].Name.Find[${ItemToFind}]}) {
           /varcalc totalItems ${totalItems}+1
-          /docommand /timed ${reportDelay} ${ChatToggle} [${InvSlot[${i}].Item.AugSlot[${a}]}]->[${InvSlot[${i}].Item}]->(${InvSlot[${i}].Name})
+          /docommand /timed ${reportDelay} ${ChatToggle} ${InvSlot[${i}].Item.AugSlot[${a}]}-> [${InvSlot[${i}].Item}-> ${InvSlot[${i}].Name}]
         }
       /next a
     /next i
     | -Search packslots.
     /for i 1 to 8
-      /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Inventory[pack${i}]}]->(InvSlot${i})
+      /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) {
+        /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Stack}
+        /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack})-> InvSlot${i}]
+      }
       /if (${Me.Inventory[pack${i}].Container}) {
         /for e 1 to ${Me.Inventory[pack${i}].Container}
           /if (${Me.Inventory[pack${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
             /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Item[${e}].Stack}
-            /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Inventory[pack${i}].Item[${e}]}]->(${Me.Inventory[pack${i}]}->InvSlot${i}->PackSlot${e})
+            /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}].Item[${e}]}(${Me.Inventory[pack${i}].Item[${e}].Stack})-> [${Me.Inventory[pack${i}]}-> InvSlot${i}-> PackSlot${e}]
           }
           /for a 0 to ${Me.Inventory[pack${i}].Item[${e}].Augs}
             /if (${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
               /varcalc totalItems ${totalItems}+1
-              /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}]->[${Me.Inventory[pack${i}].Item[${e}]}]->(${Me.Inventory[pack${i}]}->InvSlot${i}->PackSlot${e})
+              /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}-> [${Me.Inventory[pack${i}].Item[${e}]}]-> [${Me.Inventory[pack${i}]}-> InvSlot${i}-> PackSlot${e}]
             }
           /next a
         /next e
@@ -573,19 +576,19 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
   | -Search bank packslots.
     /for i 1 to 26
       /if (${Me.Bank[${i}].Name.Find[${ItemToFind}]}) {
-        /varcalc totalItems ${totalItems}+1
-        /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Bank[${i}]}]->(BankSlot${i})
+        /varcalc totalItems ${totalItems}+${Me.Bank[${i}].Stack}
+        /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}]}(${Me.Bank[${i}].Stack}) ->[BankSlot${i}]
       }
       /if (${Me.Bank[${i}].Container}) {
         /for e 1 to ${Me.Bank[${i}].Container}
           /if (${Me.Bank[${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
-            /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Item[${e}].Stack}
-            /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Bank[${i}].Item[${e}]}]->(${Me.Bank[${i}]}->BankSlot${i}->PackSlot${e})
+            /varcalc totalItems ${totalItems}+${Me.Bank[${i}].Item[${e}].Stack}
+            /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}].Item[${e}]}(${Me.Bank[${i}].Item[${e}].Stack})-> [${Me.Bank[${i}]}-> BankSlot${i}-> PackSlot${e}]
           }
           /for a 0 to ${Me.Bank[${i}].Item[${e}].Augs}
             /if (${Me.Bank[${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
               /varcalc totalItems ${totalItems}+1
-              /docommand /timed ${reportDelay} ${ChatToggle} [${Me.Bank[${i}].Item[${e}].AugSlot[${a}]}]->[${Me.Bank[${i}].Item[${e}]}]->(${Me.Bank[${i}]}->BankSlot${i}->PackSlot${e})
+              /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}].Item[${e}].AugSlot[${a}]}-> [${Me.Bank[${i}].Item[${e}]}]-> ${Me.Bank[${i}]}-> BankSlot${i}-> PackSlot${e}
             }
           /next a
         /next e
@@ -646,6 +649,7 @@ SUB EVENT_FindSlot(line, ChatSender, SlotToFind)
   } else {
     /if (${c_eventArgChatSender.Equal[${Me}]}) {
       /echo Valid Slots: charm, leftear, head, face, rightear, neck, shoulder, arms, leftwrist, rightwrist, ranged, hands, mainhand, offhand, ammo, back, leftfinger, rightfinger, chest, legs, feet, waist, powersource
+    }
   }
 /RETURN
 |------------------------------------------------------------|

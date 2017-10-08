@@ -374,6 +374,8 @@ SUB check_Plugins
 	}
   |Check MQ2ItemDisplay.
 	/if (!${Plugin[mq2itemdisplay].Name.Length}) /plugin MQ2ItemDisplay
+	|Check MQ2LinkDB
+	/if (!${Plugin[MQ2LinkDB].Name.Length}) /plugin MQ2LinkDB
   |Check MQ2ITurbo
   /if (!${Plugin[mq2turbo].Name.Length}) {
     /plugin MQ2Turbo
