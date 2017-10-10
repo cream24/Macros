@@ -51,10 +51,9 @@ SUB loot_Area
   /declare c int local
   /declare NumCorpses int local ${SpawnCount[npc corpse zradius 50 radius ${seek_Radius} "_"]}
   /declare CorpsesLeft int local ${NumCorpses}
+  /varset cantLootCorpseCount 0
   /if (${Debug} || ${Debug_Loot}) /echo NumCorpses: ${NumCorpses}
-  |build list of nearby corpses
   |/doevents flush YourKill
-
   /for i 1 to ${NumCorpses}
     /varset ClosestCorpse ${NearestSpawn[${i},npc corpse zradius 50 radius ${seek_Radius} "_"].ID}
     /varset CorpseList ${CorpseList}${ClosestCorpse}|
@@ -71,9 +70,9 @@ SUB loot_Area
     /for c 1 to ${CorpsesLeft}
       /varset TMPClosestCorpse ${CorpseList.Arg[${c},|]}
       /varset TMPClosestCorpseDist ${Math.Distance[${Spawn[id ${TMPClosestCorpse}].Y},${Spawn[id ${TMPClosestCorpse}].X}]}
-      /if (${TMPClosestCorpseDist} < ${ClosestCorpseDist}) {
-        /if (${Debug} || ${Debug_Loot}) /echo [${TMPClosestCorpse}]:${TMPClosestCorpseDist} closer than [${ClosestCorpse}]:${ClosestCorpseDist}
-      }
+      |/if (${TMPClosestCorpseDist} < ${ClosestCorpseDist}) {
+      |  /if (${Debug} || ${Debug_Loot}) /echo [${TMPClosestCorpse}]:${TMPClosestCorpseDist} closer than [${ClosestCorpse}]:${ClosestCorpseDist}
+      |}
     /next c
     /if (!${Bool[${Spawn[${ClosestCorpse}]}]}) /goto :skipCorpse
 
@@ -84,7 +83,7 @@ SUB loot_Area
       /goto :skipCorpse
     }
     /if (${Target.Distance}>20 && ${Target.DistanceZ} < 80) {
-      /call MoveToLoc ${Target.Y} ${Target.X} 12 16
+      /call MoveToLoc ${Target.Y} ${Target.X} 15 16
     }
     /if (${Target.Distance}<=20 &&  ${Target.DistanceZ} < 30) {
       /call lootCorpse
@@ -95,13 +94,15 @@ SUB loot_Area
     /varset CorpseList ${CorpseList.Replace[${ClosestCorpse}|,]}
     /varcalc CorpsesLeft ${CorpsesLeft}-1
     |exits loop if autoloot was turned off
-    |/doevents lootRelay
+    /doevents lootRelay
   /if (${Auto_Loot}) /next i
+  |if all corpses in radius cant be looted, dont try again until a new kill occurs
+  /if (${cantLootCorpseCount}>=${SpawnCount[npc corpse zradius 50 radius ${seek_Radius} "_"]}) /doevents flush YourKill
 
   /if (${Following}) {
     /call AcquireFollow
   } else {
-    /call MoveToLoc ${startY} ${startX}
+    /call MoveToLoc ${startY} ${startX} 15 20
   }
   /if (${Debug} || ${Debug_Loot}) /echo <== loot_Area -|
 /return
@@ -114,14 +115,15 @@ SUB lootCorpse
   /delay 5 ${Window[LootWnd].Open}
   /doevents NotYourKill
   /delay 1s ${Corpse.Items} || !${canLootCorpse}
-  /if (${Debug} || ${Debug_Loot}) /echo Looting ${Target.ID}-Items:${Corpse.Items}
+  /if (${Debug} || ${Debug_Loot}) /echo Looting ${Target.ID}-Items:${Int[${Corpse.Items}]}
   /if (!${canLootCorpse}) {
     /if (${Debug} || ${Debug_Loot}) /echo Not your kill
+    /varcalc cantLootCorpseCount ${cantLootCorpseCount}+1
     /goto :skipLoot
   }
   /if (!${Bool[${Corpse.Items}]}) /goto :skipLoot
 
-  /for i 1 to ${Corpse.Items})
+  /for i 1 to ${Corpse.Items}
     /if (!${Me.FreeInventory}) {
       /if (!${fullInventory_Alert}) {
         /beep
@@ -136,17 +138,15 @@ SUB lootCorpse
       | Destroy the item
       /if (${lootSetting.Find[Destroy]}) {
         /echo [Loot]: Destroying [${Corpse.Item[${i}].Name}]
-        /if (${Corpse.Item[i].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
+        /if (${Corpse.Item[${i}].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
         /call loot_Handle ${i} destroy
         | Keep the item
       } else /if (${lootSetting.Find[Keep]}) {
         | Check for a max stock
-        /if (${lootSetting.Find[keep|]}) {
-          /call argueString keep| "${lootSetting}"
-          /if (${Bool[${c_argueString}]} && ${Int[${c_argueString}]} < ${Math.Calc[${FindItemCount[${Corpse.Item[i].Name}]} + 1].Int}) {
-            /echo [Loot]: Fully stocked on [${Corpse.Item[i].Name}].
-            /goto :skipItem
-          }
+        /call argueString keep| "${lootSetting}"
+        /if (${Bool[${c_argueString}]} && ${Int[${c_argueString}]} < ${Math.Calc[${FindItemCount[${Corpse.Item[${i}].Name}]} + 1].Int}) {
+          /echo [Loot]: Fully stocked on [${Corpse.Item[${i}].Name}].
+          /goto :skipItem
         }
         | If the item is lore, make sure I don't have one.  If I do, skip it.
         /if (${Corpse.Item[${i}].Lore}) {
@@ -167,6 +167,7 @@ SUB lootCorpse
       :skipItem
     }
   /next i
+  /delay 1
   |looting done, if items leftover link them
   /if (${Corpse.Items}) {
     /keypress /
@@ -184,7 +185,7 @@ SUB lootCorpse
 
 |--------------------------------------------------------------------------|
 SUB get_lootSetting(invSlot, itemSlot)
-|/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot} ==>
+/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot} ==>
 	/declare itemName string local
 	/declare itemValue string local
 	/declare iniEntryVariables string local
@@ -195,7 +196,7 @@ SUB get_lootSetting(invSlot, itemSlot)
 		| Reset itemName if it contains a ':'.  ':'s cause errors when reading from the ini, because they act as a delimiter, just like '='s
 |		/echo ${Corpse.Item[${invSlot}].Name}		
 		/varset itemName ${Corpse.Item[${invSlot}].Name}
-|		/echo itemName variable: ${itemName}
+		/echo itemName variable: ${itemName}
 		/if (${itemName.Find[:]}) /varset itemName ${itemName.Replace[:,;]}
 		| Set item value
 		/varset itemValue ${Corpse.Item[${invSlot}].Value}
@@ -211,7 +212,6 @@ SUB get_lootSetting(invSlot, itemSlot)
 			/call WriteToIni "${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}" ${If[${Corpse.Item[${invSlot}].Container},Container,${If[${Corpse.Item[${invSlot}].NoDrop},Skip,Keep${If[${Corpse.Item[${invSlot}].Stackable},|${Corpse.Item[${invSlot}].StackSize},]}]}]}
 			/echo /docommand ${ChatToggle} Added: [${Corpse.Item[${invSlot}].Name}(${Ini[${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}]})] to [${Loot_Ini}].
 			/docommand ${ChatToggle} Added: [${Corpse.Item[${invSlot}].Name}(${Ini[${Loot_Ini},${itemName.Left[1]},${itemName} ${itemValue}${iniEntryVariables}]})] to [${Loot_Ini}].
-			| Add scripts to import old loot settings from ninjaloot.ini, and old e3 loot inis
 		}
 	| If the item is in a bag
 	} else {
@@ -340,6 +340,7 @@ SUB loot_Setup
 
   /declare fullInventory_Alert bool outer FALSE
   /declare canLootCorpse bool outer FALSE
+  /declare cantLootCorpseCount int outer FALSE
   /declare lootSetting string outer
 
 	/if (!${Ini[${Loot_Ini}].Length}) /call Build_Alphabetized_Ini "${Loot_Ini}"

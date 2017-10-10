@@ -52,7 +52,7 @@ sub event_petWeapons(line, ChatSender)
       /call give_PetsWeapons FALSE
     }
 
-    /if (${Math.Distance[${originalLoc}]}>20) /call MoveToLoc ${originalLoc} 50
+    /if (${Math.Distance[${originalLoc}]}>20) /call MoveToLoc ${originalLoc} 50 20
     /if (${c_eventArgChatSender.NotEqual[${Me}]}) /tell ${c_eventArgChatSender} Finished arming pets
     /varset Following ${wasFollowing}
   }

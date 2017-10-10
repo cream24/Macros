@@ -59,7 +59,7 @@ SUB event_UseCorpseSummoner(line, ChatSender)
       /call iniToVarV "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)" PLACEHOLDER bool local
       :lootNow
       /if (${Bool[${Macro.Return}]} && ${Spawn[${Me}'s].ID}) /call event_LootNow "PLACEHOLDER" "${Me.CleanName}"
-      /call MoveToLoc ${startingPoint} 80
+      /call MoveToLoc ${startingPoint} 80 15
       :skip
       /if (${Defined[startingPoint]}) /deletevar startingPoint
       /if (${Defined[SoulStoneToUse]}) /deletevar SoulStoneToUse
@@ -121,14 +121,14 @@ SUB find_Soulstone
 SUB withdraw_Plat
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- withdraw_Plat ==>
 	| Move to the startingPoint
-	/call MoveToLoc ${startingPoint} 80
+	/call MoveToLoc ${startingPoint} 80 15
 	| Look for the west side banker.
 	/if (!${Spawn[npc A Shrewd Banker].LineOfSight}) {
 		/echo I couldn't find a banker.  Move to either the west or east wings of the Guild Lobby, and try again.
 	} else {
 		| Move to the banker.
 		/call TrueTarget ${Spawn[npc A Shrewd Banker].ID}
-		/call MoveToLoc ${Target.Y} ${Target.X} 80
+		/call MoveToLoc ${Target.Y} ${Target.X} 80 15
 		/if (${Target.Distance} > 15) {
 			/docommand ${ChatToggle} I failed to move to the banker
 		} else {
@@ -210,7 +210,7 @@ SUB buy_SoulStone(SoulStoneToUse)
 	} else {
 		|--------------------------------------------------------------------------------------------------------------------------------------------------------------------Move to the banker.
     /call TrueTarget ${Spawn[npc A Disciple of Luclin].ID}
-    /call MoveToLoc ${Target.Y} ${Target.X} 80
+    /call MoveToLoc ${Target.Y} ${Target.X} 80 15
 		/if (${Target.Distance} > 15) {
 			/echo ERROR: I failed to move to the soulstone merchant. Move me to the west side of The Guild Lobby, and try again.
 		} else {
@@ -269,14 +269,14 @@ SUB buy_SoulStone(SoulStoneToUse)
 SUB summon_Corpse(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- summon_Corpse ==>
 	| Move to the startingPoint
-	/call MoveToLoc ${startingPoint} 80
+	/call MoveToLoc ${startingPoint} 80 15
 	|---Look for the corpse summoner.
 	/if (!${Spawn[npc A Priest of Luclin].LineOfSight}) {
 		/echo ERROR: I couldn't find the corpse summoner.  Move to the Throne area, or the west side of The Guild Lobby, and try again.
 	} else {
 		|---Move to the corpse summoner.
     /call TrueTarget ${Spawn[npc A Priest of Luclin].ID}
-    /call MoveToLoc ${Target.Y} ${Target.X} 80
+    /call MoveToLoc ${Target.Y} ${Target.X} 80 15
 		/if (${Target.Distance} > 15) {
 			/echo ERROR: I failed to move to the corpse summoner. Move me to the west side of The Guild Lobby, and try again.
 		} else {

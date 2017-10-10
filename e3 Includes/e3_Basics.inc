@@ -95,7 +95,7 @@ SUB Bind_StopFollowing(yLoc,xLoc)
   /if (${Stick.Active} || ${NetAdvPath.Status}==1 || ${Following}) {
     /if (${Stick.Active}) /squelch /stick off
     /if (${NetAdvPath.Status}==1) /squelch /netfollow off
-    /call MoveToLoc ${yLoc} ${xLoc} 20
+    /call MoveToLoc ${yLoc} ${xLoc} 20 20
     /varset FollowTarget
     /varset Following FALSE
   }
@@ -138,7 +138,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
   /varset Following     FALSE
   /if (${Assisting}  || ${Me.Combat}) /call AssistOff
 
-  /call MoveToLoc ${Spawn[id ${c_eventArgData}].Loc} 50
+  /call MoveToLoc ${Spawn[id ${c_eventArgData}].Loc} 50 15
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_MoveHere -|
 /RETURN
 
@@ -193,7 +193,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   :retry_Bark
   /if (${Me.Invis}) /makemevisible
   /call TrueTarget ${msgTarget}
-  /if (${Target.Distance} > 10) /call MoveToLoc ${Target.Y} ${Target.X} 50
+  /if (${Target.Distance} > 10) /call MoveToLoc ${Target.Y} ${Target.X} 50 15
   | -Wait a moment, then bark the message.
   /delay ${Math.Rand[8]}
   /varset startingLoc ${Me.Loc.Replace[ ,]}
@@ -337,7 +337,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
       /if (${NetAdvPath.Status}==1) /squelch /netfollow off
       /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
       :retryClick
-      /if (${Math.Distance[${locToStart}]} > 10) /call MoveToLoc ${locToStart}
+      /if (${Math.Distance[${locToStart}]} > 10) /call MoveToLoc ${locToStart} 30 20
       /if (${Math.Distance[${locToStart}]} > 10) {
         /docommand ${ChatToggle} I failed to move to the inteded object
       } else {
@@ -424,7 +424,7 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
           /goto :retryRTZ
         } else {
           /docommand ${ChatToggle} I failed to run through the zoneline in [${Zone}].
-          /call MoveToLoc ${locToStart} 50
+          /call MoveToLoc ${locToStart} 30 20
         }
       }
     }

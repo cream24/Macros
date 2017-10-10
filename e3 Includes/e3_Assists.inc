@@ -794,7 +794,7 @@ SUB Event_AEs(line, ChatSender, aeType, aeToggle)
     /if (${aeType.Equal[PB]} || ${aeType.Equal[All]}) {
       /varset use_PBAE TRUE
       /call TrueTarget ${NetBots[${c_eventArgChatSender}].ID}
-      /call MoveToLoc ${Target.Y} ${Target.X} 30
+      /call MoveToLoc ${Target.Y} ${Target.X} 30 18
     }
     /if (${aeType.Equal[Target]} || ${aeType.Equal[All]}) {
       /varset use_TargetAE TRUE
