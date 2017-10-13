@@ -77,8 +77,8 @@ SUB give_PetsWeapons(autoWeap)
           :SummonWeap_Loop
           /if (${petItems2D[${w},${iCastName}].Equal["Blazing Stone of Demise"]} && ${FindItemCount[=Summoned: Burning Shank]}) {
             /call SwapItem "Summoned: Burning Shank" "Cursor"
-          } else /if (${FindItemCount[=${petItems2D[${w},${iCastName}].Replace[Summon,Summoned]}]}) {
-            /call SwapItem "${petItems2D[${w},${iCastName}].Replace[Summon,Summoned]}" "Cursor"
+          |} else /if (${FindItemCount[=${petItems2D[${w},${iCastName}].Replace[Summon,Summoned]}]}) {
+          |  /call SwapItem "${petItems2D[${w},${iCastName}].Replace[Summon,Summoned]}" "Cursor"
           } else {
             /call check_Ready "petItems2D" ${w}
             /if (${c_Ready}) {

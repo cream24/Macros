@@ -849,7 +849,7 @@ SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)
   /squelch /moveto loc ${yLoc} ${xLoc} dist ${arrivalDist}
   :retryMove
   /call Background_Events
-  /delay ${Math.Calc[${timeToWait}/10]} ${Math.Distance[${yLoc},${xLoc}]} <=${arrivalDist}
+  /delay ${Math.Calc[${timeToWait}/5]} ${Math.Distance[${yLoc},${xLoc}]} <=${arrivalDist}
   /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) {
     /moveto off
     /return
