@@ -1086,9 +1086,9 @@ SUB event_SpellSet(line, ChatSender, spellArray)
             /varset use_CommandDots TRUE
             /echo \ag Dots on Command set to [${spellsToUse}] - ${Command_DoTs2D.Size[1]} spells
             /if (!${Following}) {
-              /for i 1 to ${Command_DoTs.Size[1]}
-              /if (!${Bool[${Me.Gem[${Command_DoTs[${i},${iCastName}]}]}]}) {
-                /call memorize_spell "${Command_DoTs[${i},${iCastName}]}" ${Command_DoTs[${i},${iSpellGem}]}
+              /for i 1 to ${Command_DoTs2D.Size[1]}
+              /if (!${Bool[${Me.Gem[${Command_DoTs2D[${i},${iCastName}]}]}]}) {
+                /call memorize_spell "${Command_DoTs2D[${i},${iCastName}]}" ${Command_DoTs2D[${i},${iSpellGem}]}
               }
               /next i
             }
