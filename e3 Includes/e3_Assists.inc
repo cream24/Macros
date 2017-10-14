@@ -272,11 +272,11 @@ SUB CombatAbilities
     |skip the ability if current aggro is less than defined PctAggro or the taret is not a Named
     /if (${Abilities2D[${i},${iPctAggro}]} > 0 && (${Me.PctAggro} < ${Abilities2D[${i},${iPctAggro}]} || !${Target.Named})) {
       /if (${Debug} || ${Debug_Assists}) /echo skipping ${Abilities2D[${i},${iCastName}]}, current aggro ${Me.PctAggro} defined ${Abilities2D[${i},${iPctAggro}]} named ${Target.Named}
-      /next i
+      /goto :skipAbility
     }
     /if (${Abilities2D[${i},${iCastType}].Equal[Ability]}) {
       /if (${Abilities2D[${i},${iCastName}].Equal[Bash]}) {
-        /if (!${Select[${Me.Inventory[Offhand].Type},Shield]} && !${Me.AltAbility[2 Hand Bash]}) /next i
+        /if (!${Select[${Me.Inventory[Offhand].Type},Shield]} && !${Me.AltAbility[2 Hand Bash]}) /goto :skipAbility
       }
       /if (${Me.AbilityReady[${Abilities2D[${i},${iCastName}]}]}) {
         /doability "${Abilities2D[${i},${iCastName}]}"
@@ -300,6 +300,7 @@ SUB CombatAbilities
         }
       }
     }
+  :skipAbility
   /next i
 
   /if (${Debug} || ${Debug_Assists}) /echo <== CombatAbilities -|

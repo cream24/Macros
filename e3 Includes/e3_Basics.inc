@@ -910,7 +910,7 @@ SUB event_gatherCorpses
 SUB EVENT_ClickYes(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_ClickYes ==>
   /if (!${checkEventArgs[${ChatSender},${line},U,${eventParams}]}) /return
-  /declare buttonToClick string local ${If[${eventParams.Find[yes]},Yes,No]}
+  /declare buttonToClick string local ${If[${c_eventArgData.Find[yes]},Yes,No]}
   /declare miscTimer timer local 100
   :clickButton
   /if (${Window[ConfirmationDialogBox].Open}) {
