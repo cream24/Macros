@@ -173,22 +173,23 @@ SUB heal_pets
 	/declare s int local
 	/for t 1 to ${petOwners.Size}
 	  |/echo ${petOwners[${t}]} ${Spawn[pc =${petOwners[${t}]}].Pet.Name} hp ${NetBots[${petOwners[${t}]}].PetHP}
-	  /if (!${Bool[${Spawn[pc =${petOwners[${t}]}].Pet.ID}]}) /next t
-		/for s 1 to ${petHeals2D.Size[1]}
-			/if (${NetBots[${petOwners[${t}]}].PetHP} <= ${petHeals2D[${s},${iHealPct}]}) {
-				/call check_Ready "petHeals2D" ${s}
-				/if (${c_Ready}) {
-					/if (${Spawn[pc =${petOwners[${t}]}].Pet.Distance} < ${petHeals2D[${s},${iMyRange}]}) {
-            /if (${check_Mana["petHeals2D",${s}]}) {
-							/if (!${Bool[${currentBot}]} || ${NetBots[${petOwners[${t}]}].PetHP} < ${NetBots[${currentBot}].PetHP}) {
-								/varset currentBot ${petOwners[${t}]}
-								/varset currentSpellIndx ${s}								
+	  /if (${Bool[${NetBots[${petOwners[${t}]}].InZone}]} && ${Spawn[pc =${petOwners[${t}]}].Pet.ID}) {
+			/for s 1 to ${petHeals2D.Size[1]}
+				/if (${NetBots[${petOwners[${t}]}].PetHP} <= ${petHeals2D[${s},${iHealPct}]}) {
+					/call check_Ready "petHeals2D" ${s}
+					/if (${c_Ready}) {
+						/if (${Spawn[pc =${petOwners[${t}]}].Pet.Distance} < ${petHeals2D[${s},${iMyRange}]}) {
+							/if (${check_Mana["petHeals2D",${s}]}) {
+								/if (!${Bool[${currentBot}]} || ${NetBots[${petOwners[${t}]}].PetHP} < ${NetBots[${currentBot}].PetHP}) {
+									/varset currentBot ${petOwners[${t}]}
+									/varset currentSpellIndx ${s}
+								}
 							}
 						}
 					}
 				}
-			}
-		/next s
+			/next s
+		}
 	/next t
 |	/echo ${currentBot} ${Spawn[pc =${currentBot}].Pet.ID} ${Spawn[pc =${currentBot}].Pet.Name}
 	/if (${Bool[${currentBot}]}) {
