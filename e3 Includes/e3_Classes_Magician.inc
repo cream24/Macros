@@ -240,8 +240,10 @@ SUB MAG_Setup
     /call BuildSpellArray "cohSpells" "cohSpells2D"
   }
 
-  /declare moltenOrb[1] string outer Summon: Molten Orb
-  /call BuildSpellArray "moltenOrb" "moltenOrb2D"
+  /if (${Bool[${Me.Book[Summon: Molten Orb]}]}) {
+    /declare moltenOrb[1] string outer Summon: Molten Orb
+    /call BuildSpellArray "moltenOrb" "moltenOrb2D"
+  }
 /if (${Debug} || ${Debug_MAG}) /echo <== MAG_Setup -|
 /RETURN
 |----------------------------------------------------------------------------|

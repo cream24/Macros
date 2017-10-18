@@ -193,7 +193,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   :retry_Bark
   /if (${Me.Invis}) /makemevisible
   /call TrueTarget ${msgTarget}
-  /if (${Target.Distance} > 10) /call MoveToLoc ${Target.Y} ${Target.X} 50 15
+  /if (${Target.Distance} > 5) /call MoveToLoc ${Target.Y} ${Target.X} 50 5
   | -Wait a moment, then bark the message.
   /delay ${Math.Rand[8]}
   /varset startingLoc ${Me.Loc.Replace[ ,]}

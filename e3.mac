@@ -4,7 +4,7 @@
 |- Enhanced and maintained by Creamo of PEQ.       -|
 |- Thanks to Vysra for IDE,additional plugins,code -|
 |---------------------------------------------------|
-|#warning
+#warning
 #turbo 100
 #include e3 Includes\e3_Setup.inc
 

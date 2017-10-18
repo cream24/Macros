@@ -199,7 +199,7 @@ SUB openMerchant(int providedID)
 	
 		| Move to the merchant.
 		/call TrueTarget ${merchantID}
-		/call MoveTo ${Target.Y} ${Target.X} 80
+		/call MoveToLoc ${Target.Y} ${Target.X} 80 15
 	
 		| Open Trade with merchant.
 		/if (${Target.Distance} < 20) {

@@ -435,7 +435,7 @@ Sub background_Aliases
 	/noparse /squelch /alias /RemoveAutoDestroy /echo Remove Auto-Destro item ${Cursor.Name}
 	/squelch /alias /tributezone /bc Set Tribute Zone
 	/noparse /squelch /alias /reporttrib /noparse /bcaa //gu ${Me.CurrentFavor}
-	/noparse /squelch /alias /reportAA /noparse /bcaa //gu ${Me.AAPoints}
+	/noparse /squelch /alias /reportAA /noparse /bcaa //gu AA Spent-Available: ${Me.AAPointsSpent}-${Me.AAPoints}
 
 /return
 

@@ -203,7 +203,7 @@ SUB withdraw_Plat
 SUB buy_SoulStone(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- buy_SoulStone ==>
 	| Move to the startingPoint
-	/call MoveTo ${startingPoint} 80
+  /call MoveToLoc ${startingPoint} 80 15
 	|-------------------------------------------------------------------------------------------------------------------------------------------------------------Look for the west side banker.
 	/if (!${Spawn[npc A Disciple of Luclin].LineOfSight}) {
 		/echo ERROR: I couldn't find the soulstone merchant.  Move to the Throne area, or the west side of The Guild Lobby, and try again.
