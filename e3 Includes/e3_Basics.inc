@@ -1034,7 +1034,7 @@ SUB EVENT_Invite(line, ChatSender)
 #EVENT saveGroup "<#1#> Save Group #2#"
 SUB EVENT_saveGroup(line, ChatSender, eventParams)
 /if (${Debug}) /echo |- EVENT_saveGroup ==>
-  /if (!${checkEventArgs[${ChatSender},${line},U,""]}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},U,${eventParams}]}) /return
   /if (!${Select[${Group.Leader},${Me}]}) {
     /if (${Debug}) /echo I am not a group leader, skipping.
   } else {
