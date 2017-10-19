@@ -504,95 +504,95 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
 	  |this check lets you use OOW debuff BP in debuff section
 	  /if (${${ArrayName}[${s},${iSpellType}].Find[Beneficial]}) {
 	    /varset spellTarg ${Me.ID}
+      /if (${Debug} || ${Debug_Assists}) /echo ${${ArrayName}[${s},${iCastName}]} is beneficial, going directly to casting
 	    /goto :attemptCast
     } else {
       /varset spellTarg ${spellTarget}
     }
 		/varset spellTimer spellTimer_${spellTarg}_${ArrayName}_${s}
-		/varset resistCount resist__${spellTarg}_${ArrayName}_${s}
+		/varset resistCount resist_${spellTarg}_${ArrayName}_${s}
     |/echo stdef ${Defined[${spellTimer}]} st ${spellTarg}  tgt ${Target.ID}
 		/if (${Defined[${spellTimer}]}) {
 		  /if (${${spellTimer}}) {
-        /if (${Debug} || ${Debug_Assists} || ${Me.CleanName.Equal[Cremora]}) /echo |- cast_longTermSpells - [${ArrayName}] -|	Waiting to recast ${${ArrayName}[${s},${iCastName}]} on ${spellTarget}.
+        /if (${Debug} || ${Debug_Assists}) /echo |- cast_longTermSpells - [${ArrayName}] -|	Waiting ${${spellTimer}} to recast ${${ArrayName}[${s},${iCastName}]} on ${spellTarg}.
+        /goto :skipCast
       }
-    } else {
-      |check if the target is already debuffed, and if the duration is longer than the recast time
-      /if (${spellTarg} != ${Target.ID}) {
-        /call TrueTarget ${spellTarg}
-        /delay 5 ${Target.BuffsPopulated}
+    }
+    |check if the target is already debuffed, and if the duration is longer than the recast time
+    /if (${spellTarg} != ${Target.ID}) {
+      /call TrueTarget ${spellTarg}
+      /delay 5 ${Target.BuffsPopulated}
+    }
+    /if (${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]}) {
+      /if (${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
+        /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000 - ${longTermRecastTime}
+        /call createTimer ${spellTimer} ${spellRecast}s
+        /echo \ag ${Target.CleanName} already debuffed ${${ArrayName}[${s},${iSpellName}]} recast ${spellRecast}
+        /goto :skipCast
       }
-      /if (${Bool[${Select[${ArrayName},Command_Debuffs2D,Assist_Debuffs2D]}]}) {
-        /if (${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000 > ${longTermRecastTime}) {
-          /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000 - ${longTermRecastTime}
-          /call createTimer ${spellTimer} ${spellRecast}s
-          /echo \ag ${Target.CleanName} already debuffed ${${ArrayName}[${s},${iSpellName}]} recast ${spellRecast}
-          /goto :skipCast
-        }
-      }
-      :attemptCast
-      /call check_Ready "${ArrayName}" ${s}
-      /if (${c_Ready}) {
-        /if (${check_Mana[${ArrayName},${s}]}) {
-          /if (${check_Distance[${spellTarg},${${ArrayName}[${s},${iMyRange}]}]}) {
-            /call e3_Cast ${spellTarg} "${ArrayName}" "${s}"
-          } else {
-            /if (${Debug} || ${Debug_Assists}) /echo ${spellTarg} out of range for ${${ArrayName}[${s},${iMyRange}]} ${${ArrayName}[${s},${iCastName}]}
-            /goto :skipCast
-          }
+    }
+    :attemptCast
+    /call check_Ready "${ArrayName}" ${s}
+    /if (${c_Ready}) {
+      /if (${check_Mana[${ArrayName},${s}]}) {
+        /if (${check_Distance[${spellTarg},${${ArrayName}[${s},${iMyRange}]}]}) {
+          /call e3_Cast ${spellTarg} "${ArrayName}" "${s}"
         } else {
-          /if (${Debug} || ${Debug_Assists}) /echo lack mana for ${${ArrayName}[${s},${iCastName}]}
+          /if (${Debug} || ${Debug_Assists}) /echo ${spellTarg} out of range for ${${ArrayName}[${s},${iMyRange}]} ${${ArrayName}[${s},${iCastName}]}
           /goto :skipCast
         }
       } else {
-        /if (${Debug} || ${Debug_Assists}) /echo ${${ArrayName}[${s},${iCastName}]} not ready
+        /if (${Debug} || ${Debug_Assists}) /echo lack mana for ${${ArrayName}[${s},${iCastName}]}
         /goto :skipCast
       }
-      |/if (${Debug} || ${Debug_Assists}) /echo castretun ${castReturn} res ${Cast.Result}
-      |/if (${Debug} || ${Debug_Assists}) /echo maxtries ${${ArrayName}[${i},${iMaxTries}]} rescount ${resistCount} ${${resistCount}}
-      |/if (${Debug} || ${Debug_Assists}) /echo castname ${${ArrayName}[${i},${iCastName}]} stored ${Cast.Stored.Name} return ${castReturn}
-      | If the spell was resisted.
-      /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_RESIST]}) {
-        /if (!${Defined[${resistCount}]}) {
-          /declare ${resistCount} int outer 1
-        } else {
-          /varcalc ${resistCount} ${${resistCount}}+1
-          /if (${${resistCount}} >= ${${ArrayName}[${s},${iMaxTries}]}) {
-            /deletevar ${resistCount}
-            /call createTimer "${spellTimer}" "1m"
-          }
-        }
-
-      | If the spell did not take hold.
-      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_TAKEHOLD]}) {
-        /if (${Defined[${resistCount}]}) {
+    } else {
+      /if (${Debug} || ${Debug_Assists}) /echo ${${ArrayName}[${s},${iCastName}]} not ready
+      /goto :skipCast
+    }
+    |/if (${Debug} || ${Debug_Assists}) /echo castretun ${castReturn} res ${Cast.Result}
+    |/if (${Debug} || ${Debug_Assists}) /echo maxtries ${${ArrayName}[${i},${iMaxTries}]} rescount ${resistCount} ${${resistCount}}
+    |/if (${Debug} || ${Debug_Assists}) /echo castname ${${ArrayName}[${i},${iCastName}]} stored ${Cast.Stored.Name} return ${castReturn}
+    | If the spell was resisted.
+    /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_RESIST]}) {
+      /if (!${Defined[${resistCount}]}) {
+        /declare ${resistCount} int outer 1
+      } else {
+        /varcalc ${resistCount} ${${resistCount}}+1
+        /if (${${resistCount}} >= ${${ArrayName}[${s},${iMaxTries}]}) {
           /deletevar ${resistCount}
+          /call createTimer "${spellTimer}" "1m"
         }
-        /call createTimer "${spellTimer}" "3m"
-        | If the target was immune.
-      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_IMMUNE]}) {
-        /if (${Defined[${resistCount}]}) {
-          /deletevar ${resistCount}
-        }
-        /call createTimer "${spellTimer}" "30m"
-      | If the cast was successful.
-      } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_SUCCESS]}) {
-        /if (${Defined[${resistCount}]}) {
-          /deletevar ${resistCount}
-        }
-        |if i dont have spell awarenes use default buff duration
-        /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000
-        /if (${spellRecast}==0) /varcalc spellRecast ${${ArrayName}[${s},${iDuration}]}*6
-        |/echo ${Target.Name}  ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]} ${spellRecast}
-        |duration over 90 seconds is considered long term
-        /if (${spellRecast}>90) {
-          /varcalc spellRecast ${spellRecast}-${longTermRecastTime}
-        } else {
-          /varcalc spellRecast ${spellRecast}-${shortTermRecastTime}
-        }
-        /if (${Debug} || ${Debug_Assists}) /echo |- longTermSpells - [${ArrayName}] -| Creating timer [${spellTimer}] -- [${spellRecast}]
-        |/echo Creating timer [${spellTimer}] -- [${spellRecast}]
-        /call createTimer "${spellTimer}" "${spellRecast}s"
       }
+    | If the spell did not take hold.
+    } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_TAKEHOLD]}) {
+      /if (${Defined[${resistCount}]}) {
+        /deletevar ${resistCount}
+      }
+      /call createTimer "${spellTimer}" "3m"
+      | If the target was immune.
+    } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_IMMUNE]}) {
+      /if (${Defined[${resistCount}]}) {
+        /deletevar ${resistCount}
+      }
+      /call createTimer "${spellTimer}" "30m"
+    | If the cast was successful.
+    } else /if (${Cast.Stored.Name.Equal[${${ArrayName}[${s},${iSpellName}]}]} && ${castReturn.Equal[CAST_SUCCESS]}) {
+      /if (${Defined[${resistCount}]}) {
+        /deletevar ${resistCount}
+      }
+      |if i dont have spell awarenes use default buff duration
+      /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000
+      /if (${spellRecast}==0) /varcalc spellRecast ${${ArrayName}[${s},${iDuration}]}*6
+      |/echo ${Target.Name}  ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]} ${spellRecast}
+      |duration over 90 seconds is considered long term
+      /if (${spellRecast}>90) {
+        /varcalc spellRecast ${spellRecast}-${longTermRecastTime}
+      } else {
+        /varcalc spellRecast ${spellRecast}-${shortTermRecastTime}
+      }
+      /if (${Debug} || ${Debug_Assists}) /echo |- longTermSpells - [${ArrayName}] -| Creating timer [${spellTimer}] -- [${spellRecast}]
+      |/echo Creating timer [${spellTimer}] -- [${spellRecast}]
+      /call createTimer "${spellTimer}" "${spellRecast}s"
     }
   :skipCast
   /if (!${ActionTaken}) /next s

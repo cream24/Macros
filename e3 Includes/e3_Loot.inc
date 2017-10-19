@@ -31,7 +31,7 @@ SUB EVENT_NotYourKill
 |--------------------------------------------------------------------------|
 |- Moves to corpses and begins looting, reads Loot_Ini for loot handles.	-|
 SUB loot_Area
-  /if (${Me.Name.Equal[Balron]}) /varset Debug_Loot TRUE
+  /if (${NetBots[Creamo].ID}) /varset Debug_Loot TRUE
   /if (${Debug} || ${Debug_Loot}) /echo |- loot_Area ==>
   /declare startX int ${Me.X}
   /declare startY int ${Me.Y}
@@ -82,10 +82,10 @@ SUB loot_Area
       /if (${Debug} || ${Debug_Loot}) /echo Cant Target ${ClosestCorpse}
       /goto :skipCorpse
     }
-    /if (${Target.Distance}>20 && ${Target.DistanceZ} < 80) {
+    /if (${Target.Distance}>16 && ${Target.DistanceZ} < 80) {
       /call MoveToLoc ${Target.Y} ${Target.X} 15 16
     }
-    /if (${Target.Distance}<=20 &&  ${Target.DistanceZ} < 30) {
+    /if (${Target.Distance}<=20 &&  ${Target.DistanceZ} < 40) {
       /call lootCorpse
     } else {
       /echo Corpse ${ClosestCorpse} is > ${Target.Distance}|${Target.DistanceZ} distance, skipping
@@ -115,27 +115,37 @@ SUB lootCorpse
   /delay 5 ${Window[LootWnd].Open}
   /doevents NotYourKill
   /delay 1s ${Corpse.Items} || !${canLootCorpse}
-  /if (${Debug} || ${Debug_Loot}) /echo Looting ${Target.ID}-Items:${Int[${Corpse.Items}]}
+  /declare numItems int local ${Corpse.Items}
+  /if (${Debug} || ${Debug_Loot}) {
+    /echo ===========================
+    /echo Looting ${Target.ID}-Items:${Int[${numItems}]} - ${Time}
+  }
   /if (!${canLootCorpse}) {
     /if (${Debug} || ${Debug_Loot}) /echo Not your kill
     /varcalc cantLootCorpseCount ${cantLootCorpseCount}+1
     /goto :skipLoot
   }
-  /if (!${Bool[${Corpse.Items}]}) /goto :skipLoot
-
-  /for i 1 to ${Corpse.Items}
+  /if (!${Bool[${Corpse.Items}]}) {
+    |/if (${Debug} || ${Debug_Loot}) /echo Ending loot on ${Target.ID}, no items left: ${Corpse.Items}
+    /goto :skipLoot
+  }
+  |must use numItems, ${Corpse.Items} recalcs every iteration
+  /for i 1 to ${numItems}
+    |/if (${Debug} || ${Debug_Loot}) /echo starting loot i: ${i} of ${numItems}
     /if (!${Me.FreeInventory}) {
       /if (!${fullInventory_Alert}) {
         /beep
         /varset fullInventory_Alert TRUE
         /docommand ${ChatToggle} My inventory is full!  I will continue to link items on corpses, but cannot loot anything else.
       }
+      /if (${Debug} || ${Debug_Loot}) /echo no free inventory slots
     } else {
       /varset fullInventory_Alert FALSE
       /delay 1s ${Corpse.Item[${i}].ID}
-      /if (${Debug} || ${Debug_Loot}) /echo itemID ${Corpse.Item[${i}].ID}
-      /call get_lootSetting "${i}" 0
+      |/if (${Debug} || ${Debug_Loot}) /echo itemID ${Corpse.Item[${i}].ID}
+      /call get_lootSetting ${i} 0
       | Destroy the item
+      |/if (${Debug} || ${Debug_Loot}) /echo loot setting: ${Corpse.Item[${i}].Name}-${lootSetting}
       /if (${lootSetting.Find[Destroy]}) {
         /echo [Loot]: Destroying [${Corpse.Item[${i}].Name}]
         /if (${Corpse.Item[${i}].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
@@ -160,12 +170,14 @@ SUB lootCorpse
           /echo [Loot]: I don't have a free inventory space large enough to hold [${Corpse.Item[${i}].Name}].
           /goto :skipItem
         }
-        /echo [Loot]: Looting [${Corpse.Item[${i}].Name}]
+        |/if (${Debug} || ${Debug_Loot}) /echo [Loot]: Looting [${Corpse.Item[${i}].Name}] keep
         /call loot_Handle ${i} keep
+        |/if (${Debug} || ${Debug_Loot}) /echo Done Looting i: ${i}
         /delay 1
       }
       :skipItem
     }
+  |/if (${Debug} || ${Debug_Loot}) /echo Done with slot i: ${i}
   /next i
   /delay 1
   |looting done, if items leftover link them
@@ -181,11 +193,12 @@ SUB lootCorpse
   :skipLoot
   /if (${Corpse.Open}) /notify LootWnd DoneButton leftmouseup
   /delay 1s !${Window[LootWnd].Open}
+  |/if (${Debug} || ${Debug_Loot}) /echo Done Looting ${Time}
 /return
 
 |--------------------------------------------------------------------------|
 SUB get_lootSetting(invSlot, itemSlot)
-/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot} ==>
+|/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot}
 	/declare itemName string local
 	/declare itemValue string local
 	/declare iniEntryVariables string local
@@ -196,7 +209,6 @@ SUB get_lootSetting(invSlot, itemSlot)
 		| Reset itemName if it contains a ':'.  ':'s cause errors when reading from the ini, because they act as a delimiter, just like '='s
 |		/echo ${Corpse.Item[${invSlot}].Name}		
 		/varset itemName ${Corpse.Item[${invSlot}].Name}
-		/echo itemName variable: ${itemName}
 		/if (${itemName.Find[:]}) /varset itemName ${itemName.Replace[:,;]}
 		| Set item value
 		/varset itemValue ${Corpse.Item[${invSlot}].Value}
@@ -242,13 +254,12 @@ SUB get_lootSetting(invSlot, itemSlot)
 |- @param handle: What to do with the item once you loot it.		    -|
 |--------------------------------------------------------------------|
 SUB loot_Handle(int slotNum, handle)
-/if (${Debug} || ${Debug_Loot}) /echo |- loot_Handle ==>
+  |/if (${Debug} || ${Debug_Loot}) /echo [loot_Handle] slot ${slotNum} ${handle}
 	/declare lootTimer timer local 3s
 	:retry_Loot
-	/if (${Debug} || ${Debug_Loot}) /echo |- loot_Handle -| :retry_Loot slot ${slotNum} ${handle}
 	| Try to loot the specified item from the corpse.
 	/itemnotify loot${slotNum} leftmouseup
-	/delay 5 ${Cursor.ID} || ${Window[ConfirmationDialogBox].Open} || ${Window[QuantityWnd].Open}
+	/delay 1s ${Cursor.ID} || ${Window[ConfirmationDialogBox].Open} || ${Window[QuantityWnd].Open}
 	| If the item has been looted, decide what to do with it.
 	/if (${Cursor.ID}) {
 		| Destroy the item.
@@ -260,6 +271,7 @@ SUB loot_Handle(int slotNum, handle)
 		| Else, keep the item.
 		} else {
 			/call ClearCursor
+			/echo Succesfully looted ${slotNum}
 		}
 	| Else, if loot attempt was unsuccessful, try again.		
 	} else {
@@ -271,7 +283,7 @@ SUB loot_Handle(int slotNum, handle)
 		}
 		/if (${lootTimer}) /goto :retry_Loot
 	}
-/if (${Debug} || ${Debug_Loot}) /echo <== loot_Handle -|
+|/if (${Debug} || ${Debug_Loot}) /echo <== loot_Handle -|
 /RETURN
 
 |--------------------------------------------------------------------|

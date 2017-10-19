@@ -77,7 +77,7 @@ sub Event_wordHeal(line, ChatSender)
 #event Rez "#1# tells you, 'Rez'"
 #event Rez "#*# tells you, 'Rez On #1#'"
 #event Rez "#1# tells the group, 'Rez'"
-sub Event_Rez(string line, string ChatSender)
+sub Event_Rez(line, ChatSender)
 	/if (${ChatSender.Left[1].Compare[ ]}<0) /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
 	/if (${Me.Class.ShortName.Equal[CLR]} && ${Spawn[${ChatSender}'s].ID}) {
 	  /varset canRez 0
@@ -105,12 +105,12 @@ sub Event_Rez(string line, string ChatSender)
 |----------------------------------------------------------------------------|
 #EVENT AE_Rez "[MQ2] AE Rez"
 #EVENT AE_Rez "#1# tells you, 'AERez'"
-SUB EVENT_AE_Rez(string line, string ChatSender)
+SUB EVENT_AE_Rez(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_AE_Rez ==>
   /call defineRezSpell
   /call BuildCorpseList
 	/if (!${CorpseListSize}) {
-		/echo I couldn't find any corpses to ressurect...
+		/echo I couldn't find any corpses to resurrect...
 	} else {
     /if (${NetAdvPath.Status}==1) /squelch /netfollow off
     /if (${Stick.Active}) /squelch /stick off
@@ -206,8 +206,6 @@ Sub Event_CorpseExpired(line, corpseExpired)
 |----------------------------------------------------------------------------|
 Sub check_CorpseRezzable
   /declare conTimer timer local 5s
-  /declare returnResult bool local FALSE
-  /declare corpseOwner string local
   /doevents CorpseExpired flush
   /varset canRez 0
   :waitForExpired

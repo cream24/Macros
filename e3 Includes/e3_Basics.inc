@@ -1378,9 +1378,9 @@ Sub basics_Aliases
 	/noparse /squelch /alias /followon /bc Follow ${Me.CleanName}
 	/noparse /squelch /alias /followme /bc Follow ${Me.CleanName}
 	/noparse /squelch /alias /followit /bc Follow ${Target.CleanName}
-	/squelch /alias /followoff /bc Stop
+  /squelch /alias /followoff /bc Stop
 	/squelch /alias /stop /bc Stop
-  /noparse /squelch /alias /stopf /bca //StopFollowing ${Me.Y} ${Me.X}
+  /noparse /squelch /alias /stopf /bcaa //StopFollowing ${Me.Y} ${Me.X}
   /noparse /squelch /alias /mtm /bc Move to ${Me.ID}
   /noparse /squelch /alias /movetome /bc Move to ${Me.ID}
 	/noparse /squelch /alias /mtt /bc Move to ${Target.ID}

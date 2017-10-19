@@ -345,7 +345,7 @@ Sub memorize_spell(spellName,gemNum)
 	/delay 3s ${Bool[${Me.Gem[${spellName}]}]}
 	|only wait for beneficial,self spells
 	/if (${Spell[${spellName}].Beneficial} || ${Spell[${spellName}].TargetType.Equal[Self]}) {
-    /declare waitForReady timer local ${If[${Me.CombatState.Equal[COMBAT]},35,${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}]}
+    /declare waitForReady timer local ${If[${Me.CombatState.Equal[COMBAT]},35,${Math.Calc[35+(${Spell[${spellName}].RecastTime}/100)]}]}
     |/echo wfr ${waitForReady} rc ${Spell[${spellName}].RecastTime} math ${Math.Calc[25+(${Spell[${spellName}].RecastTime}/100)]}
     :checkTimer
       |/echo chectimer ${waitForReady} ${Me.SpellReady[${spellName}]}
