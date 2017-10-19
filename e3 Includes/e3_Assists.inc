@@ -582,7 +582,7 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
       }
       |if i dont have spell awarenes use default buff duration
       /varcalc spellRecast ${Target.BuffDuration[${${ArrayName}[${s},${iSpellName}]}]}/1000
-      /if (${spellRecast}==0) /varcalc spellRecast ${${ArrayName}[${s},${iDuration}]}*6
+      /if (${spellRecast}< ${Math.Calc[${${ArrayName}[${s},${iDuration}]}*6]}) /varcalc spellRecast ${${ArrayName}[${s},${iDuration}]}*6
       |/echo ${Target.Name}  ${Target.BuffDuration[${${ArrayName}[${i},${iSpellName}]}]} ${spellRecast}
       |duration over 90 seconds is considered long term
       /if (${spellRecast}>90) {

@@ -329,7 +329,7 @@ SUB hot_pets
   /declare s int local
   /for t 1 to ${petOwners.Size}
 |/echo ${petOwners[${t}]} ${Spawn[pc =${petOwners[${t}]}].Pet.Name} hp ${NetBots[${petOwners[${t}]}].PetHP}
-    /if (!${Bool[${NetBots[${petOwners[${t}]}].PetID}]}) /next t
+		/if (${Bool[${NetBots[${petOwners[${t}]}].InZone}]} && ${Spawn[pc =${petOwners[${t}]}].Pet.ID}) {
       /for s 1 to ${hotSpells2D.Size[1]}
       /if (${NetBots[${petOwners[${t}]}].PetHP} <= ${hotSpells2D[${s},${iHealPct}]}) {
         /call check_HotPetStack "${petOwners[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
@@ -348,6 +348,7 @@ SUB hot_pets
         }
       }
       /next s
+		}
   /next t
   |/echo ${currentBot} ${Spawn[pc =${currentBot}].Pet.ID} ${Spawn[pc =${currentBot}].Pet.Name}
   /if (${Bool[${currentBot}]}) {
