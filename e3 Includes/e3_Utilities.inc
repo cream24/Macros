@@ -449,6 +449,8 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/if (${${ArrayName}[${i}].Find[/MinHP|]}) {
 			/call argueString MinHP| "${${ArrayName}[${i}]}"
 			/varset ${NewArrayName}[${i},${iMinHP}] ${c_argueString}
+		} else {
+			/varset ${NewArrayName}[${i},${iMinHP}] 70
 		}
 		/if (${printAll}) /echo MinHP ${${NewArrayName}[${i},${iMinHP}]}	
 
