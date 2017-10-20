@@ -83,7 +83,7 @@ SUB loot_Area
       /goto :skipCorpse
     }
     /if (${Target.Distance}>16 && ${Target.DistanceZ} < 80) {
-      /call MoveToLoc ${Target.Y} ${Target.X} 15 16
+      /call MoveToLoc ${Target.Y} ${Target.X} 20 12
     }
     /if (${Target.Distance}<=20 &&  ${Target.DistanceZ} < 40) {
       /call lootCorpse
