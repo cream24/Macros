@@ -258,8 +258,8 @@ SUB CombatAbilities
   }
   /if (${Defined[smartTaunt]}) {
     /if (${smartTaunt} && ${Me.AbilityReady[Taunt]}) {
-      /if (${Bool[${Me.TargetOfTarget}]} && !${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
-        /bc Taunting ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget.Name} has aggro
+      /if (${Bool[${Target.AggroHolder}]} && !${Select[${Target.AggroHolder.Class.ShortName},WAR,PAL,SHD]} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
+        /bc Taunting ${Target.CleanName}: ${Target.AggroHolder.Class.ShortName}-${Target.AggroHolder} has aggro
         /doability Taunt
       }
     }
