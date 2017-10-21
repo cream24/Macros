@@ -78,6 +78,7 @@ SUB peelTank
       }
       /if (${Me.CombatAbilityReady[Bazu Bellow]}) /doability "Bazu Bellow"
       /if (${Me.AltAbilityReady[Divine Stun]}) /casting "Divine Stun"
+      /if (${Me.SpellReady[Terror of Discord]}) /casting "Terror of Discord"
     }
   }
 

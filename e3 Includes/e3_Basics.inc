@@ -529,9 +529,6 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
   /declare e int local
   /declare a int local
   /declare totalItems int local 0
-
-  |/if (${FindItemCount[${ItemToFind}]} || ${FindItemBankCount[${ItemToFind}]} || ${Cursor.Name.Equal[${ItemToFind}]}) {
-    |/docommand ${ChatToggle} >> Found (${Math.Calc[${FindItemCount[${ItemToFind}]} + ${FindItemBankCount[${ItemToFind}]}].Int}) : [${ItemToFind}] <<
   | -Check cursor.
   /if (${Cursor.Name.Equal[${ItemToFind}]}) {
     /varcalc totalItems ${totalItems}+${Cursor.Stack}
@@ -598,7 +595,192 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
 
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
 /RETURN
+|--------------------------------------------------------|
+#EVENT FindItemCompact "<#1#> Find ItemC #2#"
+SUB EVENT_FindItemCompact(line, ChatSender, ItemToFind)
+  /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_FindItems ==>
+  /if (!${checkEventArgs[${ChatSender},${line},U,${ItemToFind}]}) /return
+  /declare reportDelay int local 1
+  /declare reportArray[50] string local NIL
+  /declare raINDX int local 1
+|parse item link
+  /if (${c_eventArgData.Find[000]}) {
+    /varset ItemToFind ${c_eventArgData.Right[${Math.Calc[${c_eventArgData.Length} - 57]}].Left[-1]}
+  } else {
+    /varset ItemToFind ${c_eventArgData}
+  }
+  /declare i int local
+  /declare e int local
+  /declare a int local
+  /declare r int local
+  /declare totalItems int local 0
+| -Check cursor.
+  /if (${Cursor.Name.Equal[${ItemToFind}]}) {
+    /varcalc totalItems ${totalItems}+${Cursor.Stack}
+    /varset reportArray[${raINDX}] [Cursor]${Cursor.Name}(${Cursor.Stack}
+    /varcalc raINDX ${raINDX}+1
+    |/docommand /timed ${reportDelay} ${ChatToggle} >>> Found ${Cursor.Name}(${Cursor.Stack})-> [Cursor] <<<
+  }
+  /if (${FindItemCount[${ItemToFind}]}) {
+    | -Search Equippped Items.
+    /for i 1 to 22
+      /if (${InvSlot[${i}].Item.Name.Find[${ItemToFind}]}) {
+        /varcalc totalItems ${totalItems}+${InvSlot[${i}].Item.Stack}
+        /varset reportArray[${raINDX}] [Worn]${InvSlot[${i}].Item}(${InvSlot[${i}].Item.Stack}
+        |/echo ${raINDX} ${reportArray[${raINDX}]} ${InvSlot[${i}].Item}
+        /varcalc raINDX ${raINDX}+1
+        |/docommand /timed ${reportDelay} ${ChatToggle} ${InvSlot[${i}].Item}(${InvSlot[${i}].Item.Stack})-> [${InvSlot[${i}].Name}]
+      }
+      /for a 0 to ${InvSlot[${i}].Item.Augs}
+        /if (${InvSlot[${i}].Item.AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+          /varcalc totalItems ${totalItems}+1
+          /varset reportArray[${raINDX}] [Worn]${InvSlot[${i}].Item.AugSlot[${a}]}(1
+          /varcalc raINDX ${raINDX}+1
+          |/docommand /timed ${reportDelay} ${ChatToggle} ${InvSlot[${i}].Item.AugSlot[${a}]}-> [${InvSlot[${i}].Item}-> ${InvSlot[${i}].Name}]
+        }
+      /next a
+    /next i
+    | -Search packslots.
+    |/echo p${raINDX}
+    /for i 1 to 8
+    /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Stack}
+      /varset reportArray[${raINDX}] [Pack]${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack}
+      |/echo [Pack]${Me.Inventory[pack${i}]}
+      /varcalc raINDX ${raINDX}+1
+      |/docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack})-> InvSlot${i}]
+    }
+    /if (${Me.Inventory[pack${i}].Container}) {
+      /for e 1 to ${Me.Inventory[pack${i}].Container}
+        /if (${Me.Inventory[pack${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
+          /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Item[${e}].Stack}
+          /varset reportArray[${raINDX}] [Bag]${Me.Inventory[pack${i}].Item[${e}]}(${Me.Inventory[pack${i}].Item[${e}].Stack}
+          |/echo [Bag]${Me.Inventory[pack${i}].Item[${e}]}
+          /varcalc raINDX ${raINDX}+1
+          |/docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}].Item[${e}]}(${Me.Inventory[pack${i}].Item[${e}].Stack})-> [${Me.Inventory[pack${i}]}-> InvSlot${i}-> PackSlot${e}]
+        }
+        /for a 0 to ${Me.Inventory[pack${i}].Item[${e}].Augs}
+        /if (${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+          /varcalc totalItems ${totalItems}+1
+          /varset reportArray[${raINDX}] [Bag]${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}(1
+          |/echo [Bagaug]${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}
+          /varcalc raINDX ${raINDX}+1
+          |/docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}-> [${Me.Inventory[pack${i}].Item[${e}]}]-> [${Me.Inventory[pack${i}]}-> InvSlot${i}-> PackSlot${e}]
+        }
+        /next a
+      /next e
+    }
+    /next i
+  }
+| -Search bank packslots.
+  |/echo b${raINDX}
+  /for i 1 to 26
+  /if (${Me.Bank[${i}].Name.Find[${ItemToFind}]}) {
+    /varcalc totalItems ${totalItems}+${Me.Bank[${i}].Stack}
+    /varset reportArray[${raINDX}] [Bank]${Me.Bank[${i}]}(${Me.Bank[${i}].Stack}
+    /varcalc raINDX ${raINDX}+1
+    |/docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}]}(${Me.Bank[${i}].Stack}) ->[BankSlot${i}]
+  }
+  /if (${Me.Bank[${i}].Container}) {
+    /for e 1 to ${Me.Bank[${i}].Container}
+    /if (${Me.Bank[${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+${Me.Bank[${i}].Item[${e}].Stack}
+      /varset reportArray[${raINDX}] [Bank]${Me.Bank[${i}].Item[${e}]}(${Me.Bank[${i}].Item[${e}].Stack}
+      /varcalc raINDX ${raINDX}+1
+      |/docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}].Item[${e}]}(${Me.Bank[${i}].Item[${e}].Stack})-> [${Me.Bank[${i}]}-> BankSlot${i}-> PackSlot${e}]
+    }
+    /for a 0 to ${Me.Bank[${i}].Item[${e}].Augs}
+    /if (${Me.Bank[${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+1
+      /varset reportArray[${raINDX}] [Bag]${Me.Bank[${i}].Item[${e}].AugSlot[${a}]}(1
+      /varcalc raINDX ${raINDX}+1
+      |/docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}].Item[${e}].AugSlot[${a}]}-> [${Me.Bank[${i}].Item[${e}]}]-> ${Me.Bank[${i}]}-> BankSlot${i}-> PackSlot${e}
+    }
+    /next a
+    /next e
+  }
+  /next i
 
+  |/echo ${raINDX} ${reportArray[1]}
+  /for r 1 to ${raINDX}
+    /if (${reportArray[${r}].NotEqual[NIL]}) /docommand ${ChatToggle} ${reportArray[${r}]}/${totalItems})
+  /next r
+  |/if (${totalItems} > 0) /docommand ${ChatToggle} >> Found (${totalItems}) : [${ItemToFind}] <<
+
+  /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_FindItems -|
+/RETURN
+|--------------------------------------------------------|
+|- Finditem with no summary data for easier viewing
+|--------------------------------------------------------|
+SUB FindItemSub(ItemToFind,reportTotal,reportDelay)
+  /declare i int local
+  /declare e int local
+  /declare a int local
+  /declare totalItems int local 0
+  | -Check cursor.
+  /if (${Cursor.Name.Equal[${ItemToFind}]}) {
+    /varcalc totalItems ${totalItems}+${Cursor.Stack}
+    /docommand /timed ${reportDelay} ${ChatToggle} >>> Found ${Cursor.Name}(${Cursor.Stack})-> [Cursor] <<<
+  }
+  /if (${FindItemCount[${ItemToFind}]}) {
+    | -Search Equippped Items.
+    /for i 1 to 22
+    /if (${InvSlot[${i}].Item.Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+${InvSlot[${i}].Item.Stack}
+      /docommand /timed ${reportDelay} ${ChatToggle} ${InvSlot[${i}].Item}(${InvSlot[${i}].Item.Stack})-> [${InvSlot[${i}].Name}]
+    }
+    /for a 0 to ${InvSlot[${i}].Item.Augs}
+    /if (${InvSlot[${i}].Item.AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+1
+      /docommand /timed ${reportDelay} ${ChatToggle} ${InvSlot[${i}].Item.AugSlot[${a}]}-> [${InvSlot[${i}].Item}-> ${InvSlot[${i}].Name}]
+    }
+    /next a
+    /next i
+    | -Search packslots.
+    /for i 1 to 8
+    /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Stack}
+      /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack})-> InvSlot${i}]
+    }
+    /if (${Me.Inventory[pack${i}].Container}) {
+      /for e 1 to ${Me.Inventory[pack${i}].Container}
+      /if (${Me.Inventory[pack${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
+        /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Item[${e}].Stack}
+        /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}].Item[${e}]}(${Me.Inventory[pack${i}].Item[${e}].Stack})-> [${Me.Inventory[pack${i}]}-> InvSlot${i}-> PackSlot${e}]
+      }
+      /for a 0 to ${Me.Inventory[pack${i}].Item[${e}].Augs}
+      /if (${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+        /varcalc totalItems ${totalItems}+1
+        /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}].Item[${e}].AugSlot[${a}]}-> [${Me.Inventory[pack${i}].Item[${e}]}]-> [${Me.Inventory[pack${i}]}-> InvSlot${i}-> PackSlot${e}]
+      }
+      /next a
+      /next e
+    }
+    /next i
+  }
+  | -Search bank packslots.
+  /for i 1 to 26
+  /if (${Me.Bank[${i}].Name.Find[${ItemToFind}]}) {
+    /varcalc totalItems ${totalItems}+${Me.Bank[${i}].Stack}
+    /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}]}(${Me.Bank[${i}].Stack}) ->[BankSlot${i}]
+  }
+  /if (${Me.Bank[${i}].Container}) {
+    /for e 1 to ${Me.Bank[${i}].Container}
+    /if (${Me.Bank[${i}].Item[${e}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+${Me.Bank[${i}].Item[${e}].Stack}
+      /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}].Item[${e}]}(${Me.Bank[${i}].Item[${e}].Stack})-> [${Me.Bank[${i}]}-> BankSlot${i}-> PackSlot${e}]
+    }
+    /for a 0 to ${Me.Bank[${i}].Item[${e}].Augs}
+    /if (${Me.Bank[${i}].Item[${e}].AugSlot[${a}].Name.Find[${ItemToFind}]}) {
+      /varcalc totalItems ${totalItems}+1
+      /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Bank[${i}].Item[${e}].AugSlot[${a}]}-> [${Me.Bank[${i}].Item[${e}]}]-> ${Me.Bank[${i}]}-> BankSlot${i}-> PackSlot${e}
+    }
+    /next a
+    /next e
+  }
+  /next i
+  /if (${Bool[${reportTotal}]} && ${totalItems} > 0) /docommand ${ChatToggle} >> Found (${totalItems}) : [${ItemToFind}] <<
+/RETURN
 |------------------------------------------------------------------|
 |- Reports which character lacks a specified item                 -|
 |- 'Name' must be the full itemname, accepts item links as 'Name' -|
@@ -640,6 +822,24 @@ SUB EVENT_FindMissingItem(line, ChatSender, ItemToFind)
   /if (${totalItems}==0) /docommand ${ChatToggle} >> I did not find ${ItemToFind} <<
 /RETURN
 
+|------------------------------------------------------------|
+|**
+SUB LPAD_NAME_BC(myName, textToPad)
+  /declare i int local
+  /declare maxLength int local 0
+  /declare numToPad int local
+  /declare paddedText string local
+  /for i 1 to ${NetBots.Counts}
+    /if(${NetBots.Client[${i}].Length} > ${maxLength}) /varset maxLength ${NetBots.Client[${i}].Length}
+  /next i
+
+  /varcalc numToPad ${maxLength}-${Me.Nam.Length}
+  /for i 1 to ${numToPad}
+    /varset paddedText _${paddedText}
+    /echo ${paddedText}
+  /next i
+/RETURN ${paddedText}
+**|
 |------------------------------------------------------------|
 #EVENT FindSlot "<#1#> Find Slot #2#"
 SUB EVENT_FindSlot(line, ChatSender, SlotToFind)
@@ -969,6 +1169,7 @@ SUB EVENT_Evacuate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Evacuate ==>
   /if (${Select[${Me.Class.ShortName},DRU,WIZ]}) {
     /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
+    /if (${Bool[${Group.Member[${c_eventArgChatSender}]}]} && ${NetBots.Counts}>6) /delay 1s
     /if (${Me.AltAbilityReady[Exodus]}) {
       /delay 3
       /docommand ${ChatToggle} Evacuating!
@@ -1338,6 +1539,7 @@ Sub basics_Background_Events
   /doevents CountBots
   /doevents FindMissingItem
   /doevents FindItems
+  /doevents FindItemCompact
   /doevents FindSlot
   /doevents CheckBuffs
   /doevents LoadSpells
@@ -1375,11 +1577,11 @@ SUB basics_CharacterSettings
 
 Sub basics_Aliases
 /if (${Debug}) /echo |- basics_Aliases ==>
-	/noparse /squelch /alias /followon /bc Follow ${Me.CleanName}
-	/noparse /squelch /alias /followme /bc Follow ${Me.CleanName}
-	/noparse /squelch /alias /followit /bc Follow ${Target.CleanName}
-  /squelch /alias /followoff /bc Stop
-	/squelch /alias /stop /bc Stop
+	/noparse /squelch /alias /followon /bc [+g+]Follow ${Me.CleanName}
+	/noparse /squelch /alias /followme /bc [+g+]Follow ${Me.CleanName}
+	/noparse /squelch /alias /followit /bc [+g+]Follow ${Target.CleanName}
+  /squelch /alias /followoff /bc [+r+]Stop
+	/squelch /alias /stop /bc [+r+]Stop
   /noparse /squelch /alias /stopf /bcaa //StopFollowing ${Me.Y} ${Me.X}
   /noparse /squelch /alias /mtm /bc Move to ${Me.ID}
   /noparse /squelch /alias /movetome /bc Move to ${Me.ID}
@@ -1403,10 +1605,12 @@ Sub basics_Aliases
 	/squelch /alias /LoadSpells /bc Load Spells
 	/squelch /alias /DropBuff /bc Drop Buff
 	/squelch /alias /CheckBuff /bc Check Buff
+  /squelch /alias /FindItemC /bc Find ItemC
 	/squelch /alias /FindItem /bc Find Item
   /squelch /alias /FindSlot /bc Find Slot
   /squelch /alias /fds /bc Find Slot
   /squelch /alias /fdi /bc Find Item
+  /squelch /alias /fic /bc Find ItemC
   /squelch /alias /FindMissingItem /bc Find Missing Item
   /squelch /alias /fmi /bc Find Missing Item
 	/noparse /squelch /alias /FindIt /bc Find Item ${Cursor}
