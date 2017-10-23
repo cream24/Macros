@@ -391,7 +391,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
 #EVENT runThruZone "#1# tell your party, 'Run through zone#2#'"
 SUB EVENT_runThruZone(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_runThruZone ==>
-  /if (!${checkEventArgs["${ChatSender}","${line}","UZR","${eventParams}"]}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /declare locToStart string local ${Spawn[pc ${c_eventArgChatSender}].Loc}
   /declare startHeading float local ${Spawn[pc ${c_eventArgChatSender}].Heading.Degrees}
@@ -1362,7 +1362,7 @@ SUB EVENT_groupUp(line, ChatSender, createGroup)
       }
       /next e
 
-      /delay 6s ${Group} == ${groupSize}
+      /delay 8s ${Group} == ${groupSize}
       /if (${Group} != ${groupSize}) {
         /for e 1 to 5
         /if (${groupMembers[${e}].NotEqual[PLACEHOLDER]} && !${Bool[${Group.Member[${groupMembers[${e}]}]}]}) /docommand ${ChatToggle} [${groupMembers[${e}]}] Did not join the group...

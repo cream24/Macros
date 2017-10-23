@@ -178,7 +178,7 @@ SUB checkAuras
       /call check_Ready "auraSpells2D" 1
       /if (${c_Ready}) {
         /cast ${Me.Gem[${auraSpells2D[1,${iCastName}]}]}
-        /delay 4s !${Me.Casting.ID}
+        /delay 7s !${Me.Casting.ID}
       }
       /call unpauseTwist
     } else {
