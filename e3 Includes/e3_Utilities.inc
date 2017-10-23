@@ -701,7 +701,6 @@ SUB RemoveArrayElement(ArrayName, Data)
 	}
 /if (${Debug}) /echo <== RemoveArrayElement -|
 /RETURN
-
 |----------------------------------------------------|
 SUB RemoveArrayElements(ArrayName, ArrayIndexes)
   /declare i int local
@@ -725,7 +724,6 @@ SUB RemoveArrayElements(ArrayName, ArrayIndexes)
   }
   /deletevar tempArray
 /RETURN
-
 |------------------------------------------------------------|
 |- Reliably targets specified Target.IDs.					-|
 |------------------------------------------------------------|
@@ -740,7 +738,6 @@ SUB TrueTarget(TargetID)
 		/echo TrueTarget has no spawncount
 	}
 /RETURN
-
 |------------------------------------------------------------------------------------|
 |- Creates timers, at the specified duration, and adds their names to timerArray.	-|
 |------------------------------------------------------------------------------------|
@@ -757,7 +754,6 @@ SUB createTimer(timerName, timerSetting)
   }
 /if (${Debug}) /echo <== createTimer -| created ${timerName} [${${timerName}}]
 /RETURN
-
 |----------------------------------------------------|
 |- Deletes spent timers made by 'SUB createTimer'.	-|
 |----------------------------------------------------|
@@ -785,7 +781,6 @@ SUB check_macroTimers
 	}
 /if (${Debug}) /echo <== check_macroTimers -|
 /RETURN
-
 |----------------------------------------------------------------------------------------|
 |- Auto inventories items from your cursor. 											-|
 |- Alerts the user, and ends the macro, if there is no free inventory space available.	-|
@@ -809,7 +804,6 @@ SUB ClearCursor
   }
 /if (${Debug}) /echo <== ClearCursor -|
 /RETURN
-
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sub SwapItem(itemName,slotName)
   /if (!${Defined[itemName]} || !${Defined[slotName]}) /return
@@ -837,7 +831,6 @@ Sub SwapItem(itemName,slotName)
     /delay 2s !${Window[Pack${packSlot}].Open}
   }
 /return
-
 |-------------------------------------------------------------|
 |- Use MQ2MoveUtils /moveto function, to move to destination.	||
 SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)
@@ -845,7 +838,6 @@ SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)
   /if (!${Bool[${timeToWait}]}) /varset timeToWait 30
   /declare moveTimer timer local ${timeToWait}
   |/echo MoveToLoc ${yLoc},${xLoc},${timeToWait},${arrivalDist}
-
   /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) /return
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
   /squelch /moveto loc ${yLoc} ${xLoc} dist ${arrivalDist}
@@ -855,9 +847,10 @@ SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)
   /if (${Math.Distance[${yLoc},${xLoc}]}<=${arrivalDist}) {
     /moveto off
     /return
-  } else /if (${moveTimer}) /goto :retryMove
+  } else /if (${moveTimer}) {
+  	/goto :retryMove
+	} else /moveto off
 /return
-
 |--------------------------------------------------------------------------|
 |- Type Stuff
 |- Lifted from commonsubs.inc by Armysoldier
@@ -873,7 +866,6 @@ Sub Type(InStr)
   }
   /next loopctr
 /return
-
 |--------------------------------------------------------------------------|
 SUB argueString(WhatToFind, givenData)
 	/declare i int local 1

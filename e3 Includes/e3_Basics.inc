@@ -108,7 +108,7 @@ SUB Bind_StopFollowing(yLoc,xLoc)
 SUB EVENT_Stop(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Stop ==>
 	/if (${Following}) {
-    /if (!${checkEventArgs[${ChatSender},${line},UZ]}) /return
+    /if (!${checkEventArgs[${ChatSender},${line},UZR]}) /return
       | -Wait to get close to the followTarget.
     /delay 1s ${Spawn[${FollowTarget}].Distance} < 25
     | -Stop following
