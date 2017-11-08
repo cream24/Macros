@@ -199,7 +199,7 @@ SUB lootCorpse
 |--------------------------------------------------------------------------|
 SUB get_lootSetting(invSlot, itemSlot)
 |/if (${Debug} || ${Debug_Loot}) /echo |- get_lootSetting invSlot: ${invSlot} ${itemSlot}
-  /if (!${Bool[${Corpse.Items}]}) /return
+  /if (!${Bool[${Corpse.Items}]} && !${Window[MerchantWnd]}) /return
 	/declare itemName string local
 	/declare itemValue string local
 	/declare iniEntryVariables string local

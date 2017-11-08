@@ -29,8 +29,6 @@ SUB EVENT_syncInventory
 	/declare i int local
 	/declare x int local
 
-	/declare lootSetting string local
-	
 	| Check inventory slots 1 - 8 for items, and containers.
 	/for i 1 to 8
 	
@@ -262,8 +260,6 @@ SUB closeMerchant
 |----------------------------------------------------------------------------------------|
 SUB sellItems
 /if (${Debug} || ${Debug_Sell}) /echo |- sellItems ==>
-
-	/declare lootSetting string local
 	/declare retryTimer timer local
 	/declare i int local
 	/declare e int local

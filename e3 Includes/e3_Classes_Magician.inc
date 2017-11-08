@@ -151,13 +151,15 @@ SUB check_SummonItems
       /declare p int local
       /declare masterName string local
       /declare petName string local
+      /declare petRace string local
       /declare petID int local
       /if (${Defined[petIDArray]}) /deletevar petIDArray
       /for p 1 to ${SpawnCount[pcpet radius 100]}
         /varset masterName ${NearestSpawn[${p},pcpet].Master}
         /varset petName ${NearestSpawn[${p},pcpet].CleanName}
         /varset petID ${NearestSpawn[${p},pcpet].ID}
-        /if (!${Bool[${petName}]} || !${Bool[${masterName}]} || ${petName.Find[familiar]}) /return
+        /varset petRace ${NearestSpawn[${p},pcpet].Race}
+        /if (!${Bool[${petName}]} || !${Bool[${masterName}]} || ${petName.Find[familiar]} || ${petRace.Equal[Gnomework]}) /return
         /if (${NetBots[${masterName}].ID}) {
           /if (${Spawn[id ${petID}].LineOfSight}) {
             /if (${petName.Equal[${Ini[${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Auto-Pet Weapons-${masterName}]}]}) {
