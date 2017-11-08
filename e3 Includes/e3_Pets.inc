@@ -76,15 +76,17 @@ SUB check_petHeal
 	/if (${Me.Pet.ID}) {
     /declare petMended bool local FALSE
 		| Check Mend Companion AA.
-		/if (${Me.Pet.PctHPs} < ${petMendPct}) {
-		  /if (${Me.AltAbilityReady[Replenish Companion]}) {
-        /casting "Replenish Companion" "-targetid|${Me.Pet.ID}"
-        /varset petMended TRUE
-      } else /if (${Me.AltAbilityReady[Mend Companion]}) {
-        /casting "Mend Companion" "-targetid|${Me.Pet.ID}"
-        /varset petMended TRUE
+		/if (${Defined[petMendPct]}) {
+      /if (${Me.Pet.PctHPs} < ${petMendPct}) {
+        /if (${Me.AltAbilityReady[Replenish Companion]}) {
+          /casting "Replenish Companion" "-targetid|${Me.Pet.ID}"
+          /varset petMended TRUE
+        } else /if (${Me.AltAbilityReady[Mend Companion]}) {
+          /casting "Mend Companion" "-targetid|${Me.Pet.ID}"
+          /varset petMended TRUE
+        }
       }
-		}
+    }
     /if (!${Defined[petHeal2D]}) /return
 		/if (!${petMended}) {
       /declare s int local

@@ -94,10 +94,16 @@ SUB event_Assist(line, ChatSender, int MobID)
 |- You must manually call engage to re-engage a PauseTarget.		    -|
 |- Use, '/backoff', or, 'Back off' in /tell, /group, or /bc.		    -|
 |--------------------------------------------------------------------|
-#event BackOff "<#1#> Back Off"
+#event BackOff "<#1#> Back Off#*#"
 SUB Event_BackOff(line, ChatSender)
 /if (${Debug} || ${Debug_Assists}) /echo |- Event_BackOff ==>
   /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
+|#event BackOff "<#1#> Back Off#2#"
+|SUB Event_BackOff(line, ChatSender, args)
+|/if (${Debug} || ${Debug_Assists}) /echo |- Event_BackOff ==>
+
+|  /if (!${checkEventArgs[${ChatSender},${line},UZR,${args}]}) /return
+  /echo Backing off.
   /if (${c_eventArgChatSender.Equal[${Me}]}) /docommand ${ChatToggle} Backing off.
   /varset PauseTarget ${Target.ID}
   /call AssistOff
