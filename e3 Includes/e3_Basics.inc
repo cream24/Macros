@@ -26,7 +26,7 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
   | -If I am the follow target
   /if (${FollowTarget.Equal[${Me}]}) {
     /if (${Stick.Active}) /squelch /stick off
-    /if (${NetAdvPath.Status}) /squelch /netfollow off
+    /if (${NetAdvPath.Following}) /squelch /netfollow off
   } else {
     | -Check Range
     /if (${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist}) {
@@ -57,7 +57,7 @@ SUB AcquireFollow
 		/if (${SpawnCount[=${FollowTarget} radius ${MaxResponseDist}]}) {
 			/if (${FollowTarget.NotEqual[${Me.CleanName}]}) {
 				/if (${Stick.Active}) /squelch /stick off
-				/if (${NetAdvPath.Status}==1) /squelch /netfollow off
+				/if (${NetAdvPath.Following}) /squelch /netfollow off
 
 				/declare followTargetID int local
 				/if (${SpawnCount[pc =${FollowTarget}]}) {
@@ -92,9 +92,9 @@ SUB AcquireFollow
 |----------------------------------------------------------------------------|
 #bind StopFollowing /StopFollowing
 SUB Bind_StopFollowing(yLoc,xLoc)
-  /if (${Stick.Active} || ${NetAdvPath.Status}==1 || ${Following}) {
+  /if (${Stick.Active} || ${NetAdvPath.Following} || ${Following}) {
     /if (${Stick.Active}) /squelch /stick off
-    /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+    /if (${NetAdvPath.Following}) /squelch /netfollow off
     /call MoveToLoc ${yLoc} ${xLoc} 20 20
     /varset FollowTarget
     /varset Following FALSE
@@ -113,7 +113,7 @@ SUB EVENT_Stop(line, ChatSender)
     /delay 1s ${Spawn[${FollowTarget}].Distance} < 25
     | -Stop following
     /if (${Stick.Active}) /squelch /stick off
-    /if (${NetAdvPath.Status}) /squelch /netfollow off
+    /if (${NetAdvPath.Following}) /squelch /netfollow off
     /varset FollowTarget NULL
     /varset Following FALSE
   }
@@ -133,7 +133,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
   /if (!${SpawnCount[id ${c_eventArgData}]}) /return
   |turn off following, assist
   /if (${Stick.Active})         /squelch /stick off
-  /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+  /if (${NetAdvPath.Following}) /squelch /netfollow off
   /varset FollowTarget  NULL
   /varset Following     FALSE
   /if (${Assisting}  || ${Me.Combat}) /call AssistOff
@@ -185,7 +185,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   }
 
   /if (${Stick.Active}) /squelch /stick off
-  /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+  /if (${NetAdvPath.Following}) /squelch /netfollow off
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 
   /doevents barkReturn flush
@@ -334,7 +334,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
       /declare miscTimer timer local
       /declare startZone int local ${Zone.ID}
       /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+      /if (${NetAdvPath.Following}) /squelch /netfollow off
       /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
       :retryClick
       /if (${Math.Distance[${locToStart}]} > 10) /call MoveToLoc ${locToStart} 30 20
@@ -407,7 +407,7 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
       /docommand ${ChatToggle} I am to far away from that zone line.
     } else {
       /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+      /if (${NetAdvPath.Following}) /squelch /netfollow off
       /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /delay 5s !${Me.Casting.ID}
     :retryRTZ
       | -Check if I need to move closer.
@@ -1111,7 +1111,8 @@ SUB EVENT_ClickYes(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_ClickYes ==>
   /if (!${checkEventArgs[${ChatSender},${line},U,${eventParams}]}) /return
   /declare buttonToClick string local ${If[${c_eventArgData.Find[yes]},Yes,No]}
-  /declare miscTimer timer local 100
+  /declare miscTimer timer local 5s
+  /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   :clickButton
   /if (${Window[ConfirmationDialogBox].Open}) {
     /notify ConfirmationDialogBox ${buttonToClick}_Button leftmouseup

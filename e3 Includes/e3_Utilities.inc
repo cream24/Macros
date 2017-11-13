@@ -19,7 +19,7 @@ Sub IniToArrayV(IniKey, ArrayName)
   /declare array_size int local 0
   /declare ArrayScope string local outer
   /if (${IniKey.Right[1].Equal[#]} && ${IniExt[${IniKey}1].Length}) {
-    /call IniToArrayV_Deprecated "${IniKey}" "${ArrayName}"
+    /call IniToArray_Deprecated "${IniKey}" "${ArrayName}"
     /return
   }
   /if (${IniKey.Right[1].Equal[#]}) /varset IniKey ${IniKey.Left[-1]}
@@ -45,7 +45,8 @@ Sub IniToArrayV(IniKey, ArrayName)
   }
 /return
 
-Sub IniToArrayV_Deprecated(IniKey, ArrayName)
+|-----------------------
+Sub IniToArray_Deprecated(IniKey, ArrayName)
   /declare i int local 1
 |/declare IniKey ${File},${Section},${Key}
   /declare ArrayScope string local outer
@@ -62,11 +63,43 @@ Sub IniToArrayV_Deprecated(IniKey, ArrayName)
     /for i 1 to ${count}
     /varset ${ArrayName}[${i}] ${Ini[${IniKey}${i}]}
     /next i
-  } else {
-    /declare ${ArrayName}[0] string ${ArrayScope}
+  |} else {
+  |  /declare ${ArrayName}[0] string ${ArrayScope}
   }
 /return
 
+SUB IniToVar_Deprecated(Ini_Key, VarToMake, VarType, VarScope)
+	/if (${Debug}) /echo |- IniToVar [${Ini_Key}] ==>
+| Check for the specified ini key.
+	/if (!${Ini[${Ini_Key}].Length}) {
+		/if (${Debug}) /echo [${Ini_Key}] not found.
+	} else {
+		| Validate bool.
+		/if (${VarType.Equal[bool]}) {
+			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+			/if (!${Defined[new_VarName]}) /declare new_VarName string outer
+			/declare ${VarToMake} bool ${VarScope} ${If[${Select[${Ini[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
+			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
+			| Validate int.
+		} else /if (${VarType.Equal[Int]}) {
+			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+			/declare ${VarToMake} int ${VarScope} ${Ini[${Ini_Key}]}
+			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
+			| Validate float.
+		} else /if (${VarType.Equal[Float]}) {
+			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+			/declare ${VarToMake} float ${VarScope} ${Ini[${Ini_Key}]}
+			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
+			| Create string or timer.
+		} else {
+			/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+			/declare ${VarToMake} ${VarType} ${VarScope} ${Ini[${Ini_Key}]}
+			/if (${Debug}) /echo |- IniToVar -| Defined: ${VarToMake} [${${VarToMake}}]
+		}
+	}
+
+	/if (${Debug}) /echo <== IniToVar -|
+/RETURN
 |-----------------------
 |- Creates ini entries from supplied ini keys.
 |- Allows the user to toggle whether or not to overwrite an existing entry

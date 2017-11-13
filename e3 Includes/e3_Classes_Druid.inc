@@ -42,7 +42,26 @@ sub Event_AE_SOW(string line)
 	 } else /bc Spirit of the Wood is not available...
 	}
 /return
+
+#event AE_FOE "#*# tells you, 'AEFOE'"
+sub Event_AE_FOE(string line)
+	/if (${Me.Class.ShortName.Equal[DRU]}) {
+	 /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Bool[${Me.Book[Flight of Eagles]}]}) {
+		 /bc MGB Flight of Eagles inc...
+		 /casting "Mass Group Buff|alt" -maxtries|3
+		 /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
+		 /delay 5
+		 /casting "Flight of Eagles|alt" -maxtries|3
+		 /delay 5 !${Me.AltAbilityReady[Spirit of the Wood]}
+		 /casting "Flight of Eagles|alt" -maxtries|3
+		 /rs MGB Spirit of the Wood inc...
+	 } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
+			/bc Mass Group Buff is not available...
+	 } else /bc Flight of Eagles is not available...
+	}
+/return
 |----------------------------------------------------------------------------|
 Sub DRU_Background_Events
 	/doevents AE_SOW
+	/doevents AE_FOE
 /return

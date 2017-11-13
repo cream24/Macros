@@ -58,6 +58,26 @@ SUB check_manaDump
   }
 /if (${Debug}) /echo <== check_manaDump -|
 /return
+
+|----------------------------------------------------------------------------|
+#event AE_DMF "#*# tells you, 'AEDMF'"
+sub Event_AE_DMF(string line)
+/if (${Me.Class.ShortName.Equal[NEC]}) {
+   /if (${Me.AltAbilityReady[Mass Group Buff]} && ${Bool[${Me.Book[Dead Men Floating]}]}) {
+     /bc MGB Dead Men Floating inc...
+     /casting "Mass Group Buff|alt" "-maxtries|3"
+     /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
+     /delay 5
+     /casting "Dead Men Floating" "-maxtries|3"
+     /delay 5 !${Me.SpellReady[Dead Men Floating]}
+     /casting "Dead Men Floating" "-maxtries|3"
+     /rs MGB Dead Men Floating inc...
+   } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
+      /bc Mass Group Buff is not available...
+   } else /bc Dead Men Floating is not in your Spell Book, Go and buy it fool...
+}
+/return
+
 |----------------------------------------------------------------------------|
 Sub NEC_Setup
 /if (${Debug}) /echo |- NEC_Setup ==>
@@ -107,4 +127,5 @@ Sub NEC_Aliases
 /return
 |----------------------------------------------------------------------------|
 Sub NEC_Background_Events
+  /doevents AE_DMF
 /return

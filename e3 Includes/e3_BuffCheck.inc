@@ -249,26 +249,29 @@ SUB event_BuffAll
 /RETURN
 
 |----------------------------------------------------|
-|- Tell a character to turn on/off all buffing		-|
+|- Tell a character to turn on/off all buffing      -|
 |----------------------------------------------------|
 #EVENT toggleBuffs "<#1#> Toggle Buffs #2#"
 #EVENT toggleBuffs "#1# tells you, 'Toggle Buffs #2#'"
-SUB EVENT_toggleBuffs(line, ChatSender, buffSetting)
-/if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
-  /if (!${checkEventArgs[${ChatSender},${line},UZ,${buffSetting}]}) /return
-  /varset buffSetting ${c_eventArgData}
-	/if (${buffSetting.Equal[on]}) {
-		/varset buffSetting TRUE
-	} else /if (${buffSetting.Equal[off]}) {
-		/varset buffSetting FALSE
-	}	
-	/varset BuffCheck ${buffSetting}
-	/docommand ${ChatToggle} BuffCheck [${If[${BuffCheck},ON,OFF]}]
-/if (${Debug} || ${Debug_BuffCheck}) /echo <== EVENT_toggleBuffs -|
+SUB EVENT_toggleBuffs(line, ChatSender, parms)
+  /if (${Debug} || ${Debug_BuffCheck}) /echo |- EVENT_toggleBuffs ==>
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${parms}]}) /return
+  /declare buffSetting bool local ${BuffCheck}
+  /varset parms ${c_eventArgData}
+  /if (${parms.Equal[on]} && !${BuffCheck}) {
+    /varset buffSetting TRUE
+  } else /if (${parms.Equal[off]} && ${BuffCheck}) {
+    /varset buffSetting FALSE
+  }
+  /if (${buffSetting} != ${BuffCheck}) {
+    /varset BuffCheck ${buffSetting}
+    /docommand ${ChatToggle} BuffCheck [${If[${BuffCheck},ON,OFF]}]
+  }
+  /if (${Debug} || ${Debug_BuffCheck}) /echo <== EVENT_toggleBuffs -|
 /RETURN
 
 |----------------------------------------------------|
-|- Tell a character to turn on/off combat buffing	-|
+|- Tell a character to turn on/off combat buffing	  -|
 |----------------------------------------------------|
 #EVENT toggleCombatBuffs "<#1#> Toggle Combat Buffs #2#"
 #EVENT toggleCombatBuffs "#1# tells you, 'Toggle Combat Buffs #2#'"

@@ -37,7 +37,7 @@ SUB event_Assist(line, ChatSender, int MobID)
       }
       | Disengage follow.
       /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+      /if (${NetAdvPath.Following}) /squelch /netfollow off
       | Set Assist Variables.
       /varset Assisting TRUE
       /varset AssistTarget ${MobID}
@@ -264,9 +264,11 @@ SUB CombatAbilities
   }
   /if (${Defined[smartTaunt]}) {
     /if (${smartTaunt} && ${Me.AbilityReady[Taunt]}) {
-      /if (${Bool[${Target.AggroHolder}]} && !${Select[${Target.AggroHolder.Class.ShortName},WAR,PAL,SHD]} && ${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
-        /bc Taunting ${Target.CleanName}: ${Target.AggroHolder.Class.ShortName}-${Target.AggroHolder} has aggro
-        /doability Taunt
+      /if (${Bool[${Me.TargetOfTarget}]} && !${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}) {
+        /if (${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
+          /bc Taunting ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
+          /doability Taunt
+        }
       }
     }
   }

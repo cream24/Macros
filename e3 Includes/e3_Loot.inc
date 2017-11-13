@@ -38,7 +38,7 @@ SUB loot_Area
   /squelch /hidecor looted
   /if (${Twist.Twisting}) /call pauseTwist
   /delay 5s !${Me.Casting.ID}
-  /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+  /if (${NetAdvPath.Following}) /squelch /netfollow off
   /if (${Stick.Active}) /squelch /stick off
 
   /declare ClosestCorpse        int local
@@ -110,6 +110,9 @@ SUB loot_Area
 |-------------------------------------------------------------------------------------------------
 SUB lootCorpse
   /declare i int local
+  /declare j int local
+  /declare itemName string local
+  /declare itemSlot int local
   /varset canLootCorpse TRUE
   /loot
   /delay 5 ${Window[LootWnd].Open}
@@ -129,6 +132,7 @@ SUB lootCorpse
     |/if (${Debug} || ${Debug_Loot}) /echo Ending loot on ${Target.ID}, no items left: ${Corpse.Items}
     /goto :skipLoot
   }
+
   |must use numItems, ${Corpse.Items} recalcs every iteration
   /for i 1 to ${numItems}
     |/if (${Debug} || ${Debug_Loot}) /echo starting loot i: ${i} of ${numItems}
@@ -139,44 +143,81 @@ SUB lootCorpse
         /docommand ${ChatToggle} My inventory is full!  I will continue to link items on corpses, but cannot loot anything else.
       }
       /if (${Debug} || ${Debug_Loot}) /echo no free inventory slots
-    } else {
-      /varset fullInventory_Alert FALSE
-      /delay 1s ${Corpse.Item[${i}].ID}
-      |/if (${Debug} || ${Debug_Loot}) /echo itemID ${Corpse.Item[${i}].ID}
-      /call get_lootSetting ${i} 0
-      | Destroy the item
-      |/if (${Debug} || ${Debug_Loot}) /echo loot setting: ${Corpse.Item[${i}].Name}-${lootSetting}
-      /if (${lootSetting.Find[Destroy]}) {
-        /echo [Loot]: Destroying [${Corpse.Item[${i}].Name}]
-        /if (${Corpse.Item[${i}].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
-        /call loot_Handle ${i} destroy
-        | Keep the item
-      } else /if (${lootSetting.Find[Keep]}) {
-        | Check for a max stock
-        /call argueString keep| "${lootSetting}"
-        /if (${Bool[${c_argueString}]} && ${Int[${c_argueString}]} < ${Math.Calc[${FindItemCount[${Corpse.Item[${i}].Name}]} + 1].Int}) {
-          /echo [Loot]: Fully stocked on [${Corpse.Item[${i}].Name}].
-          /goto :skipItem
-        }
-        | If the item is lore, make sure I don't have one.  If I do, skip it.
-        /if (${Corpse.Item[${i}].Lore}) {
-            /if (${FindItemCount[=${Corpse.Item[${i}].Name}]} || ${FindItemBankCount[=${Corpse.Item[${i}].Name}]}) {
-            /echo [Loot]: [${Corpse.Item[${i}].Name}] is lore, and I already have one${If[${FindItemBankCount[=${Corpse.Item[${i}].Name}]}, in the bank,]}.
-            /goto :skipItem
-          }
-        }
-        | Check that I have an inventory space large enough for the item
-        /if (${Me.LargestFreeInventory} < ${Corpse.Item[${i}].Size}) {
-          /echo [Loot]: I don't have a free inventory space large enough to hold [${Corpse.Item[${i}].Name}].
-          /goto :skipItem
-        }
-        |/if (${Debug} || ${Debug_Loot}) /echo [Loot]: Looting [${Corpse.Item[${i}].Name}] keep
-        /call loot_Handle ${i} keep
-        |/if (${Debug} || ${Debug_Loot}) /echo Done Looting i: ${i}
-        /delay 1
-      }
-      :skipItem
     }
+
+    /delay 1s ${Corpse.Item[${i}].ID}
+    |/if (${Debug} || ${Debug_Loot}) /echo itemID ${Corpse.Item[${i}].ID}
+    /call get_lootSetting ${i} 0
+
+    /if (${lootSetting.Find[Skip]}) /goto :skipItem
+    /varset itemName ${Corpse.Item[${i}].Name}
+/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: itemName: ${itemName}
+
+    | Destroy the item
+    |/if (${Debug} || ${Debug_Loot}) /echo loot setting: ${Corpse.Item[${i}].Name}-${lootSetting}
+    /if (${lootSetting.Find[Destroy]}) {
+      /echo [Loot]: Destroying [${Corpse.Item[${i}].Name}]
+      /if (${Corpse.Item[${i}].Lore} && ${FindItemCount[=${Corpse.Item[${i}].Name}]}) /goto :skip_Loot
+      /call loot_Handle ${i} destroy
+      | Keep the item
+    } else /if (${lootSetting.Find[Keep]}) {
+      | Check for a max stock
+      /call argueString keep| "${lootSetting}"
+      /if (${Bool[${c_argueString}]} && ${Int[${c_argueString}]} < ${Math.Calc[${FindItemCount[${Corpse.Item[${i}].Name}]} + 1].Int}) {
+        /echo [Loot]: Fully stocked on [${Corpse.Item[${i}].Name}].
+        /goto :skipItem
+      }
+      | If the item is lore, make sure I don't have one.  If I do, skip it.
+      /if (${Corpse.Item[${i}].Lore}) {
+          /if (${FindItemCount[=${Corpse.Item[${i}].Name}]} || ${FindItemBankCount[=${Corpse.Item[${i}].Name}]}) {
+          /echo [Loot]: [${Corpse.Item[${i}].Name}] is lore, and I already have one${If[${FindItemBankCount[=${Corpse.Item[${i}].Name}]}, in the bank,]}.
+          /goto :skipItem
+        }
+      }
+      | Check that I have an inventory space large enough for the item
+      | If
+      | 1) No open slots
+      | 2) The item on the corpse is stackable
+      | 3) I have one of the stackable items in my inventory already
+      | Then check to see if there is room within the stack to loot it.
+      /if (${Me.FreeInventory}) {
+      } else /if (!${Me.LargestFreeInventory} && ${Corpse.Item[${i}].Stackable} && ${Bool[${FindItem[=${itemName}]}]}) {
+/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: Check stackables
+
+        /if (!${Bool[${FindItem[=${itemName}].ItemSlot}]}) /goto :skipItem
+        /varset itemSlot ${FindItem[=${itemName}].ItemSlot}
+/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: itemSlot: ${itemSlot}
+
+        /if (${Bool[${Me.Inventory[${itemSlot}].Items}]}) {
+          /for j 1 to 10
+            /if (${Me.Inventory[${itemSlot}].Item[${j}].Name.Equal[${itemName}]}) {
+              /if (!${Me.Inventory[${itemSlot}].Item[${j}].FreeStack} ) {
+/if (${Debug} || ${Debug_Loot}) /echo [Auto-Loot]: I've got a stack, but its full, skipping
+                /goto :skipItem
+              } else {
+/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: I've got a stack, but its NOT full, I should loot this
+              }
+            }
+          /next j
+        } else {
+          /goto :skipItem
+        }
+      } else /if (${Me.LargestFreeInventory} < ${Corpse.Item[${i}].Size}) {
+        /echo [Loot]: I don't have a free inventory space large enough to hold [${itemName}].
+        /goto :skipItem
+      }  else /if (!${Me.FreeInventory}) {
+/if (${Debug} || ${Debug_Loot}) /bc [+g+] [Auto-Loot]: No Free Space
+        /goto :skipItem
+      }
+
+      |/if (${Debug} || ${Debug_Loot}) /echo [Loot]: Looting [${Corpse.Item[${i}].Name}] keep
+/bc [+g+] [Auto-Loot]: Looting [${itemName}] keep
+      /call loot_Handle ${i} keep
+      |/if (${Debug} || ${Debug_Loot}) /echo Done Looting i: ${i}
+      /delay 1
+    }
+  :skipItem
+
   |/if (${Debug} || ${Debug_Loot}) /echo Done with slot i: ${i}
   /next i
   /delay 1
