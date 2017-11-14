@@ -1243,7 +1243,7 @@ SUB EVENT_saveGroup(line, ChatSender, eventParams)
     /echo Preparing to save...
     /declare groupName string local ${c_eventArgData}
     /if (${groupName.Right[1].Equal[ ]}) /varset groupName ${groupName.Left[${Math.Calc[${groupName.Length}-1]}]}
-    /delay ${Math.Calc[${NetBots[${Me.CleanName}]} * 3].Int}
+    /delay ${Math.Rand[25]}
     /declare uniqueID int local
     /declare i int local
     /declare e int local
