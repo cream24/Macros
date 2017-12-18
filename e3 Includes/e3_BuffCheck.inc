@@ -61,7 +61,7 @@ SUB buffBots(ArrayName)
       /if (!${Bool[${Me.Song[${buffSpellName}]}]} && !${Bool[${Me.Song[${buffCheckForName}]}]}) {
         /if (${Spell[${buffSpellName}].Stacks} && ${Spell[${buffSpellName}].NewStacks} && !${Bool[${Me.Buff[${buffCheckForName}]}]}) {
           /call check_Ready "${ArrayName}" ${s}
-          /if (${c_Ready}) {
+          /if (${c_Ready} && ${${ArrayName}[${s},${iIfs}]}) {
             /if (${check_Mana["${ArrayName}",${s}]}) {
               /call e3_Cast ${buffTargetID} "${ArrayName}" ${s}
             }
@@ -75,7 +75,7 @@ SUB buffBots(ArrayName)
       /if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffCheckForID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffCheckForID} ]}]}) {
         /if (!${${ArrayName}[${s},${iTargetType}].Equal[Single in Group]} || ${Bool[${Group.Member[${buffTarget}]}]}) {
           /call check_Ready "${ArrayName}" ${s}
-          /if (${c_Ready}) {
+          /if (${c_Ready} && ${${ArrayName}[${s},${iIfs}]}) {
             /if (${check_Distance[${buffTargetID},${${ArrayName}[${s},${iMyRange}]}]}) {
               /if (${check_Mana["${ArrayName}",${s}]}) {
                 /call e3_Cast ${buffTargetID} "${ArrayName}" ${s}

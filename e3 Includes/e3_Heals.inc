@@ -35,7 +35,7 @@ SUB check_lifeSupport
 		/for s 1 to ${lifeSupport2D.Size[1]}
 			/if (${Me.PctHPs} <= ${lifeSupport2D[${s},${iHealPct}]}) {
 				/call check_Ready "lifeSupport2D" "${s}"
-				/if (${c_Ready}) {
+				/if (${c_Ready} && ${lifeSupport2D[${s},${iIfs}]}) {
 					/if (${Bool[${Me.AbilityReady[${lifeSupport2D[${s},${iCastName}]}]}]}) {
             /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 						/doability "${lifeSupport2D[${s},${iCastName}]}"
@@ -65,7 +65,7 @@ SUB heal_tanks
 		/for s 1 to ${tankHeals2D.Size[1]}
 			/if (${Bool[${NetBots[${tanks[${t}]}].InZone}]} && ${NetBots[${tanks[${t}]}].PctHPs} <= ${tankHeals2D[${s},${iHealPct}]}) {
 				/call check_Ready "tankHeals2D" ${s}
-				/if (${c_Ready}) {
+				/if (${c_Ready} && ${tankHeals2D[${s},${iIfs}]}) {
           /if (${check_Distance[${NetBots[${tanks[${t}]}].ID},${tankHeals2D[${s},${iMyRange}]}]}) {
             /if (${check_Mana["tankHeals2D",${s}]}) {
 							/varset currentBot ${tanks[${t}]}
@@ -97,7 +97,7 @@ SUB heal_importantBots
     /for s 1 to ${importantHeals2D.Size[1]}
     /if (${Bool[${NetBots[${importantBots[${t}]}].InZone}]} && ${NetBots[${importantBots[${t}]}].PctHPs} <= ${importantHeals2D[${s},${iHealPct}]}) {
       /call check_Ready "importantHeals2D" ${s}
-      /if (${c_Ready}) {
+      /if (${c_Ready} && ${importantHeals2D[${s},${iIfs}]}) {
         /call check_Distance
         /if (${check_Distance[${NetBots[${importantBots[${t}]}].ID},${importantHeals2D[${s},${iMyRange}]}]}) {
           /if (${check_Mana["importantHeals2D",${s}]}) {
@@ -141,7 +141,7 @@ SUB heal_Allbots
 		/for s 1 to ${allHeals2D.Size[1]}
 			/if (${Bool[${NetBots[${currClient}].InZone}]} && ${NetBots[${currClient}].PctHPs} <= ${allHeals2D[${s},${iHealPct}]}) {
 				/call check_Ready "allHeals2D" ${s}
-				/if (${c_Ready}) {
+				/if (${c_Ready} && ${allHeals2D[${s},${iIfs}]}) {
           /if (${check_Distance[${NetBots[${currClient}].ID},${allHeals2D[${s},${iMyRange}]}]}) {
             /if (${check_Mana["allHeals2D",${s}]}) {
 							/if (!${Bool[${currentBot}]} || ${NetBots[${currClient}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
@@ -177,7 +177,7 @@ SUB heal_pets
 			/for s 1 to ${petHeals2D.Size[1]}
 				/if (${NetBots[${petOwners[${t}]}].PetHP} <= ${petHeals2D[${s},${iHealPct}]}) {
 					/call check_Ready "petHeals2D" ${s}
-					/if (${c_Ready}) {
+					/if (${c_Ready} && ${petHeals2D[${s},${iIfs}]}) {
 						/if (${Spawn[pc =${petOwners[${t}]}].Pet.Distance} < ${petHeals2D[${s},${iMyRange}]}) {
 							/if (${check_Mana["petHeals2D",${s}]}) {
 								/if (!${Bool[${currentBot}]} || ${NetBots[${petOwners[${t}]}].PetHP} < ${NetBots[${currentBot}].PetHP}) {
@@ -214,7 +214,7 @@ SUB hot_tanks
 				/call check_HotTankStack "${tanks[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
 				/if (${c_SubToRun}) {
 					/call check_Ready "hotSpells2D" ${s}
-					/if (${c_Ready}) {
+					/if (${c_Ready} && ${hotSpells2D[${s},${iIfs}]}) {
             /if (${check_Distance[${NetBots[${tanks[${t}]}].ID},${hotSpells2D[${s},${iMyRange}]}]}) {
               /if (${check_Mana["hotSpells2D",${s}]}) {
 								/varset currentBot ${tanks[${t}]}
@@ -250,7 +250,7 @@ SUB hot_importantBots
 		/call check_HotImportantBotStack "${importantBots[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
 		/if (${c_SubToRun}) {
 		  /call check_Ready "hotSpells2D" ${s}
-		  /if (${c_Ready}) {
+		  /if (${c_Ready} && ${hotSpells2D[${s},${iIfs}]}) {
         /if (${check_Distance[${NetBots[${importantBots[${t}]}].ID},${hotSpells2D[${s},${iMyRange}]}]}) {
           /if (${check_Mana["hotSpells2D",${s}]}) {
             /if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
@@ -295,7 +295,7 @@ SUB hot_Allbots
 				/call check_HotAllStack "${currClient}" ${hotSpells2D[${s},${iSpellID}]}
 				/if (${c_SubToRun}) {
 					/call check_Ready "hotSpells2D" ${s}
-					/if (${c_Ready}) {
+					/if (${c_Ready} && ${hotSpells2D[${s},${iIfs}]}) {
             /if (${check_Distance[${NetBots[${currClient}].ID},${hotSpells2D[${s},${iMyRange}]}]}) {
               /if (${check_Mana["hotSpells2D",${s}]}) {
 								/if (!${Bool[${currentBot}]} || ${NetBots[${currClient}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {
@@ -335,7 +335,7 @@ SUB hot_pets
         /call check_HotPetStack "${petOwners[${t}]}" ${hotSpells2D[${s},${iSpellID}]}
         /if (${c_SubToRun}) {
           /call check_Ready "hotSpells2D" ${s}
-          /if (${c_Ready}) {
+          /if (${c_Ready} && ${hotSpells2D[${s},${iIfs}]}) {
             /if (${Spawn[pc =${petOwners[${t}]}].Pet.Distance} < ${hotSpells2D[${s},${iMyRange}]}) {
               /if (${check_Mana["hotSpells2D",${s}]}) {
                 /if (!${Bool[${currentBot}]} || ${NetBots[${petOwners[${t}]}].PetHP} < ${NetBots[${currentBot}].PetHP}) {
@@ -521,7 +521,7 @@ SUB groupHeals
 			/if (${c_SubToRun}) {
         /if (${check_Mana["groupHeals2D",${s}]}) {
 					/call check_Ready "groupHeals2D" ${s}
-					/if (${c_Ready}) {
+					/if (${c_Ready} && ${groupHeals2D[${s},${iIfs}]}) {
 						/call e3_Cast ${Me.ID} "groupHeals2D" ${s}
 					}
 				}

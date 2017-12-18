@@ -383,7 +383,7 @@ SUB check_Nukes
         /if (${Spawn[pc ${Me.TargetOfTarget}].ID}) {
           /varset assistToT ${Me.TargetOfTarget.ID}
           /call check_Ready "Nukes2D" ${castIndex}
-          /if (${c_Ready}) {
+          /if (${c_Ready} && ${Nukes2D[${castIndex},${iIfs}]}) {
             /if (${check_Mana["Nukes2D",${castIndex}]}) {
               /if (${check_Distance[${assistToT},${Nukes2D[${s},${iMyRange}]}]}) {
                 /call e3_Cast ${assistToT} "Nukes2D" "${castIndex}"
@@ -450,7 +450,7 @@ SUB check_Nukes
       }
 
       /call check_Ready "Nukes2D" ${castIndex}
-      /if (${c_Ready}) {
+      /if (${c_Ready} && ${Nukes2D[${castIndex},${iIfs}]}) {
         /if (${check_Mana["Nukes2D",${castIndex}]}) {
           /if (${check_Distance[${AssistTarget},${Nukes2D[${s},${iMyRange}]}]}) {
             /call e3_Cast ${AssistTarget} "Nukes2D" "${castIndex}"
@@ -540,6 +540,12 @@ SUB cast_longTermSpells(int spellTarget, string ArrayName)
       }
     }
     :attemptCast
+    /if (!${${ArrayName}[${s},${iIfs}]}) {
+        | need to have some sort of timer ... this will skip most encounters but raids will probably allow rechecking if conditions change
+        /call createTimer "${spellTimer}" "30s"
+        /echo \gy Skipping ${${ArrayName}[${s},${iSpellName}]} due to Ifs on ${Target.CleanName}
+        /goto :skipCast
+    }
     /call check_Ready "${ArrayName}" ${s}
     /if (${c_Ready}) {
       /if (${check_Mana[${ArrayName},${s}]}) {
@@ -846,7 +852,7 @@ SUB check_AE
 	/if (${use_PBAE} && ${Defined[PBAE_Spells2D]}) {
     /for s 1 to ${PBAE_Spells2D.Size[1]}
       /call check_Ready "PBAE_Spells2D" ${s}
-      /if (${c_Ready}) {
+      /if (${c_Ready} && ${PBAE_Spells2D[${s},${iIfs}]}) {
         /if (${check_Mana["PBAE_Spells2D",${s}]}) {
           /squelch /face fast id ${AssistTarget}
           /call e3_Cast ${aeTarget} "PBAE_Spells2D" "${s}"
@@ -869,7 +875,7 @@ SUB check_AE
     }
     /for s 1 to ${TargetAE_Spells2D.Size[1]}
       /call check_Ready "TargetAE_Spells2D" ${s}
-      /if (${c_Ready}) {
+      /if (${c_Ready} && ${TargetAE_Spells2D[${s},${iIfs}]}) {
         /if (${check_Mana["TargetAE_Spells2D",${s}]}) {
           /if (${check_Distance[${useBestTarget},${TargetAE_Spells2D[${s},${iMyRange}]}]}) {
             /squelch /face fast id ${useBestTarget}
@@ -917,7 +923,7 @@ SUB event_SwarmPets(line, ChatSender, int swarmTarget)
 			/declare i int local
 			/for i 1 to ${swarmPets2D.Size[1]}
         /call check_Ready "swarmPets2D" ${i}
-        /if (${c_Ready}) {
+        /if (${c_Ready} && ${swarmPets2D[${i},${iIfs}]}) {
           /if (${check_Distance[${swarmTarget},${swarmPets2D[1,${iMyRange}]}]}) {
 				    /call e3_Cast ${swarmTarget} "swarmPets2D" "${i}"
           }
@@ -970,7 +976,7 @@ SUB useBurns(ArrayName)
     /call check_Ready "${ArrayName}" ${i}
     |/echo ${i} ${${ArrayName}[${i},${iCastName}]} tgt ${AssistTarget} rng ${${ArrayName}[${i},${iMyRange}]}
     |/echo ${i} rdy ${c_Ready} dist ${check_Distance[${AssistTarget},${${ArrayName}[${i},${iMyRange}]}]}
-    /if (${c_Ready}) {
+    /if (${c_Ready} && ${${ArrayName}[${i},${iIfs}]}) {
       /if (${check_Distance[${AssistTarget},${${ArrayName}[${i},${iMyRange}]}]}) {
         /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastName}].Equal[Savage Spirit]}) /goto :skipCurrent
         /if (${Me.ActiveDisc.ID} && ${${ArrayName}[${i},${iCastType}].Equal[Disc]} && ${Bool[${${ArrayName}[${i},${iDuration}]}]}) /goto :skipCurrent
@@ -996,7 +1002,7 @@ SUB check_lifeTap
     /declare s int local
     /for s 1 to ${lifeTaps2D.Size[1]}
     /call check_Ready "lifeTaps2D" ${s}
-    /if (${c_Ready}) {
+    /if (${c_Ready} && ${lifeTaps2D[${s},${iIfs}]}) {
       /if (${check_Mana["lifeTaps2D",${s}]}) {
         /if (${Me.PctHPs} <= ${lifeTaps2D[${s},${iHealPct}]}) {
           /if (${check_Distance[${AssistTarget},${lifeTaps2D[${s},${iMyRange}]}]}) {
