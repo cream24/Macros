@@ -228,6 +228,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 		/varset SpellProp[35] PctAggro
 		/varset SpellProp[36] Zone
     /varset SpellProp[37] MinSick
+    /varset SpellProp[38] Ifs
 	}
 
   /if (${Defined[${NewArrayName}]}) /deletevar ${NewArrayName}
@@ -272,6 +273,7 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
   /if (!${Defined[iPctAggro]})		/declare iPctAggro int outer 35
 	/if (!${Defined[iZone]})		/declare iZone int outer 36
   /if (!${Defined[iMinSick]})		/declare iMinSick int outer 37
+  /if (!${Defined[iIfs]})		/declare iIfs int outer 38
 
 	/declare i int local
 	/declare printAll bool local FALSE
@@ -646,6 +648,16 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
       /varset	${NewArrayName}[${i},${iMinSick}] 0
     }
     /if (${printAll}) /echo Zone ${${NewArrayName}[${i},${iMinSick}]}
+    | get iIfs - conditionals used in various places
+    /if (${${ArrayName}[${i}].Find[/Ifs|]}) {
+        /call argueString Ifs| "${${ArrayName}[${i}]}"
+        /varset ${NewArrayName}[${i},${iIfs}] ${Ini[${Character_Ini},Ifs,${c_argueString},NULL,noparse]}
+        | we kind of need to print here instead of like everything else :P
+        /if (${printAll}) /echo Ifs ${c_argueString}
+    } else {
+        /varset ${NewArrayName}[${i},${iIfs}] TRUE
+        /if (${printAll}) /echo Ifs TRUE
+    }
     |default casting while invis to 0 which impies no casting while invis
     /varset	${NewArrayName}[${i},${iCastInvis}] 0
 		/if (${printAll}) /echo ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
