@@ -38,8 +38,8 @@ SUB check_Gems
 	/for i 1 to 9
 		/if (${Select[${Me.Gem[${i}]},NULL]}) /varcalc spellCount ${spellCount}+1
 	/next i
-	| If more than 3 are empty
-	/if (${spellCount} > 3) {
+	| If more than 2 are empty
+	/if (${spellCount} > 2) {
 		/declare spellsetMem_Timer timer local 300
 		/docommand ${ChatToggle} Loading spells...
 		/memspellset ${Default_SpellSet}

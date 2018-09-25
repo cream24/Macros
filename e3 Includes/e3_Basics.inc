@@ -18,8 +18,9 @@
 #EVENT Follow "#1# tell your party, 'Follow #2#'"
 SUB EVENT_Follow(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Follow ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${eventParams}]}) /return
-  /declare SpawnToFollow string local ${c_eventArgData}
+  /declare SpawnToFollow string local ${c_eventArgData.Left[1].Upper}${c_eventArgData.Right[-1].Lower}
   /if (!${NetBots[${SpawnToFollow}].InZone} || ${SpawnToFollow.Equal[me]} || ${SpawnToFollow.Equal[on]}) /varset SpawnToFollow ${c_eventArgChatSender}
   | -Turn Following on and set the FollowTarget
   /varset FollowTarget ${Spawn[pc =${SpawnToFollow}].CleanName}
@@ -108,6 +109,7 @@ SUB Bind_StopFollowing(yLoc,xLoc)
 SUB EVENT_Stop(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Stop ==>
 	/if (${Following}) {
+    /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZR]}) /return
       | -Wait to get close to the followTarget.
     /delay 1s ${Spawn[${FollowTarget}].Distance} < 25
@@ -126,6 +128,7 @@ SUB EVENT_Stop(line, ChatSender)
 #EVENT MoveHere "#1# tells the group, 'Move to #2#'"
 SUB EVENT_MoveHere(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_MoveHere ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (!${Int[${c_eventArgData}]}) /return
   |never move the person who issued the command
@@ -157,6 +160,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
 #EVENT bark "#1# tell your party, 'Bark at #2# #3#'"
 SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Bark ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${barkMsg}]}) /return
   | -If msgTarget is not an ID, find TargetID.
   /if (!${Int[${msgTarget}]}) {
@@ -247,6 +251,7 @@ SUB EVENT_barkReturn(line, returnBark)
 #EVENT clickIt "#1# tell your party, 'Click It#2#'"
 SUB EVENT_clickIt(line, ChatSender, eventParams)
   /declare debug_clickit bool local FALSE
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
@@ -320,6 +325,7 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
 #EVENT oldclickIt "#1# tell your party, 'OldClickIt #2#'"
 SUB EVENT_oldclickIt(line, ChatSender, locToStart)
   /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_clickIt ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${locToStart}]}) /return
   | -Check LoS.
   /if (!${LineOfSight[${Me.Loc.Replace[ ,]}:${c_eventArgData}]}) {
@@ -391,6 +397,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
 #EVENT runThruZone "#1# tell your party, 'Run through zone#2#'"
 SUB EVENT_runThruZone(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_runThruZone ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /declare locToStart string local ${Spawn[pc ${c_eventArgChatSender}].Loc}
@@ -549,7 +556,7 @@ SUB EVENT_FindItems(line, ChatSender, ItemToFind)
       /next a
     /next i
     | -Search packslots.
-    /for i 1 to 8
+    /for i 1 to ${numInventorySlots}
       /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) {
         /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Stack}
         /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack})-> InvSlot${i}]
@@ -642,7 +649,7 @@ SUB EVENT_FindItemCompact(line, ChatSender, ItemToFind)
     /next i
     | -Search packslots.
     |/echo p${raINDX}
-    /for i 1 to 8
+    /for i 1 to ${numInventorySlots}
     /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) {
       /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Stack}
       /varset reportArray[${raINDX}] [Pack]${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack}
@@ -737,7 +744,7 @@ SUB FindItemSub(ItemToFind,reportTotal,reportDelay)
     /next a
     /next i
     | -Search packslots.
-    /for i 1 to 8
+    /for i 1 to ${numInventorySlots}
     /if (${Me.Inventory[pack${i}].Name.Find[${ItemToFind}]}) {
       /varcalc totalItems ${totalItems}+${Me.Inventory[pack${i}].Stack}
       /docommand /timed ${reportDelay} ${ChatToggle} ${Me.Inventory[pack${i}]}(${Me.Inventory[pack${i}].Stack})-> InvSlot${i}]
@@ -1136,6 +1143,7 @@ SUB EVENT_ClickYes(line, ChatSender, eventParams)
 #EVENT gate "#1# tells the group, 'Gate'"
 SUB EVENT_gate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Gate ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
   /if (!${Me.Book[gate]}) {
     /if (${FindItem[Philter of Major Translocation].ID}) {
@@ -1169,6 +1177,7 @@ SUB EVENT_gate(line, ChatSender)
 SUB EVENT_Evacuate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Evacuate ==>
   /if (${Select[${Me.Class.ShortName},DRU,WIZ]}) {
+    /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
     /if (${Bool[${Group.Member[${c_eventArgChatSender}]}]} && ${NetBots.Counts}>6) /delay 1s
     /if (${Me.AltAbilityReady[Exodus]}) {
@@ -1243,7 +1252,7 @@ SUB EVENT_saveGroup(line, ChatSender, eventParams)
     /echo Preparing to save...
     /declare groupName string local ${c_eventArgData}
     /if (${groupName.Right[1].Equal[ ]}) /varset groupName ${groupName.Left[${Math.Calc[${groupName.Length}-1]}]}
-    /delay ${Math.Rand[25]}
+    |/delay ${Math.Rand[25]}
     /declare uniqueID int local
     /declare i int local
     /declare e int local
@@ -1254,22 +1263,27 @@ SUB EVENT_saveGroup(line, ChatSender, eventParams)
       }
     /next i
     | Check to see if existing entries need to be overwritten.
-    /if (${Ini[${Group_Ini}].Find[${groupName}]}) {
-      /echo Overwriting existing saved group(s)...
-      /varset i 1
-      :next_groupName
-      /if (${Ini[${Group_Ini}].Arg[${i},|].Length}) {
-        /if (${Ini[${Group_Ini}].Arg[${i},|].Arg[2,_].Equal[${groupName}]}) {
-          /for e 0 to 5
-            /call WriteToIni "${Group_Ini},${Ini[${Group_Ini}].Arg[${i},|]},GroupMember#${e}" "DEPRECATED" 1
-          /next e
+    | Only savegroup caller overwrites existing
+    /if (${c_eventArgChatSender.Equal[${Me.CleanName}]}) {
+      /if (${Ini[${Group_Ini}].Find[${groupName}]}) {
+        /echo Overwriting existing saved group(s)...
+        /varset i 1
+        :next_groupName
+        /if (${Ini[${Group_Ini}].Arg[${i},|].Length}) {
+          /if (${Ini[${Group_Ini}].Arg[${i},|].Arg[2,_].Equal[${groupName}]}) {
+            /for e 0 to 5
+              /call WriteToIni "${Group_Ini},${Ini[${Group_Ini}].Arg[${i},|]},GroupMember#${e}" "DEPRECATED" 1
+            /next e
+          }
+          /varcalc i ${i}+1
+          /goto :next_groupName
         }
-        /varcalc i ${i}+1
-        /goto :next_groupName
       }
+    } else {
+      /delay 2s
     }
     | Delay for a moment to allow other bots to catch up, so they don't overwrite our soon to be saved group.
-    /delay 2s
+    /delay ${Math.Rand[25]}
     | Save the group configuration
     /echo Group configuration(s) saved. Use [/group ${groupName}] to recall this group setup.
     /for i 0 to 5
@@ -1384,14 +1398,14 @@ SUB EVENT_groupUp(line, ChatSender, createGroup)
 #EVENT exp_group "#1# tells the group, 'ExpGroup #2#'"
 #EVENT exp_group "#1# tell your party, 'ExpGroup #2#'"
 SUB EVENT_exp_group(line, ChatSender, expToggle)
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${expToggle}]}) /return
-
   /if (${Select[${c_eventArgData},On,Yes,True,1]} > 0) {
     /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#" MyAbilities
     /if (${Defined[MyAbilities]})	/call BuildSpellArray "MyAbilities" "Abilities2D"
     /if (${Me.Class.ShortName.Equal[Rog]}) {
       /call buff_SpellArrays
-      /if (${Defined[strikeDiscStr]}) {
+      /if (${Defined[strikeDiscStr]} && ${Defined[strikeDisc]}) {
         /varset strikeDisc ${strikeDiscStr.Arg[1,/]}
       }
     }
@@ -1408,18 +1422,24 @@ SUB EVENT_exp_group(line, ChatSender, expToggle)
     /if (${Ini[${Character_Ini},Nukes,${NoKSSpellSet}].Length}) /call event_SpellSet "PLACEHOLDER" "${Me}" ${NoKSSpellSet}
     /if (${Defined[NoKSWeaponSet]} && ${Ini[${Character_Ini},Swap Items,${NoKSWeaponSet}].Length}) /swap ${NoKSWeaponSet}
     /if (${Me.Class.ShortName.Equal[Rog]}) {
-      /varset strikeDisc 0
+      /if (${Defined[strikeDisc]}) /varset strikeDisc 0
       /declare poisonInUse string local
       /declare i int local
       :remove_poisons
-        /if (${Defined[${poisonPR}]}) {
-          /if (${Bool[${Me.Buff[${FindItem[=${poisonPR}].Spell}]}]}) /varset poisonInUse ${poisonPR}
+        /if (${Defined[poisonPR]}) {
+          /if (${Bool[${Me.Buff[${FindItem[=${poisonPR}].Spell}]}]}) {
+            /varset poisonInUse ${poisonPR}
+          }
         }
-        /if (${Defined[${poisonFR}]}) {
-          /if (${Bool[${Me.Buff[${FindItem[=${poisonFR}].Spell}]}]}) /varset poisonInUse ${poisonFR}
+        /if (${Defined[poisonFR]}) {
+          /if (${Bool[${Me.Buff[${FindItem[=${poisonFR}].Spell}]}]}) {
+            /varset poisonInUse ${poisonFR}
+          }
         }
-        /if (${Defined[${poisonCR}]}) {
-          /if (${Bool[${Me.Buff[${FindItem[=${poisonCR}].Spell}]}]}) /varset poisonInUse ${poisonCR}
+        /if (${Defined[poisonCR]}) {
+          /if (${Bool[${Me.Buff[${FindItem[=${poisonCR}].Spell}]}]}) {
+            /varset poisonInUse ${poisonCR}
+          }
         }
         /if (${Defined[CombatBuffs2D]}) {
           /for i 1 to ${CombatBuffs2D.Size[1]}
@@ -1437,6 +1457,7 @@ SUB EVENT_exp_group(line, ChatSender, expToggle)
           }
         /next i
       }
+      /echo ${poisonInUse}, ${poisonPR},${poisonFR},${poisonCR}
       /squelch ${Me.Buff[${FindItem[=${poisonInUse}].Spell}].Remove}
     }
     /echo \ag NoKS Mode Activated - do not get exp

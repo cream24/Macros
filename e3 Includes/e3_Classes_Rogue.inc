@@ -33,10 +33,11 @@ sub AutoHide
 |----------------------------------------------------------------------------|
 sub AutoEvade
 /if (${Debug}) /echo |- AutoEvade ==>
-|only use evade over 80% aggro, and only if im using a disc (burning)
+  |only use evade over evadePctAggro aggro, but not when using a disc
 	/if (${Me.PctAggro} > ${evadePctAggro} && ${Me.AbilityReady[Hide]} && !${Bool[${Me.ActiveDisc.ID}]}) {
 		/attack off
-		/delay 1s !${Me.Combat}	
+		/delay 1s !${Me.Combat}
+		/delay 5
 		/doability Hide
 		/delay 5 ${Me.Invis}
 		/attack on

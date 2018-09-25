@@ -4,9 +4,9 @@
 SUB check_Buffs
 	/if (${Debug} || ${Debug_BuffCheck}) /echo |- buffCheck ==>
 	/if (${BuffCheck} && !${ActionTaken} && !${activeTimer} && !${rebuffTimer}) {
-		/if (!${medBreak} && !${idle} && ${BuffCombatCheck})	/call buffBots "CombatBuffs2D"
-    /if (!${medBreak} && ${procBuff} && !${idle} && ${BuffCombatCheck}) /call buffProcs
-    /if (${Defined[auraSpells2D]} && (${auraCombat} || ${Me.CombatState.NotEqual[COMBAT]})) /call checkAuras
+		/if (!${medBreak} && !${idle} && ${BuffCombatCheck} && !${Me.Moving})	/call buffBots "CombatBuffs2D"
+    /if (!${medBreak} && ${procBuff} && !${idle} && ${BuffCombatCheck} && !${Me.Moving}) /call buffProcs
+    /if (${Defined[auraSpells2D]} && (${auraCombat} || ${Me.CombatState.NotEqual[COMBAT]}) && !${Me.Moving}) /call checkAuras
 		/if (${Defined[InstantBuffs2D]})		/call buffBots "InstantBuffs2D"
 		/if (!${combatTimer} && ${Me.CombatState.NotEqual[COMBAT]} && !${Assisting} && !${Me.Moving} && ${BuffCheck}) {
 			/if (${Defined[SelfBuffs2D]}) /call buffBots "SelfBuffs2D"
@@ -59,7 +59,7 @@ SUB buffBots(ArrayName)
   /if (${Select[${ArrayName},SelfBuffs2D,InstantBuffs2D]}) {
     /if (!${Bool[${Me.Buff[${buffSpellName}]}]} || (${Bool[${Me.Buff[${buffSpellName}]}]} && ${Me.Buff[${buffSpellName}].Duration.TotalSeconds} <= ${buffRecastTime})) {
       /if (!${Bool[${Me.Song[${buffSpellName}]}]} && !${Bool[${Me.Song[${buffCheckForName}]}]}) {
-        /if (${Spell[${buffSpellName}].Stacks} && ${Spell[${buffSpellName}].NewStacks} && !${Bool[${Me.Buff[${buffCheckForName}]}]}) {
+        /if (${Spell[${buffSpellID}].NewStacks} && !${Bool[${Me.Buff[${buffCheckForName}]}]}) {
           /call check_Ready "${ArrayName}" ${s}
           /if (${c_Ready}) {
             /if (${check_Mana["${ArrayName}",${s}]}) {
@@ -71,7 +71,7 @@ SUB buffBots(ArrayName)
     } else /if (${Debug} || ${Debug_BuffCheck}) /echo buff exists with duration > 30 seconds
   } else {
   |------- Netbots ------|
-    /if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffSpellID} ]}]} && ${NetBots[${buffTarget}].FreeBuffSlots}>0) {
+    /if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffSpellID} ]}]} && ${NetBots[${buffTarget}].FreeBuffSlots}>0 && ${Bool[${NetBots[${buffTarget}].InZone}]}) {
       /if (!${Bool[${NetBots[${buffTarget}].Buff.Find[${buffCheckForID} ]}]}	&& !${Bool[${NetBots[${buffTarget}].ShortBuff.Find[${buffCheckForID} ]}]}) {
         /if (!${${ArrayName}[${s},${iTargetType}].Equal[Single in Group]} || ${Bool[${Group.Member[${buffTarget}]}]}) {
           /call check_Ready "${ArrayName}" ${s}

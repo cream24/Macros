@@ -29,8 +29,8 @@ SUB EVENT_syncInventory
 	/declare i int local
 	/declare x int local
 
-	| Check inventory slots 1 - 8 for items, and containers.
-	/for i 1 to 8
+	| Check inventory slots 1 - ${numInventorySlots} for items, and containers.
+	/for i 1 to ${numInventorySlots}
 	
 		| If there is an item in inventory slot ${i}
 		/if (${Bool[${InvSlot[pack${i}].Item}]}) {
@@ -116,7 +116,7 @@ SUB openBags
 	/declare retryTimer timer local
 	/declare miscTimer timer local
 	
-	/for i 1 to 8
+	/for i 1 to ${numInventorySlots}
 		
 		/varset miscTimer 30
 		/if (${Me.Inventory[pack${i}].Container}) {
@@ -158,7 +158,7 @@ SUB closeBags
 	/declare retryTimer timer local
 	/declare miscTimer timer local
 	
-	/for i 1 to 8
+	/for i 1 to ${numInventorySlots}
 		
 		/varset miscTimer 30
 		/if (${Me.Inventory[pack${i}].Container}) {
@@ -265,7 +265,7 @@ SUB sellItems
 	/declare e int local
 	
 	| Scan inventory for items to sell
-	/for i 1 to 8
+	/for i 1 to ${numInventorySlots}
 	
 		/if (${Bool[${Me.Inventory[pack${i}]}]}) {
 		
@@ -454,7 +454,7 @@ SUB destroyItems
 	
 		/varset badItem ${DestroyableItems[${i}]}
 
-		/for e 1 to 8
+		/for e 1 to ${numInventorySlots}
 		
 			/if (!${Me.Inventory[pack${e}].Container}) {
 				

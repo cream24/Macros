@@ -32,7 +32,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     /if (${Defined[begBuffArray2D]}) /deletevar begBuffArray2D
     /declare begBuffArray[1] string outer ${whatToCast}
     /call BuildSpellArray "begBuffArray" "begBuffArray2D"
-    /call checkEventArgs ${ChatSender} "" "" ${whatToCast}
+    /call checkEventArgs ${ChatSender} "" "" ${begBuffArray2D[1,${iSpellName}]}
     /varset ChatSender ${c_eventArgChatSender}
 
     /if (!${NetBots[${ChatSender}].ID}) {
@@ -50,30 +50,30 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
       /if (${ChatChannel.Equal[TELL]}) /tell ${ChatSender} We're not in the same zone!
       /return
     }
-    | Check Beneficial
-    /if (!${Spell[${whatToCast}].SpellType.Find[Beneficial]}) {
-      /if (${ChatChannel.Equal[TELL]}) {
-        /tell ${ChatSender} I cannot cast ${whatToCast} on you, it is not beneficial
-      } else {
-        /g I cannot cast ${whatToCast} on you, it is not beneficial
-      }
-      /return
-    }
-    | Check target type
-    /if (${Spell[${whatToCast}].TargetType.Find[self]}) {
-      /if (${ChatChannel.Equal[TELL]}) {
-        /tell ${ChatSender} I cannot cast ${whatToCast} on you, it is self only
-      } else {
-        /g I cannot cast ${whatToCast} on you, it is self only
-      }
-      /return
-    }
+		| Check Beneficial
+		/if (!${begBuffArray2D[1,${iSpellType}].Find[Beneficial]}) {
+			/if (${ChatChannel.Equal[TELL]}) {
+				/tell ${ChatSender} I cannot cast ${begBuffArray2D[1,${iSpellName}]} on you, it is not beneficial
+			} else {
+				/g I cannot cast ${begBuffArray2D[1,${iSpellName}]} on you, it is not beneficial
+			}
+			/return
+		}
+		| Check target type
+		/if (${begBuffArray2D[1,${iTargetType}].Find[self]}) {
+			/if (${ChatChannel.Equal[TELL]}) {
+				/tell ${ChatSender} I cannot cast ${begBuffArray2D[1,${iSpellName}]} on you, it is self only
+			} else {
+				/g I cannot cast ${begBuffArray2D[1,${iSpellName}]} on you, it is self only
+			}
+			/return
+		}
     | Dont cast these
     /if (!${NetBots[${ChatSender}].ID} && (${ChatText.Find[Gate]} || ${ChatText.Find[Evacuate]} || ${ChatText.Find[portal]} || ${ChatText.Find[Relocation]} || ${ChatText.Find[Succor]} || ${ChatText.Find[Circle of]} || ${ChatText.Find[Ring of]} || ${ChatText.Find[Wind of]})) {
       /if (${ChatChannel.Equal[TELL]}) {
-        /tell ${ChatSender} Do not request ${whatToCast} via beg for buffs chat
+        /tell ${ChatSender} Do not request ${begBuffArray2D[1,${iSpellName}]} via beg for buffs chat
       } else {
-        /g Do not request ${whatToCast} via beg for buffs chat
+        /g Do not request ${begBuffArray2D[1,${iSpellName}]} via beg for buffs chat
       }
       /return
     }
@@ -95,9 +95,9 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
         /goto :retryCast
       } else {
         /if (${ChatChannel.Equal[TELL]}) {
-          /tell ${ChatSender} I don't have enough mana to cast ${whatToCast}, Try again later.
+          /tell ${ChatSender} I don't have enough mana to cast ${begBuffArray2D[1,${iSpellName}]}, Try again later.
         } else {
-          /g I don't have enough mana to cast ${whatToCast}, Try again later.
+          /g I don't have enough mana to cast ${begBuffArray2D[1,${iSpellName}]}, Try again later.
         }
         /return
       }
@@ -111,22 +111,22 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
         /goto :retryCast
       } else {
         /if (${ChatChannel.Equal[TELL]}) {
-          /tell ${ChatSender} ${whatToCast} is not ready, Try again later.
+          /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} is not ready, Try again later.
         } else {
-          /g ${whatToCast} is not ready, Try again later.
+          /g ${begBuffArray2D[1,${iSpellName}]} is not ready, Try again later.
         }
         /return
       }
     }
     /if (${ChatChannel.Equal[TELL]}) {
-      /tell ${ChatSender} ${whatToCast} inc...
+      /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} inc...
     } else {
-      /g ${whatToCast} inc...
+      /g ${begBuffArray2D[1,${iSpellName}]} inc...
     }
     /call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
     /if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
       /goto :retryCast
-      /bc retrying cast ${castReturn}, ${whatToCast}
+      /bc retrying cast ${castReturn}, ${begBuffArray2D[1,${iSpellName}]}
     }
   }
 /RETURN

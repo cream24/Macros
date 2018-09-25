@@ -151,7 +151,7 @@ SUB lootCorpse
 
     /if (${lootSetting.Find[Skip]}) /goto :skipItem
     /varset itemName ${Corpse.Item[${i}].Name}
-/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: itemName: ${itemName}
+    /if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: ${itemName}
 
     | Destroy the item
     |/if (${Debug} || ${Debug_Loot}) /echo loot setting: ${Corpse.Item[${i}].Name}-${lootSetting}
@@ -182,20 +182,20 @@ SUB lootCorpse
       | Then check to see if there is room within the stack to loot it.
       /if (${Me.FreeInventory}) {
       } else /if (!${Me.LargestFreeInventory} && ${Corpse.Item[${i}].Stackable} && ${Bool[${FindItem[=${itemName}]}]}) {
-/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: Check stackables
+        /if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: Check stackables
 
         /if (!${Bool[${FindItem[=${itemName}].ItemSlot}]}) /goto :skipItem
         /varset itemSlot ${FindItem[=${itemName}].ItemSlot}
-/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: itemSlot: ${itemSlot}
+        /if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: itemSlot: ${itemSlot}
 
         /if (${Bool[${Me.Inventory[${itemSlot}].Items}]}) {
           /for j 1 to 10
             /if (${Me.Inventory[${itemSlot}].Item[${j}].Name.Equal[${itemName}]}) {
               /if (!${Me.Inventory[${itemSlot}].Item[${j}].FreeStack} ) {
-/if (${Debug} || ${Debug_Loot}) /echo [Auto-Loot]: I've got a stack, but its full, skipping
+                /if (${Debug} || ${Debug_Loot}) /echo [Auto-Loot]: I've got a stack, but its full, skipping
                 /goto :skipItem
               } else {
-/if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: I've got a stack, but its NOT full, I should loot this
+                /if (${Debug} || ${Debug_Loot}) /bc [Auto-Loot]: I've got a stack, but its NOT full, I should loot this
               }
             }
           /next j
@@ -206,12 +206,10 @@ SUB lootCorpse
         /echo [Loot]: I don't have a free inventory space large enough to hold [${itemName}].
         /goto :skipItem
       }  else /if (!${Me.FreeInventory}) {
-/if (${Debug} || ${Debug_Loot}) /bc [+g+] [Auto-Loot]: No Free Space
+        /if (${Debug} || ${Debug_Loot}) /bc [+g+] [Auto-Loot]: No Free Space
         /goto :skipItem
       }
-
-      |/if (${Debug} || ${Debug_Loot}) /echo [Loot]: Looting [${Corpse.Item[${i}].Name}] keep
-/bc [+g+] [Auto-Loot]: Looting [${itemName}] keep
+      |/if (${Debug} || ${Debug_Loot}) /bc [+g+] [Auto-Loot]: Looting [${itemName}] keep
       /call loot_Handle ${i} keep
       |/if (${Debug} || ${Debug_Loot}) /echo Done Looting i: ${i}
       /delay 1

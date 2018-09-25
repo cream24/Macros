@@ -15,23 +15,25 @@ SUB check_Yaulp
 |----------------------------------------------------------------------------|
 sub check_DivineArb
 /if (${Debug}) /echo |- check_DivineArb ==>
-	/if (${DivineArb_Pct} && ${Group}>1 && ${dArbArray2D.Size[1]}>0) {
-		/declare i int local
-		/declare s int local
-		/for i 0 to ${Group}
-			/if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
-				/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 && ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
-          /for s 1 to ${dArbArray2D.Size[1]}
-            /call check_Ready "dArbArray2D" ${s}
-            /if (${c_Ready}) {
-              /if (${Me.Casting.ID}) /call interrupt
-              /bc [+g+] Casting ${dArbArray2D[${s},${iCastName}]} for ${Group.Member[${i}]}-NB:${NetBots[${Group.Member[${i}]}].PctHPs},SP:${Spawn[pc ${Group.Member[${i}]}].PctHPs}
-              /call e3_Cast ${Me.ID} "dArbArray2D" ${s}
-						}
-          /if (!${ActionTaken}) /next s
+	/if (${Defined[dArbArray2D]}) {
+		/if (${DivineArb_Pct} && ${Group}>1 && ${dArbArray2D.Size[1]}>0) {
+			/declare i int local
+			/declare s int local
+			/for i 0 to ${Group}
+				/if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
+					/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 && ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
+			  /for s 1 to ${dArbArray2D.Size[1]}
+				/call check_Ready "dArbArray2D" ${s}
+				/if (${c_Ready}) {
+				  /if (${Me.Casting.ID}) /call interrupt
+				  /bc [+g+] Casting ${dArbArray2D[${s},${iCastName}]} for ${Group.Member[${i}]}-NB:${NetBots[${Group.Member[${i}]}].PctHPs},SP:${Spawn[pc ${Group.Member[${i}]}].PctHPs}
+				  /call e3_Cast ${Me.ID} "dArbArray2D" ${s}
+							}
+			  /if (!${ActionTaken}) /next s
+					}
 				}
-			}
-		/if (!${ActionTaken}) /next i
+			/if (!${ActionTaken}) /next i
+		}
 	}
 /if (${Debug}) /echo <== check_DivineArb -|
 /return

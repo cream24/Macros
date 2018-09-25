@@ -7,7 +7,9 @@ SUB BER_Setup
 /RETURN
 |----------------------------------------------------------------------------|
 SUB BER_Background_Events
-  /if (!${Cursor.ID} && ${Me.CombatState.NotEqual[COMBAT]} && !${combatTimer} && !${ActionTaken} && !${activeTimer} && ${axeAbility2D.Size[1]}) /call CheckAxes
+  /if (${Defined[axeAbility2D]}) {
+    /if (!${Cursor.ID} && ${Me.CombatState.NotEqual[COMBAT]} && !${combatTimer} && !${ActionTaken} && !${activeTimer} && ${axeAbility2D.Size[1]}) /call CheckAxes
+  }
 /RETURN
 |----------------------------------------------------------------------------|
 SUB CheckAxes

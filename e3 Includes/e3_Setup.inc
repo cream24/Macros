@@ -43,6 +43,7 @@ SUB e3_Setup(modeSelect)
 /if (${Debug}) /echo |- e3_Setup ==>
   /declare reloadOnLoot bool outer FALSE
   /declare missingSpellItem string outer
+  /declare numInventorySlots int outer 8
 	/if (${modeSelect.Equal[Debug]}) /varset Debug TRUE
 	| The file path for e3 Data.ini will still need to be updated in corresponding includes because you must use /noparse to write variables to inis.
 	/declare MacroData_Ini string outer e3 Macro Inis\e3 Data.ini

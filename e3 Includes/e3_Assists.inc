@@ -945,6 +945,7 @@ SUB check_Burns
 #EVENT Burns "#1# tell your party, '#2# Burn'"
 SUB event_Burns(line, ChatSender, burnType)
 /if (${Debug} || ${Debug_Assists}) /echo |- event_Burns ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${burnType}]}) /return
   /varset burnType ${c_eventArgData.Upper}
   /if (!${Assisting}) {
@@ -1018,6 +1019,7 @@ SUB check_lifeTap
 #EVENT SpellSet "#1# tell your party, 'SpellSet #2#'"
 SUB event_SpellSet(line, ChatSender, spellArray)
 /if (${Debug} || ${Debug_Assists})  /echo |- event_SpellSet ==>
+  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${spellArray}]}) /return
   /varset spellArray ${c_eventArgData}
   /declare i int local

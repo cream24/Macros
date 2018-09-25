@@ -51,9 +51,9 @@ sub Event_AE_FOE(string line)
 		 /casting "Mass Group Buff|alt" -maxtries|3
 		 /delay 5 !${Me.AltAbilityReady[Mass Group Buff]}
 		 /delay 5
-		 /casting "Flight of Eagles|alt" -maxtries|3
+		 /casting "Flight of Eagles" -maxtries|3
 		 /delay 5 !${Me.AltAbilityReady[Spirit of the Wood]}
-		 /casting "Flight of Eagles|alt" -maxtries|3
+		 /casting "Flight of Eagles" -maxtries|3
 		 /rs MGB Spirit of the Wood inc...
 	 } else /if (!${Me.AltAbilityReady[Mass Group Buff]}) {
 			/bc Mass Group Buff is not available...

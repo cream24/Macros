@@ -17,19 +17,22 @@ SUB event_UseCorpseSummoner(line, ChatSender)
   /next i
 
   /if (${itemCount} >= 27) {
+    /echo CurrentItem ${itemCount}
     /echo Looks like I have all my gear, so I don't need to summon a corpse.
     /goto :skip
   }
   | If I'm in The Guild Lobby.
   /if (${Zone.ID} == 344) {
     | Find a starting point
-    /if (!${Defined[startingPoint]}) /declare startingPoint string outer
-    /if (${LineOfSight[400,250:${Me.Loc.Replace[ ,]}]}) {
-      /varset startingPoint 400,250
-    } else /if (${LineOfSight[400,-250:${Me.Loc.Replace[ ,]}]}) {
-      /varset startingPoint 400,-250
-    }
-    /if (!${Bool[${startingPoint}]}) {
+	/if (!${Defined[startingPointX]}) /declare startingPointX string outer
+	/if (!${Defined[startingPointY]}) /declare startingPointY string outer
+	/varset startingPointX 400
+	/if (${LineOfSight[400,250:${Me.Loc.Replace[ ,]}]}) {
+		/varset startingPointY 250
+	} else /if (${LineOfSight[400,-250:${Me.Loc.Replace[ ,]}]}) {
+		/varset startingPointY -250
+	}
+	/if (!${Bool[${startingPointX}]}) {
       /echo Please move to the west or east side of the guild lobby, and try again.
     } else {
       /declare GiveUpTimer	int outer 600
@@ -59,9 +62,10 @@ SUB event_UseCorpseSummoner(line, ChatSender)
       /call iniToVarV "${genSettings_Ini},Corpse Summoning,Loot After Summoning (On/Off)" PLACEHOLDER bool local
       :lootNow
       /if (${Bool[${Macro.Return}]} && ${Spawn[${Me}'s].ID}) /call event_LootNow "PLACEHOLDER" "${Me.CleanName}"
-      /call MoveToLoc ${startingPoint} 80 15
-      :skip
-      /if (${Defined[startingPoint]}) /deletevar startingPoint
+      /call MoveToLoc ${startingPointX} ${startingPointY} 80 15
+	  :skip
+	  /if (${Defined[startingPointX]}) /deletevar startingPointX
+	  /if (${Defined[startingPointY]}) /deletevar startingPointY
       /if (${Defined[SoulStoneToUse]}) /deletevar SoulStoneToUse
       /if (${Defined[SoulStoneCost]}) /deletevar SoulStoneCost
       /if (${Defined[GiveUpTimer]}) /deletevar GiveUpTimer
@@ -121,7 +125,8 @@ SUB find_Soulstone
 SUB withdraw_Plat
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- withdraw_Plat ==>
 	| Move to the startingPoint
-	/call MoveToLoc ${startingPoint} 80 15
+	/call MoveToLoc ${startingPointX} ${startingPointY} 80 15
+	/delay 2s
 	| Look for the west side banker.
 	/if (!${Spawn[npc A Shrewd Banker].LineOfSight}) {
 		/echo I couldn't find a banker.  Move to either the west or east wings of the Guild Lobby, and try again.
@@ -203,7 +208,8 @@ SUB withdraw_Plat
 SUB buy_SoulStone(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- buy_SoulStone ==>
 	| Move to the startingPoint
-  /call MoveToLoc ${startingPoint} 80 15
+  /call MoveToLoc ${startingPointX} ${startingPointY} 80 15
+  /delay 2s
 	|-------------------------------------------------------------------------------------------------------------------------------------------------------------Look for the west side banker.
 	/if (!${Spawn[npc A Disciple of Luclin].LineOfSight}) {
 		/echo ERROR: I couldn't find the soulstone merchant.  Move to the Throne area, or the west side of The Guild Lobby, and try again.
@@ -269,7 +275,8 @@ SUB buy_SoulStone(SoulStoneToUse)
 SUB summon_Corpse(SoulStoneToUse)
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- summon_Corpse ==>
 	| Move to the startingPoint
-	/call MoveToLoc ${startingPoint} 80 15
+	/call MoveToLoc ${startingPointX} ${startingPointY} 80 15
+	/delay 2s
 	|---Look for the corpse summoner.
 	/if (!${Spawn[npc A Priest of Luclin].LineOfSight}) {
 		/echo ERROR: I couldn't find the corpse summoner.  Move to the Throne area, or the west side of The Guild Lobby, and try again.
@@ -304,7 +311,7 @@ SUB summon_Corpse(SoulStoneToUse)
 			|---Else, if my inventory is open.
 			} else {
 				|--Search packslots.
-				/for i 1 to 8
+				/for i 1 to ${numInventorySlots}
 					|---If the item in the packslot is a soulstone, pick it up.
 					/if (!${Me.Inventory[pack${i}].Container} && ${SoulStoneToUse.Equal[${Me.Inventory[pack${i}]}]}) {
 						/itemnotify pack${i} leftmouseup
@@ -385,8 +392,8 @@ SUB corpseSummon_CharacterSettings
 /RETURN
 |-----------------------------------------
 Sub corpseSummon_Aliases
-	/squelch /alias /summoncorpses /bc Use Corpse Summoner
-	/squelch /alias /summoncorpse /echo Use Corpse Summoner
+	/squelch /alias /summoncorpses /bc Summon Corpses
+	/squelch /alias /summoncorpse /echo Summon Corpses
 /return
 |-----------------------------------------
 Sub corpseSummon_Background_Events

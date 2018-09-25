@@ -31,7 +31,7 @@ SUB check_Lich
 |----------------------------------------------------------------------------|
 SUB check_manaDump
 /if (${Debug}) /echo |- check_manaDump ==>
-	/if (${manaDump} && !${medBreak}) {
+	/if (${manaDump} && !${medBreak} && !${Following}) {
 		/declare manaDump_Target string local
 		/declare manaDumpSpellIndex int local 0
     /declare i int local

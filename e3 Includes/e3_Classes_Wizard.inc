@@ -2,7 +2,7 @@
 | Wizard Functions
 |----------------------------------------------------------------------------|
 SUB check_Harvest
-	/if (${autoHarvest}) {
+	/if (${autoHarvest} && ${Defined[harvestSpells2D]}) {
     |only harvest if im not in ooc regen
     /if (${Me.CombatState.Equal[COMBAT]}) {
       /declare s int local
@@ -23,7 +23,7 @@ Sub WIZ_Setup
 	/call iniToVarV "${Character_Ini},Wizard,Evac Spell" Evac_Spell string outer
 	/call iniToVarV "${Character_Ini},Wizard,Auto-Harvest (On/Off)" autoHarvest bool outer
 	/call IniToArrayV "${Character_Ini},Wizard,Harvest#" harvestSpells
-  /if (${harvestSpells.Size}) /call BuildSpellArray "harvestSpells"	"harvestSpells2D"
+  /if (${Defined[harvestSpells]}) /call BuildSpellArray "harvestSpells"	"harvestSpells2D"
 
 /if (${Debug}) /echo <== WIZ_Setup -|
 /return

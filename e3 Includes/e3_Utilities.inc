@@ -824,7 +824,7 @@ SUB ClearCursor
   :check_cursor
 	/if (${Cursor.ID}) {
     /autoinventory
-    /if (${i} > 3) {
+    /if (${i} > 5) {
       /beep
       /bc ${Me.Name} cannot clear cursor, ending macro
       /popup ${Me.Name} cannot clear cursor, ending macro
@@ -933,6 +933,10 @@ Sub check_selectedBots(selectedBots, ChatSender)
   /if (${Select[knights,${selectedBots}]} && ${Select[${Me.Class.ShortName},PAL,SHD]}) /varset botSelected TRUE
   /if (${Select[tanks,${selectedBots}]} && ${Select[${Me.Class.ShortName},PAL,SHD,WAR]}) /varset botSelected TRUE
   /if ((${Select[priests,${selectedBots}]} || ${Select[healers,${selectedBots}]}) && ${Select[${Me.Class.ShortName},CLR,DRU,SHM]}) /varset botSelected TRUE
+  /if (${Select[plate,${selectedBots}]} && ${Select[${Me.Class.ShortName},WAR,BRD,CLR,PAL,SHD]}) /varset botSelected TRUE
+  /if (${Select[leather,${selectedBots}]} && ${Select[${Me.Class.ShortName},DRU,BST,MNK]}) /varset botSelected TRUE
+  /if (${Select[chain,${selectedBots}]} && ${Select[${Me.Class.ShortName},ROG,BER,SHM,RNG]}) /varset botSelected TRUE
+  /if (${Select[silk,${selectedBots}]} && ${Select[${Me.Class.ShortName},ENC,MAG,NEC,WIZ]}) /varset botSelected TRUE
   |/if (${Select[all,${selectedBots}]} || ${Select[${Me.Class},${selectedBots}]} || ${Select[${Me.Class.ShortName},${selectedBots}]} || ${Select[${Me.CleanName},${selectedBots}]}) /varset botSelected TRUE
   /if (${Select[group,${selectedBots}]} && ${NetBots[${ChatSender}].InGroup}) /varset botSelected TRUE
   /if (${Select[raid,${selectedBots}]} && ${Raid.Members} > 0 && ${Bool[${Raid.Member[${ChatSender}]}]}) /varset botSelected TRUE
@@ -942,7 +946,7 @@ Sub check_selectedBots(selectedBots, ChatSender)
 /return ${botSelected}
 |--------------------------------------------------------------------------|
 SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
-  |/gu cs ${ChatSender} el ${eventLine}
+  |/gu CEA ChatSender ${ChatSender} | el ${eventLine} | uz ${UZR} | ad ${ArgData}
   /varset c_eventArg FALSE
   /varset c_eventArgData
   /varset c_eventArgChatSender
