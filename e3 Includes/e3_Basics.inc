@@ -18,7 +18,7 @@
 #EVENT Follow "#1# tell your party, 'Follow #2#'"
 SUB EVENT_Follow(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Follow ==>
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${eventParams}]}) /return
   /declare SpawnToFollow string local ${c_eventArgData.Left[1].Upper}${c_eventArgData.Right[-1].Lower}
   /if (!${NetBots[${SpawnToFollow}].InZone} || ${SpawnToFollow.Equal[me]} || ${SpawnToFollow.Equal[on]}) /varset SpawnToFollow ${c_eventArgChatSender}
@@ -109,7 +109,7 @@ SUB Bind_StopFollowing(yLoc,xLoc)
 SUB EVENT_Stop(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Stop ==>
 	/if (${Following}) {
-    /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+    /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZR]}) /return
       | -Wait to get close to the followTarget.
     /delay 1s ${Spawn[${FollowTarget}].Distance} < 25
@@ -128,7 +128,7 @@ SUB EVENT_Stop(line, ChatSender)
 #EVENT MoveHere "#1# tells the group, 'Move to #2#'"
 SUB EVENT_MoveHere(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_MoveHere ==>
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (!${Int[${c_eventArgData}]}) /return
   |never move the person who issued the command
@@ -160,7 +160,7 @@ SUB EVENT_MoveHere(line, ChatSender, eventParams)
 #EVENT bark "#1# tell your party, 'Bark at #2# #3#'"
 SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Bark ==>
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${barkMsg}]}) /return
   | -If msgTarget is not an ID, find TargetID.
   /if (!${Int[${msgTarget}]}) {
@@ -251,7 +251,7 @@ SUB EVENT_barkReturn(line, returnBark)
 #EVENT clickIt "#1# tell your party, 'Click It#2#'"
 SUB EVENT_clickIt(line, ChatSender, eventParams)
   /declare debug_clickit bool local FALSE
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
@@ -325,7 +325,7 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
 #EVENT oldclickIt "#1# tell your party, 'OldClickIt #2#'"
 SUB EVENT_oldclickIt(line, ChatSender, locToStart)
   /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_clickIt ==>
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${locToStart}]}) /return
   | -Check LoS.
   /if (!${LineOfSight[${Me.Loc.Replace[ ,]}:${c_eventArgData}]}) {
@@ -397,7 +397,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
 #EVENT runThruZone "#1# tell your party, 'Run through zone#2#'"
 SUB EVENT_runThruZone(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_runThruZone ==>
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /declare locToStart string local ${Spawn[pc ${c_eventArgChatSender}].Loc}
@@ -1143,7 +1143,7 @@ SUB EVENT_ClickYes(line, ChatSender, eventParams)
 #EVENT gate "#1# tells the group, 'Gate'"
 SUB EVENT_gate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Gate ==>
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
   /if (!${Me.Book[gate]}) {
     /if (${FindItem[Philter of Major Translocation].ID}) {
@@ -1177,7 +1177,7 @@ SUB EVENT_gate(line, ChatSender)
 SUB EVENT_Evacuate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Evacuate ==>
   /if (${Select[${Me.Class.ShortName},DRU,WIZ]}) {
-    /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+    /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
     /if (${Bool[${Group.Member[${c_eventArgChatSender}]}]} && ${NetBots.Counts}>6) /delay 1s
     /if (${Me.AltAbilityReady[Exodus]}) {
@@ -1398,7 +1398,7 @@ SUB EVENT_groupUp(line, ChatSender, createGroup)
 #EVENT exp_group "#1# tells the group, 'ExpGroup #2#'"
 #EVENT exp_group "#1# tell your party, 'ExpGroup #2#'"
 SUB EVENT_exp_group(line, ChatSender, expToggle)
-  /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${expToggle}]}) /return
   /if (${Select[${c_eventArgData},On,Yes,True,1]} > 0) {
     /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#" MyAbilities

@@ -407,7 +407,7 @@ Sub interrupt
 #EVENT vetAA "#1# tells the group, 'VetAA #2#'"
 #EVENT vetAA "#1# tell your party, 'VetAA #2#'"
 SUB EVENT_vetAA(line, ChatSender,vetAAtoUse)
-	/varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${vetAAtoUse}]}) /return
   /varset vetAAtoUse ${c_eventArgData}
 

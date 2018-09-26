@@ -190,7 +190,7 @@ SUB ListToArray(ArrayName, Data, delimiter)
 SUB BuildSpellArray(ArrayName, NewArrayName)
   |/echo Array ${ArrayName} ${NewArrayName}
 	/if (!${Defined[SpellProp]}) {
-		/declare SpellProp[37] string outer 0
+		/declare SpellProp[38] string outer 0
 		/varset SpellProp[1] CastName
 		/varset SpellProp[2] CastType
 		/varset SpellProp[3] TargetType
