@@ -11,20 +11,24 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 	/if (${Int[${ChatText}]}) /return
 	/declare whatToCast string local
 	/declare retryCastTimer timer local 30s
+	/declare aliasMaxTries int local 0
   | If the ChatText is not found in the spellbook, check SpellAliases_Ini.
   :Retry_Alias
-  /if (${Me.Book[${ChatText}]}) {
-    /varset whatToCast ${Spell[${ChatText}]}
-  } else /if (${FindItemCount[=${ChatText}]}) {
-    /varset whatToCast ${FindItem[=${ChatText}]}
-  } else {
-    | Replace :'s with ;'s to adjust for inis
-    /if (${ChatText.Find[:]}) /varset ChatText ${ChatText.Replace[:,;]}
-    /if (${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Length}) {
-      /varset ChatText ${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Replace[;,:]}
-      /goto :Retry_Alias
-    }
-  }
+  /if (${aliasMaxTries}<=3) {
+		/if (${Me.Book[${ChatText}]}) {
+			/varset whatToCast ${Spell[${ChatText}]}
+		} else /if (${FindItemCount[=${ChatText}]}) {
+			/varset whatToCast ${FindItem[=${ChatText}]}
+		} else {
+			| Replace :'s with ;'s to adjust for inis
+			/if (${ChatText.Find[:]}) /varset ChatText ${ChatText.Replace[:,;]}
+			/if (${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Length}) {
+				/varset ChatText ${Ini[${SpellAliases_Ini},${Me.Class},${ChatText}].Replace[;,:]}
+				/varcalc aliasMaxTries ${aliasMaxTries}+1
+				/goto :Retry_Alias
+			}
+		}
+	}
   |/gu ${ChatChannel},${ChatSender},${ChatText},${whatToCast}
   | If I found something to cast.
   /if (${Bool[${whatToCast}]}) {
@@ -88,9 +92,10 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     }
     :retryCast
     | Check Mana
-    /if (!${check_Mana[begBuffArray2D,1]}) {
+    /echo cs ${ChatSender} csID ${Spawn[pc =${ChatSender}].ID} spell ${begBuffArray2D[1,${iSpellName}]}
+    /if (!${check_Mana["begBuffArray2D",1]}) {
       /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
-        /if (${Me.CombatState.Equal[Active]}) /sit
+        /if (${Me.Standing} && !${Me.Casting.ID}) /sit
         /delay 1s
         /goto :retryCast
       } else {
@@ -103,7 +108,6 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
       }
     }
 
-    :wait
     /call check_Ready "begBuffArray2D" 1
     /if (!${c_Ready}) {
       /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {

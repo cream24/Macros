@@ -50,7 +50,7 @@ SUB check_AutoShrink
     /for s 1 to ${petShrink2D.Size[1]}
       /call check_Ready "petShrink2D" ${s}
       /if (${c_Ready}) {
-        /if (${check_Mana[petShrink2D,${s}]} && ${Me.Pet.Distance} < ${petShrink2D[${s},${iMyRange}]}) {
+        /if (${check_Mana["petShrink2D",${s}]} && ${Me.Pet.Distance} < ${petShrink2D[${s},${iMyRange}]}) {
           /call e3_Cast ${Me.Pet.ID} "petShrink2D" ${s}
         }
       }

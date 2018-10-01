@@ -296,6 +296,9 @@ Sub defineRezSpell
     /declare rezArray[1] string outer ${rezSpell}
     /if (${rezArray.Size}) {
       /call BuildSpellArray "rezArray" "rezArray2D"
+      /for i 1 to ${rezArray2D.Size[1]}
+        /varset rezArray2D[${i},${iCastInvis}] 1
+      /next i
       }
   } else {
     /bc I do not have a resurrection spell available
