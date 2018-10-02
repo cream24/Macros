@@ -131,7 +131,7 @@ SUB event_SetTank(line, ChatSender, tankName, pullerName)
     /varset currentPuller ${pullerName}
   } else {
     /varset currentPuller 0
-    /bc [+r+] Invalid Assignment: pullerName ${pullerName} : ${line}
+    /bc [+r+] Invalid Assignment: pullerName ${pullerName}
     /return
   }
 |main tank
@@ -145,7 +145,7 @@ SUB event_SetTank(line, ChatSender, tankName, pullerName)
     }
   } else {
     /varset mainTank 0
-    /bc [+r+] Invalid Assignment: tankName ${tankName} : ${line}
+    /bc [+r+] Invalid Assignment: tankName ${tankName}
     /return
   }
 /return

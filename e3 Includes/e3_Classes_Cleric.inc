@@ -172,7 +172,7 @@ SUB EVENT_AE_Rez(line, ChatSender)
             /echo Someone is already rezzing ${playerName}-${corpseID}
             /goto :skipRez
           }
-          /gu Resurrecting-${corpseID}
+          /docommand ${ChatToggle}  Resurrecting-${corpseID} ${playerName}
           /squelch /bca //RezzingCorpseID ${Me} ${corpseID}
           /call e3_cast ${corpseID} "rezArray2D" 1
           /if (${castReturn.Equal[CAST_SUCCESS]}) /varset corpseList ${corpseList}${corpseID},
