@@ -123,7 +123,7 @@ SUB summon_Corpse(SoulStoneToUse)
     |---Else, if my inventory is open.
     } else {
     |--Search packslots.
-        /for count_i 1 to 8
+        /for count_i 1 to ${numInventorySlots}
         |---If the item in the packslot is a soulstone, pick it up.
         /if (!${Me.Inventory[pack${count_i}].Container} && ${SoulStoneToUse.Equal[${Me.Inventory[pack${count_i}]}]}) {
         /itemnotify pack${count_i} leftmouseup
