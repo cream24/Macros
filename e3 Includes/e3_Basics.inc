@@ -856,7 +856,7 @@ SUB EVENT_FindSlot(line, ChatSender, SlotToFind)
      /if (${c_eventArgData.Equal[fingers]}) {
         /say Finger Slots --- leftfinger : ${LinkDB[${InvSlot[leftfinger].Item}]} rightfinger: ${LinkDB[${InvSlot[rightfinger].Item}]}
      } else /if (${c_eventArgData.Equal[wrists]}) {
-        /say Wrist Slots --- leftwrist: ${LinkDB[${InvSlot[leftwrist].Item}]} rightfinger: ${LinkDB[${InvSlot[rightwrist].Item}]}
+        /say Wrist Slots --- leftwrist: ${LinkDB[${InvSlot[leftwrist].Item}]} rightwrist: ${LinkDB[${InvSlot[rightwrist].Item}]}
      } else /if (${c_eventArgData.Equal[ears]}) {
         /say Ear Slots --- leftear: ${LinkDB[${InvSlot[leftear].Item}]} rightear : ${LinkDB[${InvSlot[rightear].Item}]}
      } else /if (!${InvSlot[${c_eventArgData}].Item.ID}) {
@@ -867,7 +867,7 @@ SUB EVENT_FindSlot(line, ChatSender, SlotToFind)
 
   } else {
     /if (${c_eventArgChatSender.Equal[${Me}]}) {
-      /echo Valid Slots: charm, leftear, head, face, rightear, neck, shoulder, arms, leftwrist, rightwrist, ranged, hands, mainhand, offhand, ammo, back, leftfinger, rightfinger, chest, legs, feet, waist, powersource, fingers, wrists
+      /echo Valid Slots: charm, leftear, head, face, rightear, neck, shoulder, arms, leftwrist, rightwrist, ranged, hands, mainhand, offhand, ammo, back, leftfinger, rightfinger, chest, legs, feet, waist, powersource, fingers, wrists, ears
     }
   }
 /RETURN
