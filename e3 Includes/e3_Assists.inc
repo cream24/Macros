@@ -1262,7 +1262,7 @@ Sub assist_Setup
   /if (${FindItemCount[Staff of Everliving Brambles]})          /varset EpicName Staff of Everliving Brambles
   /if (${FindItemCount[Fistwraps of Celestial Discipline]})     /varset EpicName Fistwraps of Celestial Discipline
   /if (${FindItemCount[Transcended Fistwraps of Immortality]})  /varset EpicName Transcended Fistwraps of Immortality
-  /if (${FindItemCount[Redemption]})                            /varset EpicName Redemption
+  /if (${FindItemCount[=Redemption]})                           /varset EpicName Redemption
   /if (${FindItemCount[Nightbane, Sword of the Valiant]})       /varset EpicName Nightbane, Sword of the Valiant
   /if (${FindItemCount[=Heartwood Blade]})                      /varset EpicName Heartwood Blade
   /if (${FindItemCount[Aurora, the Heartwood Blade]})           /varset EpicName Aurora, the Heartwood Blade

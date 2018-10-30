@@ -309,7 +309,9 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   }
 
 :skipCast
-	/if (${oldItem.Length}) /call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
+	/if (${Defined[${ArrayName}]} && ${oldItem.Length}) {
+		/call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
+	}
 	/if (${Following} && !${Assisting}) /call AcquireFollow
   /if (${Me.Class.ShortName.Equal[BRD]}) /varset resumeTwistDelay 5
   |/if (${returnTwist})	/call unpauseTwist
