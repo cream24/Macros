@@ -92,7 +92,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     }
     :retryCast
     | Check Mana
-    /echo cs ${ChatSender} csID ${Spawn[pc =${ChatSender}].ID} spell ${begBuffArray2D[1,${iSpellName}]}
+    |/echo cs ${ChatSender} csID ${Spawn[pc =${ChatSender}].ID} spell ${begBuffArray2D[1,${iSpellName}]}
     /if (!${check_Mana["begBuffArray2D",1]}) {
       /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
         /if (${Me.Standing} && !${Me.Casting.ID}) /sit

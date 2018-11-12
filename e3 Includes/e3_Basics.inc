@@ -288,7 +288,7 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
   }
   /squelch /doortarget id ${closestDoorID}
   /if (${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
-  /if (${DoorTarget.Distance} > 20) {
+  /if (${DoorTarget.Distance} > 35) {
     /echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 5s
     /moveto off
     /return
