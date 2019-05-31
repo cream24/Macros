@@ -30,8 +30,8 @@ SUB check_Heals
 SUB check_lifeSupport
 /if (${Debug} || ${Debug_Heals}) /echo |- check_lifeSupport ==>
 	/declare s int local
-	| only use life support when near mobs
-	/if  (${SpawnCount[npc radius 200]} > 0) {
+	| only use life support when near mobs and in combat
+	/if  (${SpawnCount[npc radius 200]} > 0 && ${Me.CombatState.Equal[COMBAT]}) {
 		/for s 1 to ${lifeSupport2D.Size[1]}
 			/if (${Me.PctHPs} <= ${lifeSupport2D[${s},${iHealPct}]}) {
 				/call check_Ready "lifeSupport2D" "${s}"

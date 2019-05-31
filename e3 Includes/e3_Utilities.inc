@@ -911,6 +911,21 @@ Sub Type(InStr)
   }
   /next loopctr
 /return
+
+|--------------------------------------------------------------------------|
+Sub RemoveComma(InStr)
+  /declare newStr string local
+  /declare i int local
+  /for i 1 to 20
+|/echo ${i} ${Bool[${InStr.Arg[${i},,]}]} ${newStr} ${InStr.Arg[${i},,]}
+  /if (${Bool[${InStr.Arg[${i},,]}]}) {
+    /varset newStr ${newStr} ${InStr.Arg[${i},,]}
+  } else {
+    /return ${newStr}
+  }
+  /next i
+/return ${newStr}
+
 |--------------------------------------------------------------------------|
 SUB argueString(WhatToFind, givenData)
 	/declare i int local 1
