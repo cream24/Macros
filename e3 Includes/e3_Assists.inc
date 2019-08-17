@@ -212,7 +212,7 @@ SUB check_AssistStatus
         | If I am target of target and not sticking to front(tank) attack/stick off
         | If I am < 50% life turn off attack (unless tank/stick front)
         /if (${Me.TargetOfTarget.CleanName.Equal[${Me.CleanName}]} && ${AssistStickPoint.NotEqual[front]}) {
-          /if (${Me.PctHPs} < 80 ) /attack off
+          /if (${Me.PctHPs} < 80 && !${Bool[${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}]}) /attack off
           /stick off
         } else {
           | If the mob is not targeting me
@@ -263,11 +263,25 @@ SUB CombatAbilities
     /if (${doTaunt} && ${Me.AbilityReady[Taunt]} && ${Me.PctAggro}< 100) /doability Taunt
   }
   /if (${Defined[smartTaunt]}) {
-    /if (${smartTaunt} && ${Me.AbilityReady[Taunt]}) {
+    /if (${smartTaunt}) {
       /if (${Bool[${Me.TargetOfTarget}]} && !${Select[${Me.TargetOfTarget.Class.ShortName},WAR,PAL,SHD]}) {
         /if (${Select[${Spawn[id ${Target.ID}].Type},${AcceptableTargetTypes}]}) {
-          /bc Taunting ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
-          /doability Taunt
+          /if (${Me.AbilityReady[Taunt]}) {
+            /bc Taunting ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
+            /doability Taunt
+          |} else /if (${Me.CombatAbilityReady[Mock]}) {
+          |  /bc Mock on ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
+          |  /doability Mock
+          | } else /if (${Me.CombatAbilityReady[Bazu Bellow]}) {
+          |  /bc Bazu Bellow on ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
+          |   /doability "Bazu Bellow"
+          } else /if (${Me.AltAbilityReady[Divine Stun]}) {
+            /bc Divine Stun on ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
+            /casting "Divine Stun"
+          } else /if (${Me.SpellReady[Terror of Discord]}) {
+            /bc Terror of Discord on ${Target.CleanName}: ${Me.TargetOfTarget.Class.ShortName}-${Me.TargetOfTarget} has aggro
+            /casting "Terror of Discord"
+          }
         }
       }
     }

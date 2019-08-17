@@ -13,7 +13,7 @@ SUB tankKill
   /if (${Bool[${AssistTarget}]}) {
     /varset tankKillEngaged TRUE
     /varset killTarget ${AssistTarget}
-    /varset doTaunt TRUE
+    |/varset doTaunt TRUE
     /squelch /turbo 100
   }
   /if (${tankKillEngaged}) {
@@ -23,7 +23,7 @@ SUB tankKill
     /if (${SpawnCount[npc playerstate 4 targetable radius 75 zradius 25 los]}==0 && ${Me.CombatState.NotEqual[COMBAT]}) {
       /echo No Npc in Range, exiting tankKill
       /varset tankKillEngaged FALSE
-      /varset doTaunt FALSE
+     | /varset doTaunt FALSE
       /squelch /turbo ${classTurbo}
       /return
     } else {
@@ -69,7 +69,7 @@ SUB peelTank
     /if (${Me.TargetOfTarget.Name.Equal[${Me}]}) {
       |if i had a former assist target and it is still alive/valid then change back to assisting
       /if (${peelTankOriginalAssistTarget} && ${Select[${Spawn[id ${peelTankOriginalAssistTarget}].Type},${AcceptableTargetTypes}]}) /varset AssistTarget ${peelTankOriginalAssistTarget}
-      /varset doTaunt FALSE
+      |/varset doTaunt FALSE
       /varset peelTarget 0
     } else {
       /if (${Me.CombatAbilityReady[Mock]}) {
@@ -106,13 +106,18 @@ SUB peelTank
           /netfollow off
           /varset peelTankOriginalAssistTarget ${AssistTarget}
           /varset AssistTarget ${peelTarget}
-          /varset doTaunt TRUE
+          |/varset doTaunt TRUE
           /stick 9 front
           /attack on
           /delay 2s ${Target.Distance} < 12
           /doability Taunt
-          /if (${Me.CombatAbilityReady[Mock]}) /doability Mock
+          /if (${Me.CombatAbilityReady[Mock]}) {
+            /doability Mock
+            /delay 2
+          }
+          /if (${Me.CombatAbilityReady[Bazu Bellow]}) /doability "Bazu Bellow"
           /if (${Me.AltAbilityReady[Divine Stun]}) /casting "Divine Stun"
+          /if (${Me.SpellReady[Terror of Discord]}) /casting "Terror of Discord"
           /return
         } else {
           /varset peelTarget 0
