@@ -434,7 +434,7 @@ SUB buff_SpellArrays
   /if (${Defined[GroupBuffsL1]})   /call BuildSpellArray "GroupBuffsL1"	  "GroupBuffsL12D"
   /if (${Defined[GroupBuffsL47]})   /call BuildSpellArray "GroupBuffsL47"	  "GroupBuffsL472D"
 
-  /if (${Defined[CombatBuffs2D]})	/varset BuffCombatCheck TRUE
+  /if (${Defined[CombatBuffs2D]} || ${Defined[ProcBuffs]})	/varset BuffCombatCheck TRUE
 
   |/if (${InstantBuffs.Size})	/call BuildSpellArray "InstantBuffs"	"InstantBuffs2D"
   |/if (${SelfBuffs.Size})		  /call BuildSpellArray "SelfBuffs"			"SelfBuffs2D"
