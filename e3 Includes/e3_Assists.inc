@@ -446,6 +446,13 @@ SUB check_Nukes
           /goto :skipCast
         }
       }
+      |only cast if my aggro is less than MaxAggro, else skip the spell
+      /if (${Nukes2D[${castIndex},${iMaxAggro}]}) {
+        /if (${Me.PctAggro} > ${Nukes2D[${castIndex},${iMaxAggro}]}) {
+          /if (${Debug} || ${Debug_Assists}) /echo \ay skipping cast of ${Nukes2D[${castIndex},${iCastName}]}, my aggro ${Me.PctAggro} is > MaxAggro ${Nukes2D[${castIndex},${iMaxAggro}]}
+          /goto :skipCast
+        }
+      }
       |only cast if my aggro is greater than PctAggro and the target is a Named
       /if (${Nukes2D[${castIndex},${iPctAggro}]} > 0) {
         /if (${Me.PctAggro} < ${Nukes2D[${castIndex},${iPctAggro}]} || !${Target.Named}) {
