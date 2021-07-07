@@ -12,7 +12,7 @@ Sub Main
 	} else {
 		/casting "${rootSpell}"
 		/delay 5s !${Me.Casting.ID}
-		/if (${Bool[${Target.Rooted}]}) /delay 3s
+		/if (${Bool[${Target.Rooted}]}) /delay 2s
 		/goto :Loop
 	}
 /return

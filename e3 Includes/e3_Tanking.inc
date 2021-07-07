@@ -98,29 +98,31 @@ SUB peelTank
       |/echo ${currClient}:${NetBots[${currClient}].PctHPs} is a Priest in need of peeling
       /for i 1 to ${SpawnCount[playerstate 4 npc targetable radius ${AE_Radius} zradius 25]}
         /varset peelTarget ${NearestSpawn[${i},playerstate 4 npc targetable radius ${AE_Radius} zradius 25].ID}
-        /call TrueTarget ${peelTarget}
-        /delay 1s ${Target.BuffsPopulated}
-        |/echo checking ${peelTarget} ${Spawn[id ${peelTarget}].Name} for healer target
-        /if (${Select[${Me.TargetOfTarget.Class.ShortName},CLR,DRU,SHM]}) {
-          /bc [+y+] ${peelTarget} ${Spawn[id ${peelTarget}].Name} is targeting ${Me.TargetOfTarget.Name} : peeling!
-          /netfollow off
-          /varset peelTankOriginalAssistTarget ${AssistTarget}
-          /varset AssistTarget ${peelTarget}
-          |/varset doTaunt TRUE
-          /stick 9 front
-          /attack on
-          /delay 2s ${Target.Distance} < 12
-          /doability Taunt
-          /if (${Me.CombatAbilityReady[Mock]}) {
-            /doability Mock
-            /delay 2
+        /if (${Bool[${peelTarget}]} && ${Select[${Spawn[id ${peelTarget}].Type},${AcceptableTargetTypes}]}) {
+          /call TrueTarget ${peelTarget}
+          /delay 1s ${Target.BuffsPopulated}
+          |/echo checking ${peelTarget} ${Spawn[id ${peelTarget}].Name} for healer target
+          /if (${Select[${Me.TargetOfTarget.Class.ShortName},CLR,DRU,SHM]}) {
+            /bc [+y+] ${peelTarget} ${Spawn[id ${peelTarget}].Name} is targeting ${Me.TargetOfTarget.Name} : peeling!
+            /netfollow off
+            /varset peelTankOriginalAssistTarget ${AssistTarget}
+            /varset AssistTarget ${peelTarget}
+            |/varset doTaunt TRUE
+            /stick 9 front
+            /attack on
+            /delay 2s ${Target.Distance} < 12
+            /doability Taunt
+            /if (${Me.CombatAbilityReady[Mock]}) {
+              /doability Mock
+              /delay 2
+            }
+            /if (${Me.CombatAbilityReady[Bazu Bellow]}) /doability "Bazu Bellow"
+            /if (${Me.AltAbilityReady[Divine Stun]}) /casting "Divine Stun"
+            /if (${Me.SpellReady[Terror of Discord]}) /casting "Terror of Discord"
+            /return
+          } else {
+            /varset peelTarget 0
           }
-          /if (${Me.CombatAbilityReady[Bazu Bellow]}) /doability "Bazu Bellow"
-          /if (${Me.AltAbilityReady[Divine Stun]}) /casting "Divine Stun"
-          /if (${Me.SpellReady[Terror of Discord]}) /casting "Terror of Discord"
-          /return
-        } else {
-          /varset peelTarget 0
         }
       /next i
     }
