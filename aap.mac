@@ -1,0 +1,30 @@
+#include AAPurchase.inc
+sub main(functype)
+/delay 2
+/if (${functype.Length} < 1) {
+ /echo Usage: /mac aap [save/load]
+ /return
+}
+/if (${functype.Equal[save]}) {
+ /call AASave
+ /return
+}
+/if (${functype.Equal[load]}) {
+ /call init
+ /call AAPicker
+}
+/return
+sub init
+   /declare ListNum string outer
+   /declare AAIniFile string local AA_${Me.Name}.ini
+   /declare a int local
+   /declare IniSection string local AAtoBuy
+  
+   /call LoadINIVar2 ${IniSection} AACount 1 AACount ${AAIniFile} int
+   /if (${AACount}) {
+      /declare AA[${AACount}] string outer
+      /for a 1 to ${AACount}
+         /call LoadINIVar2 ${IniSection} AA${a} " " AA[${a}] ${AAIniFile}
+      /next a
+   }
+/return

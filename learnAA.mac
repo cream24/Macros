@@ -1,0 +1,57 @@
+/notify TradeskillWnd CombineButton leftmouseup 
+
+Sub Main(gemNumber, delay)
+	
+	:Loop
+	/delay 8
+	/notify AAWindow TrainButton leftmouseup 
+	/doevents
+	/goto :Loop
+
+/return
+
+
+/notify TaskSelectWnd TSEL_AcceptButton leftmouseup
+/echo ${Task[Population Control].WindowIndex}
+/echo The ${Task[popul]} first objective should be completed in ${Task[popul].Objective[1].Zone}
+/invoke ${Window[TaskSelectWnd].DoOpen}
+/invoke ${Window[TaskSelectWnd].DoOpen}
+
+/invoke ${Window[TaskSelectWnd].DoOpen}
+/echo ${Window[TaskWnd/TaskList].List[=1,2]}
+/echo ${Window[TaskWnd/TaskElementList]}
+
+${Window[TaskWnd/RewardPageTabWindow].Tab[Current Tasks].Child[RewardSelectionOptionList].List[2]}
+
+/echo ${Task[Population Control].WindowIndex}
+/echo ${Task[Population_Control].WindowIndex}
+
+/notify TaskSelectWnd TSEL_TaskList listselect ${Window[TaskSelectWnd].Child[TSEL_TaskList].List[Population Control]}
+/notify TaskSelectWnd TSEL_AcceptButton leftmouseup
+/notify TaskSelectWnd TSEL_TaskList listselect ${Window[TaskSelectWnd].Child[TSEL_TaskList].List[Gathering Silk]}
+
+| Do your keyphrase for popping up the Task Select Window before this line.
+/if (${Window[TaskSelectWnd].Open}) {
+	/notify TaskSelectWnd TSEL_TaskList listselect ${Window[TaskSelectWnd].Child[TSEL_TaskList].List[TYPE THE EXACT NAME OF THE TASK HERE]}
+	/delay 1s
+	/notify TaskSelectWnd TSEL_AcceptButton leftmouseup
+}
+| You should have the task now
+
+/notify TaskWnd TaskSubWindows tabselect 1 --THIS WORKS
+/notify TaskWnd TaskListPage listselect 1 --THIS WORKS
+/notify TaskWnd TASK_TaskList listselect 1 --THIS WORKS
+/notify TaskWnd QUEST_TaskList listselect 2 --THIS WORKS
+/echo ${Window[TaskWnd/TaskSubwindows].Tab[Current Tasks].Child[TASK_TaskList].List[1,2]} --THIS WORKS
+/echo ${Window[TaskWnd/TaskSubwindows].Tab[Quest History].Child[QUEST_TaskList].List[1]}
+/echo ${Window[TaskWND].Child[Task_TaskList].List[1,2]} --THIS WORKS
+/echo ${Window[TaskWND].Child[Task_TaskList].List[Gathering Silk]} --does not work
+/echo ${Window[TaskWND].Child[Task_TaskList].List} --returns count of tasks, or array index?
+
+/declare questCount int ${Window[TaskWND].Child[Task_TaskList].Items}
+/declare index int
+
+/echo --- There are ${questCount} Quests --
+/for index 1 to ${questCount}
+	/echo ${Window[TaskWND].Child[Task_TaskList].List[${index},3]}
+/next index

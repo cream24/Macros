@@ -39,9 +39,10 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
       } else {
         | -Stop assisting so we don't try to stick to the AssistTarget.
         /if (${Assisting} || ${Me.Combat}) /call AssistOff
-          /varset Following TRUE
-          /varset rebuffTimer 25
-          /call AcquireFollow
+        /if (${Me.Feigning}) /stand
+        /varset Following TRUE
+        /varset rebuffTimer 25
+        /call AcquireFollow
       }
     }
   }
@@ -399,11 +400,12 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_runThruZone ==>
   /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
-  /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
+  /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 4s
   /declare locToStart string local ${Spawn[pc ${c_eventArgChatSender}].Loc}
   /declare startHeading float local ${Spawn[pc ${c_eventArgChatSender}].Heading.Degrees}
-  /declare retryTimer timer local 7s
+  /declare retryTimer timer local 15s
   /declare miscTimer timer local
+  /declare runForTime int local 20
   /declare startZone int local ${Zone.ID}
   | -Check that you can see the location to start from.
   /if (!${LineOfSight[${Me.Loc.Replace[ ,]}:${locToStart}]}) {
@@ -418,20 +420,21 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
       /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /delay 5s !${Me.Casting.ID}
     :retryRTZ
       | -Check if I need to move closer.
-      /if (${Math.Distance[${locToStart}]} > 10) /call MoveToLoc ${locToStart} 50
-      | -Face the zone and run foward for 6 seconds.
+      /if (${Math.Distance[${locToStart}]} > 3) /call MoveToLoc ${locToStart} 20 15
+      | -Face the zone and run foward for runForTime seconds, increasing each try
       /face fast heading ${Math.Calc[${startHeading}*-1]}
       /delay 2
       /keypress forward hold
       | -Wait to zone.
-      /delay 6s !${Zone.ID} || ${Zone.ID} != ${startZone}
+      /delay ${runForTime} !${Zone.ID} || ${Zone.ID} != ${startZone}
       | -Check if I zoned.
       /if (${Zone.ID} == ${startZone}) {
         /if (${retryTimer}) {
+          /varcalc runForTime ${runForTime}+10
           /goto :retryRTZ
         } else {
           /docommand ${ChatToggle} I failed to run through the zoneline in [${Zone}].
-          /call MoveToLoc ${locToStart} 30 20
+          /call MoveToLoc ${locToStart} 15 15
         }
       }
     }
@@ -1493,6 +1496,216 @@ SUB campDesktop(line,ChatSender)
   /endmacro
 /RETURN
 
+
+|--------------------------------------------------------------------------------|
+#EVENT itemTurnin "<#1#> itemTurnin #2# to #3#"
+#EVENT itemTurnin "#1# tells the group, 'itemTurnin #2# to #3#'"
+#EVENT itemTurnin "#1# tell your party, 'itemTurnin #2# to #3#'"
+SUB event_itemTurnin(line, ChatSender, itemName, msgTarget)
+
+  /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_itemTurnin ==>
+  |/echo ${itemName}
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${msgTarget}]}) /return
+| -If msgTarget is not an ID, find TargetID.
+  /if (!${Int[${msgTarget}]}) {
+    /if (${SpawnCount[npc =${msgTarget}]}) {
+      /varset msgTarget ${Spawn[npc =${msgTarget}].ID}
+    } else /if (${SpawnCount[pc =${msgTarget}]}) {
+      /varset msgTarget ${Spawn[npc =${msgTarget}].ID}
+    } else /if (${SpawnCount[pet =${msgTarget}]}) {
+      /varset msgTarget ${Spawn[npc =${msgTarget}].ID}
+    } else {
+      /echo Could not find a SpawnID for [${msgTarget}].
+      /varset msgTarget NULL
+      /return
+    }
+  }
+  /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 1s
+  |/varset getTaskFromNPC ${Spawn[id ${msgTarget}].CleanName}
+  |/varset haveTask FALSE
+
+  /declare retryTimer timer local 10s
+  /declare startingLoc string local
+  /declare startingItemCount int local 0
+
+  /if (${Spawn[id ${msgTarget}].Distance}>${MaxResponseDist}) {
+    /echo itemTurnin Failed - ${Spawn[id ${msgTarget}].CleanName} is > ${MaxResponseDist} distance
+    /return
+  }
+
+  /varset startingItemCount ${FindItemCount[=${itemName}]}
+  /if (${startingItemCount} == 0 ) {
+    /bc I do not have any "${itemName}" in my inventory
+    /RETURN
+  }
+
+  /if (${Stick.Active}) /squelch /stick off
+  /if (${NetAdvPath.Following}) /squelch /netfollow off
+  /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+  /if (${Cursor.ID}) /autoinv
+
+  | TO DO
+  | check for ambiguous item name
+  | check to make sure item is no drop?
+
+  :retry_itemTurnin
+  /if (${FindItemCount[=${itemName}]} == 0 ) {
+    /bc Turned in ${startingItemCount} "${itemName}"
+    /RETURN
+  }
+
+  /if (${Me.Invis}) /makemevisible
+  /call TrueTarget ${msgTarget}
+  /delay 1s ${Target.ID} == ${msgTarget}
+  /if (${Target.Distance} > 5) /call MoveToLoc ${Target.Y} ${Target.X} 50 5
+  /delay 3
+  /varset startingLoc ${Me.Loc.Replace[ ,]}
+
+  /itemnotify "${itemName}" leftmouseup
+  /delay 1s ${Cursor.ID}
+  /if (!${Cursor.ID}) {
+      /echo Cant get "${itemName}" on cursor.
+      /RETURN
+  } else {
+    /call TrueTarget ${msgTarget}
+    /delay 1s ${Target.ID} == ${msgTarget}
+    /click left target
+    /delay 1s ${Window[GiveWnd].Open}
+    /if (!${Window[GiveWnd].Open}) {
+      /if (${retryTimer}) {
+        /goto :retry_itemTurnin
+      } else {
+        /echo Failed to open trade with ${Target.CleanName}
+        /if (${Cursor.ID}) /autoinv
+        /RETURN
+      }
+    }
+    /notify GiveWnd GVW_Give_Button LeftMouseUp
+    /delay 1s !${Window[GiveWnd].Open}
+    /if (${Window[GiveWnd].Open}) {
+      /if (${retryTimer}) {
+        /goto :retry_itemTurnin
+      } else {
+        /echo Failed to click trade with ${Target.CleanName}
+        /if (${Cursor.ID}) /autoinv
+        /RETURN
+      }
+    }
+  }
+
+  | loop again to see if i have more items
+  /if (${retryTimer}) {
+    /goto :retry_itemTurnin
+  }
+
+  /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_itemTurnin -|
+/RETURN
+
+
+|--------------------------------------------------------------------------------------|
+|- Commands bots to bark a message at a target.															          -|
+|- Targets can be designated by name, or ID, using -ID| or -Name|                     -|
+|- @param line: '<Name> Bark at MobName BarkMsg'														          -|
+|- @param msgTarget: The NPC you wish to bark at.														          -|
+|- @param barkIt: What to bark at the NPC.																            -|
+|- @param ChatSender: The command sender that requested getTask.								      -|
+|- @param selectedBots: Bots specified to getTask											                -|
+|- Use, '/getTask MESSAGE', or 'getTask at NAME MESSAGE' can be given in /bc, /g, or /tell. -|
+|--------------------------------------------------------------------------------------|
+
+| WORK IN PROGRESS, NOT FUNCTIONAL
+#EVENT getTask "<#1#> getTask at #2# #3#"
+#EVENT getTask "#1# tells the group, 'getTask at #2# #3#'"
+#EVENT getTask "#1# tell your party, 'getTask at #2# #3#'"
+SUB EVENT_getTask(line, ChatSender, msgTarget, taskName)
+|SUB EVENT_getTask(line, ChatSender, msgTarget, barkMsg)
+  /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Bark ==>
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${taskName}]}) /return
+| -If msgTarget is not an ID, find TargetID.
+  /if (!${Int[${msgTarget}]}) {
+    /if (${SpawnCount[npc =${msgTarget}]}) {
+      /varset msgTarget ${Spawn[npc =${msgTarget}].ID}
+    } else /if (${SpawnCount[pc =${msgTarget}]}) {
+      /varset msgTarget ${Spawn[npc =${msgTarget}].ID}
+    } else /if (${SpawnCount[pet =${msgTarget}]}) {
+      /varset msgTarget ${Spawn[npc =${msgTarget}].ID}
+    } else {
+      /echo Could not find a SpawnID for [${msgTarget}].
+      /varset msgTarget NULL
+      /return
+    }
+  }
+  /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
+  /varset getTaskFromNPC ${Spawn[id ${msgTarget}].CleanName}
+  /varset haveTask FALSE
+
+  /declare retryTimer timer local 15s
+  /declare startingLoc string local
+
+  /if (${Spawn[id ${msgTarget}].Distance}>${MaxResponseDist}) {
+    /echo getTask Failed - ${Spawn[id ${msgTarget}].CleanName} is > ${MaxResponseDist} distance
+    /return
+  }
+
+  /if (${Stick.Active}) /squelch /stick off
+  /if (${NetAdvPath.Following}) /squelch /netfollow off
+  /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+
+|  /doevents barkReturn flush
+
+  :retry_getTask
+  /if (${Me.Invis}) /makemevisible
+  /call TrueTarget ${msgTarget}
+  /if (${Target.Distance} > 5) /call MoveToLoc ${Target.Y} ${Target.X} 50 5
+| -Wait a moment, then bark the message.
+  /delay ${Math.Rand[8]}
+  /varset startingLoc ${Me.Loc.Replace[ ,]}
+
+| -Reset taskName
+  /if (${c_eventArgData.Find[-]} && ${c_eventArgData.Find[|]}) {
+    /varset taskName ${c_eventArgData.Arg[1,-]}
+    /varset taskName ${c_eventArgData.Left[${Math.Calc[${c_eventArgData.Length} - 1].Int}]}
+  }
+
+|  /say ${taskName}
+| -Wait up to 2 seconds for something to happen.
+  /delay 2s ${Zone.ID} != ${currentZone} || ${Me.Loc.Replace[ ,].NotEqual[${startingLoc}]} || ${Window[ConfirmationDialogBox].Open} || ${Window[LargeDialogWindow].Open}
+
+| -Click Yes to a confirmation box.
+  /if (${Window[ConfirmationDialogBox].Open}) {
+    /notify ConfirmationDialogBox Yes_Button leftmouseup
+    /delay 1s
+  } else /if (${Window[LargeDialogWindow].Open}) {
+    /notify LargeDialogWindow LDW_YesButton leftmouseup
+    /delay 1s
+  }
+
+  |/doevents barkReturn
+| -Check to see if the bark was successful.
+  /if (${Zone.ID} == ${currentZone} && ${Math.Distance[${startingLoc}]} < 8 && !${barkReturned}) {
+    /if (${retryTimer}) {
+      /goto :retry_getTask
+    } else {
+      /docommand ${ChatToggle} Nothing seems to have happened...
+    }
+  }
+  /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Bark -|
+/RETURN
+
+|------------------------------------------------------------|
+|- Attempts to detected NPC responses to PC hails in /say.	-|
+|- @param line: '|getTaskFromNPC| says, 'Something''			      -|
+|- @param returnNPCResponse: What the NPC replied.					        -|
+|------------------------------------------------------------|
+|#EVENT getTaskReturn "${getTaskFromNPC} #1#"
+|SUB EVENT_getTaskReturn(line, returnNPCResponse)
+|  /varset haveTask TRUE
+|/RETURN
+
+|---------------------------|
+
 Sub basics_Setup
 /call iniToVarV "${advSettings_Ini},Debug,Debug Basics (On/Off)" Debug_Basics bool outer
 /if (${Debug} || ${Debug_Basics}) /echo |- basics_Setup ==>
@@ -1503,6 +1716,9 @@ Sub basics_Setup
 
   /if (!${Defined[barkTarget]}) /declare barkTarget string outer
   /if (!${Defined[barkReturned]}) /declare barkReturned bool outer FALSE
+
+  /if (!${Defined[getTaskFromNPC]}) /declare getTaskFromNPC string outer
+  /if (!${Defined[haveTask]}) /declare haveTask bool outer FALSE
 
 	/declare event_counter int outer 0
 
@@ -1584,6 +1800,7 @@ Sub basics_Background_Events
   /doevents macroHelp
   /doevents exp_group
   /doevents campdesktop
+  /doevents itemTurnin
 |		/varset event_counter 1
 |	} else {
 |		/varcalc event_counter ${event_counter}+1

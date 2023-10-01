@@ -125,6 +125,9 @@ SUB AssistOff
 	/varset AssistTarget 0
 	/varset AllowControl FALSE
   /varset isEnraged FALSE
+  |reports of peeltank misbehaving after combat
+  /varset peelTarget 0
+  /varset peelTankOriginalAssistTarget 0
 
   /if (${Stick.Status.Equal[ON]})   /squelch /stick off
   |/if (${Defined[Debuff_Targets]})  /deletevar Debuff_Targets
