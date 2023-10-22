@@ -64,15 +64,23 @@ sub check_celestialRegen
 sub Event_wordHeal(line, ChatSender)
   /if (!${Me.Class.ShortName.Equal[CLR]}) /return
   /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
-  /delay 5s !${Me.Casting.ID}
-  /call check_Ready "wordHeal2D" 1
-  /if (${c_Ready}) {
-    /if (${check_Mana["wordHeal2D",1]}) {
-      /bc [+g+] Casting ${wordHeal2D[1,${iCastName}]}
-      /call e3_Cast ${Me.ID} "wordHeal2D" 1
+  /delay 3s !${Me.Casting.ID}
+  /declare retryTimer timer local 5s
+
+  :retryWordHeal
+  /if (${Me.Casting.ID}) /call interrupt
+  /if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 99) /call check_lifeSupport
+  /if (${check_Mana["wordHeal2D",1]}) {
+    /call check_Ready "wordHeal2D" 1
+    /if (${c_Ready}) {
+        /bc [+g+] Casting ${wordHeal2D[1,${iCastName}]}
+        /call e3_Cast ${Me.ID} "wordHeal2D" 1
+    } else {
+      /if (${retryTimer}) /goto :retryWordHeal
     }
   }
 /return
+
 |----------------------------------------------------------------------------|
 #event Rez "<#1#> Rez"
 #event Rez "<#*#> Rez On #1#"
@@ -383,6 +391,7 @@ sub Event_AE_CR(string line)
 /return
 |----------------------------------------------------------------------------|
 Sub CLR_Background_Events
+  /doevents wordHeal
   /doevents AE_CR
   /doevents AE_Rez
   /doevents Rez

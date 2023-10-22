@@ -289,6 +289,12 @@ SUB EVENT_updateAliases
 	/call SHM_Aliases
 	/call WAR_Aliases
 	/call WIZ_Aliases
+	/call basics_Aliases
+	/call buffCheck_Aliases
+	/call wait4rez_Aliases
+	/call sell_Aliases
+	/call healChain_Aliases
+	/call SmoothMoves_Aliases
 /if (${Debug}) /echo <== EVENT_updateAliases -|
 /RETURN
 

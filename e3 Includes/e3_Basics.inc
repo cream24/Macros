@@ -195,6 +195,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
 
   /doevents barkReturn flush
 
+  /declare barkStartZone int ${Zone.ID}
   :retry_Bark
   /if (${Me.Invis}) /makemevisible
   /call TrueTarget ${msgTarget}
@@ -223,14 +224,16 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   }
 
   /doevents barkReturn
+  /delay 1s
   | -Check to see if the bark was successful.
-  /if (${Zone.ID} == ${currentZone} && ${Math.Distance[${startingLoc}]} < 8 && !${barkReturned}) {
+  /if (${Zone.ID} == ${barkStartZone} && ${Math.Distance[${startingLoc}]} < 8 && !${barkReturned}) {
     /if (${retryTimer}) {
       /goto :retry_Bark
     } else {
       /docommand ${ChatToggle} Nothing seems to have happened...
     }
   }
+  /varset barkReturned False
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Bark -|
 /RETURN
 
@@ -269,7 +272,7 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
     /for i 1 to ${doorList.Size}
       /if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
       /squelch /doortarget id ${doorList[${i}].Arg[1,,]}
-      /if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.DistanceZ} < 125 && ${DoorTarget.Distance} < 400) {
+      /if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.Distance} < 400 && ${DoorTarget.Distance}) {
         /varset closestDoorDist ${DoorTarget.Distance}
         /varset closestDoorID ${doorList[${i}].Arg[1,,]}
       }
@@ -300,9 +303,18 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
     /declare clickDelay int local ${Math.Calc[${Math.Rand[${Me.ID}]}%${clickitRandomDelay}|1]}
     /declare startingLoc ${Me.Loc}
     :retryClickDoor
-    /delay ${clickDelay}
+    
     /squelch /doortarget id ${closestDoorID}
+    
+    |casting while zoning has been reported to cause a problem
+    | If casting, dismount if mounted and call /stopcast
+    /if (${Cast.Status.Find[C]} || ${Me.Casting.ID}) {
+      /if (${NetBots[${Me.Name}].Mounted}) /dismount
+      /stopcast
+    }
     /squelch /click left door
+    |give time for the click and zoning to take place.
+    /delay ${clickDelay}
     /if (${MyZone}==${Zone.ID} && ${Math.Distance[${startingLoc}]} < 10) {
       /if (${clickTimer}) {
         /goto :retryClickDoor
@@ -1140,6 +1152,8 @@ SUB EVENT_ClickYes(line, ChatSender, eventParams)
     /notify ConfirmationDialogBox ${buttonToClick}_Button leftmouseup
   } else /if (${Window[LargeDialogWindow].Open}) {
     /notify LargeDialogWindow LDW_${buttonToClick}Button leftmouseup
+  } else /if (${Window[TaskSelectWnd].Open}) {
+    /notify TaskSelectWnd TSEL_AcceptButton leftmouseup
   }
   /if (${miscTimer}) {
     /if (${Window[ConfirmationDialogBox].Open} || ${Window[LargeDialogWindow].Open}) /goto :clickButton
@@ -1219,10 +1233,14 @@ SUB EVENT_Evacuate(line, ChatSender)
 |----------------------------------------|
 #EVENT RaidAccept "#*#invites you to join a raid.#*#"
 SUB EVENT_RaidAccept
-  /delay 5
-  /notify ConfirmationDialogBox Yes_Button leftmouseup
-  /delay 5
-  /raidaccept
+  /if (${Window[ConfirmationDialogBox].Open}) {
+    /notify ConfirmationDialogBox YES_Button leftmouseup
+  }
+  /delay 2
+  /if (${Window[ConfirmationDialogBox].Open}) {
+    /notify ConfirmationDialogBox YES leftmouseup
+  }
+  /if (!${Bool[${Raid.Leader.Name}]}) /raidaccept
 /RETURN
 
 |----------------------------------------|
@@ -1615,10 +1633,10 @@ SUB event_itemTurnin(line, ChatSender, itemName, msgTarget)
 |--------------------------------------------------------------------------------------|
 
 | WORK IN PROGRESS, NOT FUNCTIONAL
-#EVENT getTask "<#1#> getTask at #2# #3#"
-#EVENT getTask "#1# tells the group, 'getTask at #2# #3#'"
-#EVENT getTask "#1# tell your party, 'getTask at #2# #3#'"
-SUB EVENT_getTask(line, ChatSender, msgTarget, taskName)
+#EVENT getTask "<#1#> getTask #2# at #3#"
+#EVENT getTask "#1# tells the group, 'getTask #2# at #3#'"
+#EVENT getTask "#1# tell your party, 'getTask #2# at #3#'"
+SUB EVENT_getTask(line, ChatSender, taskName, msgTarget)
 |SUB EVENT_getTask(line, ChatSender, msgTarget, barkMsg)
   /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Bark ==>
   /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
@@ -1730,6 +1748,8 @@ Sub basics_Setup
 
 	/declare medBreak bool outer FALSE
 	/declare medBreak_Hold bool outer FALSE
+	/declare medOn_combatBreak bool outer FALSE
+	/declare autoMedChar bool outer FALSE
 	/declare medbreak_Popup_Timer timer outer
 	/declare clickitRandomDelay int outer 7
 
@@ -1740,6 +1760,14 @@ Sub basics_Setup
 
 	/declare MaxResponseDist int outer 250
 	/if (${Ini[${genSettings_Ini},General,Max Response Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Response Distance]}]}) /call iniToVarV "${genSettings_Ini},General,Max Response Distance" MaxResponseDist int outer
+
+	/declare hideCorpse string local none
+  /if (${Ini[${genSettings_Ini},General,DefaultHideCorpse].Length} && ${Bool[${Ini[${genSettings_Ini},General,DefaultHideCorpse]}]}) /call iniToVarV "${genSettings_Ini},General,DefaultHideCorpse" hideCorpse string local
+  /if (${Select[${hideCorpse},none,all,allbutgroup,looted,npc]}) {
+    /squelch /hidecor ${hideCorpse}
+  } else {
+    /echo ERROR: General Settings ini DefaultHideCor is not corrrect, specify:  none,all,allbutgroup,looted,npc
+  }
 
 	/declare LeashLength int outer 100
 	/if (${Ini[${genSettings_Ini},General,Leash Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Leash Length]}]}) /call iniToVarV "${genSettings_Ini},General,Leash Length" LeashLength int outer
@@ -1814,6 +1842,7 @@ SUB basics_MacroSettings
 	/call WriteToIni "${genSettings_Ini},General,Leash Length" 250
 	/call WriteToIni "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" On
   /call WriteToIni "${genSettings_Ini},General,AutoMedBreak PctMana" 0
+  /call WriteToIni "${genSettings_Ini},General,DefaultHideCorpse" none
 
 	/call WriteToIni "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoExp
 	/call WriteToIni "${genSettings_Ini},ExpGroup,NoKS_SpellSet" NoExp
@@ -1824,6 +1853,12 @@ SUB basics_MacroSettings
 /RETURN
 
 SUB basics_CharacterSettings
+/if (${Select[${Me.Class.ShortName},CLR,DRU,ENC,MAG,NEC,SHM,WIZ]}) {
+	/call WriteToIni "${Character_Ini},Misc,End MedBreak in Combat(On/Off)" Off
+} else /if (${Me.Class.ShortName.NotEqual[BRD]}) {
+	/call WriteToIni "${Character_Ini},Misc,End MedBreak in Combat(On/Off)" On
+}
+/if (${Me.Class.ShortName.NotEqual[BRD]}) /call WriteToIni "${Character_Ini},Misc,AutoMedBreak (On/Off)" Off
 /RETURN
 
 Sub basics_Aliases

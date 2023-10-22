@@ -250,7 +250,8 @@ SUB check_AssistStatus
       }
     }
   }
-  /if (!${Me.Casting.ID} && ${Me.Combat} && ${Defined[Abilities2D]}) /call CombatAbilities
+
+  /if ((!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[BRD]}) && ${Me.Combat} && ${Defined[Abilities2D]}) /call CombatAbilities
 /if (${Debug} || ${Debug_Assists}) /echo <== check_AssistStatus -|
 /RETURN
 

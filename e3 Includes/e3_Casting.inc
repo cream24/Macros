@@ -343,6 +343,7 @@ Sub check_Ready(ArrayName, int ArrayIndex)
 
 Sub memorize_spell(spellName,gemNum)
   /if (${Debug} || ${Debug_Casting}) /echo |- memorize_spell =>
+  /if (${Me.Feigning}) /return
   /memorize "${spellName}" ${gemNum}
 	/delay 3s ${Bool[${Me.Gem[${spellName}]}]}
 	|only wait for beneficial,self spells

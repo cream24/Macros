@@ -48,6 +48,9 @@ SUB buffBots(ArrayName)
 	/varset buffCheckForName	${${ArrayName}[${s},${iCheckFor}]}
 	/varset buffCheckForID		${${ArrayName}[${s},${iCheckForID}]}
 
+  | workaround so Growl of the Panther properly identifies the songbuff on BST, to work as a CombatBuff instead of PetBuff which burns mana
+  /if (${${ArrayName}[${s},${iSpellName}].Equal[Growl of the Panther]}) /varset buffSpellID 6717
+
   /if (!${Bool[${NetBots[${buffTarget}].ID}]}) /goto :skipBuff
 	|/echo ${buffSpellName} ${buffSpellID} ${buffCheckForName} ${buffCheckForID} ${Bool[${NetBots[${buffTarget}].Buff.Find[${buffSpellID} ]}]}
   |/echo ${buffSpellName} ${Select["${buffSpellName}","Thief's Eyes", "Fists of Wu", "Commanding Voice","Cry Havoc"]}

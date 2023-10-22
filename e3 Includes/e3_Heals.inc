@@ -6,12 +6,11 @@
 |------------------------------------------------------------------------|
 |------------------------------------------------------------|
 |- Heals.inc's mainLoop hook.								-|	
-|------------------------------------------------------------|					
+|------------------------------------------------------------|
 |- Calls heal functions, as an extension of the main loop.	-|	
 |------------------------------------------------------------|
 SUB check_Heals
 /if (${Debug} || ${Debug_Heals}) /echo |- healLoop  ==>
-  /doevents wordHeal
 	/if (${do_GroupHeals}) 							      /call groupHeals
 	/if (!${ActionTaken} && ${healTanks}) 		/call heal_tanks
 	/if (!${ActionTaken} && ${healImportant}) /call heal_importantBots
