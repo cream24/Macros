@@ -38,8 +38,7 @@ SUB loot_Area
   /squelch /hidecor looted
   /if (${Twist.Twisting}) /call pauseTwist
   /delay 5s !${Me.Casting.ID}
-  /if (${NetAdvPath.Following}) /squelch /netfollow off
-  /if (${Stick.Active}) /squelch /stick off
+	/call StopForAction
 
   /declare ClosestCorpse        int local
   /declare ClosestCorpseDist    int local
@@ -395,8 +394,8 @@ SUB EVENT_updateLootSetting(line, ChatSender, itemName, iniSetting)
 
 |--------------------------------------------------------------------|
 SUB loot_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Loot (On/Off)" Debug_Loot bool outer
-/if (${Debug} || ${Debug_Loot}) /echo |- _Setup ==>
+/call iniToVarV "${advSettings_Ini},Debug,Debug Loot (On/Off)" Debug_Loot bool
+/if (${Debug} || ${Debug_Loot}) /echo |- loot_Setup ==>
 	/if (!${Ini[${MacroData_Ini},File Paths,Loot Settings File].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Loot Settings File" "e3 Macro Inis\Loot Settings.ini" 1
 	/if (!${Ini[${MacroData_Ini},File Paths,Loot Settings File].Length}) {
 		/echo ERROR: Could not find designated file path for [Loot Settings File], please review [e3Data.ini] and restart.
@@ -412,12 +411,12 @@ SUB loot_Setup
   /declare lootSetting string outer
 
 	/if (!${Ini[${Loot_Ini}].Length}) /call Build_Alphabetized_Ini "${Loot_Ini}"
-	/call iniToVarV "${genSettings_Ini},Loot,Loot Link Channel" linkChannel string outer
-	/call iniToVarV "${genSettings_Ini},Loot,Corpse Seek Radius" seek_Radius int outer
-  /call iniToVarV "${genSettings_Ini},Loot,Loot in Combat" combatLooting bool outer
+	/call iniToVarV "${genSettings_Ini},Loot,Loot Link Channel" linkChannel string
+	/call iniToVarV "${genSettings_Ini},Loot,Corpse Seek Radius" seek_Radius int
+  /call iniToVarV "${genSettings_Ini},Loot,Loot in Combat" combatLooting bool
 	| Import character settings
-	/if (${Bool[${Ini[${Character_Ini},Misc,Auto-Loot (On/Off)]}]}) /call iniToVarV "${Character_Ini},Misc,Auto-Loot (On/Off)" Auto_Loot bool outer
-/if (${Debug} || ${Debug_Loot}) /echo <== _Setup -|
+	/if (${Bool[${Ini[${Character_Ini},Misc,Auto-Loot (On/Off)]}]}) /call iniToVarV "${Character_Ini},Misc,Auto-Loot (On/Off)" Auto_Loot bool
+/if (${Debug} || ${Debug_Loot}) /echo <== loot_Setup -|
 /RETURN
 
 |--------------------------------------------------------------------|

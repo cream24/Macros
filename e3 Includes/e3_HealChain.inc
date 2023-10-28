@@ -458,21 +458,23 @@ SUB EVENT_set_LastHealer(line, ChatSender, time_Hour, time_Min, time_Sec)
 |- Imports ini settings from Character Ini,[healChain].	-|
 |--------------------------------------------------------|
 SUB healChain_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug HealChain (On/Off)" Debug_HealChain bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug HealChain (On/Off)" Debug_HealChain bool
 /if (${Debug} || ${Debug_HealChain}) /echo |- healChain_Setup ==>
-	/if (${Ini[${Character_Ini},Heals,Join Heal Chains (On/Off)].Length}) /call iniToVarV "${Character_Ini},Heals,Join Heal Chains (On/Off)" join_HealChain bool outer
-  /declare Chain_Moderator string outer
-  /declare Chain_Count int outer
-  /declare Chain_MemberList string outer
-  /declare Chain_TimingAdjustment int outer
-  /declare Chain_NextHealTimer timer outer
-  /declare Chain_NextTimingSet bool outer
-  /declare Chain_Status string outer
-  /declare Chain_StartLoc string outer
-  /declare Chain_Target string outer
-  /declare Chain_LastHealer string outer
-  /declare Chain_TankList string outer
-  /declare Chain_Timing int outer
+	/if (${Ini[${Character_Ini},Heals,Join Heal Chains (On/Off)].Length}) {
+		/call iniToVarV "${Character_Ini},Heals,Join Heal Chains (On/Off)" join_HealChain bool
+		/declare Chain_Moderator string outer
+		/declare Chain_Count int outer
+		/declare Chain_MemberList string outer
+		/declare Chain_TimingAdjustment int outer
+		/declare Chain_NextHealTimer timer outer
+		/declare Chain_NextTimingSet bool outer
+		/declare Chain_Status string outer
+		/declare Chain_StartLoc string outer
+		/declare Chain_Target string outer
+		/declare Chain_LastHealer string outer
+		/declare Chain_TankList string outer
+		/declare Chain_Timing int outer
+	}
 /if (${Debug} || ${Debug_HealChain}) /echo <== healChain_Setup -|
 /RETURN
 

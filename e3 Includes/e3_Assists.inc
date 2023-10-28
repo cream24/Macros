@@ -36,8 +36,7 @@ SUB event_Assist(line, ChatSender, int MobID)
         /if (${Spawn[=${FollowTarget}].Distance} > ${LeashLength} && ${Assist_Moving_Timer}) /goto :movetoAssist_Loop
       }
       | Disengage follow.
-      /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Following}) /squelch /netfollow off
+      /call StopForAction
       | Set Assist Variables.
       /varset Assisting TRUE
       /varset AssistTarget ${MobID}
@@ -311,7 +310,8 @@ SUB CombatAbilities
       |- AA, only those with 0 cast time can go here
     } else /if (${Abilities2D[${i},${iCastType}].Equal[AA]}) {
       /if (${Me.AltAbilityReady[${Abilities2D[${i},${iCastName}]}]}) {
-        /casting "${Abilities2D[${i},${iCastName}]}" alt
+        |/casting "${Abilities2D[${i},${iCastName}]}" alt
+        /alt act ${AltAbility[${Abilities2D[${i},${iCastName}]}].ID}
         /delay 3 !${Me.AltAbilityReady[${Abilities2D[${i},${iCastName}]}]}
       }
       |- Discipline, no disc with a duration can go here
@@ -1058,7 +1058,7 @@ SUB event_SpellSet(line, ChatSender, spellArray)
     /if (!${Ini[${Character_Ini},Nukes,${spellArray}].Length}) {
       /if (${Debug} || ${Debug_Assists}) /echo \ay [${spellArray}] is not configured in your bot ini [Nukes], keeping existing spell set: [${spellsToUse}]
     } else {
-      /call IniToArrayV "${Character_Ini},Nukes,${spellArray}#" MyNukes
+      /call IniToArrayV "${Character_Ini},Nukes,${spellArray}" MyNukes
       /if (${Defined[MyNukes]}) {
         /if (${MyNukes[1].Equal[OFF]}) {
           /varset use_Nukes FALSE
@@ -1083,7 +1083,7 @@ SUB event_SpellSet(line, ChatSender, spellArray)
       /if (!${Ini[${Character_Ini},Dots on Assist,${spellArray}].Length}) {
         /if (${Debug} || ${Debug_Assists}) /echo \ay [${spellArray}] is not configured in your bot ini [Dots on Assist], keeping existing spell set: [${spellsToUse}]
       } else {
-        /call IniToArrayV "${Character_Ini},Dots on Assist,${spellArray}#" Assist_DoTs
+        /call IniToArrayV "${Character_Ini},Dots on Assist,${spellArray}" Assist_DoTs
         /if (${Defined[Assist_DoTs]}) {
           /if (${Assist_DoTs[1].Equal[OFF]}) {
             /varset use_AssistDots FALSE
@@ -1109,7 +1109,7 @@ SUB event_SpellSet(line, ChatSender, spellArray)
       /if (!${Ini[${Character_Ini},Dots on Command,${spellArray}].Length}) {
         /if (${Debug} || ${Debug_Assists}) /echo \ay [${spellArray}] is not configured in your bot ini [Dots on Command], keeping existing spell set: [${spellsToUse}]
       } else {
-        /call IniToArrayV "${Character_Ini},Dots on Command,${spellArray}#" Command_DoTs
+        /call IniToArrayV "${Character_Ini},Dots on Command,${spellArray}" Command_DoTs
         /if (${Defined[Command_DoTs]}) {
           /if (${Command_DoTs[1].Equal[OFF]}) {
             /varset use_CommandDots FALSE
@@ -1134,7 +1134,7 @@ SUB event_SpellSet(line, ChatSender, spellArray)
     /declare s int local
     /declare cbpi int local
     /declare sbpi int local
-    /call IniToArrayV "${Character_Ini},Buffs,Combat Buff#"	CombatBuffs
+    /call IniToArrayV "${Character_Ini},Buffs,Combat Buff"	CombatBuffs
     /if (${Defined[CombatBuffs]}) {
       /for s 1 to ${CombatBuffs.Size}
         /if (${Select[${CombatBuffs[${s}]},${poisonFR},${poisonCR},${poisonPR}]}) {
@@ -1143,7 +1143,7 @@ SUB event_SpellSet(line, ChatSender, spellArray)
         }
       /next s
     }
-    /call IniToArrayV "${Character_Ini},Buffs,Self Buff#" SelfBuffs
+    /call IniToArrayV "${Character_Ini},Buffs,Self Buff" SelfBuffs
     /if (${Defined[SelfBuffs]}) {
       /for s 1 to ${SelfBuffs.Size}
         /if (${Select[${SelfBuffs[${s}]},${poisonFR},${poisonCR},${poisonPR}]}) {
@@ -1218,7 +1218,7 @@ sub event_CombatMode(line, ChatSender, combatMode)
 
 |--------------------------------------------------------------------------------|
 Sub assist_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Assists (On/Off)" Debug_Assists bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Assists (On/Off)" Debug_Assists bool
 /if (${Debug} || ${Debug_Assists}) /echo |- assist_Setup ==>
 
 	/declare TogglePvP bool outer FALSE
@@ -1247,28 +1247,28 @@ Sub assist_Setup
   /if (!${Defined[spellsToUse]})   /declare spellsToUse string global Main
 
 | ------------------------------------- Import Macro_Ini Settings.
-	/call iniToVarV "${genSettings_Ini},Assists,Max Engage Distance"     MaxAssistDistance int outer
-	/call iniToVarV "${genSettings_Ini},Assists,AE Threat Range"         AE_Radius int outer
-	/call iniToVarV "${genSettings_Ini},Assists,Acceptable Target Types" AcceptableTargetTypes string outer
-	/call iniToVarV "${genSettings_Ini},Assists,Auto-Assist (On/Off)"    auto_AssistOn bool outer
-  /call iniToVarV "${genSettings_Ini},Assists,Long Term Debuff Recast(s)" longTermRecastTime int outer
-  /call iniToVarV "${genSettings_Ini},Assists,Short Term Debuff Recast(s)" shortTermRecastTime int outer
+  /call iniToVarV "${genSettings_Ini},Assists,Max Engage Distance"     MaxAssistDistance int
+  /call iniToVarV "${genSettings_Ini},Assists,AE Threat Range"         AE_Radius int
+  /call iniToVarV "${genSettings_Ini},Assists,Acceptable Target Types" AcceptableTargetTypes string
+  /call iniToVarV "${genSettings_Ini},Assists,Auto-Assist (On/Off)"    auto_AssistOn bool
+  /call iniToVarV "${genSettings_Ini},Assists,Long Term Debuff Recast(s)" longTermRecastTime int
+  /call iniToVarV "${genSettings_Ini},Assists,Short Term Debuff Recast(s)" shortTermRecastTime int
 
 | ------------------------------------- Import Character_Ini Settings.
-	/if (${Ini[${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)].Length})  /call iniToVarV "${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)" AssistType string outer
-  /if (${Ini[${Character_Ini},Assist Settings,Taunt(On/Off)].Length})                   /call iniToVarV "${Character_Ini},Assist Settings,Taunt(On/Off)" doTaunt bool outer
-  /if (${Ini[${Character_Ini},Assist Settings,SmartTaunt(On/Off)].Length})              /call iniToVarV "${Character_Ini},Assist Settings,SmartTaunt(On/Off)" smartTaunt bool outer
-	/if (${Ini[${Character_Ini},Assist Settings,Melee Stick Point].Length})               /call iniToVarV "${Character_Ini},Assist Settings,Melee Stick Point" AssistStickPoint string outer
-	/if (${Ini[${Character_Ini},Assist Settings,Melee Distance].Length})                  /call iniToVarV "${Character_Ini},Assist Settings,Melee Distance" AssistDistanceSetting string outer
-	/if (${Ini[${Character_Ini},Assist Settings,Ranged Distance].Length})                 /call iniToVarV "${Character_Ini},Assist Settings,Ranged Distance" RangedStickDistance string outer
-	/if (${Ini[${Character_Ini},Assist Settings,Auto-Assist Engage Percent].Length})      /call iniToVarV "${Character_Ini},Assist Settings,Auto-Assist Engage Percent" EngagePct int outer
-	/if (!${Defined[EngagePct]}) {
-		/if (${Debug} || ${Debug_Assists}) /echo ERROR: @[EngagePct] - EngagePct is invalid, defaulting to 98%
-		/declare EngagePct int outer 98
-	} else /if (${Defined[EngagePct]} && !${EngagePct}) {
-		/if (${Debug} || ${Debug_Assists}) /echo ERROR: @[EngagePct] - EngagePct is invalid, defaulting to 98%
-		/varset EngagePct 98
-	}
+  /if (${Ini[${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)].Length})  /call iniToVarV "${Character_Ini},Assist Settings,Assist Type (Melee/Ranged/Off)" AssistType string
+  /if (${Ini[${Character_Ini},Assist Settings,Taunt(On/Off)].Length})                   /call iniToVarV "${Character_Ini},Assist Settings,Taunt(On/Off)" doTaunt bool
+  /if (${Ini[${Character_Ini},Assist Settings,SmartTaunt(On/Off)].Length})              /call iniToVarV "${Character_Ini},Assist Settings,SmartTaunt(On/Off)" smartTaunt bool
+  /if (${Ini[${Character_Ini},Assist Settings,Melee Stick Point].Length})               /call iniToVarV "${Character_Ini},Assist Settings,Melee Stick Point" AssistStickPoint string
+  /if (${Ini[${Character_Ini},Assist Settings,Melee Distance].Length})                  /call iniToVarV "${Character_Ini},Assist Settings,Melee Distance" AssistDistanceSetting string
+  /if (${Ini[${Character_Ini},Assist Settings,Ranged Distance].Length})                 /call iniToVarV "${Character_Ini},Assist Settings,Ranged Distance" RangedStickDistance string
+  /if (${Ini[${Character_Ini},Assist Settings,Auto-Assist Engage Percent].Length})      /call iniToVarV "${Character_Ini},Assist Settings,Auto-Assist Engage Percent" EngagePct int
+  /if (!${Defined[EngagePct]}) {
+    /if (${Debug} || ${Debug_Assists}) /echo ERROR: [EngagePct] - EngagePct is invalid, defaulting to 98%
+    /declare EngagePct int outer 98
+  } else /if (${Defined[EngagePct]} && !${EngagePct}) {
+    /if (${Debug} || ${Debug_Assists}) /echo ERROR: [EngagePct] - EngagePct is invalid, defaulting to 98%
+    /varset EngagePct 98
+  }
 
   | Epic Definitions for EpicBurn -exclude defensive or buffs
   /declare EpicName string outer
@@ -1305,7 +1305,6 @@ Sub assist_Setup
   /if (${FindItemCount[=Whispering Tunic of Shadows]})                        /varset AnguishChest Whispering Tunic of Shadows
   /if (${AnguishChest.Length}) /call BuildArray EPICBurns "${AnguishChest}"
 
-  |/echo ---------Assist calling spellarrays ----------
   /call assist_SpellArrays
 
   /if (${Debug} || ${Debug_Assists}) /echo <== assist_Setup -|
@@ -1314,18 +1313,20 @@ Sub assist_Setup
 |------------------------------------------------------------------------------------------------
 |------------------------------------------------------------------------------------------------
 SUB assist_SpellArrays
-  /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#"         MyAbilities
-  /call IniToArrayV "${Character_Ini},Nukes,${spellsToUse}#"            MyNukes
-  /call IniToArrayV "${Character_Ini},DoTs on Assist,${spellsToUse}#"   Assist_DoTs
-  /call IniToArrayV "${Character_Ini},DoTs on Command,${spellsToUse}#"  Command_DoTs
-  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Assist#"        Assist_Debuffs
-  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Command#"       Command_Debuffs
-  /call IniToArrayV "${Character_Ini},TargetAE,TargetAE#"               TargetAE_Spells
-  /call IniToArrayV "${Character_Ini},PBAE,PBAE#"                       PBAE_Spells
-  /call IniToArrayV "${Character_Ini},Burn,Quick Burn#"                 QUICKBurns
-  /call IniToArrayV "${Character_Ini},Burn,Long Burn#"                  LONGBurns
-  /call IniToArrayV "${Character_Ini},Burn,Full Burn#"                  FULLBurns
-
+  /if (${Debug} || ${Debug_Assists}) /echo assistSpellArrays spellsToUse ${spellsToUse} ; ${Character_Ini}
+  
+  /call IniToArrayV "${Character_Ini},Melee Abilities,Ability"         MyAbilities
+  /call IniToArrayV "${Character_Ini},Nukes,${spellsToUse}"            MyNukes
+  /call IniToArrayV "${Character_Ini},DoTs on Assist,${spellsToUse}"   Assist_DoTs
+  /call IniToArrayV "${Character_Ini},DoTs on Command,${spellsToUse}"  Command_DoTs
+  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Assist"        Assist_Debuffs
+  /call IniToArrayV "${Character_Ini},Debuffs,Debuff on Command"       Command_Debuffs
+  /call IniToArrayV "${Character_Ini},TargetAE,TargetAE"               TargetAE_Spells
+  /call IniToArrayV "${Character_Ini},PBAE,PBAE"                       PBAE_Spells
+  /call IniToArrayV "${Character_Ini},Burn,Quick Burn"                 QUICKBurns
+  /call IniToArrayV "${Character_Ini},Burn,Long Burn"                  LONGBurns
+  /call IniToArrayV "${Character_Ini},Burn,Full Burn"                  FULLBurns
+  
   /if (${Me.Class.ShortName.Equal[MAG]}) {
     /declare summonMoltenOrb bool outer FALSE
     /if (${Bool[${Me.AltAbility[Servant of Ro]}]})        /call BuildArray "swarmPets" "Servant of Ro"
@@ -1368,11 +1369,11 @@ SUB assist_SpellArrays
 |--------------------------------------------------------------------------------|
 SUB assist_MacroSettings
 /if (${Debug}) /echo |- assist_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},Debug,Debug Assists (On/Off)" Off
-	/call WriteToIni "${genSettings_Ini},Assists,Auto-Assist (On/Off)" Off
-	/call WriteToIni "${genSettings_Ini},Assists,Max Engage Distance" 250
-	/call WriteToIni "${genSettings_Ini},Assists,AE Threat Range" 100
-	/call WriteToIni "${genSettings_Ini},Assists,Acceptable Target Types" NPC,Pet
+  /call WriteToIni "${advSettings_Ini},Debug,Debug Assists (On/Off)" Off
+  /call WriteToIni "${genSettings_Ini},Assists,Auto-Assist (On/Off)" Off
+  /call WriteToIni "${genSettings_Ini},Assists,Max Engage Distance" 250
+  /call WriteToIni "${genSettings_Ini},Assists,AE Threat Range" 100
+  /call WriteToIni "${genSettings_Ini},Assists,Acceptable Target Types" NPC,Pet
   /call WriteToIni "${genSettings_Ini},Assists,Long Term Debuff Recast(s)" 30
   /call WriteToIni "${genSettings_Ini},Assists,Short Term Debuff Recast(s)" 5
 /if (${Debug}) /echo <== assist_MacroSettings -|
@@ -1390,8 +1391,8 @@ SUB assist_CharacterSettings
   } else {
     /call WriteToIni "${Character_Ini},Assist Settings,Melee Stick Point" Behind
   }
-	/call WriteToIni "${Character_Ini},Assist Settings,Melee Distance" MaxMelee
-	/call WriteToIni "${Character_Ini},Assist Settings,Ranged Distance" 100
+  /call WriteToIni "${Character_Ini},Assist Settings,Melee Distance" MaxMelee
+  /call WriteToIni "${Character_Ini},Assist Settings,Ranged Distance" 100
   /call WriteToIni "${Character_Ini},Assist Settings,Auto-Assist Engage Percent" 98
 	| If I'm a melee class, add Melee Abilities entries.
 	/if (${Select[${Me.Class.ShortName},BRD,BER,BST,MNK,PAL,RNG,ROG,SHD,WAR]}) {

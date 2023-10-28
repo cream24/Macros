@@ -102,27 +102,29 @@ SUB e3_Setup(modeSelect)
   | Import ini settings =====================================================================================================
 	/if (${Debug}) /echo Importing user settings...
 	| Debug
-	/if (!${modeSelect.Equal[Debug]}) /call iniToVarV "${advSettings_Ini},Debug,Debug Mode (On/Off)" Debug bool outer
+	/if (!${modeSelect.Equal[Debug]}) /call iniToVarV "${advSettings_Ini},Debug,Debug Mode (On/Off)" Debug bool
 	| Chat Channel
 	/declare ChatToggle string outer /bc
-	/if (${${IniMode}[${genSettings_Ini},General,Macro Output Channel].Length}) /call iniToVarV "${genSettings_Ini},General,Macro Output Channel" ChatToggle string outer
+	/if (${${IniMode}[${genSettings_Ini},General,Macro Output Channel].Length}) /call iniToVarV "${genSettings_Ini},General,Macro Output Channel" ChatToggle string
 
-	/call IniToArrayV  "${advSettings_Ini},Included Setups,Include#" macroSetups
-	/call IniToArrayV "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function#" mainLoop_Array
+	/call IniToArrayV  "${advSettings_Ini},Included Setups,Include" macroSetups
+	/call IniToArrayV "${advSettings_Ini},${Me.Class.ShortName} Functions,${Me.Class.ShortName} Function" mainLoop_Array
 	
   | Setup Includes ==========================================================================================================
   /declare i int local
 	/for i 1 to ${macroSetups.Size}
      |/g ${macroSetups[${i}]} ${Time} Start
+		/if (${Debug}) /mqpause
 		/if (${macroSetups[${i}].Equal[class]}) /varset macroSetups[${i}] ${Me.Class.ShortName}
 		/if (${Bool[${macroSetups[${i}]}]}) /call ${macroSetups[${i}]}_Setup
      |/g ${macroSetups[${i}]} ${Time} eND
+
 	/next i
   |Set Turbo per class based on configuration
-  /if (${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}].Length}) /declare classTurbo int outer ${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}]}
-  /squelch /turbo ${classTurbo}
+  |/if (${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}].Length}) /declare classTurbo int outer ${${IniMode}[${advSettings_Ini},Turbo,${Me.Class.ShortName}]}
+  |/squelch /turbo ${classTurbo}
 
-	/echo e3 loaded - Turbo ${classTurbo}
+	/echo e3 loaded - ${Time}
 	
 	/if (${Debug}) {
 		/echo
@@ -155,25 +157,25 @@ SUB EVENT_make_MacroSettingsIni
 	/echo Creating macro settings files...
 	/call WriteToIni "${genSettings_Ini},General,Macro Output Channel" /bc
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Mode (On/Off)" Off
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#1" background 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#2" basics 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#3" casting 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#4" begForBuffs 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#5" buffCheck 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#6" cures 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#7" pet 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#8" heal 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#9" healChain 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#10" assist 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#11" class 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#12" corpseSummon 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#13" loot 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#14" sell 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#15" smoothMoves 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#16" Wait4Rez 1
-	/call WriteToIni "${advSettings_Ini},Included Setups,Include#17" buy 1
-  /call WriteToIni "${advSettings_Ini},Included Setups,Include#18" alerts 1
-  /call WriteToIni "${advSettings_Ini},Included Setups,Include#19" tanking 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" background 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" basics 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" casting 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" begForBuffs 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" buffCheck 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" cures 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" pet 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" heal 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" healChain 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" assist 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" class 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" corpseSummon 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" loot 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" sell 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" smoothMoves 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" Wait4Rez 1
+	/call WriteToIni "${advSettings_Ini},Included Setups,Include" buy 1
+  /call WriteToIni "${advSettings_Ini},Included Setups,Include" alerts 1
+  /call WriteToIni "${advSettings_Ini},Included Setups,Include" tanking 1
 	/delay 15
 	/echo Creating turbo settings...
 	/call WriteToIni "${advSettings_Ini},Turbo,BRD" 30 0
@@ -194,7 +196,7 @@ SUB EVENT_make_MacroSettingsIni
 	/call WriteToIni "${advSettings_Ini},Turbo,WIZ" 30 0
 	/delay 15
 	| Import the array of Included Setups
-	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include" macroSetups
 	| Call each setup
 	/declare i int local
 	/for i 1 to ${macroSetups.Size}
@@ -230,7 +232,7 @@ SUB EVENT_make_MacroSettingsIni
 SUB EVENT_make_CharacterSettingsIni
 /if (${Debug}) /echo |- make_CharacterSettingsIni ==>
 	/echo Creating ${Me.CleanName}'${If[${Me.CleanName.Right[1].Equal[s]},,s]} settings file...
-	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include" macroSetups
 	/declare i int local
 	/for i 1 to ${macroSetups.Size}
 		/if (${macroSetups[${i}].Equal[class]}) /varset macroSetups[${i}] ${Me.Class.ShortName}
@@ -261,7 +263,7 @@ SUB EVENT_updateAliases
 	/squelch /alias /debugon /varset Debug 1
 	/squelch /alias /debugoff /varset Debug 0
 
-	/call IniToArrayV "${advSettings_Ini},Included Setups,Include#" macroSetups
+	/call IniToArrayV "${advSettings_Ini},Included Setups,Include" macroSetups
 	
 	/declare i int local
 	
@@ -333,13 +335,13 @@ SUB check_Plugins
 		/if (${NetBots}) {
 			/squelch /netbots on grab=on send=on
 		}
-	|Check MQ2NetAdvPath.
-		/if (!${Plugin[MQ2NetAdvPath].Name.Length}) {
-			/echo Plugin MQ2NetAdvPath is not loaded, attempting to resolve...
-			/plugin MQ2NetAdvPath
-			/delay 3s ${NetAdvPath}
-			/if (!${NetAdvPath}) {
-				/echo ***WARNING*** Could not load MQ2NetAdvPath. Please ensure you're using a copy of MQ2 which was compiled with the MQ2NetAdvPath plugin and try again.
+	|Check MQ2AdvPath.
+		/if (!${Plugin[MQ2AdvPath].Name.Length}) {
+			/echo Plugin MQ2AdvPath is not loaded, attempting to resolve...
+			/plugin MQ2AdvPath
+			/delay 3s ${AdvPath}
+			/if (!${AdvPath}) {
+				/echo ***WARNING*** Could not load MQ2AdvPath. Please ensure you're using a copy of MQ2 which was compiled with the MQ2AdvPath plugin and try again.
 			}
 		}
 	}
@@ -350,7 +352,7 @@ SUB check_Plugins
 		/delay 3s !${Select[${Stick.Status},NULL]}
 		/if (${Select[${Stick.Status},NULL]}) {
 			/echo ***WARNING*** Could not load MQ2MoveUtils! Macro functionality may be limited.
-			/if (!${NetAdvPath}) {
+			/if (!${AdvPath}) {
 				/echo Follow and Assist stick DISABLED.
 			} else {
 				/echo Assist and NPC stick DISABLED.
@@ -384,15 +386,6 @@ SUB check_Plugins
 	/if (!${Plugin[mq2itemdisplay].Name.Length}) /plugin MQ2ItemDisplay
 	|Check MQ2LinkDB
 	/if (!${Plugin[MQ2LinkDB].Name.Length}) /plugin MQ2LinkDB
-  |Check MQ2ITurbo
-  /if (!${Plugin[mq2turbo].Name.Length}) {
-    /plugin MQ2Turbo
-    /delay 3s ${Plugin[MQ2Turbo].Name.Length}
-    /if (!${Plugin[MQ2Turbo].Name.Length}) {
-      /echo ***WARNING*** Could not load MQ2Turbo! Performance may be impacted.
-      /echo Using default turbo in e3.mac
-    }
-  }
 |Check MQ2HUD.
 |	/if (!${Plugin[mq2hud].Name.Length}) /plugin MQ2HUD
 /RETURN

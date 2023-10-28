@@ -101,8 +101,13 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 :wait_for_misc
   /if (${${ArrayName}[${ArrayIndex},${iTargetType}].Find[pet]}) {
     /if (!${Bool[${Me.Pet.ID}]} || ${Me.Pet.Distance} > ${${ArrayName}[${ArrayIndex},${iMyRange}]}) {
-      /call CreateTimer "nht${targetID}-${pendingCastID}" "${noHoldPetDelay}"
-      /echo SkipCast-PetRange ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+			/if (${Me.Feigning}) {
+				/call CreateTimer "nht${targetID}-${pendingCastID}" "50"
+				/echo SkipCast-PetFeigned ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+			} else {
+				/call CreateTimer "nht${targetID}-${pendingCastID}" "${noHoldPetDelay}"
+				/echo SkipCast-PetRange ${pendingCast} ${pendingCastID} ${Spawn[id ${targetID}].Name} ${targetID}
+			}
       /goto :skipCast
     }
   }
@@ -167,9 +172,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	} else {
 			|- Stop following for spell/item/aa with a cast time > 0 MyCastTime, unless im a bard
 		/if (${${ArrayName}[${ArrayIndex},${iMyCastTime}]} >0 && ${Me.Class.ShortName.NotEqual[BRD]}) {
-			/if (${Stick.Status.Equal[on]}) /squelch /stick pause
-			/if (${NetAdvPath.Following} && ${Following}) /squelch /netfollow off
-			/if (${MoveTo.Moving}) /moveto off
+			/call StopForAction
 			/delay 3 !${Me.Moving}
 		}
 		|- Equip an item that must be equipped to cast and is not currently equipped.  must use base inventory slots 24 through 31
@@ -323,7 +326,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 |- Check if the Spell/Item/AA is ready			    -|
 |------------------------------------------------|
 Sub check_Ready(ArrayName, int ArrayIndex)
-  /if (${Debug} || ${Debug_Casting}) /echo |- check_Ready =>
+  /if (${Debug} || ${Debug_Casting}) /echo |- check_Ready ${ArrayName} ${ArrayIndex} ${${ArrayName}[${ArrayIndex},${iCastName}]}=>
   /varset c_Ready FALSE
   | Memorize the spell if it is not memorized
   /if (${${ArrayName}[${ArrayIndex},${iCastType}].Equal[Spell]}) {
@@ -438,7 +441,7 @@ SUB casting_MacroSettings
 
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Sub casting_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Casting (On/Off)" Debug_Casting bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Casting (On/Off)" Debug_Casting bool
 /if (${Debug} || ${Debug_Casting}) /echo |- casting_Setup ==>
 	|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	| Configurable
@@ -463,8 +466,8 @@ Sub casting_Setup
   /declare c_SubToRun bool outer FALSE
 
 	/declare DefaultGem int outer 8
-	/call iniToVarV "${genSettings_Ini},Casting,Default Spell Gem" DefaultGem int outer
-  /call iniToVarV "${genSettings_Ini},Casting,Default Spell Set" Default_SpellSet string outer
+	/call iniToVarV "${genSettings_Ini},Casting,Default Spell Gem" DefaultGem int
+  /call iniToVarV "${genSettings_Ini},Casting,Default Spell Set" Default_SpellSet string
 
   /declare vetArray[9] string outer
   /declare iLesson    int outer 1

@@ -113,17 +113,30 @@ sub Event_Rez(line, ChatSender)
 	}
 /return
 |----------------------------------------------------------------------------|
-#EVENT AE_Rez "[MQ2] AE Rez"
+
+#EVENT AE_Rez "[MQ2] AERez"
+#EVENT AE_Rez "[#1#] AERez"
+#EVENT AE_Rez "<#1#> AERez"
+#EVENT AE_Rez "<#*#> AERez"
 #EVENT AE_Rez "#1# tells you, 'AERez'"
+#EVENT AE_Rez "#1# tells the group, 'AERez'"
+#EVENT AE_Rez "#1# tell your party, 'AERez'"
 SUB EVENT_AE_Rez(line, ChatSender)
+/varset Debug true
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_AE_Rez ==>
   /call defineRezSpell
   /call BuildCorpseList
 	/if (!${CorpseListSize}) {
 		/echo I couldn't find any corpses to resurrect...
 	} else {
-    /if (${NetAdvPath.Status}==1) /squelch /netfollow off
-    /if (${Stick.Active}) /squelch /stick off
+		/call StopForAction
+    |get all consents upfront
+    /if (${Raid.Members}) {
+      /rs Consent ${Me.CleanName}
+    } else {
+      /bc Consent ${Me.CleanName}
+    }
+    /delay 1s
 
     /declare numIterations int local 2
     /declare i int local
@@ -320,10 +333,10 @@ Sub CLR_Setup
   /declare CorpseListSize int outer 0
   /declare otherRezList string outer
   /declare corpseList string outer
-	/call iniToVarV "${Character_Ini},Cleric,Divine Arbitration (Pct)" DivineArb_Pct int outer
-	/call iniToVarV "${Character_Ini},Cleric,Celestial Regeneration (Pct)" celestialRegen_Pct int outer
-	/call iniToVarV "${Character_Ini},Cleric,Auto-Yaulp (On/Off)" AutoYaulp bool outer
-	/call iniToVarV "${Character_Ini},Cleric,Yaulp Spell" yaulpSpell string outer
+	/call iniToVarV "${Character_Ini},Cleric,Divine Arbitration (Pct)" DivineArb_Pct int
+	/call iniToVarV "${Character_Ini},Cleric,Celestial Regeneration (Pct)" celestialRegen_Pct int
+	/call iniToVarV "${Character_Ini},Cleric,Auto-Yaulp (On/Off)" AutoYaulp bool
+	/call iniToVarV "${Character_Ini},Cleric,Yaulp Spell" yaulpSpell string
 	/if (${AutoYaulp}) {
 		/if (!${Defined[yaulpSpell]} || !${yaulpSpell.Length} || !${Me.Book[${yaulpSpell.Arg[1,/]}]}) {
 			/echo ERROR! ${Character_Ini} > [Cleric] > Yaulp Spell is not correctly defined.  Please check this entry, and restart the macro.
@@ -343,16 +356,16 @@ Sub CLR_Setup
 |----------------------------------------------------------------------------|
 SUB CLR_MacroSettings
 /if (${Debug}) /echo |- CLR_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#1" "check_DivineArb" 1
-  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#2" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#3" "check_Yaulp" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#4" "check_celestialRegen" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#5" "check_healChain" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#6" "check_Heals" 1
-  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#7" "check_Cures" 1
-  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#8" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#9" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function#10" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_DivineArb" 1
+  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Yaulp" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_celestialRegen" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_healChain" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Heals" 1
+  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Cures" 1
+  /call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},CLR Functions,CLR Function" "check_Nukes" 1
 /if (${Debug}) /echo <== CLR_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

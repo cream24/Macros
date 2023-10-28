@@ -528,10 +528,10 @@ SUB destroyItems
 
 
 SUB sell_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Sell (On/Off)" Debug_Sell bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Sell (On/Off)" Debug_Sell bool
 /if (${Debug} || ${Debug_Sell}) /echo |- sell_Setup ==>
 
-	/call iniToVarV "${genSettings_Ini},Sell,Destroy Unsold Items(On/Off)" destroyUnsold bool outer
+	/call iniToVarV "${genSettings_Ini},Sell,Destroy Unsold Items(On/Off)" destroyUnsold bool 
 
 /if (${Debug} || ${Debug_Sell}) /echo <== sell_Setup -|
 /RETURN

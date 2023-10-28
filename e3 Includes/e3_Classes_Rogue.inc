@@ -47,14 +47,14 @@ sub AutoEvade
 |----------------------------------------------------------------------------|
 Sub ROG_Setup
 /if (${Debug}) /echo |- ROG_Setup ==>
-	/call iniToVarV "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool outer
-	/call iniToVarV "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool outer
-  /call iniToVarV "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int outer
-  /call iniToVarV "${Character_Ini},Rogue,PoisonPR" poisonPR string outer
-  /call iniToVarV "${Character_Ini},Rogue,PoisonFR" poisonFR string outer
-  /call iniToVarV "${Character_Ini},Rogue,PoisonCR" poisonCR string outer
+	/call iniToVarV "${Character_Ini},Rogue,Auto-Hide (On/Off)" AutoHide bool
+	/call iniToVarV "${Character_Ini},Rogue,Auto-Evade (On/Off)" AutoEvade bool
+  /call iniToVarV "${Character_Ini},Rogue,Evade PctAggro" evadePctAggro int
+  /call iniToVarV "${Character_Ini},Rogue,PoisonPR" poisonPR string
+  /call iniToVarV "${Character_Ini},Rogue,PoisonFR" poisonFR string
+  /call iniToVarV "${Character_Ini},Rogue,PoisonCR" poisonCR string
 	| Assassin Strikes
-	/call iniToVarV "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string outer
+	/call iniToVarV "${Character_Ini},Rogue,Sneak Attack Discipline" strikeDiscStr string
 	/if (${Defined[strikeDiscStr]}) {
 		/declare strikeDisc string outer ${strikeDiscStr.Arg[1,/]}
 		/declare strikeDiscEndCost  string outer ${Spell[${strikeDiscStr}].EnduranceCost}
@@ -72,8 +72,8 @@ Sub ROG_Setup
 |----------------------------------------------------------------------------|
 SUB ROG_MacroSettings
 	/if (${Debug}) /echo |- ROG_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function#2" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},ROG Functions,ROG Function" "check_Buffs" 1
 	/if (${Debug}) /echo <== ROG_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

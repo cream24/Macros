@@ -21,8 +21,9 @@ Sub MNK_Background_Events
 |----------------------------------------------------------------------------|
 SUB MNK_MacroSettings
 /if (${Debug}) /echo |- MNK_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},MNK Functions,MNK Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},MNK Functions,MNK Function#2" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},MNK Functions,MNK Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},MNK Functions,MNK Function" "check_Buffs" 1
+  /call WriteToIni "${advSettings_Ini},MNK Functions,MNK Function" "check_Debuffs" 1
 /if (${Debug}) /echo <== MNK_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

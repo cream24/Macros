@@ -1,48 +1,78 @@
 |----------------------------------------------------
-Sub IniToVarV(Ini_Key, VarToMake, VarType)
-  /if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+Sub IniToVarV(IniStringCSV, VarToMake, VarType)
+	/if (${Debug}) /echo IniToVarV: IniStringCSV ${IniStringCSV} ; VarToMake ${VarToMake} ; VarType ${VarType}
+	/if (${Defined[${VarToMake}]}) /deletevar ${VarToMake}
+
+	/declare iniFile string local ${IniStringCSV.Arg[1,,]}
+	/declare iniFileSection string local ${IniStringCSV.Arg[2,,]}
+	/declare iniFileSectionKey string local ${IniStringCSV.Arg[3,,]}
+	/if (!${Ini.File[${iniFile}].Section[${iniFileSection}].Exists} || !${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].Exists}) {
+		/if (${Debug}) /echo IniToVarV Warning: ${VarType} ${VarToMake} - ${iniFile}, sec:${iniFileSection}, key: ${iniFileSectionKey} does not exist ${Ini.File[${iniFile}].Section[${iniFileSection}].Exists} ; ${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].Exists}
+		/return
+	}	
   /if (${VarType.Equal[bool]}) {
-    /declare ${VarToMake} bool outer ${If[${Select[${IniExt[${Ini_Key}]},TRUE,ON,YES,1]},TRUE,FALSE]}
+    /declare ${VarToMake} bool outer ${If[${Select[${Ini[${IniStringCSV}]},TRUE,ON,YES,1]},TRUE,FALSE]}
     /return ${${VarToMake}}
   } else {
-    /if (${IniExt[${Ini_Key}].Length}) {
-      /declare ${VarToMake} ${VarType} outer ${IniExt[${Ini_Key}]}
+    /if (${Ini[${IniStringCSV}].Length}) {
+      /declare ${VarToMake} ${VarType} outer ${Ini[${IniStringCSV}]}
       /return ${${VarToMake}}
     }
   }
 /return
 
 |-----------------------
-Sub IniToArrayV(IniKey, ArrayName)
-  /declare i int local 1
-  /declare j int local 1
-  /declare array_size int local 0
-  /declare ArrayScope string local outer
-  /if (${IniKey.Right[1].Equal[#]} && ${IniExt[${IniKey}1].Length}) {
-    /call IniToArray_Deprecated "${IniKey}" "${ArrayName}"
-    /return
-  }
-  /if (${IniKey.Right[1].Equal[#]}) /varset IniKey ${IniKey.Left[-1]}
-  |/echo IniKey = ${IniKey} count = ${IniExt[${IniKey}].Count}
+Sub IniToArrayV(IniStringCSV, ArrayName)
+	/if (${Debug}) /echo IniToArrayV: ${IniStringCSV} ; ArrayName: ${ArrayName}
+	/declare i int local 1
+	/declare ArrayScope string local outer
+	/declare totalKeys int local 0
+	/declare arraySize int local 0
+	|/if (${IniStringCSV.Right[1].Equal[#]}) /varset IniStringCSV ${IniStringCSV.Left[-1]} |strip trailing #, should no longer be needed
+	/declare iniFile string local ${IniStringCSV.Arg[1,,]}
+	/declare iniFileSection string local ${IniStringCSV.Arg[2,,]}
+	/declare iniFileSectionKey string local ${IniStringCSV.Arg[3,,]}
+
+	|/if (${Debug}) /echo args: ${IniStringCSV.Arg[1,,]} ; ${IniStringCSV.Arg[2,,,]} ; ${IniStringCSV.Arg[3,,]} ; ${Bool[${IniStringCSV.Arg[4,,]}]}
+	|/if (${Debug}) /echo args: ${iniFile} ; ${iniFileSection} ; ${iniFileSectionKey} 
+
   /if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
-  /if (${IniExt[${IniKey}].Index[1].Length}) {
-    /for i 1 to ${IniExt[${IniKey}].Count}
-    /if (${IniExt[${IniKey}].Index[${i}].Length}) {
-      /varcalc array_size ${array_size}+1
-    }
+
+	/if (!${Ini.File[${iniFile}].Section[${iniFileSection}].Exists} || !${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].Exists}) {
+		/if (${Debug}) /echo IniToArrayV Warning: ${ArrayName} - ${iniFile}, sec:${iniFileSection}, key: ${iniFileSectionKey} does not exist ${Ini.File[${iniFile}].Section[${iniFileSection}].Exists} ; ${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].Exists}
+		/return
+	}
+	|/echo ${Ini.File[e3 Macro Inis\Advanced Settings.ini].Section[${iniFileSection}]
+	|/echo ${Ini.File[e3 Macro Inis\Advanced Settings.ini].Section[${iniFileSection}]].Key[${iniFileSectionKey}].Exists}
+
+  /varset totalKeys ${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].Count}
+  |/if (${Debug}) /echo IniToArrayV total keys: ${totalKeys}
+      
+  /if (${totalKeys}>0) {
+    /for i 1 to ${totalKeys}
+			|/if (${Debug}) /echo array[${i}] ${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].ValueAtIndex[${i}]} len ${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].ValueAtIndex[${i}].Length} bool ${Bool[${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].ValueAtIndex[${i}].Length}]}
+    	/if (${Bool[${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].ValueAtIndex[${i}].Length}]}) /varcalc arraySize ${arraySize}+1
     /next i
-    |/declare ${ArrayName}[${IniExt[${IniKey}].Count}] string ${ArrayScope}
-    /declare ${ArrayName}[${array_size}] string outer
-    /if (${IniExt[${IniKey}].Count}) {
-      /for i 1 to ${IniExt[${IniKey}].Count}
-      |/echo ${ArrayName}[${i}] ${IniExt[${IniKey}].Index[${i}]} Length: ${IniExt[${IniKey}].Index[${i}].Length}
-      /if (${IniExt[${IniKey}].Index[${i}].Length}) {
-        /varset ${ArrayName}[${j}] ${IniExt[${IniKey}].Index[${i}]}
-        /varcalc j ${j}+1
-      }
-      /next i
-    }
+
+		/if (${arraySize} > 0) {
+			/if (${Debug}) /echo IniToArrayV Creating non-empty array: ${ArrayName} with size: ${arraySize}
+			/declare ${ArrayName}[${arraySize}] string outer
+			/for i 1 to ${arraySize}
+				/varset ${ArrayName}[${i}] ${Ini.File[${iniFile}].Section[${iniFileSection}].Key[${iniFileSectionKey}].ValueAtIndex[${i}]}
+			/next i
+
+			|/if (${Debug}) {
+			|	/for i 1 to ${${ArrayName}.Size}
+			|		/echo ${${ArrayName}[${i}]}
+			|	/next i
+			|}
+		}
+	|} else {
+	|	/if (${Debug}) /echo IniToArrayV Creating empty array: ${ArrayName}
+	|	/if (${Defined[${ArrayName}]}) /deletevar ${ArrayName}
+	|	/declare ${ArrayName}[0] string outer
   }
+	|/mqpause
 /return
 
 |-----------------------
@@ -313,6 +343,9 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
     }
   /next i
 
+	|/echo ArrayName ${ArrayName} size ${${ArrayName}.Size}
+	|/mqpause
+
 	/for i 1 to ${${ArrayName}.Size}
     | get SpellName
 		/varset ${NewArrayName}[${i},${iCastName}] ${${ArrayName}[${i}].Arg[1,/]}
@@ -438,19 +471,21 @@ SUB BuildSpellArray(ArrayName, NewArrayName)
 				/varset	${NewArrayName}[${i},${iMyRange}] ${Me.AltAbility[${${NewArrayName}[${i},${iCastName}]}].Spell.AERange}
 			} else {
 				/varset	${NewArrayName}[${i},${iMyRange}] ${Me.AltAbility[${${NewArrayName}[${i},${iCastName}]}].Spell.MyRange}
-			}		
-		} else /if (${${NewArrayName}[${i},${iCastType}].Equal[Spell]}) {
-			/if (${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange} > 0) {
+			}
+		|ReviewRekka} else /if (${${NewArrayName}[${i},${iCastType}].Equal[Spell]} && ${Spell[${${NewArrayName}[${i},${iCastName}]}].MyRange} == 0) {
+		} else /if (${${NewArrayName}[${i},${iCastType}].Equal[Spell]}) {			
+			/if (${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange} > 0 ) {
 				/varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange}
 			} else {
 				/varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].MyRange}
 			}
-    } else /if (${${NewArrayName}[${i},${iCastType}].Equal[Spell]}) {
-      /if (${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange} > 0) {
-        /varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange}
-      } else {
-        /varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].MyRange}
-      }
+		|this looks like a dupe
+    |} else /if (${${NewArrayName}[${i},${iCastType}].Equal[Spell]}) {
+    |  /if (${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange} > 0) {
+    |    /varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange}
+    |  } else {
+    |    /varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].MyRange}
+    |  }
     } else /if (${${NewArrayName}[${i},${iCastType}].Equal[Disc]}) {
       /if (${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange} > 0) {
         /varset	${NewArrayName}[${i},${iMyRange}] ${Spell[${${NewArrayName}[${i},${iCastName}]}].AERange}
@@ -894,7 +929,7 @@ SUB MoveToLoc(yLoc,xLoc,timeToWait,arrivalDist)
     /return
   } else /if (${moveTimer}) {
   	/goto :retryMove
-	} else /moveto off
+	} else /call StopForAction
 /return
 |--------------------------------------------------------------------------|
 |- Type Stuff
@@ -973,7 +1008,8 @@ Sub check_selectedBots(selectedBots, ChatSender)
 /return ${botSelected}
 |--------------------------------------------------------------------------|
 SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
-  |/gu CEA ChatSender ${ChatSender} | el ${eventLine} | uz ${UZR} | ad ${ArgData}
+/varset Debug true
+  /if (${Debug}) /echo ChatSender ${ChatSender} | el ${eventLine} | uz ${UZR} | ad ${ArgData}
   /varset c_eventArg FALSE
   /varset c_eventArgData
   /varset c_eventArgChatSender
@@ -988,8 +1024,8 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
   /if (${ChatSender.Right[5].Equal[(msg)]}) /varset ChatSender ${ChatSender.Left[-5]}
 
   /if (${UZR.Find[U]} && !${NetBots[${ChatSender}].ID})     /varset userValidated FALSE
-  /if (${UZR.Find[Z]} && !${NetBots[${ChatSender}].InZone}) /varset inZone FALSE
-  /if (${UZR.Find[R]} && (${Spawn[pc =${ChatSender}].Distance}>${LeashLength} || ${Spawn[pc =${ChatSender}].DistanceZ}>150)) /varset inRange FALSE
+  /if (${UZR.Find[Z]} && (!${Bool[${NetBots[${ChatSender}].ID}]} || !${NetBots[${ChatSender}].InZone} || (${NetBots[${ChatSender}].Instance} != ${NetBots[${Me}].Instance}))) /varset inZone FALSE
+  /if (${UZR.Find[R]} && (!${Bool[${NetBots[${ChatSender}].ID}]} || ${Spawn[pc =${ChatSender}].Distance}>${LeashLength} || ${Spawn[pc =${ChatSender}].DistanceZ}>150)) /varset inRange FALSE
   |/echo ${eventLine.Right[1].Equal[']} ${eventLine} ${eventLine.Left[-1]}
   /if (${eventLine.Right[1].Equal[']}) /varset eventLine ${eventLine.Left[-1]}
   /if (${eventLine.Find[/only|]}) {
@@ -1010,7 +1046,12 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
     /if (${check_selectedBots[${c_argueString},${ChatSender}]}) /varset includeBot TRUE
   }
   |/echo ${userValidated} && ${includeBot} && ${inRange} && ${inZone}
-  /if (${userValidated} && ${includeBot} && ${inRange} && ${inZone}) /varset c_eventArg TRUE
+  /if (${userValidated} && ${includeBot} && ${inRange} && ${inZone}) {
+		/varset c_eventArg TRUE
+	} else {
+		/if (${Debug}) /echo ${userValidated} && ${includeBot} && ${inRange} && ${inZone}
+		/if (${Debug}) /echo ${UZR.Find[Z]} , ${NetBots[${ChatSender}].ID} : !${Bool[${NetBots[${ChatSender}].ID}]} , !${NetBots[${ChatSender}].InZone} , (${NetBots[${ChatSender}].Instance} != ${NetBots[${Me}].Instance}) , !${Bool[${Spawn[pc =${ChatSender}].Distance}]}
+	}
   /varset c_eventArgChatSender ${ChatSender}
   /if (${Bool[${ArgData}]}) {
     /if (${ArgData.Find[/]}) {
@@ -1019,7 +1060,8 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
       /varset c_eventArgData ${ArgData}
     }
   }
-  |/echo cs ${ChatSender} ad ${ArgData} find ${ArgData.Find[/]} erd ${c_eventArgData}
+  /if (${Debug}) /echo cs ${ChatSender} ret ${c_eventArg} ad ${ArgData} find ${ArgData.Find[/]} erd ${c_eventArgData} , U ${userValidated} Z ${inZone} R ${inRange}
+/varset Debug false	
 /RETURN ${c_eventArg}
 
 |----------------------------------------------------------------------------|

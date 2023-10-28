@@ -2,7 +2,7 @@
 | Berserker Functions
 |----------------------------------------------------------------------------|
 SUB BER_Setup
-  /call IniToArrayV "${Character_Ini},${Me.Class},Axe Ability#" axeAbility
+  /call IniToArrayV "${Character_Ini},${Me.Class},Axe Ability" axeAbility
   /if (${Defined[axeAbility]} && ${axeAbility.Size}) /call BuildSpellArray "axeAbility"	"axeAbility2D"
 /RETURN
 |----------------------------------------------------------------------------|
@@ -33,8 +33,8 @@ SUB CheckAxes
 |----------------------------------------------------------------------------|
 SUB BER_MacroSettings
 /if (${Debug}) /echo |- BER_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},BER Functions,BER Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},BER Functions,BER Function#2" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},BER Functions,BER Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},BER Functions,BER Function" "check_Buffs" 1
 /if (${Debug}) /echo <== BER_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

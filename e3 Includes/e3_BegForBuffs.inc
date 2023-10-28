@@ -290,11 +290,11 @@ SUB EVENT_createSpellAlias(line, ChatSender, newAlias, spellName)
 
 |------------------------------------------------------------------------|
 SUB begForBuffs_Setup
-  /call iniToVarV "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool outer
+  /call iniToVarV "${advSettings_Ini},Debug,Debug BegForBuffs (On/Off)" Debug_BegForBuffs bool
   /if (${Debug} || ${Debug_BegForBuffs}) /echo |- setup_BegForBuffs ==>
-  /call iniToVarV "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool outer
-  /call iniToVarV "${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])" restrictedPC string outer
-  /call iniToVarV "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])" allowedPC string outer
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Allow Buff Requests (On/Off)" allow_BuffRequests bool
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Restricted PCs (When Requests [On])" restrictedPC string
+  /call iniToVarV "${genSettings_Ini},Buff Requests,Allowed PCs (When Requests [Off])" allowedPC string
   /if (!${Defined[restrictedPC]}) /declare restrictedPC string outer
   /if (!${Defined[allowedPC]}) /declare allowedPC string outer
 	|Add SpellAlias File Path.

@@ -80,63 +80,84 @@ SUB EVENT_lootNow(line, ChatSender)
 SUB Wait4Rez(functionCall)
 /if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez${If[${Defined[functionCall]}, ${functionCall},]} ==>
 	/declare i int local 0
+	/declare lootTotal int local 0
 	/if (${functionCall.Equal[LOOT_NOW]}) /goto :Looting
 	/echo Awaiting rez: auto-accepting, and looting my corpse...
 	|Consent NetBots.
-	/for i 1 to ${NetBots.Counts}
-	  /delay 2
-		/consent ${NetBots.Client[${i}]}
-	/next i
-	|Load Spells.
+	| no longer do this as there is a consent delay
+	|/for i 1 to ${NetBots.Counts}
+	|  /delay 2
+	|	/consent ${NetBots.Client[${i}]}
+	|/next i
+
+|Load Spells.
 	/if (${Me.Class.CanCast}) /call check_Gems
-  |Wait for Rez------------------------------------------------------|
+|Wait for Rez------------------------------------------------------|
 	:rezmeffs
-	/if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Waiting to accept rez.
-	/call Background_Events
-	/delay 10 ${Window[ConfirmationDialogBox].Open}
-	/if (!${Window[ConfirmationDialogBox].Open}) /goto :rezmeffs
-	|Click yes to rez box.
-	/nomodkey /notify ConfirmationDialogBox Yes_Button leftmouseup
-	|Wait for zone-----------------------------------------------------|
+		/if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Waiting to accept rez.
+		/call Background_Events
+		/delay 10 ${Window[ConfirmationDialogBox].Open}
+		/if (!${Window[ConfirmationDialogBox].Open}) /goto :rezmeffs
+		|Click yes to rez box.
+		/nomodkey /notify ConfirmationDialogBox Yes_Button leftmouseup
+|Wait for zone-----------------------------------------------------|
 	:zoneffs
-	/if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Waiting to zone.
-	/delay 300 ${Spawn[${Me}'s].ID}
-	/if (!${Spawn[${Me}'s].ID}) /goto :zoneffs
-	/delay 30
-  |Loot corpse-------------------------------------------------------|
-	/docommand ${ChatToggle} Looting...
-	:Looting
-	/if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Attempting to loot my corpse.
-	
-	/if (!${Defined[lootTotal]}) /declare lootTotal int local 0
-	/call TrueTarget ${Spawn[${Me}'s].ID}
-	/if (${Target.Distance}<100 && ${Target.CleanName.Equal[${Me}'s corpse]}) {
-	|Pull the corpse.
-		/if (${Target.Distance}>15) /corpse
-		/delay 20 ${Target.Distance}<15
-		/loot
-		/delay 20 ${Me.State.Equal[BIND]}
-		/if (${Me.State.NotEqual[BIND]}) /goto :Looting
-	|Wait for all the items on your corpse to appear in your loot window.
-		/varset lootTotal -1
-		/varset i 0
-		:autoxplootlag
-		/varcalc i ${i}+1
-		/if (${lootTotal}!=${Corpse.Items}) {
-			/varset lootTotal ${Corpse.Items}
-			/delay 5
-			/if (${i}<50) /goto :autoxplootlag
+		/if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Waiting to zone.
+		/delay 300 ${Spawn[${Me}'s].ID}
+		/if (!${Spawn[${Me}'s].ID}) /goto :zoneffs
+		/delay 30
+|Loot corpse-------------------------------------------------------|
+		/docommand ${ChatToggle} Looting...
+		:Looting
+		/if (${Debug} || ${Debug_Wait4Rez}) /echo |- Wait4Rez -| Attempting to loot my corpse.
+		
+		|If I died but got a DoN token reward, which is in pack1, and pack10 is empty, and I have nothing on cursor
+		|Move Norrath's Keepers Token(57208) or Dark Reign Token(57209) to pack10 so bags loot in correct order
+		/if (${Select[${Me.Inventory[pack1].ID},57208,57209]} && !${Bool[${Me.Inventory[pack10].ID}]} && !${Cursor.ID}) {
+			/itemnotify pack1 leftmouseup
+			/delay 2s ${Cursor.ID}
+			/if (${Select[${Cursor.ID},57208,57209]}) /itemnotify pack10 leftmouseup
+			/delay 2s !${Cursor.ID}
 		}
-	|Loot All Items.
-		/notify LootWnd LootAllButton leftmouseup
-		/delay 30s !${Window[LootWnd].Open}
-	|Check you don't still have a corpse.
-		/if (!${Me.State.Equal[BIND]}) {
-			/delay 2s !${Spawn[${Me}'s].ID}
-			/if (${Spawn[${Me}'s].ID}) /goto :Looting
+
+		/call TrueTarget ${Spawn[${Me}'s].ID}
+		/if (${Target.Distance}<100 && ${Target.CleanName.Equal[${Me}'s corpse]}) {
+		|Pull the corpse.
+			/if (${Target.Distance}>15) /corpse
+			/delay 20 ${Target.Distance}<15
+			/loot
+			/delay 20 ${Me.State.Equal[BIND]}
+			/if (${Me.State.NotEqual[BIND]}) /goto :Looting
+		|Wait for all the items on your corpse to appear in your loot window.
+			/varset lootTotal -1
+			/varset i 0
+			:autoxplootlag
+			/varcalc i ${i}+1
+			/if (${lootTotal}!=${Corpse.Items}) {
+				/varset lootTotal ${Corpse.Items}
+				/delay 5
+				/if (${i}<50) /goto :autoxplootlag
+			}
+		|Loot All Items.
+			/notify LootWnd LootAllButton leftmouseup
+			/delay 30s !${Window[LootWnd].Open}
+			|if i havent finished looting after 30s, check if my cursor is a container that is blocked by a DoN token in pack10
+			/if (${Select[${Me.Inventory[pack10].ID},57208,57209]} && ${Bool[${Cursor.Container}]}) {
+				/itemnotify pack10 leftmouseup
+				/delay 2s ${Select[${Cursor.ID},57208,57209]}
+				/autoinv
+				/delay 2s !${Cursor.ID}
+			}		
+
+		|Check you don't still have a corpse.
+			/if (!${Me.State.Equal[BIND]}) {
+				/delay 2s !${Spawn[${Me}'s].ID}
+				/if (${Spawn[${Me}'s].ID}) {
+						/goto :Looting
+				}
+			}
+			/docommand ${ChatToggle} Ready to die again!
 		}
-		/docommand ${ChatToggle} Ready to die again!
-	}
 	/doevents flush
 	/if (${buffAfterRez} && ${NetBots[${NetBots.Client[1]}].CombatState}>=3) /bc buff me
 /RETURN
@@ -145,10 +166,10 @@ SUB Wait4Rez(functionCall)
 |- Declares variables and settings used in Wait4Rez functions.	-|
 |----------------------------------------------------------------|
 SUB Wait4Rez_Setup
-	/call iniToVarV "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool outer
-	/call iniToVarV "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" use_Wait4Rez bool outer
-	/call iniToVarV "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" Wait4RezAlert int outer
-	/call iniToVarV "${genSettings_Ini},Wait4Rez,Request Buffs After Rez (On/Off)" buffAfterRez bool outer
+	/call iniToVarV "${advSettings_Ini},Debug,Debug Wait4Rez (On/Off)" Debug_Wait4Rez bool
+	/call iniToVarV "${genSettings_Ini},Wait4Rez,Wait4Rez (On/Off)" use_Wait4Rez bool
+	/call iniToVarV "${genSettings_Ini},Wait4Rez,Wait4Rez Alert (Beeps)" Wait4RezAlert int
+	/call iniToVarV "${genSettings_Ini},Wait4Rez,Request Buffs After Rez (On/Off)" buffAfterRez bool
 /RETURN
 
 SUB Wait4Rez_MacroSettings

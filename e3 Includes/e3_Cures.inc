@@ -143,7 +143,7 @@ sub event_RadiantCure(string line, string ChatSender)
 Sub cures_Setup
   /if (${Bool[${Ini[${Character_Ini},Cures]}]}) {
     /declare autoRCure bool outer FALSE
-    /if (${Ini[${Character_Ini},Cures,AutoRadiant (On/Off)].Length}) /call IniToVarV "${Character_Ini},Cures,AutoRadiant (On/Off)" autoRCure bool outer
+    /if (${Ini[${Character_Ini},Cures,AutoRadiant (On/Off)].Length}) /call IniToVarV "${Character_Ini},Cures,AutoRadiant (On/Off)" autoRCure bool
 	  /declare doCures       bool outer FALSE
 	  /declare doCureAll     bool outer FALSE
     /declare doRadiantCure bool outer FALSE
@@ -158,9 +158,9 @@ Sub cures_Setup
 Sub cure_spellArrays
   /declare i int local
   /declare removeIndexZone string local
-  /call IniToArrayV "${Character_Ini},Cures,RadiantCure#"	rCureArray
-  /call IniToArrayV "${Character_Ini},Cures,Cure#"        cureTargets
-  /call IniToArrayV "${Character_Ini},Cures,CureAll#"     cureAllTargets
+  /call IniToArrayV "${Character_Ini},Cures,RadiantCure"	rCureArray
+  /call IniToArrayV "${Character_Ini},Cures,Cure"        cureTargets
+  /call IniToArrayV "${Character_Ini},Cures,CureAll"     cureAllTargets
 
   /if (${Defined[cureTargets]}) {
     /varset removeIndexZone

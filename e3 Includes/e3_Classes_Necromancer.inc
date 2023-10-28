@@ -81,11 +81,11 @@ sub Event_AE_DMF(string line)
 |----------------------------------------------------------------------------|
 Sub NEC_Setup
 /if (${Debug}) /echo |- NEC_Setup ==>
-	/call IniToArrayV "${Character_Ini},${Me.Class},Lich Spell" lichSpell string outer
-	/call IniToArrayV "${Character_Ini},${Me.Class},LifeTap#" lifeTaps
-  /call IniToArrayV "${Character_Ini},${Me.Class},Mana Dump#" manaDump_Spells
-  /call IniToArrayV "${Character_Ini},${Me.Class},Who to Mana Dump#" whoto_manaDump
-  /call iniToVarV "${Character_Ini},${Me.Class},Mana Dump (On/Off)" manaDump bool outer
+	/call IniToArrayV "${Character_Ini},${Me.Class},Lich Spell" lichSpell
+	/call IniToArrayV "${Character_Ini},${Me.Class},LifeTap" lifeTaps
+  /call IniToArrayV "${Character_Ini},${Me.Class},Mana Dump" manaDump_Spells
+  /call IniToArrayV "${Character_Ini},${Me.Class},Who to Mana Dump" whoto_manaDump
+  /call iniToVarV "${Character_Ini},${Me.Class},Mana Dump (On/Off)" manaDump bool
 
   /if (${Defined[lichSpell]})       /call BuildSpellArray "lichSpell"	"lichSpell2D"
   /if (${Defined[lifeTaps]})        /call BuildSpellArray "lifeTaps"	"lifeTaps2D"
@@ -96,16 +96,16 @@ Sub NEC_Setup
 |----------------------------------------------------------------------------|
 SUB NEC_MacroSettings
 /if (${Debug}) /echo |- NEC_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#2" "check_Lich" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#3" "check_manaDump" 1
-  /call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#4" "check_Cures" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#5" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#6" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#7" "check_lifeTap" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#8" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#9" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function#10" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Lich" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_manaDump" 1
+  /call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Cures" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_lifeTap" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},NEC Functions,NEC Function" "check_Pets" 1
 /if (${Debug}) /echo <== NEC_MacroSettings -|
 /return
 |----------------------------------------------------------------------------|

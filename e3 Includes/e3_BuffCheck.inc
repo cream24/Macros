@@ -378,16 +378,16 @@ SUB EVENT_toggleCombatBuffs(line, ChatSender, buffSetting)
 
 |----------------------------------------------------|
 Sub buffCheck_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug BuffCheck (On/Off)" Debug_BuffCheck bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug BuffCheck (On/Off)" Debug_BuffCheck bool
 /if (${Debug} || ${Debug_BuffCheck}) /echo |- buffCheck_Setup ==>
 	/declare BuffCheck 				    bool outer TRUE
 	/declare BuffCombatCheck		  bool outer FALSE
 	/declare min_BuffCheckHealth 	int outer 80
 	/declare buffRecastTime			  int outer 60
-  /call iniToVarV "${Character_Ini},Buffs,Proc Buff Class"  procBuffClass string outer
-  /call iniToVarV "${Character_Ini},Buffs,Proc Buff (On/Off)"	procBuff bool outer
+  /call iniToVarV "${Character_Ini},Buffs,Proc Buff Class"  procBuffClass string
+  /call iniToVarV "${Character_Ini},Buffs,Proc Buff (On/Off)"	procBuff bool
 
-  /call iniToVarV "${Character_Ini},Buffs,Cast Aura Combat (On/Off)"	auraCombat bool outer
+  /call iniToVarV "${Character_Ini},Buffs,Cast Aura Combat (On/Off)"	auraCombat bool
 	/declare auraSpell string outer
 
 |--  doability
@@ -416,15 +416,15 @@ Sub buffCheck_Setup
 /return
 
 SUB buff_SpellArrays
-  /call IniToArrayV "${Character_Ini},Buffs,Instant Buff#" 	InstantBuffs
-  /call IniToArrayV "${Character_Ini},Buffs,Self Buff#"			SelfBuffs
-  /call IniToArrayV "${Character_Ini},Buffs,Group Buff#"		GroupBuffs
-  /call IniToArrayV "${Character_Ini},Buffs,Bot Buff#"			BotBuffs
-  /call IniToArrayV "${Character_Ini},Buffs,Combat Buff#"		CombatBuffs
-  /call IniToArrayV "${Character_Ini},Buffs,Proc Buff#"		  ProcBuffs
+  /call IniToArrayV "${Character_Ini},Buffs,Instant Buff" 	InstantBuffs
+  /call IniToArrayV "${Character_Ini},Buffs,Self Buff"			SelfBuffs
+  /call IniToArrayV "${Character_Ini},Buffs,Group Buff"		GroupBuffs
+  /call IniToArrayV "${Character_Ini},Buffs,Bot Buff"			BotBuffs
+  /call IniToArrayV "${Character_Ini},Buffs,Combat Buff"		CombatBuffs
+  /call IniToArrayV "${Character_Ini},Buffs,Proc Buff"		  ProcBuffs
 
-  /call IniToArrayV "${Character_Ini},Buffs,Group Buff L1#"		GroupBuffsL1
-  /call IniToArrayV "${Character_Ini},Buffs,Group Buff L47#"		GroupBuffsL47
+  /call IniToArrayV "${Character_Ini},Buffs,Group Buff L1"		GroupBuffsL1
+  /call IniToArrayV "${Character_Ini},Buffs,Group Buff L47"		GroupBuffsL47
 
   /if (${Defined[InstantBuffs]}) /call BuildSpellArray "InstantBuffs"	"InstantBuffs2D"
   /if (${Defined[SelfBuffs]})    /call BuildSpellArray "SelfBuffs"	  "SelfBuffs2D"

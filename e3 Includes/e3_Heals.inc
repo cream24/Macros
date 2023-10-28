@@ -536,7 +536,7 @@ SUB groupHeals
 |- Imports and validates ini settings from Character Ini,[Heals].	-|
 |--------------------------------------------------------------------|
 SUB heal_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Heals (On/Off)" Debug_Heals bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Heals (On/Off)" Debug_Heals bool
 /if (${Debug} || ${Debug_Heals}) /echo |- heal_Setup ==>
 	| CONFIGURABLE
 	|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
@@ -549,6 +549,9 @@ SUB heal_Setup
 	/declare hotTankNoStackStr		string outer 5259,8493
 	/declare hotImportantNoStackStr	string outer 5259,8493,5416,8503
 	/declare hotAllNoStackStr		string outer 5259,8493,5416,8503
+	|ReviewRekka /declare hotTankNoStackStr		string outer 32493,21818,38061,16200,16201,16202,16514,16515,16516
+	|ReviewRekka /declare hotImportantNoStackStr	string outer 32493,21818,38061,16200,16201,16202,16514,16515,16516
+	|ReviewRekka /declare hotAllNoStackStr		string outer 32493,21818,38061,16200,16201,16202,16514,16515,16516
 	|~~~~~~~~~~~~~~~~~~~ PCTHps Interrupt	~~~~~~~~~~~~~~~~~~~~~~~~|
 	|~~~~~~~~~~~~ Interrupt heal if target >= this PCTHps ~~~~~~~~~~|
 	/declare interruptHealPct			int outer 95
@@ -572,11 +575,11 @@ SUB heal_Setup
   /call ListToArray "hotAllNoStack"		    "${hotAllNoStackStr}" 		  ","
 
   /if (${Bool[${Ini[${Character_Ini},Heals]}]}) {
-    /if (${Ini[${Character_Ini},Heals,Who to Heal].Length})		/call iniToVarV "${Character_Ini},Heals,Who to Heal"		 WhoToHeal string outer
-    /if (${Ini[${Character_Ini},Heals,Who to HoT].Length})		/call iniToVarV "${Character_Ini},Heals,Who to HoT"		 WhoToHoT string outer
-    /call IniToArrayV "${Character_Ini},Heals,Tank#"           tanks
-    /call IniToArrayV "${Character_Ini},Heals,Important Bot#"  importantBots
-    /call IniToArrayV "${Character_Ini},Heals,Pet Owner#"      petOwners
+    /if (${Ini[${Character_Ini},Heals,Who to Heal].Length})		/call iniToVarV "${Character_Ini},Heals,Who to Heal"		 WhoToHeal string
+    /if (${Ini[${Character_Ini},Heals,Who to HoT].Length})		/call iniToVarV "${Character_Ini},Heals,Who to HoT"		 WhoToHoT string
+    /call IniToArrayV "${Character_Ini},Heals,Tank"           tanks
+    /call IniToArrayV "${Character_Ini},Heals,Important Bot"  importantBots
+    /call IniToArrayV "${Character_Ini},Heals,Pet Owner"      petOwners
   }
 
   /call heal_SpellArrays
@@ -587,14 +590,14 @@ SUB heal_Setup
 |--------------------------------------------------------------------------------------------------------------------------------
 SUB heal_SpellArrays
 | Import settings from Character_Ini
-  /call IniToArrayV "${Character_Ini},Life Support,Life Support#" lifeSupport
+  /call IniToArrayV "${Character_Ini},Life Support,Life Support" lifeSupport
   /if (${Bool[${Ini[${Character_Ini},Heals]}]}) {
-    /call IniToArrayV "${Character_Ini},Heals,Tank Heal#"             tankHeals
-    /call IniToArrayV "${Character_Ini},Heals,Important Heal#"        importantHeals
-    /call IniToArrayV "${Character_Ini},Heals,All Heal#"              allHeals
-    /call IniToArrayV "${Character_Ini},Heals,Pet Heal#"              petHeals
-    /call IniToArrayV "${Character_Ini},Heals,Heal Over Time Spell#"  hotSpells
-    /call IniToArrayV "${Character_Ini},Heals,Group Heal#"            groupHeals
+    /call IniToArrayV "${Character_Ini},Heals,Tank Heal"             tankHeals
+    /call IniToArrayV "${Character_Ini},Heals,Important Heal"        importantHeals
+    /call IniToArrayV "${Character_Ini},Heals,All Heal"              allHeals
+    /call IniToArrayV "${Character_Ini},Heals,Pet Heal"              petHeals
+    /call IniToArrayV "${Character_Ini},Heals,Heal Over Time Spell"  hotSpells
+    /call IniToArrayV "${Character_Ini},Heals,Group Heal"            groupHeals
   }
 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
 | lets healers break invis to cast heal

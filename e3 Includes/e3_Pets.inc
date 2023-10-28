@@ -182,16 +182,16 @@ SUB event_returnMinion(line, ChatSender)
 |------------------------------------------------------------------------|
 |- Setup															                                  -|
 Sub pet_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Pets (On/Off)" Debug_Pets bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Pets (On/Off)" Debug_Pets bool
 /if (${Debug} || ${Debug_Pets}) /echo |- pet_Setup ==>
 	/if (${Ini[${Character_Ini},Pets].Length}) {
 		/if (!${Defined[suspend_Pets]})        /declare suspend_Pets bool global FALSE
 		/if (!${Defined[currently_Suspended]}) /declare currently_Suspended bool global FALSE
-    /if (${Ini[${Character_Ini},Pets,Pet Mend (Pct)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Mend (Pct)" petMendPct int outer
-    /if (${Ini[${Character_Ini},Pets,Pet Taunt (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Taunt (On/Off)" petTaunt bool outer
-		/if (${Ini[${Character_Ini},Pets,Pet Auto-Shrink (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" petAutoShrink bool outer
-    /if (${Ini[${Character_Ini},Pets,Pet Summon Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Summon Combat (On/Off)" petSummonCombat bool outer
-    /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Buff Combat (On/Off)" petBuffCombat bool outer
+    /if (${Ini[${Character_Ini},Pets,Pet Mend (Pct)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Mend (Pct)" petMendPct int
+    /if (${Ini[${Character_Ini},Pets,Pet Taunt (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Taunt (On/Off)" petTaunt bool
+		/if (${Ini[${Character_Ini},Pets,Pet Auto-Shrink (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" petAutoShrink bool
+    /if (${Ini[${Character_Ini},Pets,Pet Summon Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Summon Combat (On/Off)" petSummonCombat bool
+    /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Buff Combat (On/Off)" petBuffCombat bool
 	}
 
 	/call pet_spellArrays
@@ -201,9 +201,9 @@ Sub pet_Setup
 |------------------------------------------------------------------------|
 |- spell setup
 SUB pet_spellArrays
-  /call IniToArrayV "${Character_Ini},Pets,Pet Spell#" petSpell
-  /call IniToArrayV "${Character_Ini},Pets,Pet Buff#" petBuffs
-  /call IniToArrayV "${Character_Ini},Pets,Pet Heal#" petHeal
+  /call IniToArrayV "${Character_Ini},Pets,Pet Spell" petSpell
+  /call IniToArrayV "${Character_Ini},Pets,Pet Buff" petBuffs
+  /call IniToArrayV "${Character_Ini},Pets,Pet Heal" petHeal
 
   /if (${Defined[petSpell]}) /call BuildSpellArray "petSpell"	"petSpell2D"
 

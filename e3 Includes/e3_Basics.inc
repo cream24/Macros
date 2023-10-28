@@ -26,8 +26,7 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
   /varset FollowTarget ${Spawn[pc =${SpawnToFollow}].CleanName}
   | -If I am the follow target
   /if (${FollowTarget.Equal[${Me}]}) {
-    /if (${Stick.Active}) /squelch /stick off
-    /if (${NetAdvPath.Following}) /squelch /netfollow off
+		/call StopForAction
   } else {
     | -Check Range
     /if (${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist} && ${Bool[${NetBots[${SpawnToFollow}].InZone}]}) {
@@ -52,14 +51,13 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
 |----------------------------------------------------------------------------------------------------|
 |- Engages follow plugins on specified follow targets.												-|
 |----------------------------------------------------------------------------------------------------|
-|- Uses NetAdvPath if the follow target is one of your bots, or MoveUtils, if its someone elses.	-|		
+|- Uses AdvPath if the follow target is one of your bots, or MoveUtils, if its someone elses.	-|		
 |----------------------------------------------------------------------------------------------------|
 SUB AcquireFollow
 /if (${Debug} || ${Debug_Basics}) /echo |- AcquireFollow ==>
 		/if (${SpawnCount[=${FollowTarget} radius ${MaxResponseDist}]}) {
 			/if (${FollowTarget.NotEqual[${Me.CleanName}]}) {
-				/if (${Stick.Active}) /squelch /stick off
-				/if (${NetAdvPath.Following}) /squelch /netfollow off
+		    /call StopForAction
 
 				/declare followTargetID int local
 				/if (${SpawnCount[pc =${FollowTarget}]}) {
@@ -70,11 +68,12 @@ SUB AcquireFollow
 					/varset followTargetID ${Spawn[pet =${FollowTarget}].ID}
 				}
 				/if (${Bool[${Me.Casting.ID}]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
-				 | If the FollowTarget is a NetBot, and you're using NetAdvPath
-				/if (${NetBots[${FollowTarget}].ID} && ${NetAdvPath}) {
+				 | If the FollowTarget is a NetBot, and you're using AdvPath
+				/if (${NetBots[${FollowTarget}].ID} && ${AdvPath}) {
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
 						/call TrueTarget ${followTargetID}
-						/squelch /netfollow on
+						/squelch /afollow on nodoor
+            
 					}
 				} else {
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
@@ -94,9 +93,8 @@ SUB AcquireFollow
 |----------------------------------------------------------------------------|
 #bind StopFollowing /StopFollowing
 SUB Bind_StopFollowing(yLoc,xLoc)
-  /if (${Stick.Active} || ${NetAdvPath.Following} || ${Following}) {
-    /if (${Stick.Active}) /squelch /stick off
-    /if (${NetAdvPath.Following}) /squelch /netfollow off
+  /if (${Stick.Active} || ${AdvPath.Following} || ${Following}) {
+		/call StopForAction
     /call MoveToLoc ${yLoc} ${xLoc} 20 20
     /varset FollowTarget
     /varset Following FALSE
@@ -109,41 +107,76 @@ SUB Bind_StopFollowing(yLoc,xLoc)
 #EVENT Stop "#1# you tell your party, 'Stop'"
 SUB EVENT_Stop(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Stop ==>
-	/if (${Following}) {
+	/if (${Stick.Active} || ${AdvPath.Following} || ${Following}) {
     /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZR]}) /return
       | -Wait to get close to the followTarget.
-    /delay 1s ${Spawn[${FollowTarget}].Distance} < 25
+    |/delay 1s ${Spawn[${FollowTarget}].Distance} < 20
     | -Stop following
-    /if (${Stick.Active}) /squelch /stick off
-    /if (${NetAdvPath.Following}) /squelch /netfollow off
+		/call StopForAction
+    /call MoveToLoc ${Spawn[${FollowTarget}].Y} ${Spawn[${FollowTarget}].X} 20 20
     /varset FollowTarget NULL
     /varset Following FALSE
   }
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Stop -|
-/RETURN STOP
+/return STOP
 
 |----------------------------------------------------------------------------|
-#EVENT MoveHere "<#1#> Move to #2#"
-#EVENT MoveHere "#1# tells you, 'Move to #2#'"
-#EVENT MoveHere "#1# tells the group, 'Move to #2#'"
-SUB EVENT_MoveHere(line, ChatSender, eventParams)
-/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_MoveHere ==>
+SUB StopForAction
+/if (${Debug} || ${Debug_Basics}) /echo |- StopForAction ==>
+  /if (${Stick.Active}) /squelch /stick off
+  /if (${AdvPath.Following}) /squelch /afollow off
+  /if (${MoveTo.Moving}) /moveto off
+  /if (${Navigation.Active}) /nav stop
+/if (${Debug} || ${Debug_Basics}) /echo <== StopForAction -|
+/return
+
+|----------------------------------------------------------------------------|
+#EVENT MoveTo "<#1#> Move to #2#"
+#EVENT MoveTo "#1# tells you, 'Move to #2#'"
+#EVENT MoveTo "#1# tells the group, 'Move to #2#'"
+SUB EVENT_MoveTo(line, ChatSender, eventParams)
+/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_MoveTo ==>
   /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
-  /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${eventParams}]}) /return
   /if (!${Int[${c_eventArgData}]}) /return
   |never move the person who issued the command
   /if (${c_eventArgChatSender.Equal[${Me}]}) /return
   /if (!${SpawnCount[id ${c_eventArgData}]}) /return
   |turn off following, assist
-  /if (${Stick.Active})         /squelch /stick off
-  /if (${NetAdvPath.Following}) /squelch /netfollow off
+	/call StopForAction
   /varset FollowTarget  NULL
   /varset Following     FALSE
   /if (${Assisting}  || ${Me.Combat}) /call AssistOff
-
   /call MoveToLoc ${Spawn[id ${c_eventArgData}].Loc} 50 15
-/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_MoveHere -|
+/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_MoveTo -|
+/RETURN
+
+|----------------------------------------------------------------------------|
+#EVENT NavigateTo "<#1#> Navigate to #2#"
+#EVENT NavigateTo "#1# tells you, 'Navigate to #2#'"
+#EVENT NavigateTo "#1# tells the group, 'Navigate to #2#'"
+SUB EVENT_NavigateTo(line, ChatSender, eventParams)
+/if (${Debug} || ${Debug_Basics}) /echo |- EVENT_NavigateTo ==>
+  /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
+  /if (!${checkEventArgs[${ChatSender},${line},UZ,${eventParams}]}) /return
+  /if (!${Int[${c_eventArgData}]}) /return
+  |only nav if eventParams is not chatsender
+  /if (${Spawn[id ${c_eventArgData}].Name.Equal[${Me}]}) /return
+  /if (!${SpawnCount[id ${c_eventArgData}]}) /return
+  |turn off following, assist
+	/call StopForAction
+  /varset FollowTarget  NULL
+  /varset Following     FALSE
+  /if (${Assisting}  || ${Me.Combat}) /call AssistOff
+  /if (${Navigation.PathExists[id ${c_eventArgData}]}) {
+      /nav id ${c_eventArgData}
+      |/nav spawn <spawn search text>
+      |${Navigation.Active}
+      |${Navigation.PathLength[navigation parameters}
+      |${Navigation.Velocity}
+  }
+/if (${Debug} || ${Debug_Basics}) /echo <== EVENT_NavigateTo -|
 /RETURN
 
 |--------------------------------------------------------------------------------------|
@@ -189,8 +222,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
     /return
   }
 
-  /if (${Stick.Active}) /squelch /stick off
-  /if (${NetAdvPath.Following}) /squelch /netfollow off
+	/call StopForAction
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 
   /doevents barkReturn flush
@@ -256,14 +288,17 @@ SUB EVENT_barkReturn(line, returnBark)
 SUB EVENT_clickIt(line, ChatSender, eventParams)
   /declare debug_clickit bool local FALSE
   /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
-  /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) /return
+  /if (!${checkEventArgs[${ChatSender},${line},UZR,${eventParams}]}) {
+    /if (${debug_clickit}) /echo failed checkEventArgs cs ${c_eventArgChatSender}
+    /return
+  }
   /if (${c_eventArgChatSender.Equal[${Me}]}) /delay 2s
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
   /declare i int local
   /declare closestDoorID int local 0
-  /declare closestDoorDist float local 0
+  /declare closestDoorDist float local 999
   |load array of doors from doors.ini:  doorid, x, y, z, name
-  /call IniToArrayV "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}#" doorList
+  /call IniToArrayV "e3 Macro Inis\doors.ini,${Zone.ShortName},${Zone.ShortName}" doorList
   /if (!${Defined[doorList]}) {
     /if (${Me.CleanName.Equal[Creamo]}) /bc I have no doorList for this zone
   } else {
@@ -272,17 +307,25 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
     /for i 1 to ${doorList.Size}
       /if (${debug_clickit}) /echo ${i} ${doorList[${i}]}
       /squelch /doortarget id ${doorList[${i}].Arg[1,,]}
-      /if ((${closestDoorDist}==0 || ${DoorTarget.Distance} < ${closestDoorDist}) && ${DoorTarget.Distance} < 400 && ${DoorTarget.Distance}) {
-        /varset closestDoorDist ${DoorTarget.Distance}
-        /varset closestDoorID ${doorList[${i}].Arg[1,,]}
+      |${Math.Distance[${yLoc},${xLoc}]} /echo ${Math.Distance[${Switch.Y},${Switch.X}]}
+      |Switch distance can be more accurate than DoortTarget.Distance
+      |ensure that i actually get a door targeted, in case doors are removed
+      /if (${Switch.ID} == ${doorList[${i}].Arg[1,,]}) {
+        /if (${Math.Distance[${Switch.Y},${Switch.X}]} < ${closestDoorDist}  && ${Math.Distance[${Switch.Y},${Switch.X}]} < 400 && ${Math.Abs[${Math.Calc[${Switch.Z} - ${Me.Z}]}]} < 150) {
+          /varset closestDoorDist ${Math.Distance[${Switch.Y},${Switch.X}]}
+          /varset closestDoorID ${doorList[${i}].Arg[1,,]}
+          /if (${debug_clickit}) /echo ClosestDoor loop ${i} door ${closestDoorID}
+        }
+      } else {
+        /if (${debug_clickit}) /echo Skipping door ${doorList[${i}].Arg[1,,]} because its not targetable 
       }
     /next i
   }
-  | if i have a door within 100 distance then move to it and try to click
+  |if i didnt get a closest door from file, just use the one /doortarget returns
   /if (${debug_clickit}) /echo closest ${closestDoorID} ${closestDoorDist}
   /if (!${Bool[${closestDoorID}]}) {
     /squelch /doortarget
-    /if (${DoorTarget.Distance} < ${MaxResponseDist}) {
+    /if (${Math.Distance[${Switch.Y},${Switch.X}]} < 150 && ${Math.Distance[${Switch.Y},${Switch.X}]} < 150) {
       /varset closestDoorID ${Switch.ID}
       /if (${debug_clickit}) /echo no door in file, picked closest door ${Switch.ID}
     } else {
@@ -290,22 +333,24 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
       /return
     }
   }
+    | if i have a door within 150 distance then move to it and try to click
+
   /squelch /doortarget id ${closestDoorID}
-  /if (${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
-  /if (${DoorTarget.Distance} > 35) {
-    /echo \ay Aborting ClickIt: I could not moveto < 20 units of ${DoorTarget.Name} within 5s
-    /moveto off
+  | doortarget distance differs than calc distance, check both
+  /if (${Math.Distance[${Switch.Y},${Switch.X}]} > 15 || ${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
+  /if (${DoorTarget.Distance} > 20) {
+    /echo \ay Aborting ClickIt: I could not moveto <= 20 units of ${DoorTarget.Name} within 5s
+    /call StopForAction
     /return
   } else {
     /declare MyZone int local ${Zone.ID}
     /declare clickTimer timer local 5s
     |add starting loc vs final loc for intrazone click
-    /declare clickDelay int local ${Math.Calc[${Math.Rand[${Me.ID}]}%${clickitRandomDelay}|1]}
+    /declare clickDelay int local ${Math.Calc[10+${Math.Calc[${Math.Rand[${Me.ID}]}%${clickitRandomDelay}]}]}
     /declare startingLoc ${Me.Loc}
+
     :retryClickDoor
-    
-    /squelch /doortarget id ${closestDoorID}
-    
+    /squelch /doortarget id ${closestDoorID} 
     |casting while zoning has been reported to cause a problem
     | If casting, dismount if mounted and call /stopcast
     /if (${Cast.Status.Find[C]} || ${Me.Casting.ID}) {
@@ -315,12 +360,12 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
     /squelch /click left door
     |give time for the click and zoning to take place.
     /delay ${clickDelay}
-    /if (${MyZone}==${Zone.ID} && ${Math.Distance[${startingLoc}]} < 10) {
+    /if (${MyZone}==${Zone.ID} && ${Math.Distance[${startingLoc}]} < 15) {
       /if (${clickTimer}) {
         /goto :retryClickDoor
       } else {
         /echo \ay I have failed to click Door ${Switch.ID} ${DoorTarget.Name}
-        /moveto off
+        /call StopForAction
         /return
       }
     }
@@ -352,8 +397,7 @@ SUB EVENT_oldclickIt(line, ChatSender, locToStart)
       /declare retryTimer timer local 15s
       /declare miscTimer timer local
       /declare startZone int local ${Zone.ID}
-      /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Following}) /squelch /netfollow off
+		  /call StopForAction
       /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
       :retryClick
       /if (${Math.Distance[${locToStart}]} > 10) /call MoveToLoc ${locToStart} 30 20
@@ -417,7 +461,7 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
   /declare startHeading float local ${Spawn[pc ${c_eventArgChatSender}].Heading.Degrees}
   /declare retryTimer timer local 15s
   /declare miscTimer timer local
-  /declare runForTime int local 20
+  /declare runForTime int local 30
   /declare startZone int local ${Zone.ID}
   | -Check that you can see the location to start from.
   /if (!${LineOfSight[${Me.Loc.Replace[ ,]}:${locToStart}]}) {
@@ -427,8 +471,7 @@ SUB EVENT_runThruZone(line, ChatSender, eventParams)
     /if (${Math.Distance[${locToStart}]} > ${Math.Calc[${MaxResponseDist}*3].Int}) {
       /docommand ${ChatToggle} I am to far away from that zone line.
     } else {
-      /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Following}) /squelch /netfollow off
+		  /call StopForAction
       /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /delay 5s !${Me.Casting.ID}
     :retryRTZ
       | -Check if I need to move closer.
@@ -540,7 +583,7 @@ SUB EVENT_CheckBuffs(line, ChatSender, eventParams)
 SUB EVENT_FindItems(line, ChatSender, ItemToFind)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_FindItems ==>
   /if (!${checkEventArgs[${ChatSender},${line},U,${ItemToFind}]}) /return
-  /declare reportDelay int local 30
+  /declare reportDelay int local 20
   |parse item link
   /if (${c_eventArgData.Find[000]}) {
     /varset ItemToFind ${c_eventArgData.Right[${Math.Calc[${c_eventArgData.Length} - 57]}].Left[-1]}
@@ -1434,7 +1477,7 @@ SUB EVENT_exp_group(line, ChatSender, expToggle)
   /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
   /if (!${checkEventArgs[${ChatSender},${line},UZ,${expToggle}]}) /return
   /if (${Select[${c_eventArgData},On,Yes,True,1]} > 0) {
-    /call IniToArrayV "${Character_Ini},Melee Abilities,Ability#" MyAbilities
+    /call IniToArrayV "${Character_Ini},Melee Abilities,Ability" MyAbilities
     /if (${Defined[MyAbilities]})	/call BuildSpellArray "MyAbilities" "Abilities2D"
     /if (${Me.Class.ShortName.Equal[Rog]}) {
       /call buff_SpellArrays
@@ -1558,8 +1601,7 @@ SUB event_itemTurnin(line, ChatSender, itemName, msgTarget)
     /RETURN
   }
 
-  /if (${Stick.Active}) /squelch /stick off
-  /if (${NetAdvPath.Following}) /squelch /netfollow off
+	/call StopForAction
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
   /if (${Cursor.ID}) /autoinv
 
@@ -1667,8 +1709,7 @@ SUB EVENT_getTask(line, ChatSender, taskName, msgTarget)
     /return
   }
 
-  /if (${Stick.Active}) /squelch /stick off
-  /if (${NetAdvPath.Following}) /squelch /netfollow off
+	/call StopForAction
   /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 
 |  /doevents barkReturn flush
@@ -1725,7 +1766,7 @@ SUB EVENT_getTask(line, ChatSender, taskName, msgTarget)
 |---------------------------|
 
 Sub basics_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Basics (On/Off)" Debug_Basics bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Basics (On/Off)" Debug_Basics bool
 /if (${Debug} || ${Debug_Basics}) /echo |- basics_Setup ==>
 
 	/if (!${Defined[Following]}) /declare Following bool global FALSE
@@ -1753,16 +1794,16 @@ Sub basics_Setup
 	/declare medbreak_Popup_Timer timer outer
 	/declare clickitRandomDelay int outer 7
 
-	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call iniToVarV "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoKSWeaponSet string outer
-	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call iniToVarV "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string outer
-	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_SpellSet].Length}) 			/call iniToVarV "${genSettings_Ini},ExpGroup,NoKS_SpellSet" NoKSSpellSet string outer
-	/if (${Ini[${genSettings_Ini},ExpGroup,KS_SpellSet].Length}) 				/call iniToVarV "${genSettings_Ini},ExpGroup,KS_SpellSet" KSSpellSet string outer
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_WeaponSet].Length}) 		/call iniToVarV "${genSettings_Ini},ExpGroup,NoKS_WeaponSet" NoKSWeaponSet string
+	/if (${Ini[${genSettings_Ini},ExpGroup,KS_WeaponSet].Length}) 			/call iniToVarV "${genSettings_Ini},ExpGroup,KS_WeaponSet" KSWeaponSet string
+	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_SpellSet].Length}) 			/call iniToVarV "${genSettings_Ini},ExpGroup,NoKS_SpellSet" NoKSSpellSet string
+	/if (${Ini[${genSettings_Ini},ExpGroup,KS_SpellSet].Length}) 				/call iniToVarV "${genSettings_Ini},ExpGroup,KS_SpellSet" KSSpellSet string
 
 	/declare MaxResponseDist int outer 250
-	/if (${Ini[${genSettings_Ini},General,Max Response Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Response Distance]}]}) /call iniToVarV "${genSettings_Ini},General,Max Response Distance" MaxResponseDist int outer
+	/if (${Ini[${genSettings_Ini},General,Max Response Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Response Distance]}]}) /call iniToVarV "${genSettings_Ini},General,Max Response Distance" MaxResponseDist int
 
 	/declare hideCorpse string local none
-  /if (${Ini[${genSettings_Ini},General,DefaultHideCorpse].Length} && ${Bool[${Ini[${genSettings_Ini},General,DefaultHideCorpse]}]}) /call iniToVarV "${genSettings_Ini},General,DefaultHideCorpse" hideCorpse string local
+  /if (${Ini[${genSettings_Ini},General,DefaultHideCorpse].Length} && ${Bool[${Ini[${genSettings_Ini},General,DefaultHideCorpse]}]}) /call iniToVarV "${genSettings_Ini},General,DefaultHideCorpse" hideCorpse string
   /if (${Select[${hideCorpse},none,all,allbutgroup,looted,npc]}) {
     /squelch /hidecor ${hideCorpse}
   } else {
@@ -1770,9 +1811,9 @@ Sub basics_Setup
   }
 
 	/declare LeashLength int outer 100
-	/if (${Ini[${genSettings_Ini},General,Leash Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Leash Length]}]}) /call iniToVarV "${genSettings_Ini},General,Leash Length" LeashLength int outer
-	/if (${Ini[${genSettings_Ini},General,End MedBreak in Combat(On/Off)].Length}) /call iniToVarV "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" medOn_combatBreak bool outer
-  /if (${Ini[${genSettings_Ini},General,AutoMedBreak PctMana].Length}) /call iniToVarV "${genSettings_Ini},General,AutoMedBreak PctMana" autoMedPctMana int outer
+	/if (${Ini[${genSettings_Ini},General,Leash Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Leash Length]}]}) /call iniToVarV "${genSettings_Ini},General,Leash Length" LeashLength int
+	/if (${Ini[${genSettings_Ini},General,End MedBreak in Combat(On/Off)].Length}) /call iniToVarV "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" medOn_combatBreak bool
+  /if (${Ini[${genSettings_Ini},General,AutoMedBreak PctMana].Length}) /call iniToVarV "${genSettings_Ini},General,AutoMedBreak PctMana" autoMedPctMana int
 	| -Add Groups_Ini file path
 	/if (!${Ini[${MacroData_Ini},File Paths,Saved Groups].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Saved Groups" "e3 Macro Inis\Saved Groups.ini" 1
 	| -Import Groups_Ini.
@@ -1789,9 +1830,10 @@ Sub basics_Setup
 
 
 Sub basics_Background_Events
-	/doevents Follow
-	/doevents Stop
-  /doevents MoveHere
+  /doevents Follow
+  /doevents Stop
+  /doevents MoveTo
+  /doevents NavigateTo
   /doevents clickIt
   /doevents oldclickIt
   /doevents bark
@@ -1863,62 +1905,64 @@ SUB basics_CharacterSettings
 
 Sub basics_Aliases
 /if (${Debug}) /echo |- basics_Aliases ==>
-	/noparse /squelch /alias /followon /bc [+g+]Follow ${Me.CleanName}
-	/noparse /squelch /alias /followme /bc [+g+]Follow ${Me.CleanName}
-	/noparse /squelch /alias /followit /bc [+g+]Follow ${Target.CleanName}
+  /noparse /squelch /alias /followon /bc [+g+]Follow ${Me.CleanName}
+  /noparse /squelch /alias /followme /bc [+g+]Follow ${Me.CleanName}
+  /noparse /squelch /alias /followit /bc [+g+]Follow ${Target.CleanName}
   /squelch /alias /followoff /bc [+r+]Stop
-	/squelch /alias /stop /bc [+r+]Stop
+  /squelch /alias /stop /bc [+r+]Stop
   /noparse /squelch /alias /stopf /bcaa //StopFollowing ${Me.Y} ${Me.X}
   /noparse /squelch /alias /mtm /bc Move to ${Me.ID}
+  /noparse /squelch /alias /ntm /bc Navigate to ${Me.ID}
+  /noparse /squelch /alias /ntt /bc Navigate to ${Target.ID}
   /noparse /squelch /alias /movetome /bc Move to ${Me.ID}
-	/noparse /squelch /alias /mtt /bc Move to ${Target.ID}
+  /noparse /squelch /alias /mtt /bc Move to ${Target.ID}
   /noparse /squelch /alias /movetotarget /bc Move to ${Target.ID}
-	/noparse /squelch /alias /Bark /bc Bark at ${Target.ID}
+  /noparse /squelch /alias /Bark /bc Bark at ${Target.ID}
   /squelch /alias /ClickIt /bc Click It
   /noparse /squelch /alias /oClickIt /bc OldClickit ${Me.Loc.Replace[ ,]}
-	/noparse /squelch /alias /RunThruZone /bc Run through zone at ${Me.Loc.Replace[ ,]},${Me.Heading.Degrees}
-	/noparse /squelch /alias /RunThroughZone /bc Run through zone at ${Me.Loc.Replace[ ,]},${Me.Heading.Degrees}
-	|/noparse /squelch /alias /RTZ /bc Run through zone at ${Me.Loc.Replace[ ,]},${Me.Heading.Degrees}
+  /noparse /squelch /alias /RunThruZone /bc Run through zone at ${Me.Loc.Replace[ ,]},${Me.Heading.Degrees}
+  /noparse /squelch /alias /RunThroughZone /bc Run through zone at ${Me.Loc.Replace[ ,]},${Me.Heading.Degrees}
+  |/noparse /squelch /alias /RTZ /bc Run through zone at ${Me.Loc.Replace[ ,]},${Me.Heading.Degrees}
   /noparse /squelch /alias /RTZ /bc Run through zone
-	/squelch /alias /ClickYes /bc Click yes
-	/squelch /alias /Yes /bc Click yes
-	/squelch /alias /ClickNo /bc Click No
-	/squelch /alias /No /bc Click No
-	/squelch /alias /DropInvis /bc Drop Invisibility
-	/squelch /alias /BotExit /bc Exit
-	/squelch /alias /Gate /bc Gate
-	/squelch /alias /Evac /bc Evac
-	/squelch /alias /LoadSpells /bc Load Spells
-	/squelch /alias /DropBuff /bc Drop Buff
-	/squelch /alias /CheckBuff /bc Check Buff
+  /squelch /alias /ClickYes /bc Click yes
+  /squelch /alias /Yes /bc Click yes
+  /squelch /alias /ClickNo /bc Click No
+  /squelch /alias /No /bc Click No
+  /squelch /alias /DropInvis /bc Drop Invisibility
+  /squelch /alias /BotExit /bc Exit
+  /squelch /alias /Gate /bc Gate
+  /squelch /alias /Evac /bc Evac
+  /squelch /alias /LoadSpells /bc Load Spells
+  /squelch /alias /DropBuff /bc Drop Buff
+  /squelch /alias /CheckBuff /bc Check Buff
   /squelch /alias /FindItemC /bc Find ItemC
-	/squelch /alias /FindItem /bc Find Item
+  /squelch /alias /FindItem /bc Find Item
   /squelch /alias /FindSlot /bc Find Slot
   /squelch /alias /fds /bc Find Slot
   /squelch /alias /fdi /bc Find Item
   /squelch /alias /fic /bc Find ItemC
   /squelch /alias /FindMissingItem /bc Find Missing Item
   /squelch /alias /fmi /bc Find Missing Item
-	/noparse /squelch /alias /FindIt /bc Find Item ${Cursor}
-	/squelch /alias /CountBots /echo Head Count
-	/squelch /alias /Count /echo Head Count
-	/squelch /alias /BotCount /echo Head Count
-	/squelch /alias /RollCall /echo Head Count
-	/squelch /alias /Swap /echo Swap
-	/squelch /alias /useitem /useitem
-	/noparse /squelch /alias /ConsentMe /bc Consent ${Me.CleanName}
-	/squelch /alias /BotConsent /bc Consent
-	/squelch /alias /Group /bc Group
-	/squelch /alias /SaveGroup /bc Save Group
-	/squelch /alias /SaveGroups /bc Save Group
-	/squelch /alias /listgroups /bc List Groups
-	/squelch /alias /medon /bc MedBreak On
-	/squelch /alias /medoff /bc MedBreak Off
-	/squelch /alias /SetAAXP /bc Set AA XP
-	/squelch /alias /PortTo /bc Port to
-	/squelch /alias /FixCorpses /bc Fix Corpses
-	/squelch /alias /ResetCorpses /bc Fix Corpses
-	/squelch /alias /gathercorpses /echo Gather Corpses
-	/squelch /alias /mana /bc Report Mana
+  /noparse /squelch /alias /FindIt /bc Find Item ${Cursor}
+  /squelch /alias /CountBots /echo Head Count
+  /squelch /alias /Count /echo Head Count
+  /squelch /alias /BotCount /echo Head Count
+  /squelch /alias /RollCall /echo Head Count
+  /squelch /alias /Swap /echo Swap
+  |/squelch /alias /useitem /useitem
+  /noparse /squelch /alias /ConsentMe /bc Consent ${Me.CleanName}
+  /squelch /alias /BotConsent /bc Consent
+  /squelch /alias /Group /bc Group
+  /squelch /alias /SaveGroup /bc Save Group
+  /squelch /alias /SaveGroups /bc Save Group
+  /squelch /alias /listgroups /bc List Groups
+  /squelch /alias /medon /bc MedBreak On
+  /squelch /alias /medoff /bc MedBreak Off
+  /squelch /alias /SetAAXP /bc Set AA XP
+  /squelch /alias /PortTo /bc Port to
+  /squelch /alias /FixCorpses /bc Fix Corpses
+  /squelch /alias /ResetCorpses /bc Fix Corpses
+  /squelch /alias /gathercorpses /echo Gather Corpses
+  /squelch /alias /mana /bc Report Mana
 /if (${Debug}) /echo <== basics_Aliases -|
 /return

@@ -20,9 +20,9 @@ SUB check_Harvest
 |----------------------------------------------------------------------------|
 Sub WIZ_Setup
 /if (${Debug}) /echo |- WIZ_Setup ==>
-	/call iniToVarV "${Character_Ini},Wizard,Evac Spell" Evac_Spell string outer
-	/call iniToVarV "${Character_Ini},Wizard,Auto-Harvest (On/Off)" autoHarvest bool outer
-	/call IniToArrayV "${Character_Ini},Wizard,Harvest#" harvestSpells
+	/call iniToVarV "${Character_Ini},Wizard,Evac Spell" Evac_Spell string
+	/call iniToVarV "${Character_Ini},Wizard,Auto-Harvest (On/Off)" autoHarvest bool
+	/call IniToArrayV "${Character_Ini},Wizard,Harvest" harvestSpells
   /if (${Defined[harvestSpells]}) /call BuildSpellArray "harvestSpells"	"harvestSpells2D"
 
 /if (${Debug}) /echo <== WIZ_Setup -|
@@ -30,11 +30,11 @@ Sub WIZ_Setup
 |----------------------------------------------------------------------------|
 SUB WIZ_MacroSettings
 /if (${Debug}) /echo |- WIZ_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#2" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#3" "check_AE" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#4" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function#5" "check_Harvest" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_AE" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},WIZ Functions,WIZ Function" "check_Harvest" 1
 /if (${Debug}) /echo <== WIZ_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

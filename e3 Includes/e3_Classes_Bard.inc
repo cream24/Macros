@@ -46,7 +46,7 @@ SUB EVENT_startMelody(line, ChatSender, melodyName)
     /declare memGem int local
     /varset melodyName ${c_eventArgData}
     | If I don't have the melodyName listed in my ini.
-    /call IniToArrayV "${Character_Ini},${melodyName} Melody,Song#" melodyArray
+    /call IniToArrayV "${Character_Ini},${melodyName} Melody,Song" melodyArray
     /if (!${Defined[melodyArray]}) {
       | If Stop, end, or pause were used, stop the melody.
       /if (${Select[${melodyName},Stop,End,Pause]}) {
@@ -220,10 +220,10 @@ sub check_bard_mez
 |--------------------------------------------------------------|
 Sub BRD_Setup
 /if (${Debug}) /echo |- BRD_Setup ==>
-	/call iniToVarV "${Character_Ini},Bard,Auto-Melody" autoMelody string outer
-  /call iniToVarV "${Character_Ini},Bard,AutoMez (On/Off)" autoMez bool outer
-  /call IniToArrayV "${Character_Ini},Bard,Mez#"	  mezArray
-  /call IniToArrayV "${Character_Ini},Bard,Charm#"	charmArray
+	/call iniToVarV "${Character_Ini},Bard,Auto-Melody" autoMelody string
+  /call iniToVarV "${Character_Ini},Bard,AutoMez (On/Off)" autoMez bool
+  /call IniToArrayV "${Character_Ini},Bard,Mez"	  mezArray
+  /call IniToArrayV "${Character_Ini},Bard,Charm"	charmArray
   /declare returnTwist		bool outer FALSE
   /declare playingMelody	bool outer TRUE
   /declare songSet string outer
@@ -258,8 +258,8 @@ Sub BRD_Background_Events
 |--------------------------------------------------------------|
 SUB BRD_MacroSettings
 	| Adv Settings
-	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function#2" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},BRD Functions,BRD Function" "check_Buffs" 1
 /RETURN
 |--------------------------------------------------------------|
 SUB BRD_CharacterSettings

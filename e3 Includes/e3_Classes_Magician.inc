@@ -47,8 +47,7 @@ sub event_petWeapons(line, ChatSender)
       }
     /next p
     /if (${Defined[petIDArray]}) {
-      /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Status}==1) /squelch /netfollow off
+		  /call StopForAction
       /call give_PetsWeapons FALSE
     }
 
@@ -74,12 +73,14 @@ SUB give_PetsWeapons(autoWeap)
       /call TrueTarget ${petIDArray[${p}]}
       /if (${Target.ID} && ${Target.Distance}>19) /call MoveToLoc ${Target.Y} ${Target.X} 50 15
         /for w 1 to ${petItems2D.Size[1]}
+          /echo petweap ${petItems2D[${w},${iCastName}]}
           :SummonWeap_Loop
           /if (${petItems2D[${w},${iCastName}].Equal["Blazing Stone of Demise"]} && ${FindItemCount[=Summoned: Burning Shank]}) {
             /call SwapItem "Summoned: Burning Shank" "Cursor"
-          |fix me later
-          |} else /if (${FindItemCount[${petItems2D[${w},${iCastName}].Replace[Summon ,]}]}) {
-          |  /call SwapItem "${petItems2D[${w},${iCastName}].Replace[Summon ,]}" "Cursor"
+          } else /if (${Bool[${FindItem[=${petItems2D[${w},${iCastName}]}]}]} && ${Bool[${FindItem[=${petItems2D[${w},${iCastName}]}].NoRent}]}) {
+            /ItemNotify "${petItems2D[${w},${iCastName}]}" leftmouseup
+          } else /if (${Bool[${FindItem[=Summoned: ${petItems2D[${w},${iCastName}]}]}]} && ${Bool[${FindItem[=Summoned: ${petItems2D[${w},${iCastName}]}].NoRent}]}) {
+            /ItemNotify "Summoned: ${petItems2D[${w},${iCastName}]}" leftmouseup
           } else {
             /call check_Ready "petItems2D" ${w}
             /if (${c_Ready}) {
@@ -232,8 +233,8 @@ SUB MAG_Setup
 /declare Debug_MAG bool outer FALSE
 /if (${Debug} || ${Debug_MAG}) /echo |- MAG_Setup ==>
   /declare coh_dist int outer 150
-	/call iniToVarV "${Character_Ini},Magician,Auto-Pet Weapons (On/Off)" autoWeapons bool outer
-	/call IniToArrayV "${Character_Ini},Magician,Summoned Pet Item#" petItems
+	/call iniToVarV "${Character_Ini},Magician,Auto-Pet Weapons (On/Off)" autoWeapons bool
+	/call IniToArrayV "${Character_Ini},Magician,Summoned Pet Item" petItems
 	/declare mageRangedSwap bool outer FALSE
 	/if (${Defined[petItems]}) /call BuildSpellArray "petItems"	"petItems2D"
 
@@ -251,14 +252,14 @@ SUB MAG_Setup
 |----------------------------------------------------------------------------|
 SUB MAG_MacroSettings
 /if (${Debug}) /echo |- MAG_MacroSettings ==>
-  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#1" "check_CoH" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#2" "check_Buffs" 1
-  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#3" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#4" "check_Pets" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#5" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#6" "check_Ae" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#7" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function#8" "check_SummonItems" 1
+  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_CoH" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Buffs" 1
+  /call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Ae" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},MAG Functions,MAG Function" "check_SummonItems" 1
 /if (${Debug}) /echo <== MAG_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

@@ -28,24 +28,24 @@ SUB check_Canni
 |----------------------------------------------------------------------------|
 Sub SHM_Setup
 /if (${Debug}) /echo |- SHM_Setup ==>
-	/call iniToVarV "${Character_Ini},Shaman,Auto-Canni (On/Off)" AutoCanni bool outer
-	/call IniToArrayV "${Character_Ini},Shaman,Canni#" canniSpells
+	/call iniToVarV "${Character_Ini},Shaman,Auto-Canni (On/Off)" AutoCanni bool
+	/call IniToArrayV "${Character_Ini},Shaman,Canni" canniSpells
   /if (${canniSpells.Size}) /call BuildSpellArray "canniSpells"	"canniSpells2D"
 /if (${Debug}) /echo <== SHM_Setup -|
 /return
 |----------------------------------------------------------------------------|
 SUB SHM_MacroSettings
 /if (${Debug}) /echo |- SHM_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#1" "check_Debuffs" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#2" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#3" "check_Heals" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#4" "check_Cures" 1
-  /call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#5" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#6" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#7" "check_AE" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#8" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#9" "check_Pets" 1
-	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function#10" "check_Canni" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Debuffs" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Heals" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Cures" 1
+  /call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_AE" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},SHM Functions,SHM Function" "check_Canni" 1
 /if (${Debug}) /echo <== SHM_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

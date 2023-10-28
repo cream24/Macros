@@ -6,14 +6,14 @@ Sub BST_Setup
 |----------------------------------------------------------------------------|
 SUB BST_MacroSettings
 /if (${Debug}) /echo |- BST_MacroSettings ==>
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#1" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#2" "check_Debuffs" 1
-  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#3" "check_Heals" 1
-  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#4" "check_Cures" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#5" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#6" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function#7" "check_Pets" 1
-  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function#8" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Debuffs" 1
+  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Heals" 1
+  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Cures" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_Pets" 1
+  /call WriteToIni "${advSettings_Ini},BST Functions,BST Function" "check_DoTs" 1
 /if (${Debug}) /echo <== BST_MacroSettings -|
 /RETURN
 |----------------------------------------------------------------------------|

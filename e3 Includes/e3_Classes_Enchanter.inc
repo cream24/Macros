@@ -246,14 +246,14 @@ Sub ENC_Setup
   /declare autoRune bool outer FALSE
   /declare autoMez bool outer FALSE
 
-	/if (${Ini[${Character_Ini},Enchanter,AutoRune].Length}) /call iniToVarV "${Character_Ini},Enchanter,AutoRune (On/Off)" autoRune bool outer
-	/if (${Ini[${Character_Ini},Enchanter,AutoMez (On/Off)].Length}) /call iniToVarV "${Character_Ini},Enchanter,AutoMez (On/Off)" autoMez bool outer
-	/if (${Ini[${Character_Ini},Enchanter,GatherMana Pct].Length}) /call iniToVarV "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int outer
+	/if (${Ini[${Character_Ini},Enchanter,AutoRune].Length}) /call iniToVarV "${Character_Ini},Enchanter,AutoRune (On/Off)" autoRune bool
+	/if (${Ini[${Character_Ini},Enchanter,AutoMez (On/Off)].Length}) /call iniToVarV "${Character_Ini},Enchanter,AutoMez (On/Off)" autoMez bool
+	/if (${Ini[${Character_Ini},Enchanter,GatherMana Pct].Length}) /call iniToVarV "${Character_Ini},Enchanter,GatherMana Pct" gatherManaPCT int
 
-  /call IniToArrayV "${Character_Ini},Enchanter,RuneTarget#"  runeTargets
-  /call IniToArrayV "${Character_Ini},Enchanter,RuneSpell#"   runeArray
-  /call IniToArrayV "${Character_Ini},Enchanter,Mez#"         mezArray
-  /call IniToArrayV "${Character_Ini},Enchanter,Charm#"       charmArray
+  /call IniToArrayV "${Character_Ini},Enchanter,RuneTarget  runeTargets
+  /call IniToArrayV "${Character_Ini},Enchanter,RuneSpell"   runeArray
+  /call IniToArrayV "${Character_Ini},Enchanter,Mez"         mezArray
+  /call IniToArrayV "${Character_Ini},Enchanter,Charm"       charmArray
   /if (${Bool[${mezArray.Size}]}) {
     /call BuildSpellArray "mezArray"	"mezArray2D"
   } else {
@@ -287,16 +287,16 @@ Sub ENC_Background_Events
 /return
 |----------------------------------------------------------------------------|
 SUB ENC_MacroSettings
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#1" "check_Charm" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#2" "check_Mez" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#3" "check_Rune" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#4" "check_Burns" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#5" "check_Debuffs" 1
-  /call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#6" "check_Buffs" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#7" "check_DoTs" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#8" "check_AE" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#9" "check_Nukes" 1
-	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function#10" "check_Pets" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Charm" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Mez" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Rune" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Burns" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Debuffs" 1
+  /call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Buffs" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_DoTs" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_AE" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Nukes" 1
+	/call WriteToIni "${advSettings_Ini},ENC Functions,ENC Function" "check_Pets" 1
 /RETURN
 |----------------------------------------------------------------------------|
 SUB ENC_CharacterSettings

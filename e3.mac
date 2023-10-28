@@ -12,10 +12,10 @@ SUB Main(modeSelect)
   /declare macroVersion string outer 7.0
   /declare Debug bool outer false
   /declare IniMode string outer Ini
-  /if (${Bool[${Plugin[MQ2IniExt]}]}) {
-    /varset IniMode IniExt
-    /iniext clear
-  }
+  |/if (${Bool[${Plugin[MQ2IniExt]}]}) {
+  |  /varset IniMode IniExt
+  |  /iniext clear
+  |}
   /call e3_Setup "${modeSelect}"
 	/if (${Debug}) {
 		/echo Post Setup
@@ -44,6 +44,7 @@ SUB Main(modeSelect)
 				/if (${Bool[${mainLoop_Array[${i}]}]}) /call ${mainLoop_Array[${i}]}
 			/if (!${ActionTaken}) /next i
 
+      |move this to a background check 10222023
       /if (${Me.CombatState.NotEqual[COMBAT]}) {
         /if ((!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[BRD]}) && !${use_TargetAE}) /call completePendingExchange
         /if (!${Me.Moving} && !${Following} && !${Me.Casting.ID}) {
@@ -62,6 +63,16 @@ SUB Main(modeSelect)
 /if (${Debug}) {
 	/echo <== MainLoop -|
 	/delay 5
+}
+
+/delay 1
+|if i didnt do anything last loop, delay a bit more to reduce pc load
+/if (!${ActionTaken}) {
+  /if (${Select[${Me.Class.ShortName},BST,CLR,DRU,SHM,ENC]})  {
+    /delay 2
+  } else /if (${Select[${Me.Class.ShortName},WAR,BRD,ROG,BER,MNK,RNG,SHD,PAL,NEC,MAG,WIZ]}) {
+    /delay 3
+  }
 }
 /goto :MainLoop	
 /RETURN

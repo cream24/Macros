@@ -64,7 +64,7 @@ SUB check_Follow
       /declare followTgtDistance float local ${Spawn[=${FollowTarget}].Distance}
       /declare followTgtLoS bool local ${Spawn[=${FollowTarget}].LineOfSight}
       /if (${followTgtDistance} <= ${LeashLength}) {
-        /if (!${NetAdvPath.Status} && !${Stick.Active}) {
+        /if (!${AdvPath.Status} && !${Stick.Active}) {
           /if (${followTgtDistance}< 40 && ${medBreak}) {
             /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
           } else {
@@ -75,7 +75,7 @@ SUB check_Follow
         |FollowCheckTimer
       } else /if (${followTgtDistance} > ${LeashLength}) {
         /if (!${FollowCheckTimer}) {
-          /if (!${NetAdvPath.Status} && !${Stick.Active}) {
+          /if (!${AdvPath.Status} && !${Stick.Active}) {
             /bct ${FollowTarget} //popup ${Me} stopped moving! Dist:${followTgtDistance},LoS:${followTgtLoS}
           } else {
             /bct ${FollowTarget} //popup ${Me} is falling behind. Dist:${followTgtDistance},LoS:${followTgtLoS}
@@ -341,7 +341,7 @@ SUB EVENT_manualTributeSet(line, ChatSender, eventParams)
 
 |----------------------------------------------------------------------------------------------------|
 Sub background_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug Background (On/Off)" Debug_Background bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug Background (On/Off)" Debug_Background bool
 /if (${Debug} || ${Debug_Background}) /echo |- background_Setup ==>
 	/declare idle bool outer false
 	/declare idleTimer timer outer
@@ -383,33 +383,33 @@ Sub background_Setup
 	}
 	| Clear Cursor Timer
 	/if (${Ini[${genSettings_Ini},Background,Auto-Inventory Timer (Sec)].Length}) {
-		/call iniToVarV "${genSettings_Ini},Background,Auto-Inventory Timer (Sec)" inventoryTimer string outer
+		/call iniToVarV "${genSettings_Ini},Background,Auto-Inventory Timer (Sec)" inventoryTimer string
 	} else {
 		/echo Warning: Could not find a setting for [Auto-Inventory Timer] in [${genSettings_Ini}].  [Auto-Inventory Timer] has been set to 30 seconds.
 		/declare inventoryTimer int outer 30
 	}
 	| Close Spellbook Timer
 	/if (${Ini[${genSettings_Ini},Background,Close Spellbook Timer (Sec)].Length}) {
-		/call iniToVarV "${genSettings_Ini},Background,Close Spellbook Timer (Sec)" spellbookTimer string outer
+		/call iniToVarV "${genSettings_Ini},Background,Close Spellbook Timer (Sec)" spellbookTimer string
 	} else {
 		/echo Warning: Could not find a setting for [Close Spellbook Timer] in [${genSettings_Ini}].  [Close Spellbook Timer] has been set to 1 minute.
 		/declare spellbookTimer int outer 60
 	}
 	| Idle Timer
 	/if (${Ini[${genSettings_Ini},Background,Idle Time Out (Min)].Length}) {
-		/call iniToVarV "${genSettings_Ini},Background,Idle Time Out (Min)" idleInterval int outer
+		/call iniToVarV "${genSettings_Ini},Background,Idle Time Out (Min)" idleInterval int
 	} else {
 		/echo Warning: Could not find a setting for [Idle Time Out] in [${genSettings_Ini}].  [Idel Time Out] has been set to 10 minutes.
 		/declare idleInterval int outer 10
 	}
 	| Auto-Destroy Items
-	/if (${Ini[${genSettings_Ini},Background,Auto-Destroy List].Length}) /call iniToVarV "${genSettings_Ini},Background,Auto-Destroy List" badItems string outer
+	/if (${Ini[${genSettings_Ini},Background,Auto-Destroy List].Length}) /call iniToVarV "${genSettings_Ini},Background,Auto-Destroy List" badItems string
 	| Auto-Tribute
-	/call iniToVarV "${genSettings_Ini},Auto-Tribute,Auto-Tribute (On/Off)" autoTribute bool outer
+	/call iniToVarV "${genSettings_Ini},Auto-Tribute,Auto-Tribute (On/Off)" autoTribute bool
 	| Import NetBots HUD array
-	/call IniToArrayV "${advSettings_Ini},NetBots HUD,NetBot#" netBotsHUDArray
+	|/call IniToArrayV "${advSettings_Ini},NetBots HUD,NetBot" netBotsHUDArray
 
-  /call iniToVarV "${genSettings_Ini},Background,AutoSetPctAAExp (On/Off)" autoSetPctAAExp bool outer
+  /call iniToVarV "${genSettings_Ini},Background,AutoSetPctAAExp (On/Off)" autoSetPctAAExp bool
 
 /if (${Debug} || ${Debug_Background}) /echo <== background_Setup -|
 /return
@@ -434,6 +434,8 @@ Sub background_Aliases
 	/noparse /squelch /alias /AddAutoDestroy /echo Add Auto-Destro item ${Cursor.Name}
 	/noparse /squelch /alias /RemoveAutoDestroy /echo Remove Auto-Destro item ${Cursor.Name}
 	/squelch /alias /tributezone /bc Set Tribute Zone
+  /squelch /alias /tributeOn /bc Tribute On
+  /squelch /alias /tributeOff /bc Tribute Off
 	/noparse /squelch /alias /reporttrib /noparse /bcaa //gu ${Me.CurrentFavor}
 	/noparse /squelch /alias /reportAA /noparse /bcaa //gu AA Spent-Available: ${Me.AAPointsSpent}-${Me.AAPoints}
 

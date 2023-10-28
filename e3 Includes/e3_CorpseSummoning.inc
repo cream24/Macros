@@ -1,60 +1,186 @@
-|------------------------------------------------------------------------------------|
-|- e3_Macro_CorpseSummoning.inc v1.0 ( originally designed to work with e3.mac )    -|
-|- Written by Killians of PEQ                                                        -|
-|------------------------------------------------------------------------------------|
-|- Contains functions to automatically use the corpse summoners in the guild lobby.    -|
-|------------------------------------------------------------------------------------|
+|--------------------------------------------------------------------------------------------------------|
+|- e3_Macro_CorpseSummoning.inc - designed to work with e3.mac )                                        -|
+|- Contains functions to automatically use the (West side only) corpse summoners in the guild lobby.    -|
+|--------------------------------------------------------------------------------------------------------|
+#event UseCorpseSummoner "<#1#> Use Corpse Summoner"
+#event UseCorpseSummoner "[#1#] Use Corpse Summoner"
+|#event UseCorpseSummoner "Use Corpse Summoner"
 #event UseCorpseSummoner "<#1#> Summon Corpses"
 #event UseCorpseSummoner "[#1#] Summon Corpses"
 SUB event_UseCorpseSummoner(line, ChatSender)
-    /bcaa //stand
-  /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
-  | Check to see if you need to summon a corpse
-    /declare itemCount int local
-    /declare SoulStoneCost string outer ${Macro.Return.Arg[2,_]}
-    /declare SoulStoneToUse string outer ${Macro.Return.Arg[1,_]}
-    /declare HaveSoulStone int outer
-    /varset HaveSoulStone 0
-    /declare count_i int outer
-    /declare merchantTotal int outer
-    /varset count_i 0
-    /for count_i 1 to 30
-    /if (${Bool[${InvSlot[${count_i}].Item}]}) /varcalc itemCount ${itemCount} + 1
-    /next count_i
+/varset Debug_CorpseSummoning TRUE
+/if (${Debug} || ${Debug_CorpseSummoning}) /echo |- EVENT_UseCorpseSummoner ==> 
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
 
-    /if (${itemCount} >= 27) {
-    /echo Looks like i have all my gear, so i don't need to summon a corpse.
-    /goto :skip
+    /if (!${Defined[SoulStoneCost]}) /declare SoulStoneCost string outer
+    /if (!${Defined[SoulStoneToUse]}) /declare SoulStoneToUse string outer
+    /declare HaveSoulStone int local
+    /declare equippedItemCount int local
+    /declare summonCorpseTimer timer local 20s
+    |/declare bankPlatinumWindow string local
+    |/declare bankPlatinumWindowAmount int local
+    |${Me.PlatinumShared}
+    | enhancement, fallback to shared bank plat if not enough bank platinum
+
+    | Check to see if you need to summon a corpse
+    /declare i int local 0
+
+    /if (${Spawn[${Me}'s].ID}) {
+        /if (${Debug} || ${Debug_CorpseSummoning}) /echo I already have a corpse in the zone, exiting corpseSummoning
+        /goto :skip
+    }
+    
+    :retrySummonCorpse
+    /varset equippedItemCount 0
+    /varset HaveSoulStone 0
+
+    |recover from restarts etc by closing any open windows
+    /if (${Window[BigBankWnd].Open}) /nomodkey /notify BigBankWnd DoneButton leftmouseup
+    /if (${Window[MerchantWnd].Open}) /nomodkey /notify MerchantWnd MW_Done_Button leftmouseup
+
+    /for i 1 to 30
+        /if (${Bool[${InvSlot[${i}].Item}]}) /varcalc equippedItemCount ${equippedItemCount} + 1
+    /next i
+    |not all low level are fully geared, make this configurable though
+    /if (${equippedItemCount} >= 27 || (${Me.Level} < 50 && ${equippedItemCount} >= 10)) {
+        |always print this echo for clarity
+        /echo I have ${equippedItemCount} items equipped, I dont need to summon a corpse
+        /goto :skip
     }
     | If I'm in The Guild Lobby.
     /if (${Zone.ID} == 344) {
-    /echo I'm in The Guild Lobby
+        /if (${Debug} || ${Debug_CorpseSummoning}) /echo I am in the Guild Lobby
     } else {
-    /return
+        /if (${Debug} || ${Debug_CorpseSummoning}) /echo I am not in the Guild Lobby, exiting corpseSummoning
+        /goto :skip
     }
-    /bcaa //stand
-    /debuffsoff
-    /call find_Soulstone
-    /call checkforstone
-    /call runtomiddlepoint
-    /call movetobanker
-    /call getmoneyfrombanker
-    /call runtomiddlepoint
-    /call movetocomponentsven
-    /call buysoulstone
-    /call runtomiddlepoint
-    /call movetosummoner
-    /call summon_Corpse
-    /call runtomiddlepoint
+    |stop doing other stuff
+    /call AssistOff |this should not be needed
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+	/call StopForAction
+    |determine which stone to use based on level
+    /call pickSoulstone 
+    
+    |count soulstone in inventory base slots, dont consider others
+    /if (${FindItemCount[${SoulStoneToUse}]}) {
+        /for i 1 to 10
+            /if (${Me.Inventory[pack${i}].Name.Find[${SoulStoneToUse}]}) /varcalc HaveSoulStone ${HaveSoulStone}+${Me.Inventory[pack${i}].Stack}
+        /next i   
+    }
+    /if (${Debug} || ${Debug_CorpseSummoning}) /echo Already have ${HaveSoulStone} Soulstones in base inventory  
+
+    /if (${HaveSoulStone}==0) {
+        |do i have plat, if not get from banker
+        /if (${Me.Platinum} < ${SoulStoneCost}) {
+            /if (${Me.PlatinumBank} < ${SoulStoneCost}) {
+                /echo I do not have enough money in bank to summon corpse, exiting corpseSummon
+                /goto :skip
+            }
+            /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+            /delay 2
+            /call MoveToLoc 477 190 30 15 |move to A Shrewd Banker Y X 3sec 15 arrival dist
+            /delay 2
+            /target "A Shrewd Banker"
+            /delay 1s ${Target.DisplayName.Equal[A Shrewd Banker]}
+            /stick 5
+            /delay 5s ${Math.Distance[477,190,2]} < 16
+            
+            /if (!${Window[BigBankWnd].Open}) {
+                /click right target
+                /delay 1s ${Window[BigBankWnd].Open}
+                /nomodkey /notify BigBankWnd BIGB_Money0 leftmouseup          
+                /delay 1s ${Window[QuantityWnd].Open}
+                /delay 4
+                /for i 1 to 9
+                    /keypress backspace chat
+                    /delay 5
+                /next i
+
+                /for i 1 to ${SoulStoneCost.Length}
+                    /keypress ${SoulStoneCost.Mid[${i},1]} chat
+                    /delay 5
+                /next i
+
+                /nomodkey /notify QuantityWnd QTYW_Accept_Button leftmouseup
+                /delay 1s !${Window[QuantityWnd].Open}
+                /delay 5
+                /autoinventory                  
+            } 
+            /if (${Me.Platinum} < ${SoulStoneCost}) {              
+                /if (${summonCorpseTimer}) {
+                    /if (${Debug} || ${Debug_CorpseSummoning}) /echo I failed to get platinum from bank, trying again ${Time}  
+                    /goto :retrySummonCorpse
+                } else {
+                    /if (${Debug} || ${Debug_CorpseSummoning}) /echo CorpseSummon failed: I couldnt get platinum from bank ${Time}
+                }
+            }
+        }
+        |i have enough platinum, go to soulstone vendor
+        /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+        /delay 2    
+        /call MoveToLoc 350 191 30 15 |move to Disciple Y X 3sec 15 arrival dist
+        /delay 2
+        /target "A Disciple of Luclin"
+        /delay 1s ${Target.DisplayName.Equal[A Disciple of Luclin]}
+        /stick 5
+        /delay 5s ${Math.Distance[350,191,2]} < 16
+        /delay 1
+        /click right target
+        /delay 1
+        /delay 1s ${Window[MerchantWnd].Open}
+        /delay 1
+        /nomodkey /notify MerchantWnd ItemList listselect ${Window[MerchantWnd].Child[ItemList].List[=${SoulStoneToUse},2]}
+        /delay 5
+        /nomodkey /notify MerchantWnd MW_Buy_Button leftmouseup
+        /delay 5
+        |count soulstone in inventory base slots, dont consider others
+        /if (${FindItemCount[${SoulStoneToUse}]}) {
+            /varset HaveSoulStone 0
+            /for i 1 to 10
+                /if (${Me.Inventory[pack${i}].Name.Find[${SoulStoneToUse}]}) /varcalc HaveSoulStone ${HaveSoulStone}+${Me.Inventory[pack${i}].Stack}
+            /next i   
+        }
+        /if (${HaveSoulStone}==0) {
+            /if (${summonCorpseTimer}) {
+                /if (${Debug} || ${Debug_CorpseSummoning}) /echo I failed to buy a soulstone, trying again ${Time}  
+                /goto :retrySummonCorpse
+            } else {
+                /if (${Debug} || ${Debug_CorpseSummoning}) /echo CorpseSummon failed: I couldnt buy a soulstone ${Time}
+            }
+        }   
+        /if (${Window[MerchantWnd].Open}) /nomodkey /notify MerchantWnd MW_Done_Button leftmouseup
+    }
+    |i have a soulstone in base inventory slot, go to corpse summoner
+    /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+    /delay 2    
+    /call MoveToLoc 321 270 30 15 |move to Disciple Y X 3sec 15 arrival dist
+    /delay 2
+    /target "A Priest of Luclin"
+    /delay 1s ${Target.DisplayName.Equal[A Priest of Luclin]}
+    /stick 5
+    /delay 5s ${Math.Distance[321,270,2]} < 16
+
+    |reuse event_itemTurnin(line, ChatSender, itemName, msgTarget)
+    /call event_itemTurnin "itemTurnin ${SoulStoneToUse} to ${Target.ID}" "${Me}" "${SoulStoneToUse}" "${Target.ID}"
+    /delay 1s
+    /delay 3s ${Spawn[${Me}'s].ID}
+
+    /if (!${Spawn[${Me}'s].ID}) {
+        /if (${summonCorpseTimer}) {
+            /if (${Debug} || ${Debug_CorpseSummoning}) /echo My corpse did not appear after soulstone turnin, trying again ${Time}  
+            /goto :retrySummonCorpse
+        } else {
+            /if (${Debug} || ${Debug_CorpseSummoning}) /echo CorpseSummon failed: corpse did not appear. this should never happen ${Time}
+        }
+    }
+    /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+
     :skip
-/RETURN
+    /if (${Debug} || ${Debug_CorpseSummoning}) /echo <== EVENT_UseCorpseSummoner -|   
+/return
 
-SUB checkforstone
-/varset HaveSoulStone ${FindItemCount[${SoulStoneToUse}]}
-/echo Soulstones ${HaveSoulStone}
-/RETURN
 
-SUB find_Soulstone
+SUB pickSoulstone
     /if (${Me.Level} <= 20) {
         /varset SoulStoneToUse Minor Soulstone
         /varset SoulStoneCost 12
@@ -92,278 +218,10 @@ SUB find_Soulstone
         /varset SoulStoneToUse Coalescent Soulstone
         /varset SoulStoneCost 865
     }
-
-/RETURN ${SoulStoneToUse}_${SoulStoneCost}
-
-
-SUB summon_Corpse(SoulStoneToUse)
-    :tarpriest
-    /Target "A Priest of Luclin"
-    /if (${Target.ID}) {
-    |got a target
-    } else {
-    /goto :tarpriest
-    }
-    /declare e int local
-    /varset count_i 0
-    :summonCorpse
-    /if (${Spawn[${Me}'s].ID}) /goto :check_ForCorpse
-    |---Open InventoryWindow.
-    /if (!${Window[InventoryWindow].Open}) /nomodkey /keypress i
-    /delay 10 ${Window[InventoryWindow].Open}
-    |---If my inventory is not open.
-    /if (!${Window[InventoryWindow].Open}) {
-    |---If there is still time, retry.
-        /if (${retryTimer}) {
-        /goto :summonCorpse
-        |---Else, announce to user.
-        } else {
-        /echo ERROR: Failed to open my inventory.
-        }
-    |---Else, if my inventory is open.
-    } else {
-    |--Search packslots.
-        /for count_i 1 to ${numInventorySlots}
-        |---If the item in the packslot is a soulstone, pick it up.
-        /if (!${Me.Inventory[pack${count_i}].Container} && ${SoulStoneToUse.Equal[${Me.Inventory[pack${count_i}]}]}) {
-        /itemnotify pack${count_i} leftmouseup
-        } else {
-        |---If the item in the packslot is a container, search it.
-        /for e 1 to ${Me.Inventory[pack${count_i}].Container}
-        /if (${SoulStoneToUse.Equal[${Me.Inventory[pack${count_i}].Item[${e}]}]}) {
-        /if (!${Window[pack${count_i}].Open}) /itemnotify pack${count_i} rightmouseup
-        /delay 1s ${Window[pack${count_i}].Open}
-        /itemnotify in pack${count_i} ${e} leftmouseup
-        }
-        /next e
-        }
-        /next count_i
-        |---Check that the soulstone was picked up.
-        /if (!${Cursor.ID}) {
-        |---If there is still time, retry.
-            /if (${retryTimer}) {
-            /goto :summonCorpse
-            |---Else, announce to user.
-            } else {
-            /echo ERROR: Failed to pick up my soulstone.
-            }
-        |---Else, if the soulstone was picked up.
-        } else {
-            |----Open trade with the corpse summoner.
-            /click left target
-            /delay 10 ${Window[GiveWnd].Open}
-            |---If the GiveWnd did not open.
-            /if (!${Window[GiveWnd].Open}) {
-            |---If there is still time, retry.
-                /if (${retryTimer}) {
-                /goto :summonCorpse
-                |---Else, announce to user.
-                } else {
-                /echo ERROR: Failed to open the give window.
-                }
-            |---Else, if the give window is open.
-            } else {
-            |---Give the soulstone to the corpse summoner.
-            /delay 5
-            /notify GiveWnd GVW_Give_Button leftmouseup
-            /delay 10 !${Window[GiveWnd].Open}
-            |---If the GiveWnd did not open
-
-                /if (${Window[GiveWnd].Open} || ${FindItemCount[=${SoulStoneToUse}]}) {
-                |---If there is still time, retry.
-                    /if (${retryTimer}) {
-                    /goto :summonCorpse
-                    |---Else, announce to user.
-                    } else {
-                    /echo ERROR: Failed to complete the trade.
-                    }
-                |---Else, if the give window is open.
-                } else {
-                :check_ForCorpse
-                |---Loot your summoned corpse.
-                /delay 3s ${Spawn[${Me}'s].ID}
-                /if (!${Spawn[${Me}'s].ID}) /echo ERROR: My corpse did not appear.
-                }
-            }
-        }
-    }
-/RETURN
-
-SUB buysoulstone
-/if (${HaveSoulStone}) {
-/RETURN
-}
-:tardisciple
-/Target "A Disciple of Luclin"
-/if (${Target.ID}) {
-|got a target
-} else {
-/goto :tardisciple
-}
-:opendisciplewindow
-/click right target
-/delay 10 ${Window[MerchantWnd].Open}
-/if (!${Window[MerchantWnd].Open}) {
-/goto ::opendisciplewindow
-} else {
-/echo ERROR: Failed to open the soulstone merchant.
-}
-/varset merchantTotal -1
-:populateMerchant
-/if (${merchantTotal}!=${Window[MerchantWnd].Child[ItemList].Items}) {
-/varset merchantTotal ${Window[MerchantWnd].Child[ItemList].Items}
-/delay 2
-/goto :populateMerchant
-}
-/nomodkey /notify MerchantWnd ItemList listselect ${Window[MerchantWnd].Child[ItemList].List[=${SoulStoneToUse},2]}
-/delay 2
-/if (!${FindItemCount[${SoulStoneToUse}]}) /notify MerchantWnd MW_Buy_Button leftmouseup
-/delay 2
-|If i failed to buy the soulstone.
-/if (!${FindItemCount[${SoulStoneToUse}]}) {
-/if (${retryTimer}) {
-/goto :buyLoop
-} else {
-/echo ERROR: Failed to buy a soulstone!
-}
-} else {
-/nomodkey /notify MerchantWnd MW_Done_Button leftmouseup
-}
-
-/RETURN
-
-SUB movetosummoner
-/echo moving to summoner
-:movetosummonerloop
-/moveto loc 321 270
-/delay 1s
-/if (${Math.Distance[321,270,2]} < 16) {
-    :summonerclose
-    /Target "A Priest of Luclin"
-    /stick 8
-    /delay 1s
-    /if (${Target.Distance} < 9) {
-    /keypress forward
-    /echo moved to summoner
-    } else {
-    /goto :summonerclose
-    }
-} else {
-/goto :movetosummonerloop
-}
-/RETURN
-
-SUB movetocomponentsven
-/if (${HaveSoulStone}) {
-/RETURN
-}
-/echo moving to disciple
-:movetocomponentsvenloop
-/moveto loc 350 191
-/delay 1s
-/if (${Math.Distance[350,191,2]} < 16) {
-    :discipleclose
-    /Target "A Disciple of Luclin"
-    /stick 8
-    /delay 1s
-    /if (${Target.Distance} < 9) {
-    /keypress forward
-    /echo moved to disciple
-    } else {
-    /goto :discipleclose
-    }
-} else {
-    /goto :movetocomponentsvenloop
-}
-/RETURN
-   
-SUB movetobanker
-/if (${Me.Platinum} > ${SoulStoneCost}) {
-/RETURN
-}
-/if (${HaveSoulStone}) {
-/RETURN
-}
-/echo moving to banker
-:movetobankerloop
-/moveto loc 477 190
-/delay 1s
-/if (${Math.Distance[477,190,2]} < 16) {
-    :bankercloser
-    /Target "A Shrewd Banker"
-    /stick 8
-    /delay 1s
-    /if (${Target.Distance} < 9) {
-    /keypress forward
-    /echo moved to banker
-    }    else {
-    /goto :bankercloser
-    }
-} else {
-    /goto :movetobankerloop
-}
-/RETURN
-
-SUB getmoneyfrombanker
-/if (${Me.Platinum} > ${SoulStoneCost}) {
-/RETURN
-}
-/if (${HaveSoulStone}) {
-/RETURN
-}
-:startwithdraw
-/Target "A Shrewd Banker"
-/if (${Target.ID}) {
-|got a target
-} else {
-/goto :startwithdraw
-}
-:openbanker
-/if (!${Window[BigBankWnd].Open}) {
-/click right target
-} else {
-/goto :openbanker
-}
-:ammountofplat
-/if (!${Window[QuantityWnd].Open}) {
-    /notify BigBankWnd BIGB_Money0 leftmouseup
-    }
-    /delay 5 ${Window[QuantityWnd].Open}
-    /for count_i 1 to 9
-        /keypress backspace chat
-        /delay 3
-    /next count_i
-    /varset count_i 0
-    /for count_i 1 to ${SoulStoneCost.Length}
-        /keypress ${SoulStoneCost.Mid[${count_i},1]} chat
-        /delay 3
-    /next count_i
-    /notify QuantityWnd QTYW_Accept_Button leftmouseup
-    /delay 2
-    /autoinventory
-else {
-/echo QuantityWnd is open
-}
-/if (${Me.Platinum} < ${SoulStoneCost}) {
-/goto :startwithdraw
-}
-/RETURN
-
-SUB runtomiddlepoint
-:loopmiddlep
-/moveto loc 400 250
-|/echo ${Math.Distance[400,250,1]}
-/if (${Math.Distance[400,250,1]} < 20) {
-/echo all done moved to middle
-/RETURN
-} else {
-/delay 5
-/goto :loopmiddlep
-}
-/RETURN
+/return 
 
 SUB corpseSummon_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug CorpseSummoning (On/Off)" Debug_CorpseSummoning bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug CorpseSummoning (On/Off)" Debug_CorpseSummoning bool
 /RETURN
 |-----------------------------------------
 SUB corpseSummon_MacroSettings

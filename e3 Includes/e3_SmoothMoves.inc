@@ -344,9 +344,8 @@ SUB event_run_Route(line, ChatSender, route_Name)
       | If the route was found in the Routes_Ini.
       /echo Recalling route [${route_Name}]...
       /varset route_From_Ini ${Ini[${SmoothMoves_Ini},${Zone.ShortName},${route_Name}]}
-      | Turn off stick.
-      /if (${Stick.Active}) /squelch /stick off
-      /if (${NetAdvPath.Following}) /squelch /netfollow off
+      | Turn off stick and afollow
+			/call StopForAction
       | Set route variables.
       /varset i 1
       /varset startZone ${Zone.ID}
@@ -453,7 +452,7 @@ SUB next_WP(float y_loc, float x_loc)
 	/call Movement_Events
 |------------------------------------------If a 'stop route' was called, stop moving, and return to event_run_Route.
 	/if (${stop_Route}) {
-		/moveto off
+		/call StopForAction
 		/goto :skip_wait4Stop
 	}
 |-------------Calculate distance to my destination.  If I'm closer than 5 units, start moving to the next waypoint.
@@ -637,7 +636,7 @@ SUB barkAtNPC(barkInfo, int startZone)
 
 |--------------------------------------------------------------------|
 SUB SmoothMoves_Setup
-/call iniToVarV "${advSettings_Ini},Debug,Debug SmoothMoves (On/Off)" Debug_SmoothMoves bool outer
+/call iniToVarV "${advSettings_Ini},Debug,Debug SmoothMoves (On/Off)" Debug_SmoothMoves bool 
 /if (${Debug} || ${Debug_SmoothMoves}) /echo |- SmoothMoves_Setup ==>
 	| Add Casting File Paths
 	/if (!${Ini[${MacroData_Ini},File Paths,Saved Routes].Length}) /call WriteToIni "${MacroData_Ini},File Paths,Saved Routes" "e3 Macro Inis\Saved Routes.ini" 1
