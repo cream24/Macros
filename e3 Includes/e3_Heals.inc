@@ -97,7 +97,7 @@ SUB heal_importantBots
     /if (${Bool[${NetBots[${importantBots[${t}]}].InZone}]} && ${NetBots[${importantBots[${t}]}].PctHPs} <= ${importantHeals2D[${s},${iHealPct}]}) {
       /call check_Ready "importantHeals2D" ${s}
       /if (${c_Ready} && ${importantHeals2D[${s},${iIfs}]}) {
-        /call check_Distance
+        |/call check_Distance
         /if (${check_Distance[${NetBots[${importantBots[${t}]}].ID},${importantHeals2D[${s},${iMyRange}]}]}) {
           /if (${check_Mana["importantHeals2D",${s}]}) {
             /if (!${Bool[${currentBot}]} || ${NetBots[${importantBots[${t}]}].PctHPs} < ${NetBots[${currentBot}].PctHPs}) {

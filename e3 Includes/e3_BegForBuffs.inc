@@ -10,7 +10,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
 	| Make sure that ChatText is not an integer, this will cause an unparsable calculation.
 	/if (${Int[${ChatText}]}) /return
 	/declare whatToCast string local
-	/declare retryCastTimer timer local 30s
+	/declare retryCastTimer timer local 5s
 	/declare aliasMaxTries int local 0
 
   | If the ChatText is not found in the spellbook, check SpellAliases_Ini.
@@ -40,6 +40,9 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     /call BuildSpellArray "begBuffArray" "begBuffArray2D"
     /call checkEventArgs ${ChatSender} "" "" ${begBuffArray2D[1,${iSpellName}]}
     /varset ChatSender ${c_eventArgChatSender}
+
+		/echo timer ${retryCastTimer} recast time ${begBuffArray2D[1,${iRecastTime}]} newtimer ${Math.Calc[${retryCastTimer}+${Math.Calc[.015*${begBuffArray2D[1,${iRecastTime}]}]}]}
+		/varset retryCastTimer ${Math.Calc[${retryCastTimer}+ ${Math.Calc[.015*${begBuffArray2D[1,${iRecastTime}]}]}]}
 
     /if (!${NetBots[${ChatSender}].ID}) {
       /if (!${allow_BuffRequests} && !${Select[${ChatSender},${allowedPC}]}) {
@@ -92,9 +95,68 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
       }
       /return
     }
+
+    /if (${ChatChannel.Equal[TELL]}) {
+      /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} inc...
+    } else {
+      /g ${begBuffArray2D[1,${iSpellName}]} inc...
+    }
+
     :retryCast
     | Check Mana
     |/echo cs ${ChatSender} csID ${Spawn[pc =${ChatSender}].ID} spell ${begBuffArray2D[1,${iSpellName}]}
+
+		|ready, mana, distance
+
+		/if (!${Me.CombatState.Equal[COMBAT]}) {
+			/call check_Ready "begBuffArray2D" 1
+			/if (${c_Ready}) {
+					/if (${check_Mana["begBuffArray2D",1]}) {
+							/if (${check_Distance[${Spawn[pc ${ChatSender}].ID},${begBuffArray2D[1,${iMyRange}]}]}) {
+									/echo attemtping cast
+									/call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
+									/if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer}) {
+										/bc retrying cast ${castReturn}, ${begBuffArray2D[1,${iSpellName}]}
+										/delay 1
+										/if (${retryCastTimer}) /goto :retryCast
+									}
+							}
+					} else /if (${retryCastTimer}) {
+						/if (${Me.Standing} && !${Me.Casting.ID} ) /sit
+						/delay 1s
+						/goto :retryCast				
+					} else {
+						/if (${ChatChannel.Equal[TELL]}) {
+							/tell ${ChatSender} I don't have enough mana to cast ${begBuffArray2D[1,${iSpellName}]}, Try again later.
+						} else {
+							/g I don't have enough mana to cast ${begBuffArray2D[1,${iSpellName}]}, Try again later.
+						}
+						/return					
+					}
+			} else /if (${retryCastTimer}) {
+				/delay 3
+				/goto :retryCast				
+			} else {
+        /if (${ChatChannel.Equal[TELL]}) {
+          /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} is not ready, Try again later.
+        } else {
+          /g ${begBuffArray2D[1,${iSpellName}]} is not ready, Try again later.
+        }
+        /return				
+			}
+		} else {
+        /if (${ChatChannel.Equal[TELL]}) {
+          /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} I am in combat, buffing cancelled
+        } else {
+          /g ${begBuffArray2D[1,${iSpellName}]} I am in combat, buffing cancelled
+        }
+        /return				
+		}
+
+		/echo out of begforbuff main block
+		|skip old code
+		/return
+
     /if (!${check_Mana["begBuffArray2D",1]}) {
       /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
         /if (${Me.Standing} && !${Me.Casting.ID}) /sit
@@ -131,8 +193,8 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     }
     /call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
     /if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
-      /goto :retryCast
       /bc retrying cast ${castReturn}, ${begBuffArray2D[1,${iSpellName}]}
+      /goto :retryCast			
     }
   }
 /RETURN

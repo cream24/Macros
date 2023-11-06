@@ -139,14 +139,17 @@ SUB Wait4Rez(functionCall)
 				/if (${i}<50) /goto :autoxplootlag
 			}
 		|Loot All Items.
+			/if (${Select[${Cursor.ID},57208,57209]}) /autoinv
+			
 			/notify LootWnd LootAllButton leftmouseup
 			/delay 30s !${Window[LootWnd].Open}
 			|if i havent finished looting after 30s, check if my cursor is a container that is blocked by a DoN token in pack10
 			/if (${Select[${Me.Inventory[pack10].ID},57208,57209]} && ${Bool[${Cursor.Container}]}) {
 				/itemnotify pack10 leftmouseup
 				/delay 2s ${Select[${Cursor.ID},57208,57209]}
-				/autoinv
-				/delay 2s !${Cursor.ID}
+				/delay 1
+				/autoinventory
+				/delay 1s !${Cursor.ID}
 			}		
 
 		|Check you don't still have a corpse.

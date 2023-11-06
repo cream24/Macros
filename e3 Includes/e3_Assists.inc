@@ -28,12 +28,12 @@ SUB event_Assist(line, ChatSender, int MobID)
     } else {
       | Wait to catch up to group, before engage.
       |/echo ${Following}   ${Spawn[${FollowTarget}].Distance}   ${LeashLength}   ${Me.Moving}
-      /if (${Following} && ${Spawn[${FollowTarget}].Distance3D} > ${LeashLength} && ${Me.Moving}) {
+      /if (${Following} && ${Spawn[${FollowTarget}].Distance3D} > 200 && ${Me.Moving}) {
       |/echo distloop
         /declare Assist_Moving_Timer timer local 100
         :movetoAssist_Loop
         /call Background_Events
-        /if (${Spawn[=${FollowTarget}].Distance} > ${LeashLength} && ${Assist_Moving_Timer}) /goto :movetoAssist_Loop
+        /if (${Spawn[=${FollowTarget}].Distance} > 200 && ${Assist_Moving_Timer}) /goto :movetoAssist_Loop
       }
       | Disengage follow.
       /call StopForAction
@@ -137,7 +137,8 @@ SUB AssistOff
 	/if (${use_EPICBurns})           /varset use_EPICBurns FALSE
 
   /if (${Defined[${resistCount}]}) /deletevar ${resistCount}
-	/if (${Following}) /call AcquireFollow
+	|/if (${Following}) /call AcquireFollow
+  /if (${Following}) /call check_Follow
 
 /if (${Debug} || ${Debug_Assists}) /echo |- AssistOff -| <== [${Assisting}] || AssistTarget: [${AssistTarget}]
 /RETURN
@@ -1328,7 +1329,7 @@ SUB assist_SpellArrays
   /call IniToArrayV "${Character_Ini},Burn,Full Burn"                  FULLBurns
   
   /if (${Me.Class.ShortName.Equal[MAG]}) {
-    /declare summonMoltenOrb bool outer FALSE
+    /if (!${Defined[summonMoltenOrb]}) /declare summonMoltenOrb bool outer FALSE
     /if (${Bool[${Me.AltAbility[Servant of Ro]}]})        /call BuildArray "swarmPets" "Servant of Ro"
     /if (${Bool[${Me.AltAbility[Host of the Elements]}]}) /call BuildArray "swarmPets" "Host of the Elements"
     /if (${Defined[MyNukes]}) {

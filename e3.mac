@@ -1,7 +1,7 @@
 |---------------------------------------------------|
 |- e3.mac	v7.0				                             -|
 |- Originally written by Killians of PEQ.	         -|
-|- Enhanced and maintained by Creamo of PEQ.       -|
+|- Enhanced by Creamo of PEQ.                      -|
 |- Thanks to Vysra for IDE,additional plugins,code -|
 |---------------------------------------------------|
 |#warning
@@ -30,7 +30,8 @@ SUB Main(modeSelect)
 		/call check_Idle
     /call check_autoTribute
     /if (${currentZone} != ${Zone.ID})  /call check_Zone
-    /if (${Following} && !${Assisting}) /call check_Follow
+    /if (${Following}) /call check_Follow
+    |/if (${Following} && !${Assisting}) /call check_Follow
 
 		/if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 99) /call check_lifeSupport
     |workaround for item cast array
@@ -69,9 +70,9 @@ SUB Main(modeSelect)
 |if i didnt do anything last loop, delay a bit more to reduce pc load
 /if (!${ActionTaken}) {
   /if (${Select[${Me.Class.ShortName},BST,CLR,DRU,SHM,ENC]})  {
-    /delay 2
+    /delay 1
   } else /if (${Select[${Me.Class.ShortName},WAR,BRD,ROG,BER,MNK,RNG,SHD,PAL,NEC,MAG,WIZ]}) {
-    /delay 3
+    /delay 2
   }
 }
 /goto :MainLoop	

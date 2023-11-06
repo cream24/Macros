@@ -147,7 +147,7 @@ SUB buffProcs
             /if (!${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${s},${iSpellID}]} ]} && !${NetBots[${Group.Member[${g}]}].Buff.Find[${ProcBuffs2D[${s},${iCheckFor}]} ]}) {
               /call check_Ready "ProcBuffs2D" ${s}
               /if (${c_Ready}) {
-                /call check_Distance
+                |/call check_Distance
                 /if (${check_Distance[${Group.Member[${g}].ID},${ProcBuffs2D[${s},${iMyRange}]}]}) {
                   /if (${check_Mana["ProcBuffs2D",${s}]}) {
                     /call e3_Cast ${Group.Member[${g}].ID} "ProcBuffs2D" ${s}

@@ -80,7 +80,7 @@ Sub check_rune
       /if (${Bool[${NetBots[${runeTargets[${t}]}].InZone}]} && !${Bool[${NetBots[${runeTargets[${t}]}].Buff.Find[${runeArray2D[${s},${iCastID}]} ]}]}) {
         /call check_Ready "runeArray2D" ${s}
         /if (${c_Ready}) {
-          /call check_Distance
+          |/call check_Distance
           /if (${check_Distance[${NetBots[${runeTargets[${t}]}].ID},${runeArray2D[${s},${iMyRange}]}]}) {
             /if (${check_Mana["runeArray2D",${s}]}) {
               /call e3_Cast ${NetBots[${runeTargets[${t}]}].ID} "runeArray2D" ${s}

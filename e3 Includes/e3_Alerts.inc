@@ -71,52 +71,168 @@ SUB alerts_Background_Events
     /doevents dragornBlast
     /doevents dragornThorn
     /doevents dragornReflect
+  } else /if (${Zone.ShortName.Equal[anguish]}) {
+    /doevents angmask
+    /doevents checkMarkOfDeath
+  } else /if (${Zone.ShortName.Equal[thenest]}) {
+    /doevents vish_creeping
+    /doevents vish_creepingCured
+    /doevents vish_tankSwitch
+    /doevents vish_eggSPawn
   } else {
     /doevents goDuck flush
     /doevents dragornPBAE flush
     /doevents dragornBlast flush
     /doevents dragornThorn flush
     /doevents dragornReflect flush
-  }
 
-  /if (${Zone.ShortName.Equal[anguish]}) {
-    /doevents angmask
-  } else {
     /doevents angmask flush
+
+    /doevents vish_creeping flush
+    /doevents vish_creepingCured flush
+    /doevents vish_tankSwitch flush
+    /doevents vish_eggSPawn flush
   }
 /RETURN
 
+|drake kite
+|circle radius 400
+|at loc /circle loc Y X
+|or /circle on
+
+
+#event vish_creeping "#*#You sense your doom approaching#*#"
+Sub event_vish_creeping
+  /if (${Target.Name.NotEqual[${Me.Name}]} && ${Me.TargetOfTarget.Name.Equal[${Me}]}) {
+    /shout ~~~ Creeping Doom on Me, but im tanking ~~~
+    /return
+  } else {
+    /shout ~~~ Creeping Doom on Me, gettin a spirit ~~~
+  }
+
+  /declare retryTimer timer local 35s
+  /declare locToStart string local ${Me.Loc}
+  /declare i int local 0
+  /declare aSpirit int local 0
+  /declare numSpirit int local 0
+
+  :retryCureCreeping
+  /if (${Bool[${Me.Buff[Creeping Doom]}]}) {
+    /call AssistOff
+    /if (${Stick.Active}) /squelch /stick off
+    /if (${NetAdvPath.Following}) /squelch /netfollow off
+
+    /varset numSpirit ${SpawnCount[npc mournful_spirit]}
+
+    /for i 1 to ${numSpirit}
+      /varset aSpirit ${NearestSpawn[${i},mournful_spirit npc targetable los].ID}
+      /if (${Bool[${aSpirit}]}) {
+        /call TrueTarget ${aSpirit}
+        /delay 1
+        /call MoveToLoc ${Target.Y} ${Target.X} 35 35
+        /stick 5
+        /delay 10s ${Math.Distance[${Target.Loc}]} < 15
+        /if (${Math.Distance[${Target.Loc}]} < 15) {
+          /say shoulder my burden
+          /stick off
+          /delay 3
+          /goto :retryCureCreeping
+        }
+      }
+    /if (${Bool[${Me.Buff[Creeping Doom]}]}) /next i
+
+    /delay 1s
+    /if (${retryTimer}) {
+      /goto :retryCureCreeping
+    }
+  }
+  /if (${Math.Distance[${locToStart}]} > 25) /call MoveToLoc ${locToStart} 25 25
+/return
+
+#event vish_creepingCured "#*#The mournful spirit draws corruption from your body and absorbs it#*#"
+Sub event_vish_creepingCured
+  /shout --- Creeping Doom Cured ---
+/return
+
+|#event vish_wailing "#*#You feel your body begin to wither#*#"
+|Sub event_vish_wailing
+  |/shout --- Wailing ---
+|/return
+
+#event vish_tankSwitch  "#*#Your body withers#*#"
+Sub event_vish_tankSwitch
+  /shout +++ Vish Corruption: Tank Switch +++
+/return
+
+#event vish_eggSpawn  "#*#Your presence has caused the children to awaken#*#"
+#event vish_eggSpawn  "#*#killeggs#*#"
+Sub event_vish_eggSpawn
+  /if (${Raid.Leader.Name.Equal[${Me}]}) {
+    /shout ~~~ Egg Spawn ~~~
+    /popup ~~~ Egg Spawn ~~~
+  }
+
+  /if (${Select[${Me.Class.ShortName},BER,MNK]}) {
+    /declare locToStart string local ${Me.Loc}
+    /declare i int local 0
+    /declare aEgg int local 0
+    /declare numEgg int local 0
+
+    /call AssistOff
+    /if (${Stick.Active}) /squelch /stick off
+    /if (${NetAdvPath.Following}) /squelch /netfollow off
+    /delay 2
+    /swap Blunt
+    /delay 5
+
+    /varset numEgg ${SpawnCount[tainted_egg]}
+
+    /for i 1 to ${numEgg}
+      /varset aEgg ${NearestSpawn[${i},tainted_egg targetable los].ID}
+      /if (${Bool[${aEgg}]}) {
+        /call TrueTarget ${aEgg}
+        /delay 1
+        /call MoveToLoc ${Target.Y} ${Target.X} 25 25
+        /stick 5
+        /delay 3s ${Math.Distance[${Target.Loc}]} < 15
+        /attack on
+        /delay 20s !${Bool[${Spawn[id ${aEgg}].ID}]}
+      }
+    /next i
+
+    /delay 2
+    /swap main
+    /delay 5
+    /if (${Math.Distance[${locToStart}]} > 25) /call MoveToLoc ${locToStart} 25 25
+  }
+/return
+
+
 #event angmask "#*#You feel a gaze of deadly power focusing on you#*#"
 Sub event_angmask
+  /declare retryTimer timer local 10s
+  /declare OMM_Mask string local ${Me.Inventory[face].Name} 
   /rs ~~~Mask on Me~~~ Ready: ${Me.ItemReady[Mirrored Mask]}
+
+  :retryMask
   /if (!${Bool[${FindItem[=Mirrored Mask]}]}) {
     /bc [+r+] I dont have a Mirrored Mask
     /return
   } else /if (${FindItem[=Mirrored Mask].ItemSlot} >=23 ) {
-    /if (${Me.Casting.ID}) /call interrupt
-    /delay 3s !${Me.Casting.ID}
-    /declare OMM_Mask string local ${Me.Inventory[face].Name}
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+    /delay 3s !${Me.Casting.ID} 
     /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${OMM_Mask}/face" 1
     /delay 3
     /echo calling swapitem
     /call SwapItem "Mirrored Mask" "face"
     /delay 5 ${Me.Inventory[face].Name.Equal[Mirrored Mask]}
-    /call SwapItem "Mirrored Mask" "face"
-    /delay 5 ${Me.Inventory[face].Name.Equal[Mirrored Mask]}
-    /call SwapItem "Mirrored Mask" "face"
-    /delay 5 ${Me.Inventory[face].Name.Equal[Mirrored Mask]}
-  }
-  /if (${Me.Inventory[face].Name.Equal[Mirrored Mask]}) {
-    /declare numtries int local=0
-    /if (${Me.Casting.ID}) /call interrupt
+  } else /if (${Me.Inventory[face].Name.Equal[Mirrored Mask]}) {
+    /if (${Me.Casting.ID} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
     /delay 3s !${Me.Casting.ID}
-    :retry
-    /varcalc numtries ${numtries}+1
     /casting "Mirrored Mask" -maxtries|3
     /delay 1s
-    /if (!${Bool[${Me.Song[Reflective Skin]}]} && ${numtries} < 8) /goto :retry
   }
-  |/if (${OMM_Mask.Length}) /call SwapItem "${OMM_Mask}" "face"
+  /if (${Me.ItemReady[Mirrored Mask]} && !${Bool[${Me.Song[Reflective Skin]}]} && ${retryTimer}) /goto :retryMask
   /rs ~~~Mask on Me~~~ Ready: ${Me.ItemReady[Mirrored Mask]}
 /return
 

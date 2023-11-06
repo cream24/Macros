@@ -250,6 +250,11 @@ SUB EVENT_make_CharacterSettingsIni
 SUB EVENT_updateAliases
 /if (${Debug}) /echo |- EVENT_updateAliases ==>
 
+	|REPLACE ANY [MQ2] events as this option no longer exists
+	|Delete old aliases replaced by binds, and instruct no copying of alias section of macroquest ini with upgrade
+	|alias /gathercorpses delete
+	|alias /swap delete
+
 	/echo Updating macro aliases....
 	/echo (WARNING: Your clients will lock up for a few moments.  Stand fast, friend...)
 	/echo Aliases may not work properly until you restart MQ2 on ALL clients.

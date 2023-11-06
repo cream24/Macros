@@ -1,7 +1,4 @@
 |------------------------------------------------------------------------|
-|- e3_Macro_Loot.inc v2.1 ( originally designed to work with e3.mac )	-|
-|- Written by Killians of PEQ											-|
-|------------------------------------------------------------------------|
 |${MacroQuest.ChatChannel[Creamo]}
 |${MacroQuest.ChatChannel[1]}
 |--------------------------------------------------------------------|
@@ -82,7 +79,7 @@ SUB loot_Area
       /goto :skipCorpse
     }
     /if (${Target.Distance}>16 && ${Target.DistanceZ} < 80) {
-      /call MoveToLoc ${Target.Y} ${Target.X} 20 12
+      /call MoveToLoc ${Target.Y} ${Target.X} 16 16
     }
     /if (${Target.Distance}<=20 &&  ${Target.DistanceZ} < 40) {
       /call lootCorpse
@@ -99,7 +96,8 @@ SUB loot_Area
   /if (${cantLootCorpseCount}>=${SpawnCount[npc corpse zradius 50 radius ${seek_Radius} "_"]}) /doevents flush YourKill
 
   /if (${Following}) {
-    /call AcquireFollow
+    |/call AcquireFollow
+    /call check_Follow
   } else {
     /call MoveToLoc ${startY} ${startX} 15 20
   }

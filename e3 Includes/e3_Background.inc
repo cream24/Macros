@@ -61,30 +61,69 @@ SUB check_Follow
 /if (${Debug} || ${Debug_Background}) /echo |- check_Follow ==>
 	/if (${FollowTarget.NotEqual[${Me}]}) {
 	  /if (${SpawnCount[=${FollowTarget}]}) {
-      /declare followTgtDistance float local ${Spawn[=${FollowTarget}].Distance}
+      /if (${Spawn[=${FollowTarget}].Distance3D} > ${Spawn[=${FollowTarget}].MaxRangeTo}) {
+        /if (!${Navigation.Active} && !${Select[${Spawn[=${FollowTarget}].State},DEAD,HOVER]}) {
+          /if (${Navigation.PathExists[id ${Spawn[=${FollowTarget}].ID}]}) {
+            /nav id ${Spawn[=${FollowTarget}].ID}
+          } else /if (${AdvPath} && ${Spawn[=${FollowTarget}].Distance3D} < ${MaxResponseDist} && !${Me.Moving}) {
+					  /if (${Spawn[id ${followTargetID}].LineOfSight})	{
+              /squelch /afollow spawn ${followTargetID} nodoor
+            } else {
+              /docommand ${ChatToggle} I cannot see [${FollowTarget}]  
+            }
+          }
+        }    
+
+      /declare followTgtDistance float local ${Spawn[=${FollowTarget}].Distance3D}
       /declare followTgtLoS bool local ${Spawn[=${FollowTarget}].LineOfSight}
-      /if (${followTgtDistance} <= ${LeashLength}) {
-        /if (!${AdvPath.Status} && !${Stick.Active}) {
-          /if (${followTgtDistance}< 40 && ${medBreak}) {
-            /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
-          } else {
-            /call AcquireFollow
-          }
-        }
-        /if (${Me.FeetWet}) /squelch /face fast ${FollowTarget}
+      |/if (${followTgtDistance} <= ${LeashLength}) {
+      |  /if (${AdvPath.WaitingWarp}) {
+      |      /bc warping detected following
+      |      /call AcquireFollow            
+      |  }
+      |  /if (!${AdvPath.Status} && !${Stick.Active}) {
+      |    /if (${followTgtDistance}< 40 && ${medBreak}) {
+      |      /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
+      |    } else {
+      |      /call AcquireFollow
+      |    }
+      |  }
+      |  /if (${Me.FeetWet}) /squelch /face fast ${FollowTarget}
         |FollowCheckTimer
-      } else /if (${followTgtDistance} > ${LeashLength}) {
+      |} else /if (${followTgtDistance} > ${LeashLength}) {
         /if (!${FollowCheckTimer}) {
-          /if (!${AdvPath.Status} && !${Stick.Active}) {
-            /bct ${FollowTarget} //popup ${Me} stopped moving! Dist:${followTgtDistance},LoS:${followTgtLoS}
-          } else {
-            /bct ${FollowTarget} //popup ${Me} is falling behind. Dist:${followTgtDistance},LoS:${followTgtLoS}
-          }
-          /varset FollowCheckTimer 60+${Math.Rand[${NetBots.Counts}]}
+         |/if (!${AdvPath.Status} && !${Stick.Active}) {
+         |   /bct ${FollowTarget} //popup ${Me} stopped moving! Dist:${followTgtDistance},LoS:${followTgtLoS}
+         | } else {
+           /if (${Spawn[=${FollowTarget}].Distance3D} > ${LeashLength}) /bct ${FollowTarget} //popup ${Me} is falling behind. Dist:${followTgtDistance},LoS:${followTgtLoS}
+         |}
+          /varset FollowCheckTimer 50+${Math.Rand[${NetBots.Counts}]}
         }
       }
 	  }
 	}
+  |Sub FollowTargetAround
+  |  /while (${Spawn[id ${FollowTarget}].Distance3D} > ${Spawn[id ${FollowTarget}].MaxRangeTo}) {
+  |      /if (!${Select[${Spawn[id ${FollowTarget}].State},DEAD,HOVER]}) {
+  |          /if (!${Navigation.Active}) {
+  |              /nav id ${FollowTarget}
+  |          } else /if (${LastHeading.NotEqual[${Spawn[id ${FollowTarget}].HeadingTo}]} && ${Spawn[id ${FollowTarget}].Speed}>25) {
+  |              /nav id ${FollowTarget}
+  |              /varset LastHeading ${Spawn[id ${FollowTarget}].HeadingTo}
+  |          }
+  |      }
+  |      /delay 1
+  |  }
+  |/return
+
+    |Sub MoveTo
+    |/while (${Spawn[id ${FollowTarget}].Distance3D} > ${Spawn[id ${FollowTarget}].MaxRangeTo}) {
+    |    /if (!${Navigation.Active} && !${Select[${Spawn[id ${FollowTarget}].State},DEAD,HOVER]}) {
+    |        /nav id ${FollowTarget}
+    |    }
+    |    /delay 1
+    |}
+    |/return
 /if (${Debug} || ${Debug_Background}) /echo <== check_Follow -|
 /RETURN
 
@@ -141,8 +180,8 @@ SUB check_Active
       /varset activeTimer 2
       /varset rebuffTimer 10
 	  }  else {
-      /varset activeTimer 6
-      /varset rebuffTimer 25
+      /varset activeTimer 15
+      /varset rebuffTimer 30
 	  }
   }
 
@@ -399,8 +438,8 @@ Sub background_Setup
 	/if (${Ini[${genSettings_Ini},Background,Idle Time Out (Min)].Length}) {
 		/call iniToVarV "${genSettings_Ini},Background,Idle Time Out (Min)" idleInterval int
 	} else {
-		/echo Warning: Could not find a setting for [Idle Time Out] in [${genSettings_Ini}].  [Idel Time Out] has been set to 10 minutes.
-		/declare idleInterval int outer 10
+		/echo Warning: Could not find a setting for [Idle Time Out] in [${genSettings_Ini}].  [Idle Time Out] has been set to 10 minutes.
+		/declare idleInterval int outer 60
 	}
 	| Auto-Destroy Items
 	/if (${Ini[${genSettings_Ini},Background,Auto-Destroy List].Length}) /call iniToVarV "${genSettings_Ini},Background,Auto-Destroy List" badItems string

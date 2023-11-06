@@ -28,21 +28,30 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
   /if (${FollowTarget.Equal[${Me}]}) {
 		/call StopForAction
   } else {
-    | -Check Range
-    /if (${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist} && ${Bool[${NetBots[${SpawnToFollow}].InZone}]}) {
+    /if (${Assisting} || ${Me.Combat}) /call AssistOff
+    /if (${Me.Feigning}) /stand
+    /varset Following TRUE
+    /varset rebuffTimer 25
+    | -Check Range    
+    /if (${Spawn[=${FollowTarget}].ID} && ${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist}) {
       /docommand ${ChatToggle} [${FollowTarget}] is too far away.
-    } else {
-      | -Check LoS.
-      /if (!${Spawn[=${FollowTarget}].LineOfSight}) {
-        /docommand ${ChatToggle} I cannot see [${FollowTarget}].
-      } else {
-        | -Stop assisting so we don't try to stick to the AssistTarget.
-        /if (${Assisting} || ${Me.Combat}) /call AssistOff
-        /if (${Me.Feigning}) /stand
-        /varset Following TRUE
-        /varset rebuffTimer 25
-        /call AcquireFollow
-      }
+    } else {       
+      /call check_Follow
+    }
+    |/if (${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist} && ${Bool[${NetBots[${SpawnToFollow}].InZone}]}) {
+    |  /docommand ${ChatToggle} [${FollowTarget}] is too far away.
+    |} else {
+    |  | -Check LoS.
+    |  /if (!${Spawn[=${FollowTarget}].LineOfSight}) {
+    |    /docommand ${ChatToggle} I cannot see [${FollowTarget}].
+    |  } else {
+    |    | -Stop assisting so we don't try to stick to the AssistTarget.
+    |    /if (${Assisting} || ${Me.Combat}) /call AssistOff
+    |    /if (${Me.Feigning}) /stand
+    |    /varset Following TRUE
+    |    /varset rebuffTimer 25
+    |    |/call AcquireFollow
+    |  }
     }
   }
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Follow -|
@@ -53,7 +62,7 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
 |----------------------------------------------------------------------------------------------------|
 |- Uses AdvPath if the follow target is one of your bots, or MoveUtils, if its someone elses.	-|		
 |----------------------------------------------------------------------------------------------------|
-SUB AcquireFollow
+SUB DEPRECATED_AcquireFollow
 /if (${Debug} || ${Debug_Basics}) /echo |- AcquireFollow ==>
 		/if (${SpawnCount[=${FollowTarget} radius ${MaxResponseDist}]}) {
 			/if (${FollowTarget.NotEqual[${Me.CleanName}]}) {
@@ -70,18 +79,17 @@ SUB AcquireFollow
 				/if (${Bool[${Me.Casting.ID}]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
 				 | If the FollowTarget is a NetBot, and you're using AdvPath
 				/if (${NetBots[${FollowTarget}].ID} && ${AdvPath}) {
-					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
+					|/if (${Spawn[id ${followTargetID}].LineOfSight}) {
 						/call TrueTarget ${followTargetID}
-						/squelch /afollow on nodoor
-            
-					}
+						/squelch /afollow spawn ${followTargetID} nodoor        
+					|}
 				} else {
 					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
 						/call TrueTarget ${followTargetID}
 						/squelch /stick hold 20 uw
 					}
 				}
-				/varset FollowCheckTimer 20+${Math.Calc[${Math.Rand[${NetBots.Counts}]}/2]}
+				/varset FollowCheckTimer 10+${Math.Calc[${Math.Rand[${NetBots.Counts}]}/5]}
 			}
 		}
 /if (${Debug} || ${Debug_Basics}) /echo <== AcquireFollow -|
@@ -93,11 +101,12 @@ SUB AcquireFollow
 |----------------------------------------------------------------------------|
 #bind StopFollowing /StopFollowing
 SUB Bind_StopFollowing(yLoc,xLoc)
-  /if (${Stick.Active} || ${AdvPath.Following} || ${Following}) {
+  /if (${Stick.Active} || ${AdvPath.Following} || ${Following} || ${Navigation.Active}) {
 		/call StopForAction
     /call MoveToLoc ${yLoc} ${xLoc} 20 20
     /varset FollowTarget
     /varset Following FALSE
+    /if (${Navigation.Active}) /nav stop
   }
 /return
 
@@ -125,9 +134,13 @@ SUB EVENT_Stop(line, ChatSender)
 SUB StopForAction
 /if (${Debug} || ${Debug_Basics}) /echo |- StopForAction ==>
   /if (${Stick.Active}) /squelch /stick off
+  /delay 2 (!${Stick.Active})
   /if (${AdvPath.Following}) /squelch /afollow off
+  /delay 2 (!${AdvPath.Following})
   /if (${MoveTo.Moving}) /moveto off
+  /delay 2 (!${MoveTo.Moving})
   /if (${Navigation.Active}) /nav stop
+  /delay 2 (!${Navigation.Active})
 /if (${Debug} || ${Debug_Basics}) /echo <== StopForAction -|
 /return
 
@@ -166,9 +179,9 @@ SUB EVENT_NavigateTo(line, ChatSender, eventParams)
   /if (!${SpawnCount[id ${c_eventArgData}]}) /return
   |turn off following, assist
 	/call StopForAction
-  /varset FollowTarget  NULL
-  /varset Following     FALSE
-  /if (${Assisting}  || ${Me.Combat}) /call AssistOff
+  /varset FollowTarget NULL
+  /varset Following FALSE
+  /if (${Assisting} || ${Me.Combat}) /call AssistOff
   /if (${Navigation.PathExists[id ${c_eventArgData}]}) {
       /nav id ${c_eventArgData}
       |/nav spawn <spawn search text>
@@ -337,9 +350,9 @@ SUB EVENT_clickIt(line, ChatSender, eventParams)
 
   /squelch /doortarget id ${closestDoorID}
   | doortarget distance differs than calc distance, check both
-  /if (${Math.Distance[${Switch.Y},${Switch.X}]} > 15 || ${DoorTarget.Distance} > 20) /call MoveToLoc ${DoorTarget.Y} ${DoorTarget.X} 50 15
-  /if (${DoorTarget.Distance} > 20) {
-    /echo \ay Aborting ClickIt: I could not moveto <= 20 units of ${DoorTarget.Name} within 5s
+  /if (${DoorTarget.Distance} > 28) /call MoveToLoc ${Switch.Y} ${Switch.X} 50 20
+  /if (${DoorTarget.Distance} > 28) {
+    /echo \ay Aborting ClickIt: I could not moveto <= 30 units of ${DoorTarget.Name} within 5s
     /call StopForAction
     /return
   } else {
@@ -996,9 +1009,9 @@ SUB EVENT_CountBots
 |----------------------------------------------------|
 |- Preforms item swaps, listed in Character_Inis.	  -|
 |----------------------------------------------------|
-#EVENT Swap_Items "<#*#> Swap #1#"
-#EVENT Swap_Items "[MQ2] Swap #1#"
-SUB EVENT_Swap_Items(line, IniEntry)
+#bind Swap_Char_Items /swap
+SUB Bind_Swap_Char_Items(IniEntry)
+/varset Debug_Basics True
 /if (${Debug} || ${Debug_Basics}) /echo |- Event Swap_Items ==>
 	| If I don't have a matching Ini entry.
 	/if (!${Ini[${Character_Ini},Swap Items,${IniEntry}].Length}) {
@@ -1050,6 +1063,7 @@ SUB EVENT_Swap_Items(line, IniEntry)
 		}
 	}
 /if (${Debug} || ${Debug_Basics}) /echo <== Swap_Items -|
+/varset Debug_Basics false
 /RETURN
 
 |----------------------------------------------------|
@@ -1161,22 +1175,30 @@ SUB Event_Consent(line, ChatSender, ConsentTarget)
 /RETURN
 
 |--------------------------------------------------------------------------------|
-#event gatherCorpses "[MQ2] Gather corpse#*#"
-SUB event_gatherCorpses
+|#event gatherCorpses "[MQ2] Gather corpse#*#"
+|#event UseCorpseSummoner "<#1#> Summon Corpses#*#"
+|#event UseCorpseSummoner "[#1#] Summon Corpses#*#"
+|SUB event_gatherCorpses
+
+#bind gatherCorpses /gatherCorpses
+SUB bind_gatherCorpses
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_gatherCorpses ==>
-  /if (${Raid.Members}) {
-    /rs Consent ${Me.CleanName}
-  } else {
-    /bc Consent ${Me.CleanName}
+  /if (${SpawnCount[pccorpse radius 100]} > 0) {
+    /if (${Raid.Members}) {
+      /rs Consent ${Me.CleanName}
+    } else {
+      /bc Consent ${Me.CleanName}
+    }
+
+    /declare i int local
+    /for i 1 to ${SpawnCount[pccorpse radius 100]}
+      /call TrueTarget ${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].ID}
+      /delay 2
+      /corpse
+      /delay 1s ${Target.Distance} < 20
+    /next i
+    /squelch /target clear
   }
-	/declare i int local
-	/for i 1 to ${SpawnCount[pccorpse radius 100]}
-    /call TrueTarget ${Spawn[${NearestSpawn[${i},pccorpse radius 100]}].ID}
-    /delay 2
-    /corpse
-    /delay 1s ${Target.Distance} < 20
-	/next i
-	/squelch /target clear
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_gatherCorpses -|
 /RETURN
 
@@ -1241,8 +1263,8 @@ SUB EVENT_gate(line, ChatSender)
 |--------------------------------------------------------|
 |- Use, /bc Evac, /tell 'Name' Evac
 |--------------------------------------------------------|
-#EVENT Evacuate "[#1#] Evac"
-#EVENT Evacuate	"<#1#> Evac"
+#EVENT Evacuate "[#1#] Evac#*#"
+#EVENT Evacuate	"<#1#> Evac#*#"
 #EVENT Evacuate "#1# tells you, 'Evac'"
 #EVENT Evacuate "#1# tell your party, 'Evac'"
 #EVENT Evacuate "#1# tells the group, 'Evac'"
@@ -1250,7 +1272,7 @@ SUB EVENT_Evacuate(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Evacuate ==>
   /if (${Select[${Me.Class.ShortName},DRU,WIZ]}) {
     /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
-    /if (!${checkEventArgs[${ChatSender},${line},UZ,""]}) /return
+    /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
     /if (${Bool[${Group.Member[${c_eventArgChatSender}]}]} && ${NetBots.Counts}>6) /delay 1s
     /if (${Me.AltAbilityReady[Exodus]}) {
       /delay 3
@@ -1855,7 +1877,7 @@ Sub basics_Background_Events
   /doevents medOn
   /doevents EndMacro
   /doevents castItem
-  /doevents Swap_Items
+  |/doevents Swap_Items
   /doevents CountBots
   /doevents FindMissingItem
   /doevents FindItems
@@ -1948,7 +1970,7 @@ Sub basics_Aliases
   /squelch /alias /Count /echo Head Count
   /squelch /alias /BotCount /echo Head Count
   /squelch /alias /RollCall /echo Head Count
-  /squelch /alias /Swap /echo Swap
+  |/squelch /alias /Swap /echo Swap
   |/squelch /alias /useitem /useitem
   /noparse /squelch /alias /ConsentMe /bc Consent ${Me.CleanName}
   /squelch /alias /BotConsent /bc Consent
@@ -1962,7 +1984,7 @@ Sub basics_Aliases
   /squelch /alias /PortTo /bc Port to
   /squelch /alias /FixCorpses /bc Fix Corpses
   /squelch /alias /ResetCorpses /bc Fix Corpses
-  /squelch /alias /gathercorpses /echo Gather Corpses
+  |/squelch /alias /gathercorpses /echo Gather Corpses  changing this to a bind
   /squelch /alias /mana /bc Report Mana
 /if (${Debug}) /echo <== basics_Aliases -|
 /return

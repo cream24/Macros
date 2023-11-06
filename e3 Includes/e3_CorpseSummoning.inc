@@ -2,13 +2,13 @@
 |- e3_Macro_CorpseSummoning.inc - designed to work with e3.mac )                                        -|
 |- Contains functions to automatically use the (West side only) corpse summoners in the guild lobby.    -|
 |--------------------------------------------------------------------------------------------------------|
-#event UseCorpseSummoner "<#1#> Use Corpse Summoner"
-#event UseCorpseSummoner "[#1#] Use Corpse Summoner"
+#event UseCorpseSummoner "<#1#> Use Corpse Summoner#*#"
+#event UseCorpseSummoner "[#1#] Use Corpse Summoner#*#"
 |#event UseCorpseSummoner "Use Corpse Summoner"
-#event UseCorpseSummoner "<#1#> Summon Corpses"
-#event UseCorpseSummoner "[#1#] Summon Corpses"
+#event UseCorpseSummoner "<#1#> Summon Corpses#*#"
+#event UseCorpseSummoner "[#1#] Summon Corpses#*#"
 SUB event_UseCorpseSummoner(line, ChatSender)
-/varset Debug_CorpseSummoning TRUE
+|/varset Debug_CorpseSummoning TRUE
 /if (${Debug} || ${Debug_CorpseSummoning}) /echo |- EVENT_UseCorpseSummoner ==> 
     /if (!${checkEventArgs[${ChatSender},${line},UZR,""]}) /return
 

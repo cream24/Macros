@@ -1008,8 +1008,8 @@ Sub check_selectedBots(selectedBots, ChatSender)
 /return ${botSelected}
 |--------------------------------------------------------------------------|
 SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
-/varset Debug true
-  /if (${Debug}) /echo ChatSender ${ChatSender} | el ${eventLine} | uz ${UZR} | ad ${ArgData}
+|/varset Debug true
+  /if (${Debug}) /echo cs ${ChatSender} ${Bool[${ChatSender}]} nil ${ChatSender.Equal[NULL]} | el ${eventLine} | uz ${UZR} | ad ${ArgData}
   /varset c_eventArg FALSE
   /varset c_eventArgData
   /varset c_eventArgChatSender
@@ -1022,6 +1022,13 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
   /if (${ChatSender.Equal[You]})            /varset ChatSender ${Me.CleanName}
   /if (${ChatSender.Equal[MQ2]})            /varset ChatSender ${Me.CleanName}
   /if (${ChatSender.Right[5].Equal[(msg)]}) /varset ChatSender ${ChatSender.Left[-5]}
+	|/if (!${Bool[${ChatSender}]})           	/varset ChatSender ${Me.CleanName}
+
+	|/if (!${Bool[${ChatSender.Length}]})			/varset ChatSender ${Me}
+	|/varset c_eventArgChatSender testchange
+	|/echo new chatsender ${c_eventArgChatSender} ${Bool[${c_eventArgChatSender}]} ${c_eventArgChatSender.Length}
+	|/varset ChatSender Marmo
+	|/echo  mm ${ChatSender}
 
   /if (${UZR.Find[U]} && !${NetBots[${ChatSender}].ID})     /varset userValidated FALSE
   /if (${UZR.Find[Z]} && (!${Bool[${NetBots[${ChatSender}].ID}]} || !${NetBots[${ChatSender}].InZone} || (${NetBots[${ChatSender}].Instance} != ${NetBots[${Me}].Instance}))) /varset inZone FALSE

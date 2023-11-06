@@ -24,7 +24,7 @@
 | CAST_STUNNED	       | Stunned                                                              |
 | CAST_STANDIG	       | Not Standing                                                         |
 | CAST_DISTRACTED      | To Distracted ( spell book open )                                    |
-| CAST_COMPONENTS| Missing Component													                                |
+| CAST_COMPONENTS			 | Missing Component													                          |
 |---------------------------------------------------------------------------------------------|
 Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 /if (${Debug} || ${Debug_Casting}) /echo |- e3_Cast ==>
@@ -49,6 +49,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
       /varset castReturn CAST_INVISIBLE
 			/echo SkipCast-Invis ${pendingCast} ${Spawn[id ${targetID}].Name} ${targetID}
 			/varset ActionTaken TRUE
+			/delay 1
       /goto :skipCast
     }
   }
@@ -113,14 +114,17 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
   }
 	/if (${Me.Feigning}) {
 		/if (${Debug} || ${Debug_Casting}) /bc skipping [${pendingCast}] , i am feigned and noFeigning=${noFeigning}
+		/delay 1
 		/goto :skipCast
 	}
 	/if (${Window[SpellBookWnd].Open}) {
     /if (${Debug} || ${Debug_Casting}) /bc skipping [${pendingCast}] , my spellbook is open
+		/delay 2
     /goto :skipCast
 	}
 	/if (${Corpse.Open}) {
 		/if (${Debug} || ${Debug_Casting}) /bc skipping [${pendingCast}] , i have a corpse open and closeCorpse=${closeCorpse}
+		/delay 2
 		/goto :skipCast
 	}
 
@@ -315,7 +319,9 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
 	/if (${Defined[${ArrayName}]} && ${oldItem.Length}) {
 		/call SwapItem "${oldItem}" "${${ArrayName}[${ArrayIndex},${iItemMustEquip}]}"
 	}
-	/if (${Following} && !${Assisting}) /call AcquireFollow
+	|/if (${Following} && !${Assisting}) /call AcquireFollow
+	/if (${Following} && !${Assisting}) /call check_Follow	
+
   /if (${Me.Class.ShortName.Equal[BRD]}) /varset resumeTwistDelay 5
   |/if (${returnTwist})	/call unpauseTwist
 	/if (${Debug} || ${Debug_Casting})  /echo |- e3_Cast -| castReturn= ${Cast.Result} ${castReturn}

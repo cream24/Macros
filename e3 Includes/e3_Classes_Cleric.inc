@@ -114,7 +114,7 @@ sub Event_Rez(line, ChatSender)
 /return
 |----------------------------------------------------------------------------|
 
-#EVENT AE_Rez "[MQ2] AERez"
+#EVENT AE_Rez "AERez"
 #EVENT AE_Rez "[#1#] AERez"
 #EVENT AE_Rez "<#1#> AERez"
 #EVENT AE_Rez "<#*#> AERez"
@@ -124,6 +124,7 @@ sub Event_Rez(line, ChatSender)
 SUB EVENT_AE_Rez(line, ChatSender)
 /varset Debug true
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_AE_Rez ==>
+  /if (!${checkEventArgs[${ChatSender},${line},ZR,""]}) /return
   /call defineRezSpell
   /call BuildCorpseList
 	/if (!${CorpseListSize}) {
