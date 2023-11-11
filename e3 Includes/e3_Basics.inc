@@ -38,21 +38,6 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
     } else {       
       /call check_Follow
     }
-    |/if (${Spawn[=${FollowTarget}].Distance} > ${MaxResponseDist} && ${Bool[${NetBots[${SpawnToFollow}].InZone}]}) {
-    |  /docommand ${ChatToggle} [${FollowTarget}] is too far away.
-    |} else {
-    |  | -Check LoS.
-    |  /if (!${Spawn[=${FollowTarget}].LineOfSight}) {
-    |    /docommand ${ChatToggle} I cannot see [${FollowTarget}].
-    |  } else {
-    |    | -Stop assisting so we don't try to stick to the AssistTarget.
-    |    /if (${Assisting} || ${Me.Combat}) /call AssistOff
-    |    /if (${Me.Feigning}) /stand
-    |    /varset Following TRUE
-    |    /varset rebuffTimer 25
-    |    |/call AcquireFollow
-    |  }
-    }
   }
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Follow -|
 /RETURN
@@ -116,7 +101,7 @@ SUB Bind_StopFollowing(yLoc,xLoc)
 #EVENT Stop "#1# you tell your party, 'Stop'"
 SUB EVENT_Stop(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Stop ==>
-	/if (${Stick.Active} || ${AdvPath.Following} || ${Following}) {
+	/if (${Stick.Active} || ${AdvPath.Following} || ${Following} || ${Navigation.Active}) {
     /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZR]}) /return
       | -Wait to get close to the followTarget.
@@ -1276,12 +1261,12 @@ SUB EVENT_Evacuate(line, ChatSender)
     /if (${Bool[${Group.Member[${c_eventArgChatSender}]}]} && ${NetBots.Counts}>6) /delay 1s
     /if (${Me.AltAbilityReady[Exodus]}) {
       /delay 3
-      /docommand ${ChatToggle} Evacuating!
+      /docommand ${ChatToggle} ~~Evacuating!
       /call interrupt
       /delay 3s !${Me.Casting.ID}
       /casting "Exodus" alt
     } else /if (${Me.Book[${Evac_Spell.Arg[1,/]}]}) {
-      /docommand ${ChatToggle} Evacuating!
+      /docommand ${ChatToggle} ~~Evacuating!
       /call interrupt
       /delay 3s !${Me.Casting.ID}
       /casting "${Evac_Spell.Arg[1,/]}" -maxtries|2
@@ -1821,19 +1806,13 @@ Sub basics_Setup
 	/if (${Ini[${genSettings_Ini},ExpGroup,NoKS_SpellSet].Length}) 			/call iniToVarV "${genSettings_Ini},ExpGroup,NoKS_SpellSet" NoKSSpellSet string
 	/if (${Ini[${genSettings_Ini},ExpGroup,KS_SpellSet].Length}) 				/call iniToVarV "${genSettings_Ini},ExpGroup,KS_SpellSet" KSSpellSet string
 
-	/declare MaxResponseDist int outer 250
+	/if (!${Defined[MaxResponseDist]}) /declare MaxResponseDist int outer 250
 	/if (${Ini[${genSettings_Ini},General,Max Response Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Response Distance]}]}) /call iniToVarV "${genSettings_Ini},General,Max Response Distance" MaxResponseDist int
-
-	/declare hideCorpse string local none
-  /if (${Ini[${genSettings_Ini},General,DefaultHideCorpse].Length} && ${Bool[${Ini[${genSettings_Ini},General,DefaultHideCorpse]}]}) /call iniToVarV "${genSettings_Ini},General,DefaultHideCorpse" hideCorpse string
-  /if (${Select[${hideCorpse},none,all,allbutgroup,looted,npc]}) {
-    /squelch /hidecor ${hideCorpse}
-  } else {
-    /echo ERROR: General Settings ini DefaultHideCor is not corrrect, specify:  none,all,allbutgroup,looted,npc
-  }
-
-	/declare LeashLength int outer 100
+  /if (!${Defined[MaxFollowDist]}) /declare MaxFollowDist int outer 500
+  /if (${Ini[${genSettings_Ini},General,Max Follow Distance].Length} && ${Int[${Ini[${genSettings_Ini},General,Max Follow Distance]}]}) /call iniToVarV "${genSettings_Ini},General,Max Follow Distance" MaxFollowDist int
+	/if (!${Defined[LeashLength]}) /declare LeashLength int outer 200
 	/if (${Ini[${genSettings_Ini},General,Leash Length].Length} && ${Int[${Ini[${genSettings_Ini},General,Leash Length]}]}) /call iniToVarV "${genSettings_Ini},General,Leash Length" LeashLength int
+
 	/if (${Ini[${genSettings_Ini},General,End MedBreak in Combat(On/Off)].Length}) /call iniToVarV "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" medOn_combatBreak bool
   /if (${Ini[${genSettings_Ini},General,AutoMedBreak PctMana].Length}) /call iniToVarV "${genSettings_Ini},General,AutoMedBreak PctMana" autoMedPctMana int
 	| -Add Groups_Ini file path
@@ -1846,9 +1825,16 @@ Sub basics_Setup
 	} else {
 		/declare Group_Ini string outer ${Ini[${MacroData_Ini},File Paths,Saved Groups]}
 	}
+
+  /declare hideCorpse string local none
+  /if (${Ini[${genSettings_Ini},General,DefaultHideCorpse].Length} && ${Bool[${Ini[${genSettings_Ini},General,DefaultHideCorpse]}]}) /call iniToVarV "${genSettings_Ini},General,DefaultHideCorpse" hideCorpse string
+  /if (${Select[${hideCorpse},none,all,allbutgroup,looted,npc]}) {
+    /squelch /hidecor ${hideCorpse}
+  } else {
+    /echo ERROR: General Settings ini DefaultHideCor is not corrrect, specify:  none,all,allbutgroup,looted,npc
+  }  
 /if (${Debug} || ${Debug_Basics}) /echo <== basics_Setup -|
 /return
-
 
 
 Sub basics_Background_Events
@@ -1903,6 +1889,7 @@ SUB basics_MacroSettings
 /if (${Debug}) /echo |- basics_MacroSettings ==>
 	/call WriteToIni "${advSettings_Ini},Debug,Debug Basics (On/Off)" Off
 	/call WriteToIni "${genSettings_Ini},General,Max Response Distance" 500
+  /call WriteToIni "${genSettings_Ini},General,Max Follow Distance" 1000
 	/call WriteToIni "${genSettings_Ini},General,Leash Length" 250
 	/call WriteToIni "${genSettings_Ini},General,End MedBreak in Combat(On/Off)" On
   /call WriteToIni "${genSettings_Ini},General,AutoMedBreak PctMana" 0

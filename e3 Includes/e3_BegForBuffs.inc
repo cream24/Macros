@@ -41,7 +41,7 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     /call checkEventArgs ${ChatSender} "" "" ${begBuffArray2D[1,${iSpellName}]}
     /varset ChatSender ${c_eventArgChatSender}
 
-		/echo timer ${retryCastTimer} recast time ${begBuffArray2D[1,${iRecastTime}]} newtimer ${Math.Calc[${retryCastTimer}+${Math.Calc[.015*${begBuffArray2D[1,${iRecastTime}]}]}]}
+		|adjust retry timer to be default setting plus 1.5x spell recasttime.  18 sec to ready blessing of steeloak  = timer + 27s
 		/varset retryCastTimer ${Math.Calc[${retryCastTimer}+ ${Math.Calc[.015*${begBuffArray2D[1,${iRecastTime}]}]}]}
 
     /if (!${NetBots[${ChatSender}].ID}) {
@@ -103,22 +103,26 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
     }
 
     :retryCast
-    | Check Mana
-    |/echo cs ${ChatSender} csID ${Spawn[pc =${ChatSender}].ID} spell ${begBuffArray2D[1,${iSpellName}]}
-
-		|ready, mana, distance
-
 		/if (!${Me.CombatState.Equal[COMBAT]}) {
 			/call check_Ready "begBuffArray2D" 1
 			/if (${c_Ready}) {
 					/if (${check_Mana["begBuffArray2D",1]}) {
 							/if (${check_Distance[${Spawn[pc ${ChatSender}].ID},${begBuffArray2D[1,${iMyRange}]}]}) {
-									/echo attemtping cast
 									/call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
-									/if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer}) {
-										/bc retrying cast ${castReturn}, ${begBuffArray2D[1,${iSpellName}]}
-										/delay 1
-										/if (${retryCastTimer}) /goto :retryCast
+									/if (!${castReturn.Equal[CAST_SUCCESS]}) {
+										/if (${retryCastTimer}) {
+											/if (${Debug} || ${Debug_BegForBuffs}) /bc retrying cast ${castReturn}, ${begBuffArray2D[1,${iSpellName}]}
+											/delay 1s									
+											/goto :retryCast
+										} else {
+											/if (${ChatChannel.Equal[TELL]}) {
+												/tell ${ChatSender} Failed to cast BegForBuff ${begBuffArray2D[1,${iSpellName}]}
+											} else {
+												/g Failed to cast BegForBuff ${begBuffArray2D[1,${iSpellName}]} 
+											}
+										}
+									} else {
+										/return
 									}
 							}
 					} else /if (${retryCastTimer}) {
@@ -153,50 +157,12 @@ SUB event_Chat(ChatChannel, ChatSender, ChatText)
         /return				
 		}
 
-		/echo out of begforbuff main block
-		|skip old code
-		/return
-
-    /if (!${check_Mana["begBuffArray2D",1]}) {
-      /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
-        /if (${Me.Standing} && !${Me.Casting.ID}) /sit
-        /delay 1s
-        /goto :retryCast
-      } else {
-        /if (${ChatChannel.Equal[TELL]}) {
-          /tell ${ChatSender} I don't have enough mana to cast ${begBuffArray2D[1,${iSpellName}]}, Try again later.
-        } else {
-          /g I don't have enough mana to cast ${begBuffArray2D[1,${iSpellName}]}, Try again later.
-        }
-        /return
-      }
-    }
-
-    /call check_Ready "begBuffArray2D" 1
-    /if (!${c_Ready}) {
-      /if (${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
-        /delay 1
-        /goto :retryCast
-      } else {
-        /if (${ChatChannel.Equal[TELL]}) {
-          /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} is not ready, Try again later.
-        } else {
-          /g ${begBuffArray2D[1,${iSpellName}]} is not ready, Try again later.
-        }
-        /return
-      }
-    }
-    /if (${ChatChannel.Equal[TELL]}) {
-      /tell ${ChatSender} ${begBuffArray2D[1,${iSpellName}]} inc...
-    } else {
-      /g ${begBuffArray2D[1,${iSpellName}]} inc...
-    }
-    /call e3_Cast ${Spawn[pc =${ChatSender}].ID} "begBuffArray2D" 1
-    /if (!${castReturn.Equal[CAST_SUCCESS]} && ${retryCastTimer} && !${Me.CombatState.Equal[COMBAT]}) {
-      /bc retrying cast ${castReturn}, ${begBuffArray2D[1,${iSpellName}]}
-      /goto :retryCast			
-    }
-  }
+		/if (${ChatChannel.Equal[TELL]}) {
+			/tell ${ChatSender} Failed to cast BegForBuff ${begBuffArray2D[1,${iSpellName}]}
+		} else {
+			/g Failed to cast BegForBuff ${begBuffArray2D[1,${iSpellName}]} 
+		}
+  }	
 /RETURN
 
 |--------------------------------------------------------|
@@ -266,9 +232,19 @@ SUB event_buffRequestRelay(line, ChatSender, eventParams)
 /RETURN
 
 |------------------------------------------------------------------------|
-#event portRelay "<#*#> Port to #1#"
-SUB event_portRelay(line, destination)
+|#event Assist "<#1#> Assist on #2#"
+|SUB event_Assist(line, ChatSender, int MobID)
+|/if (${Debug} || ${Debug_Assists}) /echo |- event_Assist ==>
+|  /if (!${checkEventArgs[${ChatSender},${line},UZR,${MobID}]}) /return
+|  /varset MobID ${c_eventArgData}
+
+#event portRelay "<#1#> Port to #2#"
+SUB event_portRelay(line, ChatSender, destination)
 /if (${Debug} || ${Debug_BegForBuffs}) /echo |- EVENT_portRelay ==>
+	/if (!${checkEventArgs[${ChatSender},${line},UZR,${destination}]}) {
+		/if (${Debug} || ${Debug_BegForBuffs}) /echo cs ${ChatSender} , ep ${eventParams} , ad ${c_eventArgData} , ln ${line} 
+		/return
+	}
 	/if (${Group} && ${Me.CleanName.Equal[${Group.Leader}]}) {
     /if (${Select[${Me.Class.ShortName},WIZ,DRU]}) {
       /call event_Chat "group" "${Me.Name}" "Port ${destination}"

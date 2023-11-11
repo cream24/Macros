@@ -391,6 +391,17 @@ SUB check_Plugins
 	/if (!${Plugin[mq2itemdisplay].Name.Length}) /plugin MQ2ItemDisplay
 	|Check MQ2LinkDB
 	/if (!${Plugin[MQ2LinkDB].Name.Length}) /plugin MQ2LinkDB
-|Check MQ2HUD.
-|	/if (!${Plugin[mq2hud].Name.Length}) /plugin MQ2HUD
+	|Check MQ2HUD.
+	|	/if (!${Plugin[mq2hud].Name.Length}) /plugin MQ2HUD
+
+	/if (${Plugin[MQ2Map].Name.Length}) {
+		/squelch /mapfilter Ground hide
+		/squelch /mapfilter Mount hide
+		/squelch /mapfilter NPC hide
+		/squelch /mapfilter NPCCorpse hide
+		/squelch /mapfilter Trap hide
+		/squelch /mapfilter Trigger hide
+		/squelch /mapfilter Untargettable hide
+		/squelch /mapfilter PCCorpse show
+	}
 /RETURN

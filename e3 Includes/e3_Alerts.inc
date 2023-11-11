@@ -1,4 +1,11 @@
 Sub alerts_Setup
+  /if (${Plugin[MQ2Map].Name.Length} && ${Select[${Me.Class},Warrior]}) {
+    /squelch /mapfilter NPC show
+    /squelch /mapfilter Ground hide
+    /squelch /mapfilter Trap hide
+    /squelch /mapfilter Trigger hide
+    /squelch /mapfilter Untargettable hide
+  }
 /RETURN
 
 SUB alerts_Background_Events
@@ -374,6 +381,7 @@ SUB event_startClass_Melees
 #event InktutaDeathtouch "#*#thoughts of a cursed trusik invade your mind#*#"
 SUB event_InktutaDeathtouch
   /rs I, >>^<< ${Me.Name} >>^<<, who am about to die, salute you!!
+  /nav locxyz -183 -1012 -129
 /return
 
 #event goDuck "#*#From the corner of your eye, you notice a Kyv taking aim at your head. You should duck."

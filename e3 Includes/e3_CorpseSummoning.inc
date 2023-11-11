@@ -16,7 +16,7 @@ SUB event_UseCorpseSummoner(line, ChatSender)
     /if (!${Defined[SoulStoneToUse]}) /declare SoulStoneToUse string outer
     /declare HaveSoulStone int local
     /declare equippedItemCount int local
-    /declare summonCorpseTimer timer local 20s
+    /declare summonCorpseTimer timer local 30s
     |/declare bankPlatinumWindow string local
     |/declare bankPlatinumWindowAmount int local
     |${Me.PlatinumShared}
@@ -76,14 +76,17 @@ SUB event_UseCorpseSummoner(line, ChatSender)
                 /echo I do not have enough money in bank to summon corpse, exiting corpseSummon
                 /goto :skip
             }
-            /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+            /nav locxyz 250 420 0
+            /delay 5s ${Math.Distance[420,250,0]} < 16
+            |/call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
             /delay 2
-            /call MoveToLoc 477 190 30 15 |move to A Shrewd Banker Y X 3sec 15 arrival dist
-            /delay 2
+            |/call MoveToLoc 477 190 30 15 |move to A Shrewd Banker Y X 3sec 15 arrival dist
+            |/delay 2
             /target "A Shrewd Banker"
             /delay 1s ${Target.DisplayName.Equal[A Shrewd Banker]}
-            /stick 5
+            /nav target
             /delay 5s ${Math.Distance[477,190,2]} < 16
+            /if (${Math.Distance[477,190,2]} > 16 && ${summonCorpseTimer}) /goto :retrySummonCorpse
             
             /if (!${Window[BigBankWnd].Open}) {
                 /click right target
@@ -116,19 +119,21 @@ SUB event_UseCorpseSummoner(line, ChatSender)
             }
         }
         |i have enough platinum, go to soulstone vendor
-        /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
-        /delay 2    
-        /call MoveToLoc 350 191 30 15 |move to Disciple Y X 3sec 15 arrival dist
+        |/call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+        |/delay 2    
+        |/call MoveToLoc 350 191 30 15 |move to Disciple Y X 3sec 15 arrival dist
         /delay 2
         /target "A Disciple of Luclin"
         /delay 1s ${Target.DisplayName.Equal[A Disciple of Luclin]}
-        /stick 5
+        /nav target
+        |/stick 5
         /delay 5s ${Math.Distance[350,191,2]} < 16
-        /delay 1
+        /if (${Math.Distance[350,191,2]} > 16 && ${summonCorpseTimer}) /goto :retrySummonCorpse
+        /delay 2
         /click right target
-        /delay 1
-        /delay 1s ${Window[MerchantWnd].Open}
-        /delay 1
+        /delay 2
+        /delay 2s ${Window[MerchantWnd].Open}
+        /delay 2
         /nomodkey /notify MerchantWnd ItemList listselect ${Window[MerchantWnd].Child[ItemList].List[=${SoulStoneToUse},2]}
         /delay 5
         /nomodkey /notify MerchantWnd MW_Buy_Button leftmouseup
@@ -151,14 +156,16 @@ SUB event_UseCorpseSummoner(line, ChatSender)
         /if (${Window[MerchantWnd].Open}) /nomodkey /notify MerchantWnd MW_Done_Button leftmouseup
     }
     |i have a soulstone in base inventory slot, go to corpse summoner
-    /call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
+    |/call MoveToLoc 400 250 30 15 |runtomiddlepoint Y X 3sec 15 arrival dist
     /delay 2    
-    /call MoveToLoc 321 270 30 15 |move to Disciple Y X 3sec 15 arrival dist
-    /delay 2
+    |/call MoveToLoc 321 270 30 15 |move to Disciple Y X 3sec 15 arrival dist
+    |/delay 2
     /target "A Priest of Luclin"
     /delay 1s ${Target.DisplayName.Equal[A Priest of Luclin]}
-    /stick 5
+    |/stick 5
+    /nav target
     /delay 5s ${Math.Distance[321,270,2]} < 16
+    /if (${Math.Distance[321,270,2]} > 16 && ${summonCorpseTimer}) /goto :retrySummonCorpse
 
     |reuse event_itemTurnin(line, ChatSender, itemName, msgTarget)
     /call event_itemTurnin "itemTurnin ${SoulStoneToUse} to ${Target.ID}" "${Me}" "${SoulStoneToUse}" "${Target.ID}"

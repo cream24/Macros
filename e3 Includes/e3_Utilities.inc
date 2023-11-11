@@ -1009,7 +1009,7 @@ Sub check_selectedBots(selectedBots, ChatSender)
 |--------------------------------------------------------------------------|
 SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
 |/varset Debug true
-  /if (${Debug}) /echo cs ${ChatSender} ${Bool[${ChatSender}]} nil ${ChatSender.Equal[NULL]} | el ${eventLine} | uz ${UZR} | ad ${ArgData}
+  /if (${Debug}) /echo cs ${ChatSender} ${Bool[${ChatSender}]} nil ${ChatSender.Equal[NULL]} | el ${eventLine} | uzr ${UZR} | ad ${ArgData}
   /varset c_eventArg FALSE
   /varset c_eventArgData
   /varset c_eventArgChatSender
@@ -1032,7 +1032,7 @@ SUB checkEventArgs(ChatSender, eventLine, UZR, ArgData)
 
   /if (${UZR.Find[U]} && !${NetBots[${ChatSender}].ID})     /varset userValidated FALSE
   /if (${UZR.Find[Z]} && (!${Bool[${NetBots[${ChatSender}].ID}]} || !${NetBots[${ChatSender}].InZone} || (${NetBots[${ChatSender}].Instance} != ${NetBots[${Me}].Instance}))) /varset inZone FALSE
-  /if (${UZR.Find[R]} && (!${Bool[${NetBots[${ChatSender}].ID}]} || ${Spawn[pc =${ChatSender}].Distance}>${LeashLength} || ${Spawn[pc =${ChatSender}].DistanceZ}>150)) /varset inRange FALSE
+  /if (${UZR.Find[R]} && (!${Bool[${NetBots[${ChatSender}].ID}]} || ${Spawn[pc =${ChatSender}].Distance}>${LeashLength} || ${Spawn[pc =${ChatSender}].DistanceZ}>250)) /varset inRange FALSE
   |/echo ${eventLine.Right[1].Equal[']} ${eventLine} ${eventLine.Left[-1]}
   /if (${eventLine.Right[1].Equal[']}) /varset eventLine ${eventLine.Left[-1]}
   /if (${eventLine.Find[/only|]}) {
