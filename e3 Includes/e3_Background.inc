@@ -59,66 +59,41 @@ SUB check_Gems
 |--------------------------------------------------------------------------------------------|
 SUB check_Follow
 /if (${Debug} || ${Debug_Background}) /echo |- check_Follow ==>
-|${Spawn[id ${FollowTarget}].Speed}>25
+|${Spawn[=${FollowTarget}].Speed}>25
   |${Math.Distance[${lastFollowLoc}]} > 25) /call MoveToLoc ${lastFollowLoc} 25 25
   |${Math.Distance[477,190,2]} < 16
-	/if (${FollowTarget.NotEqual[${Me}]} && (!${Me.Moving} || ${Math.Distance[${lastFollowLoc}]} < 10)) {
+  /if (${AdvPath.WaitingWarp}) /echo ${Time} Waiting4Warp 
+	/if (${Following} && ${FollowTarget.NotEqual[${Me}]} && (!${Me.Moving} || ${Math.Distance[${lastFollowLoc}]} < 10)) {
     |&& !${Select[${Spawn[=${FollowTarget}].State},DEAD,HOVER]}
 	  /if (${SpawnCount[=${FollowTarget}]} && ${Spawn[=${FollowTarget}].Distance3D} < ${MaxFollowDist} && ${Spawn[=${FollowTarget}].Distance3D} > ${Spawn[=${FollowTarget}].MaxRangeTo}) {
-      /if (${Spawn[=${FollowTarget}].LineOfSight} && ${Spawn[=${FollowTarget}].Distance3D} <= 300 || !${Navigation.PathExists[id ${Spawn[=${FollowTarget}].ID}]}) {
+      /if (!${AdvPath.WaitingWarp} && ${Spawn[=${FollowTarget}].LineOfSight} && ${Spawn[=${FollowTarget}].Distance3D} <= 300 || !${Navigation.PathExists[id ${Spawn[=${FollowTarget}].ID}]}) {
         /if (${Navigation.Active}) /nav stop
-        /if (!${AdvPath.Following} || ${AdvPath.WaitingWarp}) {
+        /if (!${AdvPath.Following}) {
           /afollow off
           /afollow spawn ${Spawn[=${FollowTarget}].ID} nodoor
         }
         /delay 1
-      } else /if (!${Navigation.Active}) {     
+      } else /if (!${Navigation.Active}) {
+        /echo ${Time} Switching to Nav     
           |/if (!${AdvPath.Following} || (${Navigation.PathExists[id ${Spawn[=${FollowTarget}].ID}]}) && ${Spawn[=${FollowTarget}].Distance3D} > 200) {
-        /if (${AdvPath.Following}) /afollow off
+        /if (${AdvPath.Following} || ${AdvPath.WaitingWarp}) /afollow off
         /nav id ${Spawn[=${FollowTarget}].ID} log=warning lineofsight=off
         /delay 1
-          |} else /if ((!${AdvPath.Following} || ${AdvPath.WaitingWarp}) && ${Spawn[=${FollowTarget}].Distance3D} < ${MaxResponseDist}) {
-					  |/if (${Spawn[id ${followTargetID}].LineOfSight})	{
-              |/afollow spawn ${Spawn[=${FollowTarget}].ID} nodoor
-              |/echo afollow ${Spawn[=${FollowTarget}].ID} status ${AdvPath.Status} w4w ${AdvPath.WaitingWarp}
-            |} else {
-            |  /docommand ${ChatToggle} I cannot see [${FollowTarget}]
-            |}
-          |}
       } else /if (${Spawn[=${FollowTarget}].Distance3D} > ${Spawn[=${FollowTarget}].MaxRangeTo}) {
-        /echo cant follow dist ${Spawn[=${FollowTarget}].Distance3D}, los ${Spawn[=${FollowTarget}].LineOfSight}, nav (${Navigation.Active}, fol ${AdvPath.Following}, w4w ${AdvPath.WaitingWarp}
+        /echo ${Time} cant follow dist ${Spawn[=${FollowTarget}].Distance3D}, los ${Spawn[=${FollowTarget}].LineOfSight}, nav ${Navigation.Active}, fol ${AdvPath.Following}, w4w ${AdvPath.WaitingWarp}
       }   
        
-        ||| !${AdvPath.Following}
-        | || (${Spawn[=${FollowTarget}].Distance3D} < 40 && ${medBreak})      
-      |/declare followTgtDistance float local ${Spawn[=${FollowTarget}].Distance3D}
-      |/declare followTgtLoS bool local ${Spawn[=${FollowTarget}].LineOfSight}
-      |/if (${followTgtDistance} <= ${LeashLength}) {
-      |  /if (${AdvPath.WaitingWarp}) {
-      |      /bc warping detected following
-      |      /call AcquireFollow            
-      |  }
-      |  /if (!${AdvPath.Status} && !${Stick.Active}) {
-      |    /if (${followTgtDistance}< 40 && ${medBreak}) {
-      |      /if (${Debug} || ${Debug_Background}) /echo not following during medbreak and < 40 dist
-      |    } else {
-      |      /call AcquireFollow
-      |    }
-      |  }
-      |  /if (${Me.FeetWet}) /squelch /face fast ${FollowTarget}
-        |FollowCheckTimer
-      |} else /if (${followTgtDistance} > ${LeashLength}) {
       /if (!${FollowCheckTimer}) {
         |/if (!${AdvPath.Status} && !${Stick.Active}) {
         |   /bct ${FollowTarget} //popup ${Me} stopped moving! Dist:${followTgtDistance},LoS:${followTgtLoS}
         | } else {
-          /echo ft ${FollowTarget} ${Spawn[=${FollowTarget}].ID}, nav: ${Navigation.Active}, advp: ${AdvPath.Following}, stick: ${Stick.Active}
+          /echo ${Time} ft ${FollowTarget} ${Spawn[=${FollowTarget}].ID}, nav: ${Navigation.Active}, advp: ${AdvPath.Following}, stick: ${Stick.Active}
           /if (${Spawn[=${FollowTarget}].Distance3D} > ${LeashLength}) /bct ${FollowTarget} //popup ${Me} is falling behind. Dist:${Spawn[=${FollowTarget}].Distance3D},LoS:${Spawn[=${FollowTarget}].LineOfSight}
         |}
         /varset FollowCheckTimer 50+${Math.Rand[${NetBots.Counts}]}
       }
 	  }
-
+  }
     /varset lastFollowLoc ${Me.Loc}
 /if (${Debug} || ${Debug_Background}) /echo <== check_Follow -|
 /RETURN

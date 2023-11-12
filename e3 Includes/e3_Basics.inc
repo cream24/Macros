@@ -47,38 +47,38 @@ SUB EVENT_Follow(line, ChatSender, eventParams)
 |----------------------------------------------------------------------------------------------------|
 |- Uses AdvPath if the follow target is one of your bots, or MoveUtils, if its someone elses.	-|		
 |----------------------------------------------------------------------------------------------------|
-SUB DEPRECATED_AcquireFollow
-/if (${Debug} || ${Debug_Basics}) /echo |- AcquireFollow ==>
-		/if (${SpawnCount[=${FollowTarget} radius ${MaxResponseDist}]}) {
-			/if (${FollowTarget.NotEqual[${Me.CleanName}]}) {
-		    /call StopForAction
-
-				/declare followTargetID int local
-				/if (${SpawnCount[pc =${FollowTarget}]}) {
-					/varset followTargetID ${Spawn[pc =${FollowTarget}].ID}
-				} else /if (${SpawnCount[npc ${FollowTarget}]}) {
-					/varset followTargetID ${Spawn[npc =${FollowTarget}].ID}
-				} else /if (${SpawnCount[pet ${FollowTarget}]}) {
-					/varset followTargetID ${Spawn[pet =${FollowTarget}].ID}
-				}
-				/if (${Bool[${Me.Casting.ID}]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
-				 | If the FollowTarget is a NetBot, and you're using AdvPath
-				/if (${NetBots[${FollowTarget}].ID} && ${AdvPath}) {
-					|/if (${Spawn[id ${followTargetID}].LineOfSight}) {
-						/call TrueTarget ${followTargetID}
-						/squelch /afollow spawn ${followTargetID} nodoor        
-					|}
-				} else {
-					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
-						/call TrueTarget ${followTargetID}
-						/squelch /stick hold 20 uw
-					}
-				}
-				/varset FollowCheckTimer 10+${Math.Calc[${Math.Rand[${NetBots.Counts}]}/5]}
-			}
-		}
-/if (${Debug} || ${Debug_Basics}) /echo <== AcquireFollow -|
-/RETURN
+|SUB DEPRECATED_AcquireFollow
+|/if (${Debug} || ${Debug_Basics}) /echo |- AcquireFollow ==>
+|		/if (${SpawnCount[=${FollowTarget} radius ${MaxResponseDist}]}) {
+|			/if (${FollowTarget.NotEqual[${Me.CleanName}]}) {
+|		    /call StopForAction
+|
+|				/declare followTargetID int local
+|				/if (${SpawnCount[pc =${FollowTarget}]}) {
+|					/varset followTargetID ${Spawn[pc =${FollowTarget}].ID}
+|				} else /if (${SpawnCount[npc =${FollowTarget}]}) {
+|					/varset followTargetID ${Spawn[npc =${FollowTarget}].ID}
+|				} else /if (${SpawnCount[pet =${FollowTarget}]}) {
+|					/varset followTargetID ${Spawn[pet =${FollowTarget}].ID}
+|				}
+|				/if (${Bool[${Me.Casting.ID}]} && ${Me.Class.ShortName.NotEqual[BRD]}) /call interrupt
+|				 | If the FollowTarget is a NetBot, and you're using AdvPath
+|				/if (${NetBots[${FollowTarget}].ID} && ${AdvPath}) {
+|					|/if (${Spawn[id ${followTargetID}].LineOfSight}) {
+|						/call TrueTarget ${followTargetID}
+|						/squelch /afollow spawn ${followTargetID} nodoor        
+|					|}
+|				} else {
+|					/if (${Spawn[id ${followTargetID}].LineOfSight}) {
+|						/call TrueTarget ${followTargetID}
+|						/squelch /stick hold 20 uw
+|					}
+|				}
+|				/varset FollowCheckTimer 10+${Math.Calc[${Math.Rand[${NetBots.Counts}]}/5]}
+|			}
+|		}
+|/if (${Debug} || ${Debug_Basics}) /echo <== AcquireFollow -|
+|/RETURN
 
 |----------------------------------------------------------------------------|
 |- Disengages follow on bots who are in the same zone as the ChatSender.	  -|
@@ -87,11 +87,10 @@ SUB DEPRECATED_AcquireFollow
 #bind StopFollowing /StopFollowing
 SUB Bind_StopFollowing(yLoc,xLoc)
   /if (${Stick.Active} || ${AdvPath.Following} || ${Following} || ${Navigation.Active}) {
-		/call StopForAction
-    /call MoveToLoc ${yLoc} ${xLoc} 20 20
     /varset FollowTarget
     /varset Following FALSE
-    /if (${Navigation.Active}) /nav stop
+		/call StopForAction
+    /call MoveToLoc ${yLoc} ${xLoc} 20 20    
   }
 /return
 
@@ -105,10 +104,10 @@ SUB EVENT_Stop(line, ChatSender)
     /if (${line.Find[,]}) /varset line ${line.Left[${Math.Calc[${line.Find[,]}-1]}]} ${line.Right[-${line.Find[,]}]}
     /if (!${checkEventArgs[${ChatSender},${line},UZR]}) /return
       | -Wait to get close to the followTarget.
-    |/delay 1s ${Spawn[${FollowTarget}].Distance} < 20
+    |/delay 1s ${Spawn[pc =${FollowTarget}].Distance} < 20
     | -Stop following
 		/call StopForAction
-    /call MoveToLoc ${Spawn[${FollowTarget}].Y} ${Spawn[${FollowTarget}].X} 20 20
+    /call MoveToLoc ${Spawn[=${FollowTarget}].Y} ${Spawn[=${FollowTarget}].X} 20 20
     /varset FollowTarget NULL
     /varset Following FALSE
   }
@@ -168,7 +167,7 @@ SUB EVENT_NavigateTo(line, ChatSender, eventParams)
   /varset Following FALSE
   /if (${Assisting} || ${Me.Combat}) /call AssistOff
   /if (${Navigation.PathExists[id ${c_eventArgData}]}) {
-      /nav id ${c_eventArgData}
+      /nav id ${c_eventArgData} door
       |/nav spawn <spawn search text>
       |${Navigation.Active}
       |${Navigation.PathLength[navigation parameters}
@@ -212,7 +211,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   /varset barkTarget ${Spawn[id ${msgTarget}].CleanName}
   /varset barkReturned FALSE
 
-  /declare retryTimer timer local 15s
+  /declare retryTimer timer local 20s
   /declare startingLoc string local
 
   /if (${Spawn[id ${msgTarget}].Distance}>${MaxResponseDist}) {
@@ -254,7 +253,7 @@ SUB EVENT_bark(line, ChatSender, msgTarget, barkMsg)
   }
 
   /doevents barkReturn
-  /delay 1s
+  /delay 5 + ${Math.Rand[10]}
   | -Check to see if the bark was successful.
   /if (${Zone.ID} == ${barkStartZone} && ${Math.Distance[${startingLoc}]} < 8 && !${barkReturned}) {
     /if (${retryTimer}) {
@@ -532,7 +531,7 @@ SUB EVENT_Exit(line, ChatSender)
 /if (${Debug} || ${Debug_Basics}) /echo |- EVENT_Exit ==>
   /if (!${checkEventArgs[${ChatSender},${line},U]}) /return
   /docommand ${ChatToggle} Bye!
-  /if (${Spawn[${ChatSender}].ID}!=${Me.ID}) /exit
+  /if (${Spawn[=${ChatSender}].ID}!=${Me.ID}) /exit
 /if (${Debug} || ${Debug_Basics}) /echo <== EVENT_Exit -|
 /RETURN
 
@@ -1029,20 +1028,28 @@ SUB Bind_Swap_Char_Items(IniEntry)
 			/if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].Type.Left[2].Equal[2H]} && ${Bool[${InvSlot[Offhand].Item}]}) {
 			  /unequip Offhand
 			  /delay 2
+        /delay 2s !${Bool[${InvSlot[Offhand].Item}]}
       }
       /if (${slotToSwap.Equal[Mainhand]} && ${FindItem[${itemToSwap}].ItemSlot}==14) {
         /unequip Offhand
         /delay 2
+        /delay 2s !${FindItem[${itemToSwap}].ItemSlot}==14
       }
       /if (${slotToSwap.Equal[Offhand]} && ${FindItem[${itemToSwap}].ItemSlot}==13) {
         /unequip Mainhand
         /delay 2
+        /delay 2s !${FindItem[${itemToSwap}].ItemSlot}==13)
       }
 			| Swap in item.
       |/if (${Debug} || ${Debug_Basics})
       /echo Equipping [${itemToSwap}] ${slotToSwap}
 			/call SwapItem "${itemToSwap}" ${slotToSwap}
 			/delay 2
+      /delay 2s ${InvSlot[${slotToSwap}].Item.Name.Equal[${itemToSwap}]}
+      /if (!${InvSlot[${slotToSwap}].Item.Name.Equal[${itemToSwap}]}) {
+        /beep
+        /bc Failed to swap ${itemToSwap} to ${slotToSwap} , wearing ${InvSlot[${slotToSwap}].Item.Name}
+      }
 			/varcalc i ${i} + 1
 			/if (${Ini[${Character_Ini},Swap Items,${IniEntry}].Arg[${i},/].Length}) /goto :SwapLoop
 		}
@@ -1050,6 +1057,7 @@ SUB Bind_Swap_Char_Items(IniEntry)
 /if (${Debug} || ${Debug_Basics}) /echo <== Swap_Items -|
 /varset Debug_Basics false
 /RETURN
+|${Ini[${Character_Ini},Swap Items,${IniEntry}].Arg[${i},/].Length}
 
 |----------------------------------------------------|
 |- Ends the macro before a bot finishes camping.	  -|
@@ -1917,6 +1925,8 @@ Sub basics_Aliases
   /noparse /squelch /alias /followon /bc [+g+]Follow ${Me.CleanName}
   /noparse /squelch /alias /followme /bc [+g+]Follow ${Me.CleanName}
   /noparse /squelch /alias /followit /bc [+g+]Follow ${Target.CleanName}
+  /noparse /squelch /alias /fmog /bc [+g+]Follow ${Me.CleanName} /only|group
+  /noparse /squelch /alias /fmor /bc [+g+]Follow ${Me.CleanName} /only|raid
   /squelch /alias /followoff /bc [+r+]Stop
   /squelch /alias /stop /bc [+r+]Stop
   /noparse /squelch /alias /stopf /bcaa //StopFollowing ${Me.Y} ${Me.X}

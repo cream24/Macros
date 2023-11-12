@@ -27,8 +27,8 @@ SUB event_Assist(line, ChatSender, int MobID)
       /docommand ${ChatToggle} ${Spawn[${MobID}].CleanName} is too far away.
     } else {
       | Wait to catch up to group, before engage.
-      |/echo ${Following}   ${Spawn[${FollowTarget}].Distance}   ${LeashLength}   ${Me.Moving}
-      /if (${Following} && ${Spawn[${FollowTarget}].Distance3D} > 200 && ${Me.Moving}) {
+      |/echo ${Following}   ${Spawn[=${FollowTarget}].Distance}   ${LeashLength}   ${Me.Moving}
+      /if (${Following} && ${Spawn[=${FollowTarget}].Distance3D} > 200 && ${Me.Moving}) {
       |/echo distloop
         /declare Assist_Moving_Timer timer local 100
         :movetoAssist_Loop
@@ -911,21 +911,27 @@ SUB check_AE
 |- Swap to Ranged for Target AE	  -|
 |----------------------------------|
 SUB swapToRangedSet(bool toggleRanged)
+  /declare origItem string local ${Me.Inventory[Ranged].Name}
   /echo ${toggleRanged} toggleRanged
   /if (${toggleRanged} && ${AssistType.Equal[melee]}) {
     /varset AssistType Ranged
     /varset revertRngToMelee TRUE
-    /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${Me.Inventory[Ranged].Name}/Ranged" 1
-    /delay 2
     /swap ranged
     /delay 2
+    /if (${Me.Inventory[Ranged].Name.NotEqual[${origItem}]) {
+      /echo Write Pending Exchange ${origItem} for ${Me.Inventory[Ranged].Name}
+      /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "${origItem}/Ranged" 1
+      /delay 2
+    }
   } else {
     /varset AssistType Melee
     /varset revertRngToMelee FALSE
     /swap melee
-    /delay 2
-    /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "NONE"
-    /delay 2
+    /if (${Me.Inventory[Ranged].Name.NotEqual[${origItem}]) {
+      /echo Clear Pending Exchange ${Me.Inventory[Ranged].Name} for ${origItem}
+      /call WriteToIni "${MacroData_Ini},${Me.CleanName}-${MacroQuest.Server},Pending Exchange" "NONE"
+      /delay 2
+    }
   }
 /RETURN
 

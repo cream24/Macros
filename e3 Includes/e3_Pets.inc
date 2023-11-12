@@ -190,7 +190,7 @@ Sub pet_Setup
     /if (${Ini[${Character_Ini},Pets,Pet Mend (Pct)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Mend (Pct)" petMendPct int
     /if (${Ini[${Character_Ini},Pets,Pet Taunt (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Taunt (On/Off)" petTaunt bool
 		/if (${Ini[${Character_Ini},Pets,Pet Auto-Shrink (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Auto-Shrink (On/Off)" petAutoShrink bool
-    /if (${Ini[${Character_Ini},Pets,Pet Summon Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Summon Combat (On/Off)" petSummonCombat bool
+    /if (${Ini[${Character_Ini},Pets,Pet Summon Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Summon Combat (On/Off)" petSummonCombat bool
     /if (${Ini[${Character_Ini},Pets,Pet Buff Combat (On/Off)].Length}) /call iniToVarV "${Character_Ini},Pets,Pet Buff Combat (On/Off)" petBuffCombat bool
 	}
 

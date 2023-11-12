@@ -15,26 +15,30 @@ SUB check_Yaulp
 |----------------------------------------------------------------------------|
 sub check_DivineArb
 /if (${Debug}) /echo |- check_DivineArb ==>
-	/if (${Defined[dArbArray2D]}) {
-		/if (${DivineArb_Pct} && ${Group}>1 && ${dArbArray2D.Size[1]}>0) {
-			/declare i int local
-			/declare s int local
-			/for i 0 to ${Group}
-				/if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
-					/if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 && ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${NetBots[${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct} || ${Spawn[pc ${Group.Member[${i}]}].PctHPs} < ${DivineArb_Pct})) {
-			  /for s 1 to ${dArbArray2D.Size[1]}
-				/call check_Ready "dArbArray2D" ${s}
-				/if (${c_Ready}) {
-				  /if (${Me.Casting.ID}) /call interrupt
-				  /bc [+g+] Casting ${dArbArray2D[${s},${iCastName}]} for ${Group.Member[${i}]}-NB:${NetBots[${Group.Member[${i}]}].PctHPs},SP:${Spawn[pc ${Group.Member[${i}]}].PctHPs}
-				  /call e3_Cast ${Me.ID} "dArbArray2D" ${s}
-							}
-			  /if (!${ActionTaken}) /next s
-					}
-				}
-			/if (!${ActionTaken}) /next i
-		}
-	}
+  /declare netBotHP int
+  /declare spawnHP int
+  /if (${Defined[dArbArray2D]}) {
+    /if (${DivineArb_Pct} && ${Group}>1 && ${dArbArray2D.Size[1]}>0) {
+      /declare i int local
+      /declare s int local
+      /for i 0 to ${Group}
+        /if (${SpawnCount[pc ${Group.Member[${i}]}]}) {
+          /varset netBotHP ${NetBots[${Group.Member[${i}]}].PctHPs}
+          /varset spawnHP ${Spawn[pc ${Group.Member[${i}]}].PctHPs}
+          /if (${SpawnCount[ID ${Spawn[${Group.Member[${i}]}].ID} radius 70]} > 0 && ${NetBots[${Group.Member[${i}]}].Zone} == ${Zone.ID} && (${netBotHP} < ${DivineArb_Pct} && ${netBotHP} > 1) || (${spawnHP} < ${DivineArb_Pct} && ${spawnHP} > 1)) {
+            /for s 1 to ${dArbArray2D.Size[1]}
+              /call check_Ready "dArbArray2D" ${s}
+              /if (${c_Ready}) {
+                /if (${Me.Casting.ID}) /call interrupt
+                /bc [+g+] Casting ${dArbArray2D[${s},${iCastName}]} for ${Group.Member[${i}]}-NB:${netBotHP} ,SP:${spawnHP}
+                /call e3_Cast ${Me.ID} "dArbArray2D" ${s}
+              }
+            /if (!${ActionTaken}) /next s
+          }
+        }
+      /if (!${ActionTaken}) /next i
+    }
+  }
 /if (${Debug}) /echo <== check_DivineArb -|
 /return
 |----------------------------------------------------------------------------|
@@ -89,10 +93,10 @@ sub Event_wordHeal(line, ChatSender)
 #event Rez "#1# tells the group, 'Rez'"
 sub Event_Rez(line, ChatSender)
 	/if (${ChatSender.Left[1].Compare[ ]}<0) /varset ChatSender ${ChatSender.Right[-2].Left[-1]}
-	/if (${Me.Class.ShortName.Equal[CLR]} && ${Spawn[${ChatSender}'s].ID}) {
+	/if (${Me.Class.ShortName.Equal[CLR]} && ${Spawn[=${ChatSender}'s].ID}) {
 	  /varset canRez 0
     /call defineRezSpell
-    /call TrueTarget ${Spawn[${ChatSender}'s].ID}
+    /call TrueTarget ${Spawn[=${ChatSender}'s].ID}
     |/echo ${Target.ID}
     /call check_CorpseRezzable
     /if (${canRez}==1) {

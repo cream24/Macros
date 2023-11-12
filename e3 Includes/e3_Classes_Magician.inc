@@ -9,6 +9,7 @@ sub event_petWeapons(line, ChatSender)
 /if (${Debug} || ${Debug_MAG}) /echo |- event_petWeapons ==>
   /declare wasFollowing bool local ${Following}
   /varset Following FALSE
+  /call StopForAction
   |/varset Debug_MAG TRUE
   /declare singlePet bool local TRUE
   /if (${Defined[petIDArray]}) /deletevar petIDArray
@@ -24,7 +25,7 @@ sub event_petWeapons(line, ChatSender)
   } else /if (!${singlePet} && !${SpawnCount[pcpet radius 100]}) {
       /echo There are no PC Pets withing a radius of 100
       /if (${c_eventArgChatSender.NotEqual[${Me}]}) /tell ${c_eventArgChatSender} No pets a radius of 100...
-  } else /if (${singlePet} && ${Spawn[${c_eventArgChatSender}].Pet.Distance}>100) {
+  } else /if (${singlePet} && ${Spawn[=${c_eventArgChatSender}].Pet.Distance}>100) {
       /if (${c_eventArgChatSender.NotEqual[${Me}]}) /tell ${c_eventArgChatSender} Your pet is not in a radius of 100...
   } else {
     /if (!${singlePet} && ${c_eventArgChatSender.NotEqual[${Me}]}) /tell ${c_eventArgChatSender} Handing out pet weapons...

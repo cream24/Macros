@@ -5,7 +5,7 @@
 |- Thanks to Vysra for IDE,additional plugins,code -|
 |---------------------------------------------------|
 |#warning
-#turbo 100
+|#turbo 100
 #include e3 Includes\e3_Setup.inc
 
 SUB Main(modeSelect)
@@ -30,33 +30,39 @@ SUB Main(modeSelect)
 		/call check_Idle
     /call check_autoTribute
     /if (${currentZone} != ${Zone.ID})  /call check_Zone
-    /if (${Following}) /call check_Follow
-    |/if (${Following} && !${Assisting}) /call check_Follow
+    /if (${Following} && !${Assisting}) /call check_Follow
 
-		/if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 99) /call check_lifeSupport
-    |workaround for item cast array
-    /if (${reloadOnLoot}) /call reloadSpellArrays
+    |if im actively moving, i shouldnt do anything but follow, listen for stop/follow/assist
+    /if (${Me.Moving} && ${Me.Speed} > 10) {
+      /call basics_Background_Events
+      /call assist_Background_Events
+      /call ${Me.Class.ShortName}_Background_Events
+      /if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 50) /call check_lifeSupport
+      |/call check_Heals
+    } else {
+		  /if (${Defined[lifeSupport2D]} && ${Me.PctHPs} < 90) /call check_lifeSupport
+      /call Background_Events
+      | If I'm not active, call mainFunctions
+      /if (!${activeTimer}) {
+        |These are functions in the e3_setup/Advanced.ini class sections... ex CLR Function#1=check_DivineArb
+        /for i 1 to ${mainLoop_Array.Size}
+          /if (${Bool[${mainLoop_Array[${i}]}]}) /call ${mainLoop_Array[${i}]}
+        /if (!${ActionTaken}) /next i
 
-		/call Background_Events
-		| If I'm not active, call mainFunctions
-		/if (!${activeTimer}) {
-      |These are functions in the e3_setup/Advanced.ini class sections... ex CLR Function#1=check_DivineArb
-			/for i 1 to ${mainLoop_Array.Size}
-				/if (${Bool[${mainLoop_Array[${i}]}]}) /call ${mainLoop_Array[${i}]}
-			/if (!${ActionTaken}) /next i
-
-      |move this to a background check 10222023
-      /if (${Me.CombatState.NotEqual[COMBAT]}) {
-        /if ((!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[BRD]}) && !${use_TargetAE}) /call completePendingExchange
-        /if (!${Me.Moving} && !${Following} && !${Me.Casting.ID}) {
-          /if ((${Me.PctMana} < ${autoMedPctMana} && ${Me.MaxMana} > 1) || (${Me.PctEndurance} < ${autoMedPctMana})) {
-            /varset medBreak TRUE
+        |move this to a background check 10222023
+        /if (${Me.CombatState.NotEqual[COMBAT]}) {
+          /if ((!${Me.Casting.ID} || ${Me.Class.ShortName.Equal[BRD]}) && !${use_TargetAE}) /call completePendingExchange
+          /if (!${Me.Moving} && !${Following} && !${Me.Casting.ID}) {
+            /if ((${Me.PctMana} < ${autoMedPctMana} && ${Me.MaxMana} > 1) || (${Me.PctEndurance} < ${autoMedPctMana})) {
+              /varset medBreak TRUE
+            }
           }
         }
+        /if (${medBreak}) /call check_MedBreak
+        |workaround for item cast array
+        /if (${reloadOnLoot}) /call reloadSpellArrays
       }
-      /if (${medBreak}) /call check_MedBreak
-		}
-
+    }
   /if (${MoveUtils.GM}) {
     /squelch /stick imsafe
     /echo GM Safe kicked in, issued /stick imsafe.  you may need to reissue /followme or /assiston
@@ -72,7 +78,7 @@ SUB Main(modeSelect)
   /if (${Select[${Me.Class.ShortName},BST,CLR,DRU,SHM,ENC]})  {
     /delay 2
   } else /if (${Select[${Me.Class.ShortName},WAR,BRD,ROG,BER,MNK,RNG,SHD,PAL,NEC,MAG,WIZ]}) {
-    /delay 3
+    /delay 2
   }
 }
 /goto :MainLoop	

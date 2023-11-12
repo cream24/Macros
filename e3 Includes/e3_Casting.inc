@@ -240,7 +240,7 @@ Sub e3_Cast(int targetID, ArrayName, int ArrayIndex)
           /if (${SpawnCount[=${FollowTarget}]} && ${Spawn[=${FollowTarget}].Distance} < ${LeashLength}) {
             /if ((${Spawn[=${FollowTarget}].Distance} > 20 || ${NetBots[${FollowTarget}].Moving})) {
               /if (${Debug} || ${Debug_Casting}) /echo following interrupt
-              |/bc following interrupt ${Time}  ${NetBots[${FollowTarget}].Moving}  ${Spawn[${FollowTarget}].Moving} ${Spawn[${FollowTarget}].Distance}
+              |/bc following interrupt ${Time}  ${NetBots[${FollowTarget}].Moving}  ${Spawn[=${FollowTarget}].Moving} ${Spawn[=${FollowTarget}].Distance}
               /call interrupt
               /goto :interrupted
             }

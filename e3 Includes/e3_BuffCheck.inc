@@ -5,14 +5,15 @@ SUB check_Buffs
 	/if (${Debug} || ${Debug_BuffCheck}) /echo |- buffCheck ==>
 	/if (${BuffCheck} && !${ActionTaken} && !${activeTimer} && !${rebuffTimer}) {
 		/if (!${medBreak} && !${idle} && ${BuffCombatCheck} && !${Me.Moving})	/call buffBots "CombatBuffs2D"
-    /if (!${medBreak} && ${procBuff} && !${idle} && ${BuffCombatCheck} && !${Me.Moving}) /call buffProcs
-    /if (${Defined[auraSpells2D]} && (${auraCombat} || ${Me.CombatState.NotEqual[COMBAT]}) && !${Me.Moving}) /call checkAuras
+    /if (!${medBreak} && ${Defined[procBuff]} && !${idle} && ${BuffCombatCheck} && !${Me.Moving}) /call buffProcs
 		/if (${Defined[InstantBuffs2D]})		/call buffBots "InstantBuffs2D"
 		/if (!${combatTimer} && ${Me.CombatState.NotEqual[COMBAT]} && !${Assisting} && !${Me.Moving} && ${BuffCheck}) {
 			/if (${Defined[SelfBuffs2D]}) /call buffBots "SelfBuffs2D"
 			/if (${Defined[BotBuffs2D]})	/call buffBots "BotBuffs2D"
-      /if (${Defined[auraSpells2D]}) /call checkAuras
 		}
+    /if (${Defined[auraSpells2D]} && !${Me.Moving}) {
+      /if (${auraCombat} || ${Me.CombatState.NotEqual[COMBAT]}) /call checkAuras
+    }    
 	}
 	/if (${Debug} || ${Debug_BuffCheck}) /echo <== buffCheck -|
 /RETURN
@@ -444,7 +445,7 @@ SUB buff_SpellArrays
   |/if (${BotBuffs.Size})		  /call BuildSpellArray "BotBuffs"			"BotBuffs2D"
   |/if (${CombatBuffs.Size}) 	/call BuildSpellArray "CombatBuffs"		"CombatBuffs2D"
   |/if (${GroupBuffs.Size})	  /call BuildSpellArray "GroupBuffs"		"GroupBuffs2D"
- | /if (${ProcBuffs.Size})	    /call BuildSpellArray "ProcBuffs"		  "ProcBuffs2D"
+  |/if (${ProcBuffs.Size})	    /call BuildSpellArray "ProcBuffs"		  "ProcBuffs2D"
   |/if (${auraSpells.Size})    /call BuildSpellArray "auraSpells"		"auraSpells2D"
 
   /declare s int local
